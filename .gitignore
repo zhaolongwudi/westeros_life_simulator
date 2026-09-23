@@ -19,3 +19,4 @@ Thumbs.db
 .env
 *.key
 *.pem
+docs/HANDOVER.md
