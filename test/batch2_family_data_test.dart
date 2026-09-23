@@ -7,8 +7,8 @@ import 'package:westeros_life_simulator/models/family.dart';
 
 void main() {
   group('家族数据', () {
-    test('allFamilies 包含 26 个家族', () {
-      expect(allFamilies.length, 26);
+    test('allFamilies 包含 27 个家族', () {
+      expect(allFamilies.length, 27);
     });
 
     test('所有家族 ID 唯一', () {
