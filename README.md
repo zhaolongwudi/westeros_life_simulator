@@ -71,12 +71,12 @@ westeros_life_simulator/
 - 测试：test/batch1_smoke_test.dart（17 个用例，覆盖 default/copyWith/toJson/fromJson/枚举完整性）
 - 验证方式：GitHub Actions CI（run 35841277454，✅ success，2026-09-23）
 
-#### Batch 2：数据层（待做）
-- lib/data/family_data.dart（26 家族）
-- lib/data/location_data.dart（50+ 地点）
-- lib/data/npc_data.dart（40+ NPC）
-- lib/data/event_data.dart（45 事件模板）
-- lib/data/system_data.dart（74 系统）
+#### Batch 2：数据层（⏳ 进行中）
+- lib/data/family_data.dart（27 家族，✅ 完成，CI 通过）
+- lib/data/location_data.dart（50+ 地点，待做）
+- lib/data/npc_data.dart（40+ NPC，待做）
+- lib/data/event_data.dart（45 事件模板，待做）
+- lib/data/system_data.dart（74 系统，待做）
 
 #### Batch 3：状态管理 + 服务层（待做）
 - lib/providers/app_provider.dart、game_provider.dart
