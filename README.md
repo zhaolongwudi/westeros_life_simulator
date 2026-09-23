@@ -69,7 +69,7 @@ westeros_life_simulator/
   - lib/models/location.dart（Location + LocationType，11 类型）
   - lib/models/event.dart（GameEvent + EventChoice + EventType，9 类型）
 - 测试：test/batch1_smoke_test.dart（17 个用例，覆盖 default/copyWith/toJson/fromJson/枚举完整性）
-- 验证方式：本机无 Flutter，待 GitHub Actions CI 验证
+- 验证方式：GitHub Actions CI（run 35841277454，✅ success，2026-09-23）
 
 #### Batch 2：数据层（待做）
 - lib/data/family_data.dart（26 家族）
