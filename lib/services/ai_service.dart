@@ -56,14 +56,15 @@ class AiService {
   }) async {
     try {
       final prompt = _buildPrompt(player, context, availableEvents);
-      final response = await _dio.post(
+      final response = await _dio.post<Map<String, dynamic>>(
         '$baseUrl/chat/completions',
         options: Options(
           headers: {
             'Authorization': 'Bearer $apiKey',
             'Content-Type': 'application/json',
           },
-          timeout: const Duration(seconds: 60),
+          sendTimeout: const Duration(seconds: 60),
+          receiveTimeout: const Duration(seconds: 60),
         ),
         data: {
           'model': model,

@@ -3,14 +3,13 @@ library;
 
 import 'package:flutter/foundation.dart';
 
-import '../data/event_data.dart';
 import '../models/event.dart';
 import '../models/player.dart';
 
 /// 事件管理。
 class EventProvider extends ChangeNotifier {
   EventProvider({List<GameEvent>? events})
-      : _allEvents = events ?? allEvents;
+      : _allEvents = events ?? const <GameEvent>[];
 
   List<GameEvent> _allEvents;
   List<GameEvent> _triggeredEvents = <GameEvent>[];

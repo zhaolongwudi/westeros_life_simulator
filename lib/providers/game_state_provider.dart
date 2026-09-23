@@ -192,7 +192,8 @@ class GameStateProvider extends ChangeNotifier {
 
   /// 检查游戏结束条件。
   void _checkGameOver() {
-    if (!_player.flags['isAlive'] ?? false) {
+    final isAlive = _player.flags['isAlive'] ?? true;
+    if (!isAlive) {
       _isGameOver = true;
       _isGameActive = false;
     }

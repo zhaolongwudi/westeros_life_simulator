@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:westeros_life_simulator/data/event_data.dart';
 import 'package:westeros_life_simulator/models/event.dart';
 import 'package:westeros_life_simulator/models/player.dart';
 import 'package:westeros_life_simulator/providers/event_provider.dart';
@@ -9,7 +10,7 @@ import 'package:westeros_life_simulator/providers/event_provider.dart';
 void main() {
   group('EventProvider', () {
     test('默认加载所有事件', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       expect(provider.allEvents.length, allEvents.length);
       expect(provider.triggeredEvents, isEmpty);
       expect(provider.completedEventIds, isEmpty);
@@ -22,7 +23,7 @@ void main() {
     });
 
     test('canTrigger 无条件事件可触发', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       final event = GameEvent(
         id: 'test_no_cond',
         name: '无条件',
@@ -39,7 +40,7 @@ void main() {
     });
 
     test('canTrigger 地点条件', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       final event = GameEvent(
         id: 'test_location',
         name: '地点测试',
@@ -59,7 +60,7 @@ void main() {
     });
 
     test('canTrigger 年龄条件', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       final event = GameEvent(
         id: 'test_age',
         name: '年龄测试',
@@ -78,7 +79,7 @@ void main() {
     });
 
     test('canTrigger 金币条件', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       final event = GameEvent(
         id: 'test_gold',
         name: '金币测试',
@@ -97,7 +98,7 @@ void main() {
     });
 
     test('canTrigger 技能条件', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       final event = GameEvent(
         id: 'test_skill',
         name: '技能测试',
@@ -120,7 +121,7 @@ void main() {
     });
 
     test('canTrigger 一次性事件已完成', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       final event = GameEvent(
         id: 'test_onetime',
         name: '一次性',
@@ -139,14 +140,14 @@ void main() {
     });
 
     test('getAvailableEvents 返回可触发事件', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       final player = Player.defaultPlayer();
       final available = provider.getAvailableEvents(player);
       expect(available, isNotEmpty);
     });
 
     test('triggerRandomEvent 触发事件', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       final player = Player.defaultPlayer();
       final event = provider.triggerRandomEvent(player);
       expect(event, isNotNull);
@@ -154,14 +155,14 @@ void main() {
     });
 
     test('markCompleted 标记完成', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       provider.markCompleted('event_1');
       provider.markCompleted('event_1'); // 重复
       expect(provider.completedEventIds.length, 1);
     });
 
     test('canChoose 无条件选项可用', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       final choice = EventChoice(
         id: 'c1',
         text: '测试',
@@ -174,7 +175,7 @@ void main() {
     });
 
     test('canChoose 金币不足', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       final choice = EventChoice(
         id: 'c1',
         text: '测试',
@@ -187,7 +188,7 @@ void main() {
     });
 
     test('getAvailableChoices 返回可用选项', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       final event = GameEvent.defaultEvent();
       final player = Player.defaultPlayer();
       final choices = provider.getAvailableChoices(event, player);
@@ -195,7 +196,7 @@ void main() {
     });
 
     test('reset 重置状态', () {
-      final provider = EventProvider();
+      final provider = EventProvider(events: allEvents);
       provider.markCompleted('event_1');
       provider.triggerRandomEvent(Player.defaultPlayer());
       provider.reset();

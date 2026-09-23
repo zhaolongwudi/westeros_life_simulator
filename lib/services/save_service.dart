@@ -125,7 +125,10 @@ class SaveService {
   /// 获取所有存档列表。
   Future<List<SaveMetadata>> listSaves() async {
     final dir = await _getSaveDirectory();
-    final files = await dir.list().whereType<File>().toList();
+    final files = <File>[];
+    await for (final entity in dir.list()) {
+      if (entity is File) files.add(entity);
+    }
 
     final saves = <SaveMetadata>[];
     for (final file in files) {
