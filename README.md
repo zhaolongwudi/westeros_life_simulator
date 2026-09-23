@@ -71,16 +71,19 @@ westeros_life_simulator/
 - 测试：test/batch1_smoke_test.dart（17 个用例，覆盖 default/copyWith/toJson/fromJson/枚举完整性）
 - 验证方式：GitHub Actions CI（run 35841277454，✅ success，2026-09-23）
 
-#### Batch 2：数据层（⏳ 进行中）
+#### Batch 2：数据层（✅ 完成，2026-09-23）
 - lib/data/family_data.dart（27 家族，✅ 完成，CI 通过）
-- lib/data/location_data.dart（50+ 地点，待做）
-- lib/data/npc_data.dart（40+ NPC，待做）
-- lib/data/event_data.dart（45 事件模板，待做）
-- lib/data/system_data.dart（74 系统，待做）
+- lib/data/location_data.dart（68 地点，✅ 完成）
+- lib/data/npc_data.dart（36 NPC，✅ 完成）
+- lib/data/event_data.dart（45 事件模板，✅ 完成）
+- lib/data/system_data.dart（74 系统，✅ 完成）
+- lib/models/system.dart（GameSystem 模型，✅ 新增）
+- 测试：test/batch2_{family,location,npc,event,system}_data_test.dart（55 用例）
+- 验证方式：GitHub Actions CI（run 35845290631，✅ success，2026-09-23）
 
 #### Batch 3：状态管理 + 服务层（待做）
-- lib/providers/app_provider.dart、game_provider.dart
-- lib/services/save_service.dart、ai_router.dart、world_engine.dart
+- lib/providers/game_state_provider.dart、event_provider.dart
+- lib/services/ai_service.dart、event_service.dart、save_service.dart
 
 #### Batch 4：混入层（待做）
 - lib/mixins/mixin_play.dart、mixin_commands.dart、mixin_systems.dart、mixin_letter.dart、mixin_adventure.dart
@@ -111,7 +114,7 @@ westeros_life_simulator/
 - v1.0：设计文档完成（2026-09-23）
 - v1.1：AI 提示词完成（2026-09-23）
 - v2.0.0：阶段 3 Batch 1 项目骨架 + 模型层完成（2026-09-23）
-- v2.1.0：阶段 3 Batch 2 数据层（待做）
+- v2.1.0：阶段 3 Batch 2 数据层完成（2026-09-23，CI run 35845290631 ✅ success）
 - v2.2.0：阶段 3 Batch 3 状态管理 + 服务层（待做）
 - v2.3.0：阶段 3 Batch 4 混入层（待做）
 - v2.4.0：阶段 3 Batch 5 UI 层（待做）
