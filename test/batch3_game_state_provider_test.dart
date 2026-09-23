@@ -3,7 +3,6 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:westeros_life_simulator/models/event.dart';
-import 'package:westeros_life_simulator/models/player.dart';
 import 'package:westeros_life_simulator/providers/game_state_provider.dart';
 
 void main() {

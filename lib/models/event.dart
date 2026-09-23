@@ -38,6 +38,17 @@ class EventChoice {
   /// 选择后的叙事文本。
   final String narrative;
 
+  /// 序列化为 JSON Map。
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'text': text,
+      'requirements': requirements,
+      'effects': effects,
+      'narrative': narrative,
+    };
+  }
+
   /// 从 JSON Map 反序列化。
   factory EventChoice.fromJson(Map<String, dynamic> json) {
     return EventChoice(
@@ -173,16 +184,4 @@ class GameEvent {
 
   @override
   String toString() => 'GameEvent($id, $name, ${type.name})';
-}
-
-extension EventChoiceJson on EventChoice {
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'text': text,
-      'requirements': requirements,
-      'effects': effects,
-      'narrative': narrative,
-    };
-  }
 }
