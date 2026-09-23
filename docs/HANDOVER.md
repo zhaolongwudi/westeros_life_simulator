@@ -22,10 +22,10 @@
   - ⏳ Batch 5：UI 层（待做）
 
 ### 当前 HEAD
-- **本地**：`80d30a5`（docs: 新增接力交接文档）
-- **远端**：`20432ee`（Git Data API 推送，与本地 80d30a5 内容等价，SHA 不同因走 API 重建）
+- **本地**：`0c72dfe`（docs: 更新 HANDOVER.md 和 README.md）
+- **远端**：`7532ce1`（Git Data API 推送，与本地 0c72dfe 内容等价，SHA 不同因走 API 重建）
 - **CI**：
-  - run `35845625751`（in_progress，commit 20432ee，HANDOVER.md）
+  - run `35845625751`（commit 20432ee，HANDOVER.md 初版）
   - run `35845290631` ✅ **success**（commit 69d4abe，Batch 2 数据层）
   - run `35842365630` ✅ success（commit c765e23，README 更新）
   - run `35842155533` ✅ success（commit 0a6258d，家族数量修复）
