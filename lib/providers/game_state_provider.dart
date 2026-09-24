@@ -93,9 +93,15 @@ class GameStateProvider extends ChangeNotifier {
     Player? player,
     GameProgress? progress,
     List<GameEvent>? history,
+    GameEvent? currentEvent,
+    bool isGameActive = false,
+    bool isGameOver = false,
   })  : _player = player ?? Player.defaultPlayer(),
         _progress = progress ?? GameProgress.defaultProgress(),
-        _history = history ?? <GameEvent>[];
+        _history = history ?? <GameEvent>[],
+        _currentEvent = currentEvent,
+        _isGameActive = isGameActive,
+        _isGameOver = isGameOver;
 
   Player _player;
   GameProgress _progress;
@@ -225,6 +231,11 @@ class GameStateProvider extends ChangeNotifier {
       history: (json['history'] as List)
           .map((e) => GameEvent.fromJson(e as Map<String, dynamic>))
           .toList(),
+      currentEvent: json['currentEvent'] == null
+          ? null
+          : GameEvent.fromJson(json['currentEvent'] as Map<String, dynamic>),
+      isGameActive: json['isGameActive'] as bool? ?? false,
+      isGameOver: json['isGameOver'] as bool? ?? false,
     );
   }
 }
