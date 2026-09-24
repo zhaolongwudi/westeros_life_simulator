@@ -81,9 +81,15 @@ westeros_life_simulator/
 - 测试：test/batch2_{family,location,npc,event,system}_data_test.dart（55 用例）
 - 验证方式：GitHub Actions CI（run 35845290631，✅ success，2026-09-23）
 
-#### Batch 3：状态管理 + 服务层（待做）
-- lib/providers/game_state_provider.dart、event_provider.dart
-- lib/services/ai_service.dart、event_service.dart、save_service.dart
+#### Batch 3：状态管理 + 服务层（✅ 完成，2026-09-24）
+- lib/providers/game_state_provider.dart（GameStateProvider + GameProgress，状态管理/时间推进/选项效果/序列化）
+- lib/providers/event_provider.dart（EventProvider，事件触发/条件检查/选项可用性/重置）
+- lib/services/ai_service.dart（AiService，调用 AI 生成叙事与选项，参考 docs/07_AI提示词.md）
+- lib/services/event_service.dart（EventService，事件触发条件检查/效果计算/存档）
+- lib/services/save_service.dart（SaveService，游戏状态序列化/存档读写/导入导出）
+- 测试：test/batch3_{game_state_provider,event_provider,ai_service,event_service,save_service}_test.dart（63 用例）
+- 验证方式：GitHub Actions CI（run 36007775720，✅ success，2026-09-24，134 测试全部通过）
+- 修复历程：4 个 Analyze error（event_provider 初始化器/GameState nullable 条件/AiService Dio 类型与超时参数）→ 1 个 warning（save_service 非空断言）→ 1 个测试失败（GameStateProvider 序列化往返丢失 isGameActive/isGameOver/currentEvent）
 
 #### Batch 4：混入层（待做）
 - lib/mixins/mixin_play.dart、mixin_commands.dart、mixin_systems.dart、mixin_letter.dart、mixin_adventure.dart
@@ -115,6 +121,6 @@ westeros_life_simulator/
 - v1.1：AI 提示词完成（2026-09-23）
 - v2.0.0：阶段 3 Batch 1 项目骨架 + 模型层完成（2026-09-23）
 - v2.1.0：阶段 3 Batch 2 数据层完成（2026-09-23，CI run 35845290631 ✅ success）
-- v2.2.0：阶段 3 Batch 3 状态管理 + 服务层（待做）
+- v2.2.0：阶段 3 Batch 3 状态管理 + 服务层完成（2026-09-24，CI run 36007775720 ✅ success，134 测试全部通过）
 - v2.3.0：阶段 3 Batch 4 混入层（待做）
 - v2.4.0：阶段 3 Batch 5 UI 层（待做）
