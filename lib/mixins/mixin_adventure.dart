@@ -1,0 +1,143 @@
+/// 冒险混入：旅行、探索、遭遇。
+///
+/// 参考 docs/08_玩法设计.md「旅行系统」「冒险系统」。
+library;
+
+import 'dart:math';
+
+import '../models/location.dart';
+import '../providers/game_provider_base.dart';
+
+/// 冒险混入。挂在 [GameProviderBase] 上。
+mixin GameAdventureMixin on GameProviderBase {
+  /// 旅行：前往一个相连的地点。
+  ///
+  /// 返回旅行叙事文本；目标不在地点相连列表中则拒绝。
+  String travel(String locationId) {
+    if (!isGameActive || isGameOver) return '游戏尚未开始。';
+    final target = locationById(locationId);
+    if (target == null) return '没有叫「$locationId」的地方。';
+    if (target.id == player.locationId) return '你已经在这里了。';
+
+    final current = currentLocation;
+    final connected = current?.connectedTo ?? <String>[];
+    if (!connected.contains(target.id)) {
+      final names = connected
+          .map((id) => locationById(id)?.name ?? id)
+          .join('、');
+      return '从这里无法直接前往 ${target.name}。可前往：${names.isEmpty ? '无' : names}。';
+    }
+
+    final rnd = rng();
+    // 旅行消耗金币（路程越远/危险度越高越贵）
+    final cost = 2 + target.dangerLevel + rnd.nextInt(4);
+    if (player.gold < cost) {
+      return '你付不起前往 ${target.name} 的旅费（需 $cost 金币）。';
+    }
+
+    updatePlayer(
+      player.copyWith(locationId: target.id, gold: player.gold - cost),
+    );
+    notifyListeners();
+
+    // 高风险地点可能触发遭遇
+    final encounter = _maybeEncounter(target, rnd);
+    final buf = StringBuffer()
+      ..writeln('🧭 你从 ${current?.name ?? '某地'} 出发，抵达 ${target.name}（${target.region}）。')
+      ..writeln('旅费 $cost 金币。');
+    if (encounter != null) {
+      buf.writeln(encounter);
+    }
+    return buf.toString().trim();
+  }
+
+  /// 探索：在当前位置搜索，可能发现金币/物品/遭遇。
+  String explore() {
+    if (!isGameActive || isGameOver) return '游戏尚未开始。';
+    final loc = currentLocation;
+    if (loc == null) return '你在一片虚无中，无从探索。';
+
+    final rnd = rng();
+    final danger = loc.dangerLevel;
+
+    // 城市/村庄探索收益低但安全；荒野/超自然收益高但危险
+    final roll = rnd.nextDouble();
+    final buf = StringBuffer()..writeln('🔍 你在${loc.name}四处探索……');
+
+    if (roll < 0.5) {
+      final found = 3 + rnd.nextInt(10 + danger * 2);
+      gainGold(found);
+      buf.writeln('你找到了一些有用的东西，价值 $found 金币。');
+    } else if (roll < 0.75) {
+      final encounter = _maybeEncounter(loc, rnd, force: true);
+      if (encounter != null) {
+        buf.writeln(encounter);
+      } else {
+        buf.writeln('你发现了一条捷径，省下不少脚程。');
+      }
+    } else {
+      buf.writeln('一无所获。${danger >= 5 ? '这地方不宜久留。' : '也许下次会有收获。'}');
+    }
+
+    // 探索推进时间（半天=0.5 月，用 turnCount 模拟）
+    notifyListeners();
+    return buf.toString().trim();
+  }
+
+  /// 可能触发一次遭遇（危险度越高概率越大）。
+  String? _maybeEncounter(Location loc, Random rnd, {bool force = false}) {
+    final danger = loc.dangerLevel;
+    if (!force && rnd.nextDouble() > danger * 0.12) return null;
+
+    final roll = rnd.nextDouble();
+    // 遭遇类型：强盗/野兽/商人/神秘事件
+    if (roll < 0.35) {
+      // 强盗：损失金币或战斗
+      final sword = skillLevel('sword');
+      if (sword >= 4 || rnd.nextDouble() < 0.5) {
+        adjustReputation(2);
+        return '⚔️ 你遭遇了一伙强盗，凭借身手击退了他们。声望 +2。';
+      }
+      final loss = 5 + danger * 2;
+      gainGold(-loss);
+      return '🥷 你遭遇了一伙强盗，被抢走了 $loss 金币。';
+    } else if (roll < 0.7) {
+      // 野兽：猎获或受伤
+      if (skillLevel('archery') >= 3 || rnd.nextDouble() < 0.6) {
+        final gain = 8 + danger * 2;
+        gainGold(gain);
+        return '🐗 你猎到一头野兽，获得 $gain 金币。';
+      }
+      setFlag('isInjured', true);
+      return '🐺 你被野兽抓伤，狼狈逃回。（受了伤）';
+    } else if (roll < 0.85) {
+      // 商人
+      final profit = 5 + rnd.nextInt(10);
+      gainGold(profit);
+      return '🛒 你遇到一位行商，做成了一笔小买卖，+$profit 金币。';
+    } else {
+      // 神秘事件（超自然地点概率更高）
+      if (loc.type == LocationType.supernatural || rnd.nextDouble() < 0.1) {
+        adjustReputation(3);
+        return '🌫️ 迷雾中你仿佛看到了不属于这个时代的东西。说不清是福是祸，但你的名字开始被人提起。声望 +3。';
+      }
+      return '🌙 你遇到了一位旅人，听了一段关于远方战争的传闻。';
+    }
+  }
+
+  /// 可前往地点列表（面板用）。
+  String formatTravelPanel() {
+    final loc = currentLocation;
+    if (loc == null) return '你不知身在何处。';
+    final connected = loc.connectedTo;
+    if (connected.isEmpty) return '从这里没有可以前往的地方。';
+    final buf = StringBuffer()..writeln('【可前往】从${loc.name}：');
+    for (final id in connected) {
+      final target = locationById(id);
+      if (target != null) {
+        buf.writeln('· ${target.name}（${target.region}，危险度 ${target.dangerLevel}）');
+      }
+    }
+    return buf.toString().trim();
+  }
+}

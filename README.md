@@ -30,20 +30,30 @@ westeros_life_simulator/
 ├── lib/
 │   ├── main.dart                      # 入口
 │   ├── app.dart                       # 应用根组件
-│   ├── data/                          # 数据层（Batch 2）
+│   ├── game_engine.dart               # 游戏引擎（组合全部 mixin 的宿主）
+│   ├── data/                          # 数据层（Batch 2 ✅）
 │   ├── models/                        # 模型层（Batch 1 ✅）
 │   │   ├── player.dart
 │   │   ├── family.dart
 │   │   ├── npc.dart
 │   │   ├── location.dart
 │   │   └── event.dart
-│   ├── providers/                     # 状态管理（Batch 3）
-│   ├── mixins/                        # 混入层（Batch 4）
-│   ├── screens/                       # UI 层（Batch 5）
-│   ├── services/                      # 服务层（Batch 3）
+│   ├── providers/                     # 状态管理（Batch 3 ✅）
+│   │   ├── game_state_provider.dart
+│   │   ├── event_provider.dart
+│   │   └── game_provider_base.dart    # 混入层宿主 + 公共能力（Batch 4 ✅）
+│   ├── mixins/                        # 混入层（Batch 4 ✅）
+│   │   ├── mixin_play.dart            # 日常玩法
+│   │   ├── mixin_commands.dart        # 指令分发
+│   │   ├── mixin_systems.dart         # 74 系统挂载/月度演进
+│   │   ├── mixin_letter.dart          # 信件系统
+│   │   └── mixin_adventure.dart       # 旅行/探索/遭遇
+│   ├── screens/                       # UI 层（Batch 5 待做）
+│   ├── services/                      # 服务层（Batch 3 ✅）
 │   └── utils/                         # 工具
 └── test/
-    └── batch1_smoke_test.dart         # Batch 1 冒烟测试（17 用例）
+    ├── batch1_smoke_test.dart         # Batch 1 冒烟测试（17 用例）
+    └── batch4_*_test.dart             # Batch 4 混入层测试（5 文件）
 ```
 
 ## 阶段规划
@@ -91,8 +101,17 @@ westeros_life_simulator/
 - 验证方式：GitHub Actions CI（run 36007775720，✅ success，2026-09-24，134 测试全部通过）
 - 修复历程：4 个 Analyze error（event_provider 初始化器/GameState nullable 条件/AiService Dio 类型与超时参数）→ 1 个 warning（save_service 非空断言）→ 1 个测试失败（GameStateProvider 序列化往返丢失 isGameActive/isGameOver/currentEvent）
 
-#### Batch 4：混入层（待做）
-- lib/mixins/mixin_play.dart、mixin_commands.dart、mixin_systems.dart、mixin_letter.dart、mixin_adventure.dart
+#### Batch 4：混入层（✅ 完成，2026-09-24）
+- lib/mixins/mixin_play.dart（日常玩法：训练/工作/休息/狩猎/贸易/月度循环）
+- lib/mixins/mixin_commands.dart（指令解析：状态/系统/信/旅行/训练/工作/狩猎/贸易/休息/探索/过月/帮助）
+- lib/mixins/mixin_systems.dart（74 系统挂载 + 月度演进结算 + 系统面板）
+- lib/mixins/mixin_letter.dart（NPC 主动来信 + 回信 + 关系培养）
+- lib/mixins/mixin_adventure.dart（旅行/探索/遭遇）
+- lib/providers/game_provider_base.dart（混入层宿主：世界静态数据 + 公共能力沉淀）
+- lib/game_engine.dart（游戏引擎：组合全部 mixin）
+- 测试：test/batch4_{play,commands,systems,letter,adventure}_test.dart（5 文件）
+- 重构要点：身份判定改用枚举（PlayerIdentity）避免字符串魔法值；金币/声望/关系/标记变更统一上提到基类，消除 mixin 间重复代码
+- 验证方式：GitHub Actions CI（待确认）
 
 #### Batch 5：UI 层（待做）
 - lib/screens/settings/、game/、family/、map/
@@ -122,5 +141,5 @@ westeros_life_simulator/
 - v2.0.0：阶段 3 Batch 1 项目骨架 + 模型层完成（2026-09-23）
 - v2.1.0：阶段 3 Batch 2 数据层完成（2026-09-23，CI run 35845290631 ✅ success）
 - v2.2.0：阶段 3 Batch 3 状态管理 + 服务层完成（2026-09-24，CI run 36007775720 ✅ success，134 测试全部通过）
-- v2.3.0：阶段 3 Batch 4 混入层（待做）
+- v2.3.0：阶段 3 Batch 4 混入层（✅ 完成，2026-09-24）
 - v2.4.0：阶段 3 Batch 5 UI 层（待做）
