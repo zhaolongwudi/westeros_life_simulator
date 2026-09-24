@@ -69,7 +69,7 @@ class SaveService {
   /// 获取存档目录。
   Future<Directory> _getSaveDirectory() async {
     if (_saveDir != null) {
-      final dir = Directory(_saveDir!);
+      final dir = Directory(_saveDir);
       if (!await dir.exists()) {
         await dir.create(recursive: true);
       }
