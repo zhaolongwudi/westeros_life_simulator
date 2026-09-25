@@ -153,6 +153,39 @@ class EventService {
             newFlags[flagName] = value != 0;
             newPlayer = newPlayer.copyWith(flags: newFlags);
             applied[key] = value;
+          } else if (key.startsWith('inventory.')) {
+            final itemId = key.substring(10);
+            final newInv = List<String>.from(newPlayer.inventory);
+            if (value > 0) {
+              for (var i = 0; i < value; i++) {
+                newInv.add(itemId);
+              }
+            } else {
+              var toRemove = -value;
+              while (toRemove > 0) {
+                final idx = newInv.indexOf(itemId);
+                if (idx < 0) break;
+                newInv.removeAt(idx);
+                toRemove--;
+              }
+            }
+            newPlayer = newPlayer.copyWith(inventory: newInv);
+            applied[key] = value;
+          } else if (key == 'health') {
+            newPlayer = newPlayer.copyWith(
+              health: (newPlayer.health + value).clamp(0, 100),
+            );
+            applied[key] = value;
+          } else if (key == 'energy') {
+            newPlayer = newPlayer.copyWith(
+              energy: (newPlayer.energy + value).clamp(0, 100),
+            );
+            applied[key] = value;
+          } else if (key == 'hunger') {
+            newPlayer = newPlayer.copyWith(
+              hunger: (newPlayer.hunger + value).clamp(0, 100),
+            );
+            applied[key] = value;
           } else {
             failed[key] = value;
           }

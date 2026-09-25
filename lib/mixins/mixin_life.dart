@@ -250,10 +250,6 @@ mixin GameLifeMixin on GameProviderBase {
     if (item == null) {
       return '没有「$itemId」这种东西可卖。';
     }
-    final have = itemCount(itemId);
-    if (have < quantity) {
-      return '你只有 $have 件「${item.name}」，卖不了 $quantity 件。';
-    }
     final loc = currentLocation;
     if (loc == null ||
         (loc.type != LocationType.city &&
@@ -262,6 +258,10 @@ mixin GameLifeMixin on GameProviderBase {
             loc.type != LocationType.village &&
             loc.type != LocationType.fort)) {
       return '这里没有收购的人。去城市、集市、城堡或村镇找找看。';
+    }
+    final have = itemCount(itemId);
+    if (have < quantity) {
+      return '你只有 $have 件「${item.name}」，卖不了 $quantity 件。';
     }
     final price = sellPriceOf(itemId) * quantity;
     for (var i = 0; i < quantity; i++) {
