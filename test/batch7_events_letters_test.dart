@@ -9,6 +9,7 @@ import 'package:westeros_life_simulator/game_engine.dart';
 import 'package:westeros_life_simulator/models/event.dart';
 import 'package:westeros_life_simulator/screens/events_screen.dart';
 import 'package:westeros_life_simulator/screens/letters_screen.dart';
+import 'package:westeros_life_simulator/utils/labels.dart';
 
 void main() {
   group('Batch 7 事件面板', () {

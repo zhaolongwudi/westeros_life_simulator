@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:westeros_life_simulator/models/player.dart';
 import 'package:westeros_life_simulator/screens/start_screen.dart';
+import 'package:westeros_life_simulator/utils/labels.dart';
 
 void main() {
   group('Batch 6 开局', () {

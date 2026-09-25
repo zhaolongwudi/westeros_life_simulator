@@ -3,6 +3,8 @@
 /// 使用 ChangeNotifier + provider 实现响应式状态管理。
 library;
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 
 import '../models/event.dart';
@@ -158,28 +160,7 @@ class GameStateProvider extends ChangeNotifier {
     if (!_isGameActive || _isGameOver) return;
 
     // 应用效果
-    var newPlayer = _player;
-    for (final entry in choice.effects.entries) {
-      final key = entry.key;
-      final value = entry.value;
-      if (key == 'gold') {
-        newPlayer = newPlayer.copyWith(gold: newPlayer.gold + value);
-      } else if (key == 'reputation') {
-        newPlayer = newPlayer.copyWith(reputation: newPlayer.reputation + value);
-      } else if (key.startsWith('skills.')) {
-        final skillName = key.substring(7);
-        final newSkills = Map<String, int>.from(newPlayer.skills);
-        newSkills[skillName] = (newSkills[skillName] ?? 0) + value;
-        newPlayer = newPlayer.copyWith(skills: newSkills);
-      } else if (key.startsWith('attributes.')) {
-        final attrName = key.substring(11);
-        final newAttrs = Map<String, int>.from(newPlayer.attributes);
-        newAttrs[attrName] = (newAttrs[attrName] ?? 0) + value;
-        newPlayer = newPlayer.copyWith(attributes: newAttrs);
-      }
-    }
-
-    _player = newPlayer;
+    _player = applyEffects(_player, choice.effects);
 
     // 记录历史
     if (_currentEvent != null) {
@@ -194,6 +175,36 @@ class GameStateProvider extends ChangeNotifier {
     _checkGameOver();
 
     notifyListeners();
+  }
+
+  /// 将效果 Map 应用到玩家身上，返回新玩家。
+  ///
+  /// 支持键：gold / reputation / skills.<name> / attributes.<name>。
+  /// 供事件选项（[applyChoice]）与 AI 生成选项共用。
+  Player applyEffects(Player player, Map<String, int> effects) {
+    var newPlayer = player;
+    for (final entry in effects.entries) {
+      final key = entry.key;
+      final value = entry.value;
+      if (key == 'gold') {
+        newPlayer = newPlayer.copyWith(gold: max(0, newPlayer.gold + value));
+      } else if (key == 'reputation') {
+        newPlayer = newPlayer.copyWith(
+          reputation: (newPlayer.reputation + value).clamp(0, 100),
+        );
+      } else if (key.startsWith('skills.')) {
+        final skillName = key.substring(7);
+        final newSkills = Map<String, int>.from(newPlayer.skills);
+        newSkills[skillName] = (newSkills[skillName] ?? 0) + value;
+        newPlayer = newPlayer.copyWith(skills: newSkills);
+      } else if (key.startsWith('attributes.')) {
+        final attrName = key.substring(11);
+        final newAttrs = Map<String, int>.from(newPlayer.attributes);
+        newAttrs[attrName] = (newAttrs[attrName] ?? 0) + value;
+        newPlayer = newPlayer.copyWith(attributes: newAttrs);
+      }
+    }
+    return newPlayer;
   }
 
   /// 检查游戏结束条件。

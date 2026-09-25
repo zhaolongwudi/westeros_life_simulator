@@ -172,15 +172,18 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
-  /// 应用 AI 生成的选项效果（简化：只展示叙事，不推进时间）。
+  /// 应用 AI 生成的选项效果：效果落盘 + 推进一个月（含系统结算/信件）。
   void _chooseAiOption(EventChoice choice) {
     setState(() {
       _aiChoices = <EventChoice>[];
     });
     _appendLine('➡️ ${choice.text}');
-    if (choice.narrative.isNotEmpty) {
-      _appendLine(choice.narrative);
+    // 引擎级应用：效果写回玩家 + 月度推进 + 系统结算 + 信件触发
+    final result = _engine.applyAiChoice(choice);
+    if (result.isNotEmpty) {
+      _appendLine(result);
     }
+    // 引擎 notify 会触发 _onEngineChanged 刷新状态条
   }
 
   /// 打开子界面。

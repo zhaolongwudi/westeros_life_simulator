@@ -48,14 +48,43 @@ class AiService {
   final Dio _dio;
 
   /// 生成叙事与选项。
+  ///
+  /// 内置基础容错：HTTP 429 / 网络错误时按指数退避自动重试
+  /// （最多 [maxRetries] 次，间隔 1s/2s/4s...），提升可用性。
   Future<AiResponse> generateNarrative({
     required Player player,
     required String context,
     required List<GameEvent> availableEvents,
     int maxTokens = 2000,
+    int maxRetries = 3,
   }) async {
+    final prompt = _buildPrompt(player, context, availableEvents);
+    var attempt = 0;
+
+    while (true) {
+      attempt++;
+      final response = await _postChat(prompt, maxTokens);
+      if (response.isSuccess) return response;
+
+      // 可重试的错误：429 / 网络错误 / 5xx；其余直接返回
+      final msg = response.errorMessage ?? '';
+      final retryable = msg.contains('429') ||
+          msg.contains('timed out') ||
+          msg.contains('Connection') ||
+          msg.contains('Network error') ||
+          msg.contains('SocketException') ||
+          msg.startsWith('HTTP 5');
+      if (!retryable || attempt > maxRetries) return response;
+
+      // 指数退避：1s / 2s / 4s ...
+      final delay = Duration(milliseconds: 500 * (1 << (attempt - 1)) * 2);
+      await Future<void>.delayed(delay);
+    }
+  }
+
+  /// 发起一次 chat/completions 请求并解析。
+  Future<AiResponse> _postChat(String prompt, int maxTokens) async {
     try {
-      final prompt = _buildPrompt(player, context, availableEvents);
       final response = await _dio.post<Map<String, dynamic>>(
         '$baseUrl/chat/completions',
         options: Options(
