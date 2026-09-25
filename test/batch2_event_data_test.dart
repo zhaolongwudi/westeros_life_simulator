@@ -7,8 +7,8 @@ import 'package:westeros_life_simulator/models/event.dart';
 
 void main() {
   group('事件数据', () {
-    test('allEvents 包含 60 个事件', () {
-      expect(allEvents.length, 60);
+    test('allEvents 包含 72 个事件', () {
+      expect(allEvents.length, 72);
     });
 
     test('所有事件 ID 唯一', () {
