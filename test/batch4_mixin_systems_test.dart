@@ -16,13 +16,13 @@ void main() {
       final engine = GameEngine()..startNewGame();
       final war = engine.systemsByCategory('战争');
       expect(war, isNotEmpty);
-      expect(war.every((s) => s?.category == '战争'), true);
+      expect(war.every((s) => s.category == '战争'), true);
     });
 
     test('默认玩家（史塔克贵族）可接触家族系统', () {
       final engine = GameEngine()..startNewGame();
       final avail = engine.availableSystems();
-      expect(avail.any((s) => s?.category == '家族' || s?.category == '封建'), true);
+      expect(avail.any((s) => s.category == '家族' || s.category == '封建'), true);
     });
 
     test('无面者身份可接触无面者系统', () {
@@ -33,7 +33,7 @@ void main() {
         isGameActive: true,
       );
       final avail = engine.availableSystems();
-      expect(avail.any((s) => s?.category == '无面者'), true);
+      expect(avail.any((s) => s.category == '无面者'), true);
     });
 
     test('君临城居民可接触贸易/经济系统', () {
@@ -42,7 +42,7 @@ void main() {
         isGameActive: true,
       );
       final avail = engine.availableSystems();
-      expect(avail.any((s) => s?.category == '贸易' || s?.category == '经济'), true);
+      expect(avail.any((s) => s.category == '贸易' || s.category == '经济'), true);
     });
 
     test('长城守夜人可接触守夜人系统', () {
@@ -51,7 +51,7 @@ void main() {
         isGameActive: true,
       );
       final avail = engine.availableSystems();
-      expect(avail.any((s) => s?.category == '守夜人'), true);
+      expect(avail.any((s) => s.category == '守夜人'), true);
     });
 
     test('铁群岛居民可接触铁民/淹神系统', () {
@@ -60,7 +60,7 @@ void main() {
         isGameActive: true,
       );
       final avail = engine.availableSystems();
-      expect(avail.any((s) => s?.category == '铁民' || s?.category == '淹神'), true);
+      expect(avail.any((s) => s.category == '铁民' || s.category == '淹神'), true);
     });
 
     test('坦格利安可接触龙系统', () {
@@ -69,7 +69,7 @@ void main() {
         isGameActive: true,
       );
       final avail = engine.availableSystems();
-      expect(avail.any((s) => s?.category == '龙'), true);
+      expect(avail.any((s) => s.category == '龙'), true);
     });
 
     test('formatSystemsPanel 输出面板', () {
