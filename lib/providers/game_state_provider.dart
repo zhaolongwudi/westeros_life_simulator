@@ -179,7 +179,8 @@ class GameStateProvider extends ChangeNotifier {
 
   /// 将效果 Map 应用到玩家身上，返回新玩家。
   ///
-  /// 支持键：gold / reputation / skills.<name> / attributes.<name>。
+  /// 支持键：gold / reputation / skills.<name> / attributes.<name> /
+  /// relations.<npcId> / flags.<flagName>（value>0 置真，<=0 清除）。
   /// 供事件选项（[applyChoice]）与 AI 生成选项共用。
   Player applyEffects(Player player, Map<String, int> effects) {
     var newPlayer = player;
@@ -202,6 +203,16 @@ class GameStateProvider extends ChangeNotifier {
         final newAttrs = Map<String, int>.from(newPlayer.attributes);
         newAttrs[attrName] = (newAttrs[attrName] ?? 0) + value;
         newPlayer = newPlayer.copyWith(attributes: newAttrs);
+      } else if (key.startsWith('relations.')) {
+        final npcId = key.substring(10);
+        final newRels = Map<String, int>.from(newPlayer.relations);
+        newRels[npcId] = (newRels[npcId] ?? 0) + value;
+        newPlayer = newPlayer.copyWith(relations: newRels);
+      } else if (key.startsWith('flags.')) {
+        final flagName = key.substring(6);
+        final newFlags = Map<String, bool>.from(newPlayer.flags);
+        newFlags[flagName] = value > 0;
+        newPlayer = newPlayer.copyWith(flags: newFlags);
       }
     }
     return newPlayer;

@@ -179,7 +179,13 @@ ${eventsDesc}
 
 请生成一段叙事文本（200-500 字），描述当前情境，并提供 2-4 个选项。
 每个选项包含：文本、效果（JSON 格式）、叙事。
-效果键约定：金币用 gold，声望用 reputation，技能用 skills.技能名（如 skills.sword），属性用 attributes.属性名（如 attributes.strength）。
+效果键约定：
+- 金币：gold
+- 声望：reputation
+- 技能：skills.技能名（如 skills.sword）
+- 属性：attributes.属性名（如 attributes.strength）
+- 关系：relations.NPC标识（正数加好感，负数降好感，如 relations.tyrion: 10）
+- 世界状态：flags.标记名（正值设置标记，如 flags.honor_pledge: 1；0 或负值清除标记）
 
 输出格式（JSON）：
 {
@@ -187,7 +193,7 @@ ${eventsDesc}
   "choices": [
     {
       "text": "选项文本",
-      "effects": {"gold": 10, "reputation": 5, "skills.sword": 1},
+      "effects": {"gold": 10, "reputation": 5, "skills.sword": 1, "relations.tyrion": 10, "flags.honor_pledge": 1},
       "narrative": "选择后的叙事"
     }
   ]
@@ -255,11 +261,14 @@ ${eventsDesc}
 3. 历史不会停止
 4. 家族不是职业
 5. 封建权力结构复杂
+6. 每个选择都有代价，没有免费午餐
+7. 玩家的身份决定他能看到的世界——贵族看到权力与阴谋，平民看到税赋与生计，学士看到知识与秘密，守夜人看到长城外的黑暗
 
-输出要求：
-- 叙事文本 200-500 字
-- 提供 2-4 个选项
-- 每个选项包含效果（JSON 格式）
-- 保持维斯特洛世界观一致性
+叙事要求：
+- 叙事文本 200-500 字，用具体的场景、对话、气味、天气来营造氛围
+- 不要写“你感到危险”，要写“守夜人的火炬在风中摇晃，墙外的狼嚎断断续续”
+- 选项要体现代价与机会：有的选项让玩家变强但树敌，有的选项需要放弃某些东西
+- 效果键必须严格遵循约定，数值要合理（技能+1~3，属性+1~2，关系±5~20）
+- 保持维斯特洛世界观一致性：季节、家族、地点、历史事件都要准确
 ''';
 }

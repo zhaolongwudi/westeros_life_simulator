@@ -66,6 +66,24 @@ void main() {
       expect(player.gold, 100); // 不变
       expect(player.reputation, 50);
     });
+    test('关系效果键 relations.<npc> 增减好感', () {
+      final provider = GameStateProvider();
+      final player = provider.applyEffects(
+        provider.player,
+        const <String, int>{'relations.tyrion': 15, 'relations.jon': -5},
+      );
+      expect(player.relations['tyrion'], 15);
+      expect(player.relations['jon'], -5);
+    });
+    test('状态效果键 flags.<name> 设置与清除', () {
+      final provider = GameStateProvider();
+      final player = provider.applyEffects(
+        provider.player,
+        const <String, int>{'flags.honor_pledge': 1, 'flags.isAlive': 0},
+      );
+      expect(player.flags['honor_pledge'], true);
+      expect(player.flags['isAlive'], false);
+    });
   });
 
   group('Batch 9 applyAiChoice 回合推进', () {
