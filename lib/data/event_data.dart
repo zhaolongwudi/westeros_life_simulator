@@ -1597,7 +1597,7 @@ const List<GameEvent> allEvents = [
     type: EventType.adventure,
     description: '商路上出现一伙匪帮，正拦路劫掠过往行人。',
     triggerConditions: const {
-      'minGold': 20,
+      'minGold': '20',
     },
     choices: const [
       EventChoice(
@@ -1703,7 +1703,7 @@ const List<GameEvent> allEvents = [
     type: EventType.economic,
     description: '一支来自自由贸易城邦的商队经过，带来稀有货物。',
     triggerConditions: const {
-      'minGold': 50,
+      'minGold': '50',
     },
     choices: const [
       EventChoice(
@@ -1806,7 +1806,7 @@ const List<GameEvent> allEvents = [
     type: EventType.supernatural,
     description: '深夜的旧道上，你看到一个穿着破旧战甲的身影，若隐若现。',
     triggerConditions: const {
-      'maxEnergy': 30,
+      'maxEnergy': '30',
       'season': 'winter',
     },
     choices: const [
@@ -1842,7 +1842,7 @@ const List<GameEvent> allEvents = [
     type: EventType.supernatural,
     description: '你连续三夜做同一个梦：一条被寒冰冻结的巨龙，在长城之上盘旋。',
     triggerConditions: const {
-      'minReputation': 30,
+      'minReputation': '30',
     },
     choices: const [
       EventChoice(
@@ -1862,7 +1862,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_tell_maester',
         text: '向学士请教',
-        requirements: const {'identity': 'maester'},
+        requirements: const {'attributes.intelligence': 5},
         effects: const {'reputation': 8, 'flags.hasVision': 1},
         narrative: '学士在古卷里翻出一则关于冰与火的预言，若有所思。',
       ),
@@ -1877,7 +1877,7 @@ const List<GameEvent> allEvents = [
     type: EventType.supernatural,
     description: '夜空中出现一颗血红彗星，七国上下议论纷纷，视为凶兆或吉兆。',
     triggerConditions: const {
-      'minAge': 15,
+      'minAge': '15',
     },
     choices: const [
       EventChoice(
@@ -1890,14 +1890,14 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_see_blessing',
         text: '视为吉兆',
-        requirements: const {'identity': 'priest'},
+        requirements: const {'attributes.willpower': 4},
         effects: const {'reputation': 5},
         narrative: '你宣称这是诸神赐福的征兆，信徒们欢欣鼓舞。',
       ),
       EventChoice(
         id: 'choice_study',
         text: '用望远镜观测',
-        requirements: const {'identity': 'scholar'},
+        requirements: const {'attributes.intelligence': 6},
         effects: const {'reputation': 8, 'flags.hasCometRecord': 1},
         narrative: '你记录下彗星的位置与色泽，这一发现将载入学城档案。',
       ),
@@ -1912,7 +1912,7 @@ const List<GameEvent> allEvents = [
     type: EventType.magical,
     description: '学城送来一支玻璃蜡烛，据说点燃者能看见千里之外的景象。',
     triggerConditions: const {
-      'hasItem.item_glass_candle': 1,
+      'hasItem.item_glass_candle': '1',
     },
     choices: const [
       EventChoice(
@@ -2019,7 +2019,7 @@ const List<GameEvent> allEvents = [
     description: '今年的收成格外丰盛，集市上货物堆积如山，价格低廉。',
     triggerConditions: const {
       'season': 'summer',
-      'minGold': 20,
+      'minGold': '20',
     },
     choices: const [
       EventChoice(
