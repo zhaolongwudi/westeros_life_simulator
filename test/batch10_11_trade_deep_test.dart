@@ -80,7 +80,7 @@ void main() {
       // 商人 + 高口才大概率成功
       expect(text, isNotEmpty);
       if (text.contains('成功议价')) {
-        expect(engine.flagOf('negotiated_discount'), true);
+        expect(engine.flagOf('negotiated'), true);
       }
     });
 

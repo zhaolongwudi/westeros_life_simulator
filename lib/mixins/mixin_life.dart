@@ -144,6 +144,7 @@ mixin GameLifeMixin on GameProviderBase {
   /// 购买价格：物品价值 × 地点系数。
   ///
   /// 城市/集市商品丰富价格平稳；要塞/荒野补给稀缺溢价。
+  /// 议价成功后（Batch 10-11）买价再降 [_negotiatedDiscount]%。
   int buyPriceOf(String itemId) {
     final item = itemById(itemId);
     if (item == null) return 0;
@@ -169,12 +170,17 @@ mixin GameLifeMixin on GameProviderBase {
           factor = 1.2;
       }
     }
-    return (item.value * factor).round();
+    var price = (item.value * factor).round();
+    if (_negotiatedDiscount > 0) {
+      price = (price * (100 - _negotiatedDiscount) / 100).round();
+    }
+    return price;
   }
 
   /// 出售价格：物品价值 × 出售折扣 × 地点系数。
   ///
   /// 珍宝/圣物/武器在城市的收购价更高，乡村/荒野贱卖。
+  /// 议价成功后（Batch 10-11）卖价按 [_negotiatedDiscount]% 上浮。
   int sellPriceOf(String itemId) {
     final item = itemById(itemId);
     if (item == null) return 0;
@@ -208,7 +214,11 @@ mixin GameLifeMixin on GameProviderBase {
         factor += 0.1;
       }
     }
-    return (item.value * factor).round();
+    var price = (item.value * factor).round();
+    if (_negotiatedDiscount > 0) {
+      price = (price * (100 + _negotiatedDiscount) / 100).round();
+    }
+    return price;
   }
 
   /// 购买物品：从背包扣金币、入背包。
@@ -295,6 +305,9 @@ mixin GameLifeMixin on GameProviderBase {
 
   // ==================== 贸易深化（Batch 10-11） ====================
 
+  /// 本次议价折扣（0-100 的百分比）。议价成功后生效，跨日重置。
+  int _negotiatedDiscount = 0;
+
   /// 新增贸易活动的每日次数上限（自包含，避免依赖 GamePlayMixin 私有状态）。
   static const Map<String, int> kNewDailyLimits = <String, int>{
     'trade_specialty': 2,
@@ -307,11 +320,13 @@ mixin GameLifeMixin on GameProviderBase {
 
   String get _b1011Today => '${progress.year}-${progress.month}';
 
-  /// 跨月重置新增活动的每日计数。
+  /// 跨月重置新增活动的每日计数，并清除议价折扣。
   void _b1011RollDaily() {
     if (_b1011DailyMonth != _b1011Today) {
       _b1011DailyMonth = _b1011Today;
       _b1011DailyCount = <String, int>{};
+      _negotiatedDiscount = 0;
+      if (flagOf('negotiated')) setFlag('negotiated', false);
     }
   }
 
@@ -435,7 +450,9 @@ mixin GameLifeMixin on GameProviderBase {
     }
     // 议价幅度：5% ~ 20%（口才越高让利越多）
     final discount = 5 + rnd.nextInt(15) + speech.clamp(0, 3) * 2;
-    setFlag('negotiated_discount', discount);
+    setFlag('negotiated', true);
+    _negotiatedDiscount = discount;
+    notifyListeners();
     return '你成功议价：本日买价再降 $discount%，卖价相应上浮。'
         '（商贩摇头：「你这张嘴，不当商人都可惜了。」）';
   }
