@@ -26,8 +26,11 @@ class CommandResult {
 }
 
 /// 指令混入。挂在 [GameProviderBase] 上，依赖四个玩法 mixin。
-mixin GameCommandsMixin on GameProviderBase
-    with GamePlayMixin, GameSystemsMixin, GameLetterMixin, GameAdventureMixin {
+///
+/// Dart 的 mixin 不能使用 `with` 组合，改为在 `on` 子句中列出
+/// 全部依赖 mixin（宿主类同时混入它们即可满足约束）。
+mixin GameCommandsMixin
+    on GameProviderBase, GamePlayMixin, GameSystemsMixin, GameLetterMixin, GameAdventureMixin {
   /// 解析并执行一条玩家指令。
   ///
   /// 返回响应文本。未知指令返回帮助提示。

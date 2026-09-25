@@ -8,9 +8,13 @@ import 'dart:math';
 import '../models/location.dart';
 import '../models/player.dart';
 import '../providers/game_provider_base.dart';
+import 'mixin_systems.dart';
 
 /// 日常玩法混入。挂在 [GameProviderBase] 上。
-mixin GamePlayMixin on GameProviderBase {
+///
+/// [advanceMonth] 需要调用 [GameSystemsMixin.applyMonthlySystems]，
+/// 因此 on 约束中列出 GameSystemsMixin。
+mixin GamePlayMixin on GameProviderBase, GameSystemsMixin {
   /// 每日活动次数上限（防数值刷子，参考 docs/08 玩法限制）。
   static const Map<String, int> kDailyLimits = {
     'train': 3,

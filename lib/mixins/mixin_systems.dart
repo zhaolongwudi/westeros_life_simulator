@@ -3,11 +3,10 @@
 /// 参考 docs/05_系统百科.md 与 docs/08_玩法设计.md「月度循环」。
 library;
 
-import 'dart:math';
-
 import '../models/family.dart';
 import '../models/location.dart';
 import '../models/player.dart';
+import '../models/system.dart';
 import '../providers/game_provider_base.dart';
 
 /// 系统混入。挂在 [GameProviderBase] 上。
@@ -31,7 +30,6 @@ mixin GameSystemsMixin on GameProviderBase {
   /// - 雇佣兵/贸易/经济：城市
   List<GameSystem> availableSystems() {
     final identity = player.identity;
-    final region = currentLocation?.region ?? '';
 
     final result = <GameSystem>[];
     for (final s in systems) {
