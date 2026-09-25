@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/game_screen.dart';
+import 'screens/start_screen.dart';
 
 class WesterosApp extends StatelessWidget {
   const WesterosApp({super.key});
@@ -13,7 +13,7 @@ class WesterosApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         useMaterial3: true,
       ),
-      home: const GameScreen(),
+      home: const StartScreen(),
     );
   }
 }

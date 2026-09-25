@@ -23,14 +23,17 @@ class _QuickCommand {
 
 /// 游戏主界面。
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  const GameScreen({super.key, this.engine});
+
+  /// 可选：传入已初始化的引擎（开局界面使用）；默认新建。
+  final GameEngine? engine;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> {
-  final GameEngine _engine = GameEngine()..startNewGame();
+  late final GameEngine _engine = widget.engine ?? GameEngine()..startNewGame();
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
