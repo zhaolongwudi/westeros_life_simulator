@@ -92,6 +92,12 @@ mixin GameCommandsMixin
         return CommandResult(text: hunt());
       case '贸易' || 'trade':
         return CommandResult(text: trade());
+      case '巡游' || '特产' || 'specialty':
+        return CommandResult(text: tradeSpecialty());
+      case '议价' || 'negotiate':
+        return CommandResult(text: negotiate());
+      case '商队' || '护送' || 'convoy':
+        return CommandResult(text: convoy());
       case '购买' || '买入' || 'buy':
         if (args.isEmpty) {
           return const CommandResult(text: '买什么？如「购买 黑面包」或「买入 item_meat」。输入「行情」看价格。');
@@ -241,6 +247,9 @@ mixin GameCommandsMixin
 工作 / work         赚取金币（消耗精力）
 狩猎 / hunt         野外狩猎（消耗精力）
 贸易 / trade        城市贸易（消耗精力）
+巡游 / specialty    地区特产巡游：当地收特产，异地高价出售（消耗精力）
+议价 / negotiate    商人议价：口才决定买卖折价（每日 1 次）
+商队 / convoy       商队护送：按战斗值判定报酬与风险（每日 1 次）
 购买 / buy [物品]    购买物品（如 购买 黑面包 或 买入 长剑）
 出售 / sell [物品]   出售物品（如 出售 烤肉 或 卖出 item_wine）
 行情 / market       查看当前地点物价

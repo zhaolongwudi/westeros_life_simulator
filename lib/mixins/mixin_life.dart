@@ -293,6 +293,187 @@ mixin GameLifeMixin on GameProviderBase {
     return buf.toString().trim();
   }
 
+  // ==================== 贸易深化（Batch 10-11） ====================
+
+  /// 新增贸易活动的每日次数上限（自包含，避免依赖 GamePlayMixin 私有状态）。
+  static const Map<String, int> kNewDailyLimits = <String, int>{
+    'trade_specialty': 2,
+    'negotiate': 1,
+    'convoy': 1,
+  };
+
+  Map<String, int> _b1011DailyCount = <String, int>{};
+  String? _b1011DailyMonth;
+
+  String get _b1011Today => '${progress.year}-${progress.month}';
+
+  /// 跨月重置新增活动的每日计数。
+  void _b1011RollDaily() {
+    if (_b1011DailyMonth != _b1011Today) {
+      _b1011DailyMonth = _b1011Today;
+      _b1011DailyCount = <String, int>{};
+    }
+  }
+
+  bool _b1011CanDo(String activity) {
+    _b1011RollDaily();
+    return (_b1011DailyCount[activity] ?? 0) < (kNewDailyLimits[activity] ?? 99);
+  }
+
+  void _b1011Record(String activity) {
+    _b1011RollDaily();
+    _b1011DailyCount[activity] = (_b1011DailyCount[activity] ?? 0) + 1;
+  }
+
+  /// 地区特产映射：每个区域的代表物品（买价更便宜，卖到其他区域更贵）。
+  ///
+  /// 用于「地区特产巡游」与跨区套利。
+  static const Map<String, List<String>> kRegionSpecialties = <String, List<String>>{
+    '北境': <String>['item_meat', 'item_fish', 'item_heart_tree_leaf', 'item_garron'],
+    '河间地': <String>['item_bread', 'item_herb', 'item_parchment'],
+    '谷地': <String>['item_wine', 'item_fish', 'item_chainmail'],
+    '西境': <String>['item_iron_ore', 'item_steel', 'item_gold_chain'],
+    '河湾地': <String>['item_bread', 'item_wine', 'item_meat', 'item_horse'],
+    '王领': <String>['item_wine', 'item_ruby', 'item_crown'],
+    '风暴地': <String>['item_fish', 'item_sword', 'item_leather'],
+    '多恩': <String>['item_wine', 'item_sapphire', 'item_herb'],
+    '铁群岛': <String>['item_fish', 'item_iron_ore', 'item_steel'],
+    '厄索斯': <String>['item_ruby', 'item_sapphire', 'item_dragonbone', 'item_glass_candle'],
+    '超自然': <String>['item_dragonbone', 'item_glass_candle', 'item_lightbringer_shard'],
+    '未知世界': <String>['item_ruby', 'item_dragonbone', 'item_heart_tree_leaf'],
+  };
+
+  /// 地区特产加成：在特产产地购买特产更便宜（×0.8），出售到异乡更贵。
+  ///
+  /// 返回价格调整后的买卖价（加成前的基础值）。
+  ({int buy, int sell}) specialtyAdjustedPrice(String itemId) {
+    final item = itemById(itemId);
+    if (item == null) return (buy: 0, sell: 0);
+    final loc = currentLocation;
+    final isLocalSpecialty = loc != null &&
+        (kRegionSpecialties[loc.region]?.contains(itemId) ?? false);
+
+    // 基础价（未考虑地点系数，仅考虑特产关系）
+    final base = item.value;
+    if (isLocalSpecialty) {
+      // 产地自产自销：买便宜、卖也便宜（供过于求）
+      return (buy: (base * 0.8).round(), sell: (base * 0.4).round());
+    }
+    // 非特产：正常买卖（卖价略低于买价）
+    return (buy: base, sell: (base * 0.6).round());
+  }
+
+  /// 地区特产巡游：在当前区域收购特产，带到其他区域高价出售。
+  ///
+  /// 消耗精力，按「是否在特产产地」与随机波动决定利润。
+  String tradeSpecialty() {
+    if (!_b1011CanDo('trade_specialty')) {
+      return '你今天的商路已经跑完了。';
+    }
+    if (!canAffordEnergy(12)) {
+      return '你精疲力竭，无力再跑商路。先去休息吧。';
+    }
+    final loc = currentLocation;
+    if (loc == null) return '你不在任何已知地点。';
+    adjustEnergy(-12);
+    _b1011Record('trade_specialty');
+
+    final specialties = kRegionSpecialties[loc.region] ?? const <String>[];
+    if (specialties.isEmpty) {
+      return '${loc.region} 似乎没有值得倒腾的特产。去别处看看吧。';
+    }
+    final rnd = rng();
+    final itemId = specialties[rnd.nextInt(specialties.length)];
+    final item = itemById(itemId);
+    if (item == null) return '这里看似有特产，却无人识货。';
+    final isMerchant = isIdentity(PlayerIdentity.merchant);
+    // 收购 2 件特产
+    final buy = buyPriceOf(itemId) * 2;
+    if (player.gold < buy) {
+      return '你买不起 2 件「${item.name}」（需 $buy 金币）。先攒点本钱吧。';
+    }
+    gainGold(-buy);
+    for (var i = 0; i < 2; i++) {
+      addItem(itemId);
+    }
+    // 商人加成 + 口才加成
+    final premium = (isMerchant ? 0.35 : 0.15) + skillLevel('speech') * 0.03;
+    final sellEstimate = (sellPriceOf(itemId) * 2 * (1 + premium)).round();
+    final profit = sellEstimate - buy;
+    final mood = profit >= 0 ? '这是一笔不错的买卖。' : '本钱压住了，得找更大的市场出手。';
+    return '你在${loc.name}（${loc.region}）收购 2 件「${item.name}」'
+        '（花 $buy 金币）。按异地行情估算可卖 $sellEstimate 金币（利润约 $profit）。$mood';
+  }
+
+  /// 商人议价：通过口才与身份，压低买入价 / 抬高卖出价。
+  ///
+  /// 议价有冷却（每回合一次），成功后本回合买卖价获得折扣/加成。
+  String negotiate() {
+    if (!_b1011CanDo('negotiate')) {
+      return '你今天的议价机会已经用过了。';
+    }
+    if (!canAffordEnergy(5)) {
+      return '你口干舌燥，无力再费口舌。';
+    }
+    adjustEnergy(-5);
+    _b1011Record('negotiate');
+    final loc = currentLocation;
+    if (loc == null ||
+        (loc.type != LocationType.city &&
+            loc.type != LocationType.market &&
+            loc.type != LocationType.castle &&
+            loc.type != LocationType.village)) {
+      return '这里没有商贩，无处议价。';
+    }
+    final rnd = rng();
+    final speech = skillLevel('speech');
+    final isMerchant = isIdentity(PlayerIdentity.merchant);
+    // 议价成功率：口才 * 8% + 商人加成 20% + 随机
+    final baseChance = speech * 8 + (isMerchant ? 20 : 0) + rnd.nextInt(20);
+    if (baseChance < 40) {
+      return '你费尽口舌，商贩油盐不进，一分钱都不肯让。';
+    }
+    // 议价幅度：5% ~ 20%（口才越高让利越多）
+    final discount = 5 + rnd.nextInt(15) + speech.clamp(0, 3) * 2;
+    setFlag('negotiated_discount', discount);
+    return '你成功议价：本日买价再降 $discount%，卖价相应上浮。'
+        '（商贩摇头：「你这张嘴，不当商人都可惜了。」）';
+  }
+
+  /// 商队护送：接受一份护送委托，按战斗值/骑术判定报酬与风险。
+  ///
+  /// 消耗精力，成功得金币与声望，失败可能受伤。
+  String convoy() {
+    if (!_b1011CanDo('convoy')) {
+      return '今天没有商队愿意等你。';
+    }
+    if (!canAffordEnergy(15)) {
+      return '你太累了，护不了商队。';
+    }
+    adjustEnergy(-15);
+    _b1011Record('convoy');
+    final loc = currentLocation;
+    if (loc == null) return '你不在任何已知地点。';
+    final rnd = rng();
+    final power = combatPower();
+    final isMerchant = isIdentity(PlayerIdentity.merchant);
+    // 战斗判定：战斗值 + 骑术加成 + 商人议价（商人更懂行价）
+    final score = power * 2 + skillLevel('riding') * 2 + (isMerchant ? 5 : 0) + rnd.nextInt(20);
+    final baseFee = 30 + power * 2 + rnd.nextInt(20);
+    if (score >= 40) {
+      gainGold(baseFee);
+      adjustReputation(3);
+      return '你一路护送商队穿越${loc.region}，击退两拨匪徒。商队老板付你 $baseFee 金币，还替你扬了名。';
+    }
+    if (score >= 25) {
+      gainGold((baseFee * 0.6).round());
+      return '商队遇上几伙小毛贼，你有惊无险地护了过去。拿到 ${(baseFee * 0.6).round()} 金币。';
+    }
+    // 失败：受伤但保住货物
+    adjustHealth(-10);
+    return '商队在路口遭了埋伏，你奋力搏杀才护住货物，自己却挂了彩（健康 -10）。商队付你 ${(baseFee * 0.3).round()} 金币聊表谢意。';
+  }
+
   // ==================== 装备系统（Batch 10-4） ====================
 
   /// 已装备的物品 ID 列表（武器优先，从 flags.equipped.<itemId> 推导）。
