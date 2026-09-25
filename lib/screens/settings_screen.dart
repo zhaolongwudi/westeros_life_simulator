@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import '../game_engine.dart';
 import '../services/ai_config.dart';
 import '../services/save_service.dart';
+import '../utils/text_formats.dart';
 
 /// 设置/存档界面。
 class SettingsScreen extends StatefulWidget {
@@ -356,7 +357,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     '${save.playerName} · ${save.year}年${save.month}月',
                   ),
                   subtitle: Text(
-                    '回合 ${save.turnCount} · ${_formatTime(save.saveTime)}',
+                    '回合 ${save.turnCount} · ${formatDateTime(save.saveTime)}',
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -378,18 +379,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
-  }
-
-  /// 格式化保存时间。
-  String _formatTime(String iso) {
-    try {
-      final dt = DateTime.parse(iso).toLocal();
-      return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-'
-          '${dt.day.toString().padLeft(2, '0')} '
-          '${dt.hour.toString().padLeft(2, '0')}:'
-          '${dt.minute.toString().padLeft(2, '0')}';
-    } catch (_) {
-      return iso;
-    }
   }
 }

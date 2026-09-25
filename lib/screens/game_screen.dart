@@ -10,6 +10,7 @@ import '../game_engine.dart';
 import '../models/event.dart';
 import '../services/ai_config.dart';
 import '../services/ai_service.dart';
+import '../utils/labels.dart';
 import 'events_screen.dart';
 import 'family_screen.dart';
 import 'letters_screen.dart';
@@ -288,23 +289,12 @@ class _StatusBar extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            '${engine.progress.year}年${engine.progress.month}月 ${_seasonLabel(engine.progress.season)}',
+            '${engine.progress.year}年${engine.progress.month}月 ${seasonShortLabel(engine.progress.season)}',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
       ),
     );
-  }
-
-  /// 季节英文名转中文。
-  static String _seasonLabel(String season) {
-    return switch (season) {
-      'spring' => '春',
-      'summer' => '夏',
-      'autumn' => '秋',
-      'winter' => '冬',
-      _ => season,
-    };
   }
 }
 

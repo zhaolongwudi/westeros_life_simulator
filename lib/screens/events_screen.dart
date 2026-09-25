@@ -8,21 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../game_engine.dart';
 import '../models/event.dart';
-
-/// 事件类型中文标签。
-String eventTypeLabel(EventType type) {
-  return switch (type) {
-    EventType.political => '政治',
-    EventType.family => '家族',
-    EventType.war => '战争',
-    EventType.religious => '宗教',
-    EventType.economic => '经济',
-    EventType.magical => '魔法',
-    EventType.daily => '日常',
-    EventType.adventure => '冒险',
-    EventType.supernatural => '超自然',
-  };
-}
+import '../utils/labels.dart';
 
 /// 事件面板。
 class EventsScreen extends StatelessWidget {

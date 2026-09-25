@@ -12,6 +12,7 @@ import '../game_engine.dart';
 import '../models/location.dart';
 import '../models/player.dart';
 import '../providers/game_state_provider.dart';
+import '../utils/labels.dart';
 import 'game_screen.dart';
 
 /// 开局配置。
@@ -43,34 +44,6 @@ class GameSetup {
   final String season;
   final int year;
   final int month;
-}
-
-/// 身份中文标签。
-String identityLabel(PlayerIdentity identity) {
-  return switch (identity) {
-    PlayerIdentity.noble => '贵族',
-    PlayerIdentity.commoner => '平民',
-    PlayerIdentity.soldier => '士兵',
-    PlayerIdentity.merchant => '商人',
-    PlayerIdentity.priest => '神职人员',
-    PlayerIdentity.scholar => '学者',
-    PlayerIdentity.adventurer => '冒险者',
-    PlayerIdentity.assassin => '刺客',
-    PlayerIdentity.maester => '学士',
-    PlayerIdentity.wildling => '野人',
-  };
-}
-
-/// 季节中文标签。
-String seasonLabel(String season) {
-  return switch (season) {
-    'spring' => '春天',
-    'summer' => '夏天',
-    'autumn' => '秋天',
-    'winter' => '冬天',
-    'longwinter' => '凛冬',
-    _ => season,
-  };
 }
 
 /// 时代选项（中文名 -> (年份, 描述)）。
