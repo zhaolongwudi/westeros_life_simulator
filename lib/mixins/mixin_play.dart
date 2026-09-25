@@ -178,6 +178,8 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin {
     // 头衔晋升检查（声望积累后自动晋升）
     final titlePromotion = checkTitlePromotion();
     advanceTime();
+    // 月度世界事件浮现（30% 概率触发一个可触发事件作为叙事提示）
+    final worldEvent = _maybeWorldEvent(seed: progress.turnCount);
     final buf = StringBuffer()
       ..writeln('⏳ 时间推进到 ${progress.year}年${progress.month}月（${progress.season}）');
     if (monthText.isNotEmpty) {
@@ -189,11 +191,29 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin {
     if (titlePromotion.isNotEmpty) {
       buf.writeln('🏆 你获得新头衔：$titlePromotion！');
     }
+    if (worldEvent.isNotEmpty) {
+      buf.writeln(worldEvent);
+    }
     final loc = currentLocation;
     if (loc != null) {
       buf.writeln('你身处 ${loc.name}（${loc.region}）。');
     }
     return buf.toString().trim();
+  }
+
+  /// 月度世界事件浮现：从可触发事件中随机选一个作叙事提示。
+  ///
+  /// 仅提示（不强制选择），30% 概率；让世界事件随季节/处境浮现。
+  String _maybeWorldEvent({int? seed}) {
+    final rnd = rng(seed);
+    if (rnd.nextDouble() >= 0.3) return '';
+    final available = eventProvider.getAvailableEvents(
+      player,
+      season: progress.season,
+    );
+    if (available.isEmpty) return '';
+    final event = available[rnd.nextInt(available.length)];
+    return '📜 传闻：${event.name}——${event.description}';
   }
 
   // ==================== 内部工具 ====================
