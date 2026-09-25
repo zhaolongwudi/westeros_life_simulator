@@ -49,29 +49,24 @@ void main() {
 
     test('政治事件数量正确', () {
       final political = eventsByType(EventType.political);
-      expect(political.length, 10);
+      expect(political.length, 11);
     });
-
     test('家族事件数量正确', () {
       final family = eventsByType(EventType.family);
-      expect(family.length, 10);
+      expect(family.length, 11);
     });
-
     test('战争事件数量正确', () {
       final war = eventsByType(EventType.war);
-      expect(war.length, 5);
+      expect(war.length, 8);
     });
-
     test('宗教事件数量正确', () {
       final religious = eventsByType(EventType.religious);
-      expect(religious.length, 5);
+      expect(religious.length, 7);
     });
-
     test('经济事件数量正确', () {
       final economic = eventsByType(EventType.economic);
-      expect(economic.length, 8);
+      expect(economic.length, 13);
     });
-
     test('魔法事件数量正确', () {
       final magical = eventsByType(EventType.magical);
       expect(magical.length, 6);
