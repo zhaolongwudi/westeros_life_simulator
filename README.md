@@ -48,12 +48,19 @@ westeros_life_simulator/
 │   │   ├── mixin_systems.dart         # 74 系统挂载/月度演进
 │   │   ├── mixin_letter.dart          # 信件系统
 │   │   └── mixin_adventure.dart       # 旅行/探索/遭遇
-│   ├── screens/                       # UI 层（Batch 5 待做）
+│   ├── screens/                       # UI 层（Batch 5 ✅）
+│   │   ├── game_screen.dart           # 游戏主界面（状态条+指令+叙事+快捷按钮）
+│   │   ├── player_panel_screen.dart   # 玩家详情面板
+│   │   ├── family_screen.dart         # 家族面板（27 家族）
+│   │   ├── map_screen.dart            # 地图（68 地点按区域分组）
+│   │   ├── systems_screen.dart        # 系统面板（74 系统）
+│   │   └── settings_screen.dart       # 设置/存档（保存/加载/导出/导入/新游戏）
 │   ├── services/                      # 服务层（Batch 3 ✅）
 │   └── utils/                         # 工具
 └── test/
     ├── batch1_smoke_test.dart         # Batch 1 冒烟测试（17 用例）
-    └── batch4_*_test.dart             # Batch 4 混入层测试（5 文件）
+    ├── batch4_*_test.dart             # Batch 4 混入层测试（5 文件）
+    └── batch5_ui_test.dart            # Batch 5 UI 测试（6 用例）
 ```
 
 ## 阶段规划
@@ -114,8 +121,17 @@ westeros_life_simulator/
 - 验证方式：GitHub Actions CI（run 36110857045，✅ success，2026-09-25，192 测试全部通过）
 - 修复历程：4 类 Analyze 错误（mixin with 子句/GamePlayMixin 跨 mixin 调用/mixin_systems import/测试判空）→ 2 类新问题（GameEngine mixin 混入顺序/测试 `?.` 多余）→ 最终 CI 通过
 
-#### Batch 5：UI 层（待做）
-- lib/screens/settings/、game/、family/、map/
+#### Batch 5：UI 层（✅ 完成，2026-09-25）
+- lib/screens/game_screen.dart（游戏主界面：顶部状态条 + 快捷指令栏 + 叙事输出区 + 指令输入框）
+- lib/screens/player_panel_screen.dart（玩家详情：身份/家族/地点/财富/属性/技能/关系/标记/背包）
+- lib/screens/family_screen.dart（家族面板：玩家家族高亮 + 27 家族可展开详情）
+- lib/screens/map_screen.dart（地图：68 地点按区域分组 + 当前所在地标记 + 地点详情弹层）
+- lib/screens/systems_screen.dart（系统面板：已接触系统列表 + 详情弹层含规则/特性）
+- lib/screens/settings_screen.dart（设置/存档：保存/加载/删除/导出/导入/新游戏，复用 SaveService）
+- lib/providers/game_state_provider.dart 新增 applyState()（加载/导入存档时整体恢复引擎状态）
+- lib/app.dart 接线：入口直接进入 GameScreen
+- 测试：test/batch5_ui_test.dart（6 用例：applyState/玩家详情/家族/地图/系统/设置）
+- 验证方式：GitHub Actions CI（run 36113576770，✅ success，2026-09-25，198 测试全部通过）
 
 ## 文档统计
 
@@ -143,4 +159,4 @@ westeros_life_simulator/
 - v2.1.0：阶段 3 Batch 2 数据层完成（2026-09-23，CI run 35845290631 ✅ success）
 - v2.2.0：阶段 3 Batch 3 状态管理 + 服务层完成（2026-09-24，CI run 36007775720 ✅ success，134 测试全部通过）
 - v2.3.0：阶段 3 Batch 4 混入层（✅ 完成，2026-09-25，CI run 36110857045 ✅ success，192 测试全部通过）
-- v2.4.0：阶段 3 Batch 5 UI 层（待做）
+- v2.4.0：阶段 3 Batch 5 UI 层（✅ 完成，2026-09-25，CI run 36113576770 ✅ success，198 测试全部通过）
