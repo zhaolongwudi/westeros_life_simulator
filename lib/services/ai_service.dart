@@ -155,11 +155,17 @@ class AiService {
     final inventoryDesc = player.inventory.isEmpty
         ? '（空）'
         : player.inventory.join('、');
+    final titleDesc = player.title.isEmpty ? '（无）' : player.title;
+    final equipmentDesc = player.flags.entries
+        .where((e) => e.key.startsWith('equipped.') && e.value)
+        .map((e) => e.key.substring(9))
+        .join('、');
 
     return '''
 当前玩家状态：
 - 姓名：${player.name}
 - 身份：${player.identity.name}
+- 头衔：$titleDesc
 - 家族：${player.familyId}
 - 年龄：${player.age}
 - 地点：${player.locationId}
@@ -170,6 +176,7 @@ class AiService {
 - 属性：${player.attributes}
 - 关系（NPC: 好感度）：${relationDesc.isEmpty ? '（无）' : relationDesc}
 - 背包：$inventoryDesc
+- 已装备：${equipmentDesc.isEmpty ? '（无）' : equipmentDesc}
 - 状态：${flagDesc.isEmpty ? '（无特殊状态）' : flagDesc}
 
 当前情境：
