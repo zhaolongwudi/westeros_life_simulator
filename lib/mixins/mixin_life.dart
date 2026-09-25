@@ -397,48 +397,82 @@ mixin GameLifeMixin on GameProviderBase {
     // 按身份分级设定头衔（声望门槛）
     switch (p.identity) {
       case PlayerIdentity.noble:
-        if (rep >= 80) target = '大领主';
-        if (rep >= 60) target = '伯爵';
-        if (rep >= 40) target = '爵士';
+        if (rep >= 80) {
+          target = '大领主';
+        } else if (rep >= 60) {
+          target = '伯爵';
+        } else if (rep >= 40) {
+          target = '爵士';
+        }
         break;
       case PlayerIdentity.soldier:
-        if (rep >= 70) target = '统帅';
-        if (rep >= 50) target = '骑士';
-        if (rep >= 30) target = '军士';
+        if (rep >= 70) {
+          target = '统帅';
+        } else if (rep >= 50) {
+          target = '骑士';
+        } else if (rep >= 30) {
+          target = '军士';
+        }
         break;
       case PlayerIdentity.merchant:
-        if (rep >= 70) target = '商会会长';
-        if (rep >= 50) target = '富商';
-        if (rep >= 30) target = '兴业商人';
+        if (rep >= 70) {
+          target = '商会会长';
+        } else if (rep >= 50) {
+          target = '富商';
+        } else if (rep >= 30) {
+          target = '兴业商人';
+        }
         break;
       case PlayerIdentity.priest:
-        if (rep >= 70) target = '大主教';
-        if (rep >= 50) target = '主教';
-        if (rep >= 30) target = '司祭';
+        if (rep >= 70) {
+          target = '大主教';
+        } else if (rep >= 50) {
+          target = '主教';
+        } else if (rep >= 30) {
+          target = '司祭';
+        }
         break;
       case PlayerIdentity.scholar:
       case PlayerIdentity.maester:
-        if (rep >= 70) target = '大学士';
-        if (rep >= 50) target = '资深学者';
-        if (rep >= 30) target = '讲席学者';
+        if (rep >= 70) {
+          target = '大学士';
+        } else if (rep >= 50) {
+          target = '资深学者';
+        } else if (rep >= 30) {
+          target = '讲席学者';
+        }
         break;
       case PlayerIdentity.adventurer:
-        if (rep >= 70) target = '传奇冒险家';
-        if (rep >= 50) target = '知名冒险家';
-        if (rep >= 30) target = '资深冒险家';
+        if (rep >= 70) {
+          target = '传奇冒险家';
+        } else if (rep >= 50) {
+          target = '知名冒险家';
+        } else if (rep >= 30) {
+          target = '资深冒险家';
+        }
         break;
       case PlayerIdentity.assassin:
-        if (rep >= 70) target = '无面者';
-        if (rep >= 50) target = '血影';
-        if (rep >= 30) target = '暗行者';
+        if (rep >= 70) {
+          target = '无面者';
+        } else if (rep >= 50) {
+          target = '血影';
+        } else if (rep >= 30) {
+          target = '暗行者';
+        }
         break;
       case PlayerIdentity.wildling:
-        if (rep >= 70) target = '自由民之王';
-        if (rep >= 50) target = '战首';
-        if (rep >= 30) target = '猎手';
+        if (rep >= 70) {
+          target = '自由民之王';
+        } else if (rep >= 50) {
+          target = '战首';
+        } else if (rep >= 30) {
+          target = '猎手';
+        }
         break;
       case PlayerIdentity.commoner:
-        if (rep >= 60) target = '乡绅';
+        if (rep >= 60) {
+          target = '乡绅';
+        }
         break;
     }
 
