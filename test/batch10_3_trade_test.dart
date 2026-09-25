@@ -8,10 +8,8 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:westeros_life_simulator/data/item_data.dart';
 import 'package:westeros_life_simulator/game_engine.dart';
 import 'package:westeros_life_simulator/models/location.dart';
-import 'package:westeros_life_simulator/models/player.dart';
 
 void main() {
   group('Batch 10-3 定价', () {
