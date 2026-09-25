@@ -11,6 +11,7 @@ import '../models/event.dart';
 import '../services/ai_config.dart';
 import '../services/ai_service.dart';
 import '../utils/labels.dart';
+import '../utils/narrative_format.dart';
 import 'events_screen.dart';
 import 'family_screen.dart';
 import 'letters_screen.dart';
@@ -421,23 +422,23 @@ class _NarrativeView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('下一步', style: theme.textTheme.titleSmall),
-                const SizedBox(height: 4),
-                for (final choice in aiChoices)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Card(
-                      color: theme.colorScheme.secondaryContainer,
-                      child: ListTile(
-                        dense: true,
-                        title: Text(choice.text),
-                        subtitle: choice.narrative.isEmpty
-                            ? null
-                            : Text(choice.narrative,
-                                maxLines: 2, overflow: TextOverflow.ellipsis),
-                        onTap: () => onChooseAi(choice),
-                      ),
+                Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.alt_route,
+                      size: 16,
+                      color: theme.colorScheme.primary,
                     ),
+                    const SizedBox(width: 6),
+                    Text('选择你的下一步', style: theme.textTheme.titleSmall),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                for (var i = 0; i < aiChoices.length; i++)
+                  _AiChoiceCard(
+                    ordinal: choiceOrdinal(i),
+                    choice: aiChoices[i],
+                    onTap: () => onChooseAi(aiChoices[i]),
                   ),
               ],
             ),
@@ -482,29 +483,147 @@ class _NarrativeView extends StatelessWidget {
 
         final line = lines[index];
         final isCommand = line.startsWith('> ');
+        // 叙事行：分段渲染（长叙事拆为短段落，逐段展示）
+        final segments = isCommand ? <String>[line] : splitNarrative(line);
         return Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Align(
             alignment: isCommand ? Alignment.centerRight : Alignment.centerLeft,
             child: Container(
+              constraints: BoxConstraints(
+                maxWidth: isCommand ? 260 : 640,
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: isCommand
-                    ? Theme.of(context).colorScheme.primaryContainer
-                    : Theme.of(context).colorScheme.surfaceContainerHigh,
+                    ? theme.colorScheme.primaryContainer
+                    : theme.colorScheme.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(
-                line,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontFamily: isCommand ? null : 'monospace',
-                      height: 1.4,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  for (var i = 0; i < segments.length; i++)
+                    Padding(
+                      padding: EdgeInsets.only(top: i == 0 ? 0 : 4),
+                      child: Text(
+                        segments[i],
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontFamily: isCommand ? null : 'monospace',
+                          height: 1.45,
+                        ),
+                      ),
                     ),
+                ],
               ),
             ),
           ),
         );
       },
+    );
+  }
+}
+
+/// AI 选项卡片：编号 + 效果预览。
+class _AiChoiceCard extends StatelessWidget {
+  const _AiChoiceCard({
+    required this.ordinal,
+    required this.choice,
+    required this.onTap,
+  });
+
+  final String ordinal;
+  final EventChoice choice;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final labels = effectLabels(choice.effects);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Card(
+        color: theme.colorScheme.secondaryContainer.withAlpha(160),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: theme.colorScheme.secondary.withAlpha(90),
+          ),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                // 编号徽章
+                Container(
+                  width: 28,
+                  height: 28,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    ordinal,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        choice.text,
+                        style: theme.textTheme.titleSmall,
+                      ),
+                      if (choice.narrative.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          choice.narrative,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: <Widget>[
+                          for (final label in labels)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surfaceContainerHigh,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                label,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
