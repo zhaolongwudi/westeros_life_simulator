@@ -6,8 +6,8 @@
 /// - 健康：0 死亡；受伤/疾病/危险事件会降低
 /// - 物品：背包增删、使用消耗品（health/energy/hunger 效果）
 library;
-
 import '../data/item_data.dart';
+import '../models/location.dart';
 import '../providers/game_provider_base.dart';
 
 /// 生存状态混入。挂在 [GameProviderBase] 上。
@@ -134,6 +134,160 @@ mixin GameLifeMixin on GameProviderBase {
       final cat = item == null ? '' : '（${itemCategoryLabel(item.category)}）';
       final value = item == null ? '' : '，价值 ${item.value}';
       buf.writeln('· $name$cat ×${entry.value}$value');
+    }
+    return buf.toString().trim();
+  }
+
+  // ==================== 贸易系统（Batch 10-3） ====================
+
+  /// 购买价格：物品价值 × 地点系数。
+  ///
+  /// 城市/集市商品丰富价格平稳；要塞/荒野补给稀缺溢价。
+  int buyPriceOf(String itemId) {
+    final item = itemById(itemId);
+    if (item == null) return 0;
+    final loc = currentLocation;
+    double factor = 1.0;
+    if (loc != null) {
+      switch (loc.type) {
+        case LocationType.city:
+        case LocationType.market:
+          factor = 1.1; // 大市场略贵但有货
+        case LocationType.castle:
+        case LocationType.fort:
+          factor = 1.25; // 城堡补给稀缺
+        case LocationType.village:
+          factor = 0.9; // 乡村便宜但品类少
+        case LocationType.wilderness:
+        case LocationType.supernatural:
+        case LocationType.unknown:
+          factor = 1.6; // 荒野无处购买，只能高价求购
+        case LocationType.temple:
+        case LocationType.academy:
+        case LocationType.tavern:
+          factor = 1.2;
+      }
+    }
+    return (item.value * factor).round();
+  }
+
+  /// 出售价格：物品价值 × 出售折扣 × 地点系数。
+  ///
+  /// 珍宝/圣物/武器在城市的收购价更高，乡村/荒野贱卖。
+  int sellPriceOf(String itemId) {
+    final item = itemById(itemId);
+    if (item == null) return 0;
+    final loc = currentLocation;
+    double factor = 0.5; // 基础五折
+    if (loc != null) {
+      switch (loc.type) {
+        case LocationType.city:
+        case LocationType.market:
+          factor = 0.7; // 大城市收购价高
+        case LocationType.castle:
+        case LocationType.fort:
+          factor = 0.55;
+        case LocationType.village:
+          factor = 0.4; // 乡下贱卖
+        case LocationType.wilderness:
+        case LocationType.supernatural:
+        case LocationType.unknown:
+          factor = 0.3; // 荒野只能以物易物
+        case LocationType.temple:
+        case LocationType.academy:
+        case LocationType.tavern:
+          factor = 0.5;
+      }
+    }
+    // 珍宝/圣物在大城市有额外加成
+    if (loc != null &&
+        (loc.type == LocationType.city || loc.type == LocationType.market)) {
+      if (item.category == ItemCategory.treasure ||
+          item.category == ItemCategory.relic) {
+        factor += 0.1;
+      }
+    }
+    return (item.value * factor).round();
+  }
+
+  /// 购买物品：从背包扣金币、入背包。
+  ///
+  /// 返回叙事文本；金币不足/地点不合适/未知物品返回说明。
+  String buyItem(String itemId, [int quantity = 1]) {
+    if (quantity < 1) quantity = 1;
+    final item = itemById(itemId);
+    if (item == null) {
+      return '没有「$itemId」这种东西可买。';
+    }
+    final loc = currentLocation;
+    if (loc == null ||
+        (loc.type != LocationType.city &&
+            loc.type != LocationType.market &&
+            loc.type != LocationType.castle &&
+            loc.type != LocationType.village &&
+            loc.type != LocationType.fort)) {
+      return '这里没有商贩。去城市、集市、城堡或村镇找找看。';
+    }
+    final price = buyPriceOf(itemId) * quantity;
+    if (player.gold < price) {
+      return '你只有 ${player.gold} 金币，买不起 ${quantity} 件「${item.name}」（需 $price 金币）。';
+    }
+    gainGold(-price);
+    for (var i = 0; i < quantity; i++) {
+      addItem(itemId);
+    }
+    return '你花 $price 金币买下 $quantity 件「${item.name}」。'
+        '${loc.type == LocationType.city || loc.type == LocationType.market ? '（市场价公道）' : ''}';
+  }
+
+  /// 出售物品：从背包移除、得金币。
+  ///
+  /// 返回叙事文本；没有该物品/地点不合适返回说明。
+  String sellItem(String itemId, [int quantity = 1]) {
+    if (quantity < 1) quantity = 1;
+    final item = itemById(itemId);
+    if (item == null) {
+      return '没有「$itemId」这种东西可卖。';
+    }
+    final have = itemCount(itemId);
+    if (have < quantity) {
+      return '你只有 $have 件「${item.name}」，卖不了 $quantity 件。';
+    }
+    final loc = currentLocation;
+    if (loc == null ||
+        (loc.type != LocationType.city &&
+            loc.type != LocationType.market &&
+            loc.type != LocationType.castle &&
+            loc.type != LocationType.village &&
+            loc.type != LocationType.fort)) {
+      return '这里没有收购的人。去城市、集市、城堡或村镇找找看。';
+    }
+    final price = sellPriceOf(itemId) * quantity;
+    for (var i = 0; i < quantity; i++) {
+      removeItem(itemId);
+    }
+    gainGold(price);
+    return '你卖出 $quantity 件「${item.name}」，得到 $price 金币。';
+  }
+
+  /// 市场行情：当前地点可买/可卖的关键物品价格。
+  String formatMarketPanel() {
+    final loc = currentLocation;
+    if (loc == null) {
+      return '你不在任何已知地点，没有市场行情。';
+    }
+    final buf = StringBuffer()..writeln('【${loc.name} · 行情】');
+    // 展示常用物品买卖价
+    final demo = <String>[
+      'item_bread', 'item_meat', 'item_wine', 'item_herb', 'item_poultice',
+      'item_sword', 'item_bow', 'item_leather_armor', 'item_chainmail',
+      'item_steel', 'item_dragonbone', 'item_gold_chain', 'item_ruby',
+      'item_heart_tree_leaf', 'item_horse',
+    ];
+    for (final id in demo) {
+      final item = itemById(id);
+      if (item == null) continue;
+      buf.writeln('· ${item.name}：买 ${buyPriceOf(id)} / 卖 ${sellPriceOf(id)}');
     }
     return buf.toString().trim();
   }

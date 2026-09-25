@@ -2,9 +2,8 @@
 ///
 /// 支持：状态/系统/信/旅行/训练/工作/狩猎/贸易/休息/探索/过月/帮助。
 library;
-
 import 'dart:math';
-
+import '../data/item_data.dart';
 import '../providers/game_provider_base.dart';
 import 'mixin_adventure.dart';
 import 'mixin_letter.dart';
@@ -93,6 +92,18 @@ mixin GameCommandsMixin
         return CommandResult(text: hunt());
       case '贸易' || 'trade':
         return CommandResult(text: trade());
+      case '购买' || '买入' || 'buy':
+        if (args.isEmpty) {
+          return const CommandResult(text: '买什么？如「购买 黑面包」或「买入 item_meat」。输入「行情」看价格。');
+        }
+        return CommandResult(text: _buyFromArgs(args));
+      case '出售' || '卖出' || 'sell':
+        if (args.isEmpty) {
+          return const CommandResult(text: '卖什么？如「出售 烤肉」或「卖出 item_wine」。');
+        }
+        return CommandResult(text: _sellFromArgs(args));
+      case '行情' || 'market' || '价格':
+        return CommandResult(text: formatMarketPanel());
       case '休息' || 'rest':
         return CommandResult(text: rest());
       case '过月' || 'advance':
@@ -103,6 +114,36 @@ mixin GameCommandsMixin
       default:
         return CommandResult(text: _unknownHelp(exact));
     }
+  }
+
+  /// 解析「购买 <物品> <数量>」参数并执行。
+  String _buyFromArgs(String args) {
+    final parts = args.split(RegExp(r'\s+'));
+    final namePart = parts.first;
+    var quantity = 1;
+    if (parts.length > 1) {
+      quantity = int.tryParse(parts[1]) ?? 1;
+    }
+    final itemId = _normalizeItem(namePart);
+    if (!kItems.containsKey(itemId)) {
+      return '这里买不到「$namePart」。输入「行情」看看有什么可买。';
+    }
+    return buyItem(itemId, quantity);
+  }
+
+  /// 解析「出售 <物品> <数量>」参数并执行。
+  String _sellFromArgs(String args) {
+    final parts = args.split(RegExp(r'\s+'));
+    final namePart = parts.first;
+    var quantity = 1;
+    if (parts.length > 1) {
+      quantity = int.tryParse(parts[1]) ?? 1;
+    }
+    final itemId = _normalizeItem(namePart);
+    if (!kItems.containsKey(itemId)) {
+      return '你没有「$namePart」这种东西。';
+    }
+    return sellItem(itemId, quantity);
   }
 
   /// 物品别名归一化（支持中文名/ID）。
@@ -186,6 +227,9 @@ mixin GameCommandsMixin
 工作 / work         赚取金币（消耗精力）
 狩猎 / hunt         野外狩猎（消耗精力）
 贸易 / trade        城市贸易（消耗精力）
+购买 / buy [物品]    购买物品（如 购买 黑面包 或 买入 长剑）
+出售 / sell [物品]   出售物品（如 出售 烤肉 或 卖出 item_wine）
+行情 / market       查看当前地点物价
 休息 / rest         恢复精力/饱食（花 2 金币）
 过月 / advance      推进一个月
 帮助 / help         显示本帮助
