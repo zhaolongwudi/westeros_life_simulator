@@ -7,6 +7,9 @@ library;
 import 'package:flutter/material.dart';
 
 import '../game_engine.dart';
+import '../models/event.dart';
+import '../services/ai_config.dart';
+import '../services/ai_service.dart';
 import 'events_screen.dart';
 import 'family_screen.dart';
 import 'letters_screen.dart';
@@ -41,6 +44,15 @@ class _GameScreenState extends State<GameScreen> {
 
   /// 叙事输出行（最新在底部）。
   final List<String> _lines = <String>[];
+
+  /// 是否 AI 行动模式（true 时输入框提交给 AiService 生成叙事/选项）。
+  bool _aiMode = false;
+
+  /// 当前 AI 生成中的选项（供用户点选）。
+  List<EventChoice> _aiChoices = <EventChoice>[];
+
+  /// AI 是否正在请求中。
+  bool _aiLoading = false;
 
   /// 快捷指令（参考 mixin_commands 帮助）。
   static const List<_QuickCommand> _quickCommands = <_QuickCommand>[
@@ -94,15 +106,80 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  /// 提交并执行指令。
+  /// 提交并执行指令（普通模式）或 AI 行动（AI 模式）。
   void _submitCommand(String raw) {
     final input = raw.trim();
     if (input.isEmpty) return;
     _inputController.clear();
 
+    if (_aiMode) {
+      _runAiAction(input);
+      return;
+    }
+
     final result = _engine.resolveCommand(input);
     _appendLine('> $input');
     _appendLine(result.text);
+  }
+
+  /// 执行一次 AI 行动：调用 AiService 生成叙事与选项。
+  Future<void> _runAiAction(String action) async {
+    if (_aiLoading) return;
+    final config = await AiConfig.load();
+    if (!config.isConfigured) {
+      _appendLine('⚠️ 尚未配置 AI API Key。请到「设置 / 存档」→ AI 配置 填写。');
+      return;
+    }
+
+    setState(() {
+      _aiLoading = true;
+      _aiChoices = <EventChoice>[];
+    });
+    _appendLine('✨ 行动：$action');
+    _appendLine('（AI 思考中…）');
+
+    final service = AiService(
+      apiKey: config.apiKey,
+      model: config.model,
+      baseUrl: config.baseUrl,
+    );
+    final context = _engine.worldSnapshot() +
+        '\n\n玩家行动：$action\n\n请根据当前世界状态生成叙事与选项。';
+
+    final response = await service.generateNarrative(
+      player: _engine.player,
+      context: context,
+      availableEvents: _engine.eventTemplates,
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _aiLoading = false;
+    });
+    // 移除占位行
+    _lines.removeWhere((l) => l == '（AI 思考中…）');
+    if (response.isSuccess && response.narrative.isNotEmpty) {
+      _appendLine(response.narrative);
+      if (response.choices.isNotEmpty) {
+        setState(() {
+          _aiChoices = response.choices;
+        });
+        _appendLine('（选择你的下一步）');
+      }
+    } else {
+      _appendLine('⚠️ AI 生成失败：${response.errorMessage ?? '未知错误'}');
+    }
+  }
+
+  /// 应用 AI 生成的选项效果（简化：只展示叙事，不推进时间）。
+  void _chooseAiOption(EventChoice choice) {
+    setState(() {
+      _aiChoices = <EventChoice>[];
+    });
+    _appendLine('➡️ ${choice.text}');
+    if (choice.narrative.isNotEmpty) {
+      _appendLine(choice.narrative);
+    }
   }
 
   /// 打开子界面。
@@ -150,6 +227,15 @@ class _GameScreenState extends State<GameScreen> {
               commands: _quickCommands,
               onTap: _submitCommand,
             ),
+            // AI 模式开关
+            _AiModeToggle(
+              aiMode: _aiMode,
+              aiLoading: _aiLoading,
+              onToggle: (v) => setState(() {
+                _aiMode = v;
+                _aiChoices = <EventChoice>[];
+              }),
+            ),
             // 叙事输出区
             Expanded(
               child: _NarrativeView(
@@ -157,12 +243,17 @@ class _GameScreenState extends State<GameScreen> {
                 scrollController: _scrollController,
                 engine: _engine,
                 onOpenPanel: _openScreen,
+                aiChoices: _aiChoices,
+                onChooseAi: _chooseAiOption,
               ),
             ),
             // 指令输入区
             _CommandInputBar(
               controller: _inputController,
               onSubmitted: _submitCommand,
+              hintText: _aiMode
+                  ? 'AI 模式：描述你的行动…'
+                  : '输入指令（如 工作 / 训练 sword / 过月）',
             ),
           ],
         ),
@@ -248,6 +339,54 @@ class _QuickCommandBar extends StatelessWidget {
   }
 }
 
+/// AI 模式开关条。
+class _AiModeToggle extends StatelessWidget {
+  const _AiModeToggle({
+    required this.aiMode,
+    required this.aiLoading,
+    required this.onToggle,
+  });
+
+  final bool aiMode;
+  final bool aiLoading;
+  final ValueChanged<bool> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      color: aiMode
+          ? theme.colorScheme.primaryContainer.withAlpha(120)
+          : null,
+      child: Row(
+        children: <Widget>[
+          Icon(
+            Icons.auto_awesome,
+            size: 16,
+            color: aiMode ? theme.colorScheme.primary : theme.colorScheme.outline,
+          ),
+          const SizedBox(width: 8),
+          const Text('AI 行动模式'),
+          const Spacer(),
+          if (aiLoading)
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            Switch(
+              value: aiMode,
+              onChanged: onToggle,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 /// 叙事输出区。
 class _NarrativeView extends StatelessWidget {
   const _NarrativeView({
@@ -255,23 +394,58 @@ class _NarrativeView extends StatelessWidget {
     required this.scrollController,
     required this.engine,
     required this.onOpenPanel,
+    required this.aiChoices,
+    required this.onChooseAi,
   });
 
   final List<String> lines;
   final ScrollController scrollController;
   final GameEngine engine;
   final ValueChanged<Widget> onOpenPanel;
+  final List<EventChoice> aiChoices;
+  final ValueChanged<EventChoice> onChooseAi;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // 末尾附加项：AI 选项卡片 + 面板快捷入口
+    final extraCount = (aiChoices.isNotEmpty ? 1 : 0) + 1;
     return ListView.builder(
       controller: scrollController,
       padding: const EdgeInsets.all(12),
-      itemCount: lines.length + 1,
+      itemCount: lines.length + extraCount,
       itemBuilder: (context, index) {
+        // 末尾：AI 选项（如有）
+        if (aiChoices.isNotEmpty && index == lines.length) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('下一步', style: theme.textTheme.titleSmall),
+                const SizedBox(height: 4),
+                for (final choice in aiChoices)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Card(
+                      color: theme.colorScheme.secondaryContainer,
+                      child: ListTile(
+                        dense: true,
+                        title: Text(choice.text),
+                        subtitle: choice.narrative.isEmpty
+                            ? null
+                            : Text(choice.narrative,
+                                maxLines: 2, overflow: TextOverflow.ellipsis),
+                        onTap: () => onChooseAi(choice),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }
         // 末尾附：面板快捷入口
-        if (index == lines.length) {
+        if (index == lines.length + (aiChoices.isNotEmpty ? 1 : 0)) {
           return Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Wrap(
@@ -365,10 +539,12 @@ class _CommandInputBar extends StatelessWidget {
   const _CommandInputBar({
     required this.controller,
     required this.onSubmitted,
+    this.hintText = '输入指令（如 工作 / 训练 sword / 过月）',
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onSubmitted;
+  final String hintText;
 
   @override
   Widget build(BuildContext context) {
@@ -380,9 +556,9 @@ class _CommandInputBar extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
-              decoration: const InputDecoration(
-                hintText: '输入指令（如 工作 / 训练 sword / 过月）',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: hintText,
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
               textInputAction: TextInputAction.send,

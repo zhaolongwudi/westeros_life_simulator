@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../game_engine.dart';
+import '../services/ai_config.dart';
 import '../services/save_service.dart';
 
 /// 设置/存档界面。
@@ -31,10 +32,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
   List<SaveMetadata> _saves = <SaveMetadata>[];
   bool _loading = false;
 
+  /// AI 配置（懒加载，仅首次进入时读取）。
+  AiConfig? _aiConfig;
+
   @override
   void initState() {
     super.initState();
     _refreshSaves();
+    _loadAiConfig();
+  }
+
+  /// 异步读取 AI 配置。
+  Future<void> _loadAiConfig() async {
+    final config = await AiConfig.load();
+    if (!mounted) return;
+    setState(() => _aiConfig = config);
   }
 
   /// 刷新存档列表。
@@ -122,6 +134,84 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await _saveService.deleteSave(saveId);
     _showSnack('已删除');
     await _refreshSaves();
+  }
+
+  /// 编辑 AI 配置。
+  Future<void> _editAiConfig() async {
+    final config = _aiConfig ?? AiConfig.defaultConfig();
+    final apiKeyController = TextEditingController(text: config.apiKey);
+    final modelController = TextEditingController(text: config.model);
+    final baseUrlController = TextEditingController(text: config.baseUrl);
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('AI 配置'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: apiKeyController,
+                decoration: const InputDecoration(
+                  labelText: 'API Key',
+                  hintText: '粘贴你的 API Key',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: modelController,
+                decoration: const InputDecoration(
+                  labelText: '模型',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: baseUrlController,
+                decoration: const InputDecoration(
+                  labelText: 'Base URL',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('保存'),
+          ),
+        ],
+      ),
+    );
+
+    if (saved == true) {
+      final newConfig = AiConfig(
+        apiKey: apiKeyController.text.trim(),
+        model: modelController.text.trim().isEmpty
+            ? AiConfig.defaultConfig().model
+            : modelController.text.trim(),
+        baseUrl: baseUrlController.text.trim().isEmpty
+            ? AiConfig.defaultConfig().baseUrl
+            : baseUrlController.text.trim(),
+      );
+      await newConfig.save();
+      if (!mounted) return;
+      setState(() => _aiConfig = newConfig);
+      _showSnack('AI 配置已保存');
+    }
+    apiKeyController.dispose();
+    modelController.dispose();
+    baseUrlController.dispose();
   }
 
   /// 新游戏（重置引擎）。
@@ -218,6 +308,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: _newGame,
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          // AI 配置卡片
+          Card(
+            child: ListTile(
+              leading: Icon(
+                Icons.auto_awesome,
+                color: (_aiConfig?.isConfigured ?? false)
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.outline,
+              ),
+              title: const Text('AI 配置'),
+              subtitle: Text(
+                (_aiConfig?.isConfigured ?? false)
+                    ? '已配置 · 模型 ${_aiConfig?.model ?? ''}'
+                    : '未配置 API Key（AI 行动模式不可用）',
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                tooltip: '编辑',
+                onPressed: _editAiConfig,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           // 存档列表
