@@ -58,14 +58,19 @@ westeros_life_simulator/
 │   │   ├── map_screen.dart             # 地图（68 地点按区域分组）
 │   │   ├── systems_screen.dart         # 系统面板（74 系统）
 │   │   └── settings_screen.dart        # 设置/存档（保存/加载/导出/导入/新游戏）
-│   ├── services/                      # 服务层（Batch 3 ✅）
+│   ├── services/                      # 服务层（Batch 3 + Batch 8 ✅）
+│   │   ├── ai_service.dart            # AiService（AI 叙事/选项生成，Dio）
+│   │   ├── ai_config.dart             # AiConfig（API Key/模型/BaseURL 持久化，Batch 8 ✅）
+│   │   ├── event_service.dart         # EventService（触发条件/效果/存档）
+│   │   └── save_service.dart          # SaveService（序列化/存档/导入导出）
 │   └── utils/                         # 工具
 └── test/
     ├── batch1_smoke_test.dart         # Batch 1 冒烟测试（17 用例）
     ├── batch4_*_test.dart             # Batch 4 混入层测试（5 文件）
     ├── batch5_ui_test.dart            # Batch 5 UI 测试（6 用例）
     ├── batch6_start_test.dart         # Batch 6 开局测试（6 用例）
-    └── batch7_events_letters_test.dart # Batch 7 事件/信件测试（7 用例）
+    ├── batch7_events_letters_test.dart # Batch 7 事件/信件测试（7 用例）
+    └── batch8_ai_ui_test.dart         # Batch 8 AI 配置测试（4 用例）
 ```
 
 ## 阶段规划
@@ -157,6 +162,13 @@ westeros_life_simulator/
 - 测试：test/batch7_events_letters_test.dart（7 用例：类型标签/事件库 45/可触发非空/面板构建/空状态/触发与冷却/来信渲染）
 - 验证方式：GitHub Actions CI（run 36119114694，✅ success，2026-09-25，211 测试全部通过）
 
+#### Batch 8：AI 行动模式（✅ 完成，2026-09-25）
+- lib/services/ai_config.dart（AiConfig：API Key/模型/BaseURL 持久化，SharedPreferences）
+- lib/screens/game_screen.dart 新增「AI 行动模式」开关（输入框提交行动描述 → AiService 生成叙事/选项卡片）
+- lib/screens/settings_screen.dart 新增 AI 配置卡片（编辑 API Key/模型/BaseURL，配置状态提示）
+- 测试：test/batch8_ai_ui_test.dart（4 用例：默认值/读写持久化/主界面开关构建/设置界面配置卡片）
+- 验证方式：GitHub Actions CI（run 36121545193，✅ success，2026-09-25，215 测试全部通过）
+
 ## 文档统计
 
 | 文档 | 行数 | 大小 |
@@ -186,3 +198,4 @@ westeros_life_simulator/
 - v2.4.0：阶段 3 Batch 5 UI 层（✅ 完成，2026-09-25，CI run 36113576770 ✅ success，198 测试全部通过）
 - v2.5.0：阶段 3 Batch 6 开局选择界面（✅ 完成，2026-09-25，CI run 36116959188 ✅ success，204 测试全部通过）
 - v2.6.0：阶段 3 Batch 7 事件面板 + 信件面板（✅ 完成，2026-09-25，CI run 36119114694 ✅ success，211 测试全部通过）
+- v2.7.0：阶段 3 Batch 8 AI 行动模式（✅ 完成，2026-09-25，CI run 36121545193 ✅ success，215 测试全部通过）
