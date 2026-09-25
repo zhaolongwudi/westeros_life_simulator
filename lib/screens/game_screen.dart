@@ -151,6 +151,7 @@ class _GameScreenState extends State<GameScreen> {
       player: _engine.player,
       context: context,
       availableEvents: _engine.eventTemplates,
+      season: _engine.progress.season,
     );
 
     if (!mounted) return;

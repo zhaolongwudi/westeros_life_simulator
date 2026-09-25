@@ -3,13 +3,14 @@
 /// 简化版：单 Key、无重试、无多 Key 轮换。
 /// 后续 Batch 可扩展为多 Key 池 + 429 退避。
 library;
-
 import 'dart:convert';
-
 import 'package:dio/dio.dart';
 
+import '../data/location_data.dart';
+import '../data/narrative_templates.dart';
 import '../models/event.dart';
 import '../models/player.dart';
+import '../utils/labels.dart';
 
 /// AI 响应结果。
 class AiResponse {
@@ -55,10 +56,11 @@ class AiService {
     required Player player,
     required String context,
     required List<GameEvent> availableEvents,
+    String season = '',
     int maxTokens = 2000,
     int maxRetries = 3,
   }) async {
-    final prompt = _buildPrompt(player, context, availableEvents);
+    final prompt = _buildPrompt(player, context, availableEvents, season);
     var attempt = 0;
 
     while (true) {
@@ -141,6 +143,7 @@ class AiService {
     Player player,
     String context,
     List<GameEvent> availableEvents,
+    String season,
   ) {
     final eventsDesc = availableEvents
         .map((e) => '- ${e.name}: ${e.description}')
@@ -160,15 +163,25 @@ class AiService {
         .where((e) => e.key.startsWith('equipped.') && e.value)
         .map((e) => e.key.substring(9))
         .join('、');
-
+    // Batch 10-9：差异化叙事引导（身份 / 区域 / 季节）
+    final idGuide = identityNarrativeGuide(player.identity);
+    String region = '';
+    for (final l in allLocations) {
+      if (l.id == player.locationId) {
+        region = l.region;
+        break;
+      }
+    }
+    final regionGuide = regionNarrativeGuide(region);
+    final seasonGuide = seasonNarrativeGuide(season);
     return '''
 当前玩家状态：
 - 姓名：${player.name}
-- 身份：${player.identity.name}
+- 身份：${identityLabel(player.identity)}
 - 头衔：$titleDesc
 - 家族：${player.familyId}
 - 年龄：${player.age}
-- 地点：${player.locationId}
+- 地点：${player.locationId}（${region.isEmpty ? '未知区域' : region}）
 - 金币：${player.gold}
 - 声望：${player.reputation}
 - 生命/精力/饱食：${player.health}/${player.energy}/${player.hunger}
@@ -178,13 +191,16 @@ class AiService {
 - 背包：$inventoryDesc
 - 已装备：${equipmentDesc.isEmpty ? '（无）' : equipmentDesc}
 - 状态：${flagDesc.isEmpty ? '（无特殊状态）' : flagDesc}
-
 当前情境：
 ${context}
-
 可用事件：
 ${eventsDesc}
-
+叙事引导（身份）：
+$idGuide
+叙事引导（区域）：
+$regionGuide
+叙事引导（季节）：
+$seasonGuide
 请生成一段叙事文本（200-500 字），描述当前情境，并提供 2-4 个选项。
 每个选项包含：文本、效果（JSON 格式）、叙事。
 效果键约定：
