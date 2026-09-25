@@ -86,6 +86,11 @@ void main() {
     });
 
     testWidgets('开局界面可构建', (tester) async {
+      // 调大测试视口，确保 ListView 全部内容一次性构建
+      tester.view.physicalSize = const Size(1080, 4000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
       await tester.pumpWidget(
         const MaterialApp(home: StartScreen()),
       );
