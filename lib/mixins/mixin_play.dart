@@ -121,9 +121,10 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin {
 
     final skill = max(skillLevel('archery'), skillLevel('sword'));
     final danger = loc.dangerLevel;
-    // 成功率：技能与危险度对抗（疲惫打折）
+    // 成功率：技能/战斗值与危险度对抗（疲惫打折；装备加成）
+    final power = combatPower();
     final successChance =
-        (0.5 + skill * 0.05 - danger * 0.03).clamp(0.1, 0.95) *
+        (0.5 + skill * 0.05 + power * 0.02 - danger * 0.03).clamp(0.1, 0.95) *
             energySuccessMultiplier();
 
     if (rnd.nextDouble() < successChance) {
@@ -174,6 +175,8 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin {
     if (!isGameActive || isGameOver) return '游戏尚未开始。';
     final monthText = applyMonthlySystems(seed: progress.turnCount);
     final lifeText = applyMonthlyLife(seed: progress.turnCount);
+    // 头衔晋升检查（声望积累后自动晋升）
+    final titlePromotion = checkTitlePromotion();
     advanceTime();
     final buf = StringBuffer()
       ..writeln('⏳ 时间推进到 ${progress.year}年${progress.month}月（${progress.season}）');
@@ -182,6 +185,9 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin {
     }
     if (lifeText.isNotEmpty) {
       buf.writeln(lifeText);
+    }
+    if (titlePromotion.isNotEmpty) {
+      buf.writeln('🏆 你获得新头衔：$titlePromotion！');
     }
     final loc = currentLocation;
     if (loc != null) {

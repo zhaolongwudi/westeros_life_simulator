@@ -8,6 +8,7 @@
 library;
 import '../data/item_data.dart';
 import '../models/location.dart';
+import '../models/player.dart';
 import '../providers/game_provider_base.dart';
 
 /// 生存状态混入。挂在 [GameProviderBase] 上。
@@ -288,6 +289,189 @@ mixin GameLifeMixin on GameProviderBase {
       final item = itemById(id);
       if (item == null) continue;
       buf.writeln('· ${item.name}：买 ${buyPriceOf(id)} / 卖 ${sellPriceOf(id)}');
+    }
+    return buf.toString().trim();
+  }
+
+  // ==================== 装备系统（Batch 10-4） ====================
+
+  /// 已装备的物品 ID 列表（武器优先，从 flags.equipped.<itemId> 推导）。
+  List<String> get equippedItems {
+    final result = <String>[];
+    for (final id in kItems.keys) {
+      if (flagOf('equipped.$id')) {
+        result.add(id);
+      }
+    }
+    return result;
+  }
+
+  /// 装备一件物品（仅武器/护甲/坐骑可装备）。
+  ///
+  /// 返回叙事文本；不可装备/未持有/已装备返回说明。
+  String equip(String itemId) {
+    final item = itemById(itemId);
+    if (item == null) return '没有「$itemId」这种东西。';
+    if (item.category != ItemCategory.weapon &&
+        item.category != ItemCategory.armor &&
+        item.category != ItemCategory.mount) {
+      return '「${item.name}」不能装备。只有武器、护甲或坐骑可以。';
+    }
+    if (itemCount(itemId) <= 0) {
+      return '你没有「${item.name}」。';
+    }
+    if (flagOf('equipped.$itemId')) {
+      return '你已经装备了「${item.name}」。';
+    }
+    // 同槽位替换：卸下同分类已装备
+    for (final eid in equippedItems) {
+      final eItem = itemById(eid);
+      if (eItem != null && eItem.category == item.category) {
+        setFlag('equipped.$eid', false);
+      }
+    }
+    setFlag('equipped.$itemId', true);
+    return '你装备了「${item.name}」。${item.category == ItemCategory.mount ? '它能驮着你走更远的路。' : ''}';
+  }
+
+  /// 卸下装备。
+  String unequip(String itemId) {
+    if (!flagOf('equipped.$itemId')) {
+      return '你并没有装备「${itemName(itemId)}」。';
+    }
+    setFlag('equipped.$itemId', false);
+    return '你卸下了「${itemName(itemId)}」。';
+  }
+
+  /// 战斗值：技能 + 装备 + 属性综合。
+  ///
+  /// 用于战斗/狩猎判定，数值越高越有利。
+  int combatPower() {
+    var power = skillLevel('sword') * 2 + skillLevel('archery');
+    power += (player.attributes['strength'] ?? 0) ~/ 2;
+    // 装备加成：武器/护甲按价值折算
+    for (final id in equippedItems) {
+      final item = itemById(id);
+      if (item == null) continue;
+      switch (item.category) {
+        case ItemCategory.weapon:
+          power += item.value ~/ 20; // 瓦雷利亚匕首 500/20=25
+        case ItemCategory.armor:
+          power += item.value ~/ 30; // 板甲 220/30≈7
+        case ItemCategory.mount:
+          power += 2;
+        default:
+          break;
+      }
+    }
+    return power;
+  }
+
+  /// 已装备面板文本。
+  String formatEquipmentPanel() {
+    if (equippedItems.isEmpty) return '【装备】\n你两手空空，没有装备任何武器或护甲。';
+    final buf = StringBuffer()..writeln('【装备】');
+    for (final id in equippedItems) {
+      final item = itemById(id);
+      if (item != null) {
+        buf.writeln('· ${item.name}（${itemCategoryLabel(item.category)}）');
+      }
+    }
+    buf.writeln('· 战斗值：${combatPower()}');
+    return buf.toString().trim();
+  }
+
+  // ==================== 头衔系统（Batch 10-4） ====================
+
+  /// 头衔晋升检查：按声望/身份自动晋升。
+  ///
+  /// 每次调用返回是否晋升；晋升后写入 player.title。
+  /// 由月度结算与关键事件触发。
+  String checkTitlePromotion() {
+    final p = player;
+    if (!(p.flags['isAlive'] ?? true)) return '';
+    final rep = p.reputation;
+    final current = p.title;
+    String target = current;
+
+    // 按身份分级设定头衔（声望门槛）
+    switch (p.identity) {
+      case PlayerIdentity.noble:
+        if (rep >= 80) target = '大领主';
+        if (rep >= 60) target = '伯爵';
+        if (rep >= 40) target = '爵士';
+        break;
+      case PlayerIdentity.soldier:
+        if (rep >= 70) target = '统帅';
+        if (rep >= 50) target = '骑士';
+        if (rep >= 30) target = '军士';
+        break;
+      case PlayerIdentity.merchant:
+        if (rep >= 70) target = '商会会长';
+        if (rep >= 50) target = '富商';
+        if (rep >= 30) target = '兴业商人';
+        break;
+      case PlayerIdentity.priest:
+        if (rep >= 70) target = '大主教';
+        if (rep >= 50) target = '主教';
+        if (rep >= 30) target = '司祭';
+        break;
+      case PlayerIdentity.scholar:
+      case PlayerIdentity.maester:
+        if (rep >= 70) target = '大学士';
+        if (rep >= 50) target = '资深学者';
+        if (rep >= 30) target = '讲席学者';
+        break;
+      case PlayerIdentity.adventurer:
+        if (rep >= 70) target = '传奇冒险家';
+        if (rep >= 50) target = '知名冒险家';
+        if (rep >= 30) target = '资深冒险家';
+        break;
+      case PlayerIdentity.assassin:
+        if (rep >= 70) target = '无面者';
+        if (rep >= 50) target = '血影';
+        if (rep >= 30) target = '暗行者';
+        break;
+      case PlayerIdentity.wildling:
+        if (rep >= 70) target = '自由民之王';
+        if (rep >= 50) target = '战首';
+        if (rep >= 30) target = '猎手';
+        break;
+      case PlayerIdentity.commoner:
+        if (rep >= 60) target = '乡绅';
+        break;
+    }
+
+    if (target != current && target.isNotEmpty) {
+      updatePlayer(player.copyWith(title: target));
+      return target;
+    }
+    return '';
+  }
+
+  /// 头衔面板：当前头衔 + 晋升进度。
+  String formatTitlePanel() {
+    final p = player;
+    final buf = StringBuffer()
+      ..writeln('【头衔】')
+      ..writeln('· 当前：${p.title.isEmpty ? '无名之辈' : p.title}');
+    // 查询下一级门槛
+    final thresholds = switch (p.identity) {
+      PlayerIdentity.noble => const <int>[40, 60, 80],
+      PlayerIdentity.soldier => const <int>[30, 50, 70],
+      PlayerIdentity.merchant => const <int>[30, 50, 70],
+      PlayerIdentity.priest => const <int>[30, 50, 70],
+      PlayerIdentity.scholar || PlayerIdentity.maester => const <int>[30, 50, 70],
+      PlayerIdentity.adventurer => const <int>[30, 50, 70],
+      PlayerIdentity.assassin => const <int>[30, 50, 70],
+      PlayerIdentity.wildling => const <int>[30, 50, 70],
+      PlayerIdentity.commoner => const <int>[60],
+    };
+    final next = thresholds.where((t) => t > p.reputation).toList();
+    if (next.isNotEmpty) {
+      buf.writeln('· 距下次晋升还差 ${next.first - p.reputation} 点声望（${next.first}）。');
+    } else {
+      buf.writeln('· 声望已达 ${p.identity.name} 的巅峰。');
     }
     return buf.toString().trim();
   }

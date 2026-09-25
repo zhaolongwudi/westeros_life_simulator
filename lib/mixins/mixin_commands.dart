@@ -104,6 +104,20 @@ mixin GameCommandsMixin
         return CommandResult(text: _sellFromArgs(args));
       case '行情' || 'market' || '价格':
         return CommandResult(text: formatMarketPanel());
+      case '装备' || 'equip':
+        if (args.isEmpty) {
+          return const CommandResult(text: '装备什么？如「装备 长剑」或「装备 锁子甲」。');
+        }
+        return CommandResult(text: equip(_normalizeItem(args)));
+      case '卸下' || 'unequip':
+        if (args.isEmpty) {
+          return const CommandResult(text: '卸下什么？如「卸下 长剑」。');
+        }
+        return CommandResult(text: unequip(_normalizeItem(args)));
+      case '装备栏' || '装备面板' || 'equipment':
+        return CommandResult(text: formatEquipmentPanel());
+      case '头衔' || 'title':
+        return CommandResult(text: formatTitlePanel());
       case '休息' || 'rest':
         return CommandResult(text: rest());
       case '过月' || 'advance':
@@ -230,6 +244,10 @@ mixin GameCommandsMixin
 购买 / buy [物品]    购买物品（如 购买 黑面包 或 买入 长剑）
 出售 / sell [物品]   出售物品（如 出售 烤肉 或 卖出 item_wine）
 行情 / market       查看当前地点物价
+装备 / equip [物品]  装备武器/护甲/坐骑（如 装备 长剑）
+卸下 / unequip [物品] 卸下装备
+装备栏 / equipment   查看当前装备与战斗值
+头衔 / title       查看头衔与晋升进度
 休息 / rest         恢复精力/饱食（花 2 金币）
 过月 / advance      推进一个月
 帮助 / help         显示本帮助
