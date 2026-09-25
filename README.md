@@ -48,9 +48,11 @@ westeros_life_simulator/
 │   │   ├── mixin_systems.dart         # 74 系统挂载/月度演进
 │   │   ├── mixin_letter.dart          # 信件系统
 │   │   └── mixin_adventure.dart       # 旅行/探索/遭遇
-│   ├── screens/                       # UI 层（Batch 5 ✅）
+│   ├── screens/                       # UI 层（Batch 5+6+7 ✅）
 │   │   ├── start_screen.dart           # 开局选择界面（Batch 6 ✅）
 │   │   ├── game_screen.dart            # 游戏主界面（状态条+指令+叙事+快捷按钮）
+│   │   ├── events_screen.dart          # 事件面板（可触发/事件库 Tab，Batch 7 ✅）
+│   │   ├── letters_screen.dart         # 信件面板（来信/回信入口，Batch 7 ✅）
 │   │   ├── player_panel_screen.dart    # 玩家详情面板
 │   │   ├── family_screen.dart          # 家族面板（27 家族）
 │   │   ├── map_screen.dart             # 地图（68 地点按区域分组）
@@ -62,7 +64,8 @@ westeros_life_simulator/
     ├── batch1_smoke_test.dart         # Batch 1 冒烟测试（17 用例）
     ├── batch4_*_test.dart             # Batch 4 混入层测试（5 文件）
     ├── batch5_ui_test.dart            # Batch 5 UI 测试（6 用例）
-    └── batch6_start_test.dart         # Batch 6 开局测试（6 用例）
+    ├── batch6_start_test.dart         # Batch 6 开局测试（6 用例）
+    └── batch7_events_letters_test.dart # Batch 7 事件/信件测试（7 用例）
 ```
 
 ## 阶段规划
@@ -146,6 +149,14 @@ westeros_life_simulator/
 - 验证方式：GitHub Actions CI（run 36116959188，✅ success，2026-09-25，204 测试全部通过）
 - 修复历程：开局界面 widget 测试在默认视口下 ListView 懒加载导致"出生地"未构建 → 调大测试视口（tester.view.physicalSize）
 
+#### Batch 7：事件面板 + 信件面板（✅ 完成，2026-09-25）
+- lib/screens/events_screen.dart（事件面板：可触发/事件库 双 Tab，事件卡片含触发条件/选项可用性标记）
+- lib/screens/letters_screen.dart（信件面板：来信/回信列表 + 回信输入入口，复用 mixin_letter）
+- lib/providers/game_provider_base.dart 新增 eventProvider 组合字段（注入事件模板供面板浏览）
+- lib/screens/game_screen.dart 主界面 AppBar 增加事件/信件入口
+- 测试：test/batch7_events_letters_test.dart（7 用例：类型标签/事件库 45/可触发非空/面板构建/空状态/触发与冷却/来信渲染）
+- 验证方式：GitHub Actions CI（run 36119114694，✅ success，2026-09-25，211 测试全部通过）
+
 ## 文档统计
 
 | 文档 | 行数 | 大小 |
@@ -174,3 +185,4 @@ westeros_life_simulator/
 - v2.3.0：阶段 3 Batch 4 混入层（✅ 完成，2026-09-25，CI run 36110857045 ✅ success，192 测试全部通过）
 - v2.4.0：阶段 3 Batch 5 UI 层（✅ 完成，2026-09-25，CI run 36113576770 ✅ success，198 测试全部通过）
 - v2.5.0：阶段 3 Batch 6 开局选择界面（✅ 完成，2026-09-25，CI run 36116959188 ✅ success，204 测试全部通过）
+- v2.6.0：阶段 3 Batch 7 事件面板 + 信件面板（✅ 完成，2026-09-25，CI run 36119114694 ✅ success，211 测试全部通过）
