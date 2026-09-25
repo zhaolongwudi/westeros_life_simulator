@@ -21,7 +21,10 @@ class EventsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final e = engine ?? GameEngine()..startNewGame();
     final allEvents = e.eventTemplates;
-    final available = e.eventProvider.getAvailableEvents(e.player);
+    final available = e.eventProvider.getAvailableEvents(
+      e.player,
+      season: e.progress.season,
+    );
 
     return DefaultTabController(
       length: 2,

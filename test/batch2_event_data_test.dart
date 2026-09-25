@@ -7,8 +7,8 @@ import 'package:westeros_life_simulator/models/event.dart';
 
 void main() {
   group('事件数据', () {
-    test('allEvents 包含 45 个事件', () {
-      expect(allEvents.length, 45);
+    test('allEvents 包含 60 个事件', () {
+      expect(allEvents.length, 60);
     });
 
     test('所有事件 ID 唯一', () {
@@ -69,17 +69,27 @@ void main() {
 
     test('经济事件数量正确', () {
       final economic = eventsByType(EventType.economic);
-      expect(economic.length, 5);
+      expect(economic.length, 8);
     });
 
     test('魔法事件数量正确', () {
       final magical = eventsByType(EventType.magical);
-      expect(magical.length, 5);
+      expect(magical.length, 6);
     });
 
     test('日常生活事件数量正确', () {
       final daily = eventsByType(EventType.daily);
-      expect(daily.length, 5);
+      expect(daily.length, 6);
+    });
+
+    test('冒险事件数量正确', () {
+      final adventure = eventsByType(EventType.adventure);
+      expect(adventure.length, 5);
+    });
+
+    test('超自然事件数量正确', () {
+      final supernatural = eventsByType(EventType.supernatural);
+      expect(supernatural.length, 5);
     });
 
     test('所有事件选项 ID 唯一', () {

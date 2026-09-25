@@ -25,7 +25,8 @@ class EventProvider extends ChangeNotifier {
   List<String> get completedEventIds => List.unmodifiable(_completedEventIds);
 
   /// 检查事件是否可触发。
-  bool canTrigger(GameEvent event, Player player) {
+  /// [season] 可选：当前季节（如 'winter'），用于支持季节触发条件。
+  bool canTrigger(GameEvent event, Player player, {String? season}) {
     // 检查一次性事件是否已完成
     if (event.isOneTime && _completedEventIds.contains(event.id)) {
       return false;
@@ -37,6 +38,9 @@ class EventProvider extends ChangeNotifier {
       final value = entry.value;
 
       if (key == 'locationId' && player.locationId != value) {
+        return false;
+      }
+      if (key == 'season' && season != value) {
         return false;
       }
       if (key == 'familyId' && player.familyId != value) {
@@ -55,6 +59,36 @@ class EventProvider extends ChangeNotifier {
         return false;
       }
       if (key == 'minReputation' && player.reputation < int.parse(value)) {
+        return false;
+      }
+      if (key == 'minHealth' && player.health < int.parse(value)) {
+        return false;
+      }
+      if (key == 'maxHealth' && player.health > int.parse(value)) {
+        return false;
+      }
+      if (key == 'minEnergy' && player.energy < int.parse(value)) {
+        return false;
+      }
+      if (key == 'maxEnergy' && player.energy > int.parse(value)) {
+        return false;
+      }
+      if (key == 'maxHunger' && player.hunger > int.parse(value)) {
+        return false;
+      }
+      if (key == 'minHunger' && player.hunger < int.parse(value)) {
+        return false;
+      }
+      if (key.startsWith('hasItem.')) {
+        final itemId = key.substring(8);
+        final needCount = int.parse(value);
+        final haveCount = player.inventory.where((i) => i == itemId).length;
+        if (haveCount < needCount) return false;
+      }
+      if (key == 'flag' && !(player.flags[value] ?? false)) {
+        return false;
+      }
+      if (key == 'noFlag' && (player.flags[value] ?? false)) {
         return false;
       }
       if (key.startsWith('skills.')) {
@@ -77,9 +111,9 @@ class EventProvider extends ChangeNotifier {
     return true;
   }
 
-  /// 获取可触发事件列表。
-  List<GameEvent> getAvailableEvents(Player player) {
-    return _allEvents.where((e) => canTrigger(e, player)).toList();
+  /// 获取可触发事件列表。[season] 可选，用于季节触发条件。
+  List<GameEvent> getAvailableEvents(Player player, {String? season}) {
+    return _allEvents.where((e) => canTrigger(e, player, season: season)).toList();
   }
 
   /// 随机触发一个事件。
@@ -108,6 +142,17 @@ class EventProvider extends ChangeNotifier {
 
       if (key == 'gold' && player.gold < value) return false;
       if (key == 'reputation' && player.reputation < value) return false;
+      if (key == 'health' && player.health < value) return false;
+      if (key == 'energy' && player.energy < value) return false;
+      if (key == 'hunger' && player.hunger < value) return false;
+      if (key.startsWith('hasItem.')) {
+        final itemId = key.substring(8);
+        final haveCount = player.inventory.where((i) => i == itemId).length;
+        if (haveCount < value) return false;
+      }
+      if (key == 'flag' && !(player.flags[value] ?? false)) {
+        return false;
+      }
       if (key.startsWith('skills.')) {
         final skillName = key.substring(7);
         final currentLevel = player.skills[skillName] ?? 0;

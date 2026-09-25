@@ -58,6 +58,18 @@ class EventService {
           if (player.gold < int.parse(value)) return false;
         case 'minReputation':
           if (player.reputation < int.parse(value)) return false;
+        case 'minHealth':
+          if (player.health < int.parse(value)) return false;
+        case 'maxHealth':
+          if (player.health > int.parse(value)) return false;
+        case 'minEnergy':
+          if (player.energy < int.parse(value)) return false;
+        case 'maxEnergy':
+          if (player.energy > int.parse(value)) return false;
+        case 'minHunger':
+          if (player.hunger < int.parse(value)) return false;
+        case 'maxHunger':
+          if (player.hunger > int.parse(value)) return false;
         case 'isAlive':
           if (value == 'true' && !(player.flags['isAlive'] ?? false)) {
             return false;
@@ -73,6 +85,16 @@ class EventService {
             final requiredValue = int.parse(value);
             final currentValue = player.attributes[attrName] ?? 0;
             if (currentValue < requiredValue) return false;
+          } else if (key.startsWith('hasItem.')) {
+            final itemId = key.substring(8);
+            final needCount = int.parse(value);
+            final haveCount =
+                player.inventory.where((i) => i == itemId).length;
+            if (haveCount < needCount) return false;
+          } else if (key == 'flag') {
+            if (!(player.flags[value] ?? false)) return false;
+          } else if (key == 'noFlag') {
+            if (player.flags[value] ?? false) return false;
           }
       }
     }
@@ -155,6 +177,12 @@ class EventService {
           if (player.gold < value) return false;
         case 'reputation':
           if (player.reputation < value) return false;
+        case 'health':
+          if (player.health < value) return false;
+        case 'energy':
+          if (player.energy < value) return false;
+        case 'hunger':
+          if (player.hunger < value) return false;
         default:
           if (key.startsWith('skills.')) {
             final skillName = key.substring(7);
@@ -164,6 +192,12 @@ class EventService {
             final attrName = key.substring(11);
             final currentValue = player.attributes[attrName] ?? 0;
             if (currentValue < value) return false;
+          } else if (key.startsWith('hasItem.')) {
+            final itemId = key.substring(8);
+            final haveCount = player.inventory.where((i) => i == itemId).length;
+            if (haveCount < value) return false;
+          } else if (key == 'flag') {
+            if (!(player.flags[value] ?? false)) return false;
           }
       }
     }
