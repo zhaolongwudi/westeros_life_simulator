@@ -148,7 +148,7 @@ void main() {
       final engine = GameEngine()..startNewGame();
       final goldBefore = engine.player.gold;
       final result = engine.npcFavor('npc_nev');
-      expect(result, contains('示好') || contains('薄礼'));
+      expect(result, anyOf(contains('示好'), contains('薄礼')));
       expect(engine.player.gold, lessThan(goldBefore));
       expect(engine.player.relations['npc_nev'], greaterThan(0));
     });
@@ -233,7 +233,7 @@ void main() {
     test('示好指令带名字执行', () {
       final engine = GameEngine()..startNewGame();
       final result = engine.resolveCommand('示好 艾德·史塔克');
-      expect(result.text, contains('艾德') || contains('深谈'));
+      expect(result.text, anyOf(contains('艾德'), contains('深谈')));
     });
   });
 }
