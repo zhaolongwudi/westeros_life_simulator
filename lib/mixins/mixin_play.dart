@@ -67,11 +67,11 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin {
       return '你太穷了，连一顿像样的饭都吃不起。找个地方蜷缩着睡了一夜。';
     }
     gainGold(-2);
-    adjustEnergy(kRestEnergyRecovery);
+    adjustEnergy(GameLifeMixin.kRestEnergyRecovery);
     adjustHunger(10);
     // 受伤时休息恢复更快
     final healText = isInjured ? ' 伤口似乎也舒缓了一些。' : '';
-    return '你在旅店歇了一晚，吃了顿热饭，花去 2 金币。精力恢复 $kRestEnergyRecovery。$healText';
+    return '你在旅店歇了一晚，吃了顿热饭，花去 2 金币。精力恢复 ${GameLifeMixin.kRestEnergyRecovery}。$healText';
   }
 
   /// 工作：按身份/技能赚取金币（消耗精力）。
