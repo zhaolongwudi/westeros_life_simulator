@@ -165,6 +165,7 @@ class AiService {
 - 地点：${player.locationId}
 - 金币：${player.gold}
 - 声望：${player.reputation}
+- 生命/精力/饱食：${player.health}/${player.energy}/${player.hunger}
 - 技能：${player.skills}
 - 属性：${player.attributes}
 - 关系（NPC: 好感度）：${relationDesc.isEmpty ? '（无）' : relationDesc}
@@ -186,6 +187,8 @@ ${eventsDesc}
 - 属性：attributes.属性名（如 attributes.strength）
 - 关系：relations.NPC标识（正数加好感，负数降好感，如 relations.tyrion: 10）
 - 世界状态：flags.标记名（正值设置标记，如 flags.honor_pledge: 1；0 或负值清除标记）
+- 生存状态：health / energy / hunger（如 health: 10 回血，energy: -15 耗精力，hunger: 20 进食）
+- 物品：inventory.物品ID（正数获得物品，如 inventory.item_bread: 1；负数消耗/丢弃）
 
 输出格式（JSON）：
 {
@@ -193,7 +196,7 @@ ${eventsDesc}
   "choices": [
     {
       "text": "选项文本",
-      "effects": {"gold": 10, "reputation": 5, "skills.sword": 1, "relations.tyrion": 10, "flags.honor_pledge": 1},
+      "effects": {"gold": 10, "reputation": 5, "skills.sword": 1, "relations.tyrion": 10, "flags.honor_pledge": 1, "inventory.item_bread": 1},
       "narrative": "选择后的叙事"
     }
   ]

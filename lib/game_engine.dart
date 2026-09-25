@@ -12,6 +12,7 @@ import 'mixins/mixin_adventure.dart';
 import 'mixins/mixin_ai.dart';
 import 'mixins/mixin_commands.dart';
 import 'mixins/mixin_letter.dart';
+import 'mixins/mixin_life.dart';
 import 'mixins/mixin_play.dart';
 import 'mixins/mixin_systems.dart';
 import 'providers/game_provider_base.dart';
@@ -20,6 +21,7 @@ import 'providers/game_provider_base.dart';
 class GameEngine extends GameProviderBase
     with
         GameSystemsMixin,
+        GameLifeMixin,
         GamePlayMixin,
         GameLetterMixin,
         GameAdventureMixin,

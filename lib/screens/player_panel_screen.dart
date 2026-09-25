@@ -77,6 +77,26 @@ class PlayerPanelScreen extends StatelessWidget {
                   title: const Text('声望'),
                   trailing: Text('${p.reputation}', style: Theme.of(context).textTheme.titleMedium),
                 ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.favorite_outline),
+                  title: const Text('生命 / 精力 / 饱食'),
+                  trailing: Text(
+                    '${p.health} / ${p.energy} / ${p.hunger}',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                if (p.title.isNotEmpty) ...[
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.workspace_premium_outlined),
+                    title: const Text('头衔'),
+                    trailing: Text(
+                      p.title,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

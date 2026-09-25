@@ -213,6 +213,37 @@ class GameStateProvider extends ChangeNotifier {
         final newFlags = Map<String, bool>.from(newPlayer.flags);
         newFlags[flagName] = value > 0;
         newPlayer = newPlayer.copyWith(flags: newFlags);
+      } else if (key.startsWith('inventory.')) {
+        final itemId = key.substring(10);
+        final newInv = List<String>.from(newPlayer.inventory);
+        if (value > 0) {
+          // 获得物品（数量倍）
+          for (var i = 0; i < value; i++) {
+            newInv.add(itemId);
+          }
+        } else {
+          // 消耗/丢弃
+          var toRemove = -value;
+          while (toRemove > 0) {
+            final idx = newInv.indexOf(itemId);
+            if (idx < 0) break;
+            newInv.removeAt(idx);
+            toRemove--;
+          }
+        }
+        newPlayer = newPlayer.copyWith(inventory: newInv);
+      } else if (key == 'health') {
+        newPlayer = newPlayer.copyWith(
+          health: (newPlayer.health + value).clamp(0, 100),
+        );
+      } else if (key == 'energy') {
+        newPlayer = newPlayer.copyWith(
+          energy: (newPlayer.energy + value).clamp(0, 100),
+        );
+      } else if (key == 'hunger') {
+        newPlayer = newPlayer.copyWith(
+          hunger: (newPlayer.hunger + value).clamp(0, 100),
+        );
       }
     }
     return newPlayer;

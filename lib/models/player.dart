@@ -34,6 +34,10 @@ class Player {
     required this.inventory,
     required this.relations,
     required this.flags,
+    this.health = 100,
+    this.energy = 100,
+    this.hunger = 0,
+    this.title = '',
   });
 
   /// 唯一标识。
@@ -77,6 +81,18 @@ class Player {
 
   /// 状态标记（如 isAlive、isMarried 等）。
   final Map<String, bool> flags;
+
+  /// 健康值（0-100，0 死亡）。
+  final int health;
+
+  /// 精力值（0-100，进行活动消耗，休息恢复）。
+  final int energy;
+
+  /// 饱食度（0-100，越高越不饿；低于阈值会有减益）。
+  final int hunger;
+
+  /// 头衔（如 '爵士'、'守夜人总司令'，随声望/事件晋升）。
+  final String title;
 
   /// 创建默认玩家（用于测试与初始化）。
   factory Player.defaultPlayer() {
@@ -131,6 +147,10 @@ class Player {
     List<String>? inventory,
     Map<String, int>? relations,
     Map<String, bool>? flags,
+    int? health,
+    int? energy,
+    int? hunger,
+    String? title,
   }) {
     return Player(
       id: id ?? this.id,
@@ -147,6 +167,10 @@ class Player {
       inventory: inventory ?? this.inventory,
       relations: relations ?? this.relations,
       flags: flags ?? this.flags,
+      health: health ?? this.health,
+      energy: energy ?? this.energy,
+      hunger: hunger ?? this.hunger,
+      title: title ?? this.title,
     );
   }
 
@@ -167,6 +191,10 @@ class Player {
       'inventory': inventory,
       'relations': relations,
       'flags': flags,
+      'health': health,
+      'energy': energy,
+      'hunger': hunger,
+      'title': title,
     };
   }
 
@@ -187,6 +215,10 @@ class Player {
       inventory: (json['inventory'] as List).cast<String>(),
       relations: (json['relations'] as Map).cast<String, int>(),
       flags: (json['flags'] as Map).cast<String, bool>(),
+      health: json['health'] as int? ?? 100,
+      energy: json['energy'] as int? ?? 100,
+      hunger: json['hunger'] as int? ?? 0,
+      title: json['title'] as String? ?? '',
     );
   }
 

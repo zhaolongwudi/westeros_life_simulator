@@ -112,6 +112,10 @@ Player buildSetupPlayer(GameSetup setup) {
       'isMarried': false,
       'isExiled': false,
     },
+    // 开局状态：满血满精力，饱食 60（不会立刻饿死，但需要尽早觅食）
+    health: 100,
+    energy: 100,
+    hunger: 60,
   );
 }
 

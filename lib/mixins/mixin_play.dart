@@ -8,13 +8,14 @@ import 'dart:math';
 import '../models/location.dart';
 import '../models/player.dart';
 import '../providers/game_provider_base.dart';
+import 'mixin_life.dart';
 import 'mixin_systems.dart';
 
 /// 日常玩法混入。挂在 [GameProviderBase] 上。
 ///
-/// [advanceMonth] 需要调用 [GameSystemsMixin.applyMonthlySystems]，
-/// 因此 on 约束中列出 GameSystemsMixin。
-mixin GamePlayMixin on GameProviderBase, GameSystemsMixin {
+/// [advanceMonth] 需要调用 [GameSystemsMixin.applyMonthlySystems] 与
+/// [GameLifeMixin.applyMonthlyLife]，因此 on 约束中列出两者。
+mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin {
   /// 每日活动次数上限（防数值刷子，参考 docs/08 玩法限制）。
   static const Map<String, int> kDailyLimits = {
     'train': 3,
@@ -26,7 +27,7 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin {
 
   /// 训练：提升一项技能。
   ///
-  /// 返回叙事文本；每天最多 [kDailyLimits] 次，防刷。
+  /// 消耗精力（疲惫时成功率减半）；返回叙事文本；每天最多 [kDailyLimits] 次。
   String train(String skillName) {
     if (!_canDoDaily('train')) {
       return '你今天已经练得够多了。身体的每一块肌肉都在抗议——明天再来吧。';
@@ -41,8 +42,14 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin {
       return '「$skillName」已臻化境，寻常训练已无法让你更进一步。';
     }
 
+    // 精力消耗：疲惫时成功率减半
+    if (!canAffordEnergy(10)) {
+      return '你精疲力竭，连剑都举不起来。先去休息吧。';
+    }
+    adjustEnergy(-10);
+
     // 成长：10 级封顶，越接近上限成功率越低（防止无限刷）。
-    final chance = 0.8 - (current * 0.05);
+    final chance = (0.8 - (current * 0.05)) * energySuccessMultiplier();
     _recordDaily('train');
 
     if (rnd.nextDouble() < chance) {
@@ -54,20 +61,28 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin {
     return '你练了一整天「$skillName」，但收效甚微。（$current 级，下次再试）';
   }
 
-  /// 休息：恢复精力（目前以金币小额消耗 + 叙事呈现）。
+  /// 休息：恢复精力与少量健康，消耗少量金币。
   String rest() {
     if (player.gold < 2) {
       return '你太穷了，连一顿像样的饭都吃不起。找个地方蜷缩着睡了一夜。';
     }
     gainGold(-2);
-    return '你在旅店歇了一晚，吃了顿热饭，花去 2 金币。明日再战。';
+    adjustEnergy(kRestEnergyRecovery);
+    adjustHunger(10);
+    // 受伤时休息恢复更快
+    final healText = isInjured ? ' 伤口似乎也舒缓了一些。' : '';
+    return '你在旅店歇了一晚，吃了顿热饭，花去 2 金币。精力恢复 $kRestEnergyRecovery。$healText';
   }
 
-  /// 工作：按身份/技能赚取金币。
+  /// 工作：按身份/技能赚取金币（消耗精力）。
   String work() {
     if (!_canDoDaily('work')) {
       return '今天的活计已经干完了。';
     }
+    if (!canAffordEnergy(15)) {
+      return '你实在太累了，干不动活了。先去休息吧。';
+    }
+    adjustEnergy(-15);
     _recordDaily('work');
     final rnd = rng();
 
@@ -89,11 +104,15 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin {
         '技能加成 ${speechBonus + swordBonus}）';
   }
 
-  /// 狩猎：按剑术/弓箭技能赚取金币，有失败风险。
+  /// 狩猎：按剑术/弓箭技能赚取金币，有失败风险（消耗精力）。
   String hunt() {
     if (!_canDoDaily('hunt')) {
       return '今天的猎物已经够多了。';
     }
+    if (!canAffordEnergy(20)) {
+      return '你实在太累了，拉不开弓。先去休息吧。';
+    }
+    adjustEnergy(-20);
     _recordDaily('hunt');
     final rnd = rng();
     final loc = currentLocation;
@@ -102,27 +121,36 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin {
 
     final skill = max(skillLevel('archery'), skillLevel('sword'));
     final danger = loc.dangerLevel;
-    // 成功率：技能与危险度对抗
-    final successChance = (0.5 + skill * 0.05 - danger * 0.03).clamp(0.1, 0.95);
+    // 成功率：技能与危险度对抗（疲惫打折）
+    final successChance =
+        (0.5 + skill * 0.05 - danger * 0.03).clamp(0.1, 0.95) *
+            energySuccessMultiplier();
 
     if (rnd.nextDouble() < successChance) {
       final reward = 10 + skill * 3 + rnd.nextInt(10);
       gainGold(reward);
-      return '你在${loc.name}附近的林地猎到猎物，收获 $reward 金币。';
+      // 顺便补充食物
+      adjustHunger(15);
+      return '你在${loc.name}附近的林地猎到猎物，收获 $reward 金币，饱餐一顿。';
     }
     // 失败：危险度高时可能受伤（掉血由 flags 模拟）
     if (rnd.nextDouble() < 0.3) {
       setFlag('isInjured', true);
-      return '狩猎时你失手摔伤，空手而归。（受了点轻伤）';
+      adjustHealth(-5);
+      return '狩猎时你失手摔伤，空手而归。（受了点轻伤，健康 -5）';
     }
     return '你在${loc.name}附近转了一天，什么也没猎到。';
   }
 
-  /// 贸易：按地点类型/商人身份赚取金币。
+  /// 贸易：按地点类型/商人身份赚取金币（消耗精力）。
   String trade() {
     if (!_canDoDaily('trade')) {
       return '今天的集市已经散了。';
     }
+    if (!canAffordEnergy(10)) {
+      return '你精疲力竭，无心讨价还价。先去休息吧。';
+    }
+    adjustEnergy(-10);
     _recordDaily('trade');
     final loc = currentLocation;
     if (loc == null ||
@@ -139,17 +167,21 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin {
         '${isMerchant ? '（商人的眼光果然毒辣）' : ''}';
   }
 
-  /// 月度循环：推进一个月，结算系统演进。
+  /// 月度循环：推进一个月，结算系统演进 + 生存状态。
   ///
-  /// 返回本月的完整叙事（含系统结算），供 UI/AI 展示。
+  /// 返回本月的完整叙事（含系统结算与生存结算），供 UI/AI 展示。
   String advanceMonth() {
     if (!isGameActive || isGameOver) return '游戏尚未开始。';
     final monthText = applyMonthlySystems(seed: progress.turnCount);
+    final lifeText = applyMonthlyLife(seed: progress.turnCount);
     advanceTime();
     final buf = StringBuffer()
       ..writeln('⏳ 时间推进到 ${progress.year}年${progress.month}月（${progress.season}）');
     if (monthText.isNotEmpty) {
       buf.writeln(monthText);
+    }
+    if (lifeText.isNotEmpty) {
+      buf.writeln(lifeText);
     }
     final loc = currentLocation;
     if (loc != null) {
@@ -198,8 +230,15 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin {
       ..writeln('· 家族：${fam?.name ?? '无'}（${fam?.motto ?? ''}）')
       ..writeln('· 地点：${loc?.name ?? p.locationId}（${loc?.region ?? ''}）')
       ..writeln('· 金币：${p.gold}｜声望：${p.reputation}')
+      ..writeln('· 生命：${p.health}/100｜精力：${p.energy}/100｜饱食：${p.hunger}/100')
       ..writeln('· 属性：${p.attributes.entries.map((e) => '${e.key} ${e.value}').join(' ')}')
       ..writeln('· 技能：${p.skills.entries.map((e) => '${e.key} ${e.value}').join(' ')}');
+    if (p.title.isNotEmpty) {
+      buf.writeln('· 头衔：${p.title}');
+    }
+    if (p.inventory.isNotEmpty) {
+      buf.writeln('· 背包：${formatInventoryPanel().replaceFirst('【背包】\n', '')}');
+    }
     return buf.toString().trim();
   }
 }

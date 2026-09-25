@@ -7,12 +7,13 @@ library;
 import '../models/event.dart';
 import '../providers/game_provider_base.dart';
 import 'mixin_letter.dart';
+import 'mixin_life.dart';
 import 'mixin_play.dart';
 import 'mixin_systems.dart';
 
 /// AI 回合混入。挂在 [GameProviderBase] 上。
 mixin GameAiMixin
-    on GameProviderBase, GameSystemsMixin, GamePlayMixin, GameLetterMixin {
+    on GameProviderBase, GameSystemsMixin, GameLifeMixin, GamePlayMixin, GameLetterMixin {
   /// 应用 AI 生成的选项效果，并推进一个月（含月度系统结算 + 信件触发）。
   ///
   /// 返回完整的回合叙事文本（供 AI 行动模式展示）。

@@ -292,6 +292,11 @@ class _StatusBar extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
+            '❤️${p.health} ⚡${p.energy} 🍖${p.hunger}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(width: 8),
+          Text(
             '${engine.progress.year}年${engine.progress.month}月 ${seasonShortLabel(engine.progress.season)}',
             style: Theme.of(context).textTheme.bodySmall,
           ),
