@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../data/item_data.dart';
 import '../game_engine.dart';
 
 /// 玩家详情面板。
@@ -116,6 +117,18 @@ class PlayerPanelScreen extends StatelessWidget {
                 .map((e) => _Entry(e.key, '${e.value}'))
                 .toList(),
           ),
+          // 装备（Batch 10-4：武器/护甲/坐骑 + 战斗值）
+          if (e.equippedItems.isNotEmpty)
+            _SectionCard(
+              title: '装备（战斗值 ${e.combatPower()}）',
+              icon: Icons.shield_outlined,
+              entries: e.equippedItems
+                  .map((id) {
+                    final item = itemById(id);
+                    return _Entry(item?.name ?? id, '');
+                  })
+                  .toList(),
+            ),
           // 关系
           if (p.relations.isNotEmpty)
             _SectionCard(
