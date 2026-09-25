@@ -49,18 +49,20 @@ westeros_life_simulator/
 │   │   ├── mixin_letter.dart          # 信件系统
 │   │   └── mixin_adventure.dart       # 旅行/探索/遭遇
 │   ├── screens/                       # UI 层（Batch 5 ✅）
-│   │   ├── game_screen.dart           # 游戏主界面（状态条+指令+叙事+快捷按钮）
-│   │   ├── player_panel_screen.dart   # 玩家详情面板
-│   │   ├── family_screen.dart         # 家族面板（27 家族）
-│   │   ├── map_screen.dart            # 地图（68 地点按区域分组）
-│   │   ├── systems_screen.dart        # 系统面板（74 系统）
-│   │   └── settings_screen.dart       # 设置/存档（保存/加载/导出/导入/新游戏）
+│   │   ├── start_screen.dart           # 开局选择界面（Batch 6 ✅）
+│   │   ├── game_screen.dart            # 游戏主界面（状态条+指令+叙事+快捷按钮）
+│   │   ├── player_panel_screen.dart    # 玩家详情面板
+│   │   ├── family_screen.dart          # 家族面板（27 家族）
+│   │   ├── map_screen.dart             # 地图（68 地点按区域分组）
+│   │   ├── systems_screen.dart         # 系统面板（74 系统）
+│   │   └── settings_screen.dart        # 设置/存档（保存/加载/导出/导入/新游戏）
 │   ├── services/                      # 服务层（Batch 3 ✅）
 │   └── utils/                         # 工具
 └── test/
     ├── batch1_smoke_test.dart         # Batch 1 冒烟测试（17 用例）
     ├── batch4_*_test.dart             # Batch 4 混入层测试（5 文件）
-    └── batch5_ui_test.dart            # Batch 5 UI 测试（6 用例）
+    ├── batch5_ui_test.dart            # Batch 5 UI 测试（6 用例）
+    └── batch6_start_test.dart         # Batch 6 开局测试（6 用例）
 ```
 
 ## 阶段规划
@@ -133,6 +135,17 @@ westeros_life_simulator/
 - 测试：test/batch5_ui_test.dart（6 用例：applyState/玩家详情/家族/地图/系统/设置）
 - 验证方式：GitHub Actions CI（run 36113576770，✅ success，2026-09-25，198 测试全部通过）
 
+#### Batch 6：开局选择界面（✅ 完成，2026-09-25）
+- lib/screens/start_screen.dart（开局选择：姓名/性别/身份/家族/出生地/时代/季节 + 随机名字）
+- 角色生成纯函数：buildSetupPlayer / buildSetupProgress（按身份差异化初始资金/技能/声望）
+- 时代选择：篡夺者战争前/期间/后/当前时代（年份 281/282/283/298）
+- 季节选择：春/夏/秋/冬/凛冬（月份 3/6/9/12/12）
+- 家族选择联动出生地（选家族自动跳到其 seat 城堡）；支持自由民（无家族）
+- lib/screens/game_screen.dart 支持注入外部引擎；lib/app.dart 入口改为 StartScreen
+- 测试：test/batch6_start_test.dart（6 用例：商人/平民角色生成、进度映射、标签、时代年份、界面构建）
+- 验证方式：GitHub Actions CI（run 36116959188，✅ success，2026-09-25，204 测试全部通过）
+- 修复历程：开局界面 widget 测试在默认视口下 ListView 懒加载导致"出生地"未构建 → 调大测试视口（tester.view.physicalSize）
+
 ## 文档统计
 
 | 文档 | 行数 | 大小 |
@@ -160,3 +173,4 @@ westeros_life_simulator/
 - v2.2.0：阶段 3 Batch 3 状态管理 + 服务层完成（2026-09-24，CI run 36007775720 ✅ success，134 测试全部通过）
 - v2.3.0：阶段 3 Batch 4 混入层（✅ 完成，2026-09-25，CI run 36110857045 ✅ success，192 测试全部通过）
 - v2.4.0：阶段 3 Batch 5 UI 层（✅ 完成，2026-09-25，CI run 36113576770 ✅ success，198 测试全部通过）
+- v2.5.0：阶段 3 Batch 6 开局选择界面（✅ 完成，2026-09-25，CI run 36116959188 ✅ success，204 测试全部通过）
