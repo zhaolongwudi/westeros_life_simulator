@@ -9,13 +9,15 @@ import '../models/location.dart';
 import '../models/player.dart';
 import '../providers/game_provider_base.dart';
 import 'mixin_life.dart';
+import 'mixin_npc_interact.dart';
 import 'mixin_systems.dart';
 
 /// 日常玩法混入。挂在 [GameProviderBase] 上。
 ///
-/// [advanceMonth] 需要调用 [GameSystemsMixin.applyMonthlySystems] 与
-/// [GameLifeMixin.applyMonthlyLife]，因此 on 约束中列出两者。
-mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin {
+/// [advanceMonth] 需要调用 [GameSystemsMixin.applyMonthlySystems]、
+/// [GameLifeMixin.applyMonthlyLife] 与 [GameNpcInteractMixin.maybeNpcStoryEvent]，
+/// 因此 on 约束中列出三者。
+mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin, GameNpcInteractMixin {
   /// 每日活动次数上限（防数值刷子，参考 docs/08 玩法限制）。
   static const Map<String, int> kDailyLimits = {
     'train': 3,
@@ -177,6 +179,8 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin {
     final lifeText = applyMonthlyLife(seed: progress.turnCount);
     // 头衔晋升检查（声望积累后自动晋升）
     final titlePromotion = checkTitlePromotion();
+    // NPC 好感度事件链（关系突破阈值触发专属剧情）
+    final npcStory = maybeNpcStoryEvent(seed: progress.turnCount);
     advanceTime();
     // 月度世界事件浮现（30% 概率触发一个可触发事件作为叙事提示）
     final worldEvent = _maybeWorldEvent(seed: progress.turnCount);
@@ -187,6 +191,9 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin {
     }
     if (lifeText.isNotEmpty) {
       buf.writeln(lifeText);
+    }
+    if (npcStory.isNotEmpty) {
+      buf.writeln(npcStory);
     }
     if (titlePromotion.isNotEmpty) {
       buf.writeln('🏆 你获得新头衔：$titlePromotion！');

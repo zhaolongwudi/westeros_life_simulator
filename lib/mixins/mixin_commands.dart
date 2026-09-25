@@ -4,10 +4,12 @@
 library;
 import 'dart:math';
 import '../data/item_data.dart';
+import '../models/npc.dart';
 import '../providers/game_provider_base.dart';
 import 'mixin_adventure.dart';
 import 'mixin_letter.dart';
 import 'mixin_life.dart';
+import 'mixin_npc_interact.dart';
 import 'mixin_play.dart';
 import 'mixin_systems.dart';
 
@@ -36,7 +38,8 @@ mixin GameCommandsMixin
         GameSystemsMixin,
         GameLetterMixin,
         GameAdventureMixin,
-        GameLifeMixin {
+        GameLifeMixin,
+        GameNpcInteractMixin {
   /// 解析并执行一条玩家指令。
   ///
   /// 返回响应文本。未知指令返回帮助提示。
@@ -124,6 +127,18 @@ mixin GameCommandsMixin
         return CommandResult(text: formatEquipmentPanel());
       case '头衔' || 'title':
         return CommandResult(text: formatTitlePanel());
+      case '在场' || 'npc' || '人物':
+        return CommandResult(text: _npcListText());
+      case '互动' || '交谈' || 'interact':
+        if (args.isEmpty) {
+          return const CommandResult(text: '和谁互动？如「互动 提利昂」或「互动 npc_tyrion」。输入「在场」看谁在这里。');
+        }
+        return CommandResult(text: npcInteract(_normalizeNpc(args)));
+      case '示好' || '送礼' || 'favor':
+        if (args.isEmpty) {
+          return const CommandResult(text: '向谁示好？如「示好 提利昂」或「送礼 npc_tyrion」。');
+        }
+        return CommandResult(text: npcFavor(_normalizeNpc(args)));
       case '休息' || 'rest':
         return CommandResult(text: rest());
       case '过月' || 'advance':
@@ -164,6 +179,39 @@ mixin GameCommandsMixin
       return '你没有「$namePart」这种东西。';
     }
     return sellItem(itemId, quantity);
+  }
+
+  /// 在场 NPC 列表文本。
+  String _npcListText() {
+    final list = npcInteractionList();
+    if (list.isEmpty) return '【在场人物】\n你身边没有其他人在场。';
+    return '【在场人物】\n${list.join('\n')}';
+  }
+
+  /// NPC 名称/别名归一化（支持中文名/ID）。
+  String _normalizeNpc(String raw) {
+    final s = raw.trim();
+    // 直接按 ID 匹配
+    final byId = npcById(s);
+    if (byId != null) return byId.id;
+    // 按中文名模糊匹配（在场优先，其次全局）
+    Npc? hit;
+    for (final n in npcsAtCurrentLocation) {
+      if (n.name == s || n.name.contains(s)) {
+        hit = n;
+        break;
+      }
+    }
+    if (hit == null) {
+      for (final n in npcs) {
+        if (n.name == s) {
+          hit = n;
+          break;
+        }
+      }
+    }
+    if (hit != null) return hit.id;
+    return s;
   }
 
   /// 物品别名归一化（支持中文名/ID）。
@@ -257,6 +305,9 @@ mixin GameCommandsMixin
 卸下 / unequip [物品] 卸下装备
 装备栏 / equipment   查看当前装备与战斗值
 头衔 / title       查看头衔与晋升进度
+在场 / npc         查看当前在场的 NPC 与关系
+互动 / interact [名字]  与在场 NPC 深度互动（好感越高内容越深）
+示好 / favor [名字]   向在场 NPC 示好送礼（每日 3 次）
 休息 / rest         恢复精力/饱食（花 2 金币）
 过月 / advance      推进一个月
 帮助 / help         显示本帮助
