@@ -68,13 +68,16 @@ void main() {
   });
 
   group('Batch 10-9 prompt 注入', () {
-    (String?, Dio) _captureDio() {
-      String? captured;
+    // 注意：必须用 List<String?> 可变容器捕获请求体，不能直接返回 String? record——
+    // record 解构是值拷贝，onRequest 闭包修改的是函数内部变量而非解构后的变量，
+    // 会导致 captured 永远读不到更新值（CI 实测 captured = null）。
+    (List<String?>, Dio) _captureDio() {
+      final captured = <String?>[null];
       final dio = Dio();
       dio.interceptors.add(
         InterceptorsWrapper(
           onRequest: (options, handler) {
-            captured = options.data.toString();
+            captured[0] = options.data.toString();
             handler.resolve(
               Response<dynamic>(
                 requestOptions: options,
@@ -97,7 +100,7 @@ void main() {
     }
 
     test('提示词注入身份中文标签与身份叙事引导', () async {
-      final (captured, dio) = _captureDio();
+      final (capturedBox, dio) = _captureDio();
       final service = AiService(
         apiKey: 'test_key',
         dio: dio,
@@ -114,6 +117,7 @@ void main() {
         season: 'summer',
         maxRetries: 0,
       );
+      final captured = capturedBox[0];
       expect(captured, isNotNull);
       expect(captured, contains('身份：商人'));
       expect(captured, contains('叙事引导（身份）'));
@@ -121,7 +125,7 @@ void main() {
     });
 
     test('提示词注入区域与季节叙事引导', () async {
-      final (captured, dio) = _captureDio();
+      final (capturedBox, dio) = _captureDio();
       final service = AiService(
         apiKey: 'test_key',
         dio: dio,
@@ -137,6 +141,7 @@ void main() {
         season: 'winter',
         maxRetries: 0,
       );
+      final captured = capturedBox[0];
       expect(captured, isNotNull);
       expect(captured, contains('叙事引导（区域）'));
       expect(captured, contains('北境'));
@@ -146,7 +151,7 @@ void main() {
     });
 
     test('prompt 保留既有身份字段（中文标签替换英文枚举名）', () async {
-      final (captured, dio) = _captureDio();
+      final (capturedBox, dio) = _captureDio();
       final service = AiService(
         apiKey: 'test_key',
         dio: dio,
@@ -161,6 +166,7 @@ void main() {
         season: 'spring',
         maxRetries: 0,
       );
+      final captured = capturedBox[0];
       expect(captured, isNotNull);
       expect(captured, contains('身份：贵族'));
       // 不再输出英文枚举名
