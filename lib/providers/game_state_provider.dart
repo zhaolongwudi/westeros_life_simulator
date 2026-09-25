@@ -211,6 +211,17 @@ class GameStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 从另一个状态复制全部字段（用于加载存档/导入）。
+  void applyState(GameStateProvider other) {
+    _player = other._player;
+    _progress = other._progress;
+    _history = List<GameEvent>.from(other._history);
+    _currentEvent = other._currentEvent;
+    _isGameActive = other._isGameActive;
+    _isGameOver = other._isGameOver;
+    notifyListeners();
+  }
+
   /// 序列化游戏状态。
   Map<String, dynamic> toJson() {
     return {
