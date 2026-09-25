@@ -7,7 +7,9 @@ library;
 import 'package:flutter/material.dart';
 
 import '../game_engine.dart';
+import 'events_screen.dart';
 import 'family_screen.dart';
+import 'letters_screen.dart';
 import 'map_screen.dart';
 import 'player_panel_screen.dart';
 import 'settings_screen.dart';
@@ -116,6 +118,16 @@ class _GameScreenState extends State<GameScreen> {
       appBar: AppBar(
         title: const Text('维斯特洛人生模拟器'),
         actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.event_note_outlined),
+            tooltip: '事件',
+            onPressed: () => _openScreen(EventsScreen(engine: _engine)),
+          ),
+          IconButton(
+            icon: const Icon(Icons.mail_outlined),
+            tooltip: '信件',
+            onPressed: () => _openScreen(LettersScreen(engine: _engine)),
+          ),
           IconButton(
             icon: const Icon(Icons.map_outlined),
             tooltip: '地图',

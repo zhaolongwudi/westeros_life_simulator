@@ -18,6 +18,7 @@ import '../models/location.dart';
 import '../models/npc.dart';
 import '../models/player.dart';
 import '../models/system.dart';
+import 'event_provider.dart';
 import 'game_state_provider.dart';
 
 /// 游戏提供者基类。mixin 通过 `on GameProviderBase` 挂载。
@@ -38,13 +39,17 @@ abstract class GameProviderBase extends GameStateProvider {
         _locations = locations ?? allLocations,
         _families = families ?? allFamilies,
         _systems = systems ?? allSystems,
-        _events = events ?? allEvents;
+        _events = events ?? allEvents,
+        eventProvider = EventProvider(events: events ?? allEvents);
 
   List<Npc> _npcs;
   List<Location> _locations;
   List<Family> _families;
   List<GameSystem> _systems;
   List<GameEvent> _events;
+
+  /// 事件提供者（组合复用，供事件面板浏览/触发）。
+  final EventProvider eventProvider;
 
   /// 世界全部 NPC。
   List<Npc> get npcs => List.unmodifiable(_npcs);
