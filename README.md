@@ -101,7 +101,7 @@ westeros_life_simulator/
 - 验证方式：GitHub Actions CI（run 36007775720，✅ success，2026-09-24，134 测试全部通过）
 - 修复历程：4 个 Analyze error（event_provider 初始化器/GameState nullable 条件/AiService Dio 类型与超时参数）→ 1 个 warning（save_service 非空断言）→ 1 个测试失败（GameStateProvider 序列化往返丢失 isGameActive/isGameOver/currentEvent）
 
-#### Batch 4：混入层（✅ 完成，2026-09-24）
+#### Batch 4：混入层（✅ 完成，2026-09-25）
 - lib/mixins/mixin_play.dart（日常玩法：训练/工作/休息/狩猎/贸易/月度循环）
 - lib/mixins/mixin_commands.dart（指令解析：状态/系统/信/旅行/训练/工作/狩猎/贸易/休息/探索/过月/帮助）
 - lib/mixins/mixin_systems.dart（74 系统挂载 + 月度演进结算 + 系统面板）
@@ -111,7 +111,8 @@ westeros_life_simulator/
 - lib/game_engine.dart（游戏引擎：组合全部 mixin）
 - 测试：test/batch4_{play,commands,systems,letter,adventure}_test.dart（5 文件）
 - 重构要点：身份判定改用枚举（PlayerIdentity）避免字符串魔法值；金币/声望/关系/标记变更统一上提到基类，消除 mixin 间重复代码
-- 验证方式：GitHub Actions CI（待确认）
+- 验证方式：GitHub Actions CI（run 36110857045，✅ success，2026-09-25，192 测试全部通过）
+- 修复历程：4 类 Analyze 错误（mixin with 子句/GamePlayMixin 跨 mixin 调用/mixin_systems import/测试判空）→ 2 类新问题（GameEngine mixin 混入顺序/测试 `?.` 多余）→ 最终 CI 通过
 
 #### Batch 5：UI 层（待做）
 - lib/screens/settings/、game/、family/、map/
@@ -141,5 +142,5 @@ westeros_life_simulator/
 - v2.0.0：阶段 3 Batch 1 项目骨架 + 模型层完成（2026-09-23）
 - v2.1.0：阶段 3 Batch 2 数据层完成（2026-09-23，CI run 35845290631 ✅ success）
 - v2.2.0：阶段 3 Batch 3 状态管理 + 服务层完成（2026-09-24，CI run 36007775720 ✅ success，134 测试全部通过）
-- v2.3.0：阶段 3 Batch 4 混入层（✅ 完成，2026-09-24）
+- v2.3.0：阶段 3 Batch 4 混入层（✅ 完成，2026-09-25，CI run 36110857045 ✅ success，192 测试全部通过）
 - v2.4.0：阶段 3 Batch 5 UI 层（待做）
