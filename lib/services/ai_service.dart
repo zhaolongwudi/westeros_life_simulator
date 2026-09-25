@@ -145,6 +145,16 @@ class AiService {
     final eventsDesc = availableEvents
         .map((e) => '- ${e.name}: ${e.description}')
         .join('\n');
+    final relationDesc = player.relations.entries
+        .map((e) => '${e.key}: ${e.value}')
+        .join('、');
+    final flagDesc = player.flags.entries
+        .where((e) => e.value)
+        .map((e) => e.key)
+        .join('、');
+    final inventoryDesc = player.inventory.isEmpty
+        ? '（空）'
+        : player.inventory.join('、');
 
     return '''
 当前玩家状态：
@@ -157,6 +167,9 @@ class AiService {
 - 声望：${player.reputation}
 - 技能：${player.skills}
 - 属性：${player.attributes}
+- 关系（NPC: 好感度）：${relationDesc.isEmpty ? '（无）' : relationDesc}
+- 背包：$inventoryDesc
+- 状态：${flagDesc.isEmpty ? '（无特殊状态）' : flagDesc}
 
 当前情境：
 ${context}
@@ -166,6 +179,7 @@ ${eventsDesc}
 
 请生成一段叙事文本（200-500 字），描述当前情境，并提供 2-4 个选项。
 每个选项包含：文本、效果（JSON 格式）、叙事。
+效果键约定：金币用 gold，声望用 reputation，技能用 skills.技能名（如 skills.sword），属性用 attributes.属性名（如 attributes.strength）。
 
 输出格式（JSON）：
 {
@@ -173,7 +187,7 @@ ${eventsDesc}
   "choices": [
     {
       "text": "选项文本",
-      "effects": {"gold": 10, "reputation": 5},
+      "effects": {"gold": 10, "reputation": 5, "skills.sword": 1},
       "narrative": "选择后的叙事"
     }
   ]
