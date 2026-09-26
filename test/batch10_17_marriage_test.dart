@@ -67,6 +67,8 @@ void main() {
     test('已婚互动恢复精力', () {
       final engine = GameEngine()..startNewGame();
       engine.marry('平民');
+      // 先消耗精力，验证互动能恢复
+      engine.updatePlayer(engine.player.copyWith(energy: 50));
       final energyBefore = engine.player.energy;
       final result = engine.spouseInteract();
       expect(result, contains('精力'));
