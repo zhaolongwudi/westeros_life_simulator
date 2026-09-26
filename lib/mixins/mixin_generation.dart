@@ -7,6 +7,7 @@
 /// - 传位叙事：maybeSuccessionStory（年长/濒死时提示立嗣）
 library;
 
+import '../models/marital.dart';
 import '../models/player.dart';
 import '../providers/game_provider_base.dart';
 import 'mixin_life.dart';
@@ -95,6 +96,18 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
       newSkills[entry.key] = (entry.value * 0.6).round();
     }
     final isNoble = p.identity == PlayerIdentity.noble;
+    // 现任家主记入历代谱系（Batch 10-17 多代展示）
+    final prevRecords = List<GenerationRecord>.from(p.generationRecords);
+    final currentGen = prevRecords.length + 1;
+    prevRecords.add(
+      GenerationRecord(
+        generation: currentGen,
+        name: p.name,
+        reignYears: '${p.age}岁继位',
+        title: p.title.isEmpty ? p.identity.name : p.title,
+        achievement: p.reputation >= 70 ? '声望 ${p.reputation}' : '',
+      ),
+    );
     final newPlayer = Player(
       id: 'player_${houseName}_$heir',
       name: heir,
@@ -122,6 +135,8 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
       title: '',
       house: houseName,
       children: const [],
+      // 谱系透传给新家主（历代记录延续）
+      generationRecords: prevRecords,
     );
     // 标记继承人为已继位（从后续继承人候选中移除）
     setFlag('house.childDead.$heir', true);

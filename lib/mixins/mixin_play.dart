@@ -9,21 +9,23 @@ import '../models/player.dart';
 import '../providers/game_provider_base.dart';
 import 'mixin_generation.dart';
 import 'mixin_life.dart';
+import 'mixin_marriage.dart';
 import 'mixin_npc_interact.dart';
 import 'mixin_systems.dart';
 /// 日常玩法混入。挂在 [GameProviderBase] 上。
 ///
 /// [advanceMonth] 需要调用 [GameSystemsMixin.applyMonthlySystems]、
 /// [GameLifeMixin.applyMonthlyLife] 与 [GameNpcInteractMixin.maybeNpcStoryEvent]、
-/// [GameGenerationMixin.maybeSuccessionStory]，
-/// 因此 on 约束中列出四者。
+/// [GameGenerationMixin.maybeSuccessionStory]、[GameMarriageMixin.maybeFamilyEvent]，
+/// 因此 on 约束中列出五者。
 mixin GamePlayMixin
     on
         GameProviderBase,
         GameSystemsMixin,
         GameLifeMixin,
         GameNpcInteractMixin,
-        GameGenerationMixin {
+        GameGenerationMixin,
+        GameMarriageMixin {
   /// 每日活动次数上限（防数值刷子，参考 docs/08 玩法限制）。
   static const Map<String, int> kDailyLimits = {
     'train': 3,
@@ -189,6 +191,8 @@ mixin GamePlayMixin
     final npcStory = maybeNpcStoryEvent(seed: progress.turnCount);
     // 家族传承提示（年长/濒死时立嗣）
     final succession = maybeSuccessionStory();
+    // 婚后生育（Batch 10-17：已婚且未满上限时有概率添丁）
+    final familyEvent = maybeFamilyEvent(seed: progress.turnCount);
     advanceTime();
     // 月度世界事件浮现（30% 概率触发一个可触发事件作为叙事提示）
     final worldEvent = _maybeWorldEvent(seed: progress.turnCount);
@@ -207,6 +211,9 @@ mixin GamePlayMixin
     }
     if (succession.isNotEmpty) {
       buf.writeln(succession);
+    }
+    if (familyEvent.isNotEmpty) {
+      buf.writeln(familyEvent);
     }
     if (titlePromotion.isNotEmpty) {
       buf.writeln('🏆 你获得新头衔：$titlePromotion！');

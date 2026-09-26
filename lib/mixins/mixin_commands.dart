@@ -10,6 +10,7 @@ import 'mixin_adventure.dart';
 import 'mixin_generation.dart';
 import 'mixin_letter.dart';
 import 'mixin_life.dart';
+import 'mixin_marriage.dart';
 import 'mixin_npc_interact.dart';
 import 'mixin_play.dart';
 import 'mixin_systems.dart';
@@ -41,7 +42,8 @@ mixin GameCommandsMixin
         GameAdventureMixin,
         GameLifeMixin,
         GameNpcInteractMixin,
-        GameGenerationMixin {
+        GameGenerationMixin,
+        GameMarriageMixin {
   /// 解析并执行一条玩家指令。
   ///
   /// 返回响应文本。未知指令返回帮助提示。
@@ -162,6 +164,31 @@ mixin GameCommandsMixin
           return const CommandResult(text: '给子女起个名字吧。如「立嗣 罗柏」。');
         }
         return CommandResult(text: addChild(args));
+      case '求婚' || '成婚' || 'marry':
+        if (args.isEmpty) {
+          return const CommandResult(text: '想与什么样的人成婚？如「求婚 平民」或「成婚 贵族」。');
+        }
+        return CommandResult(text: marry(args));
+      case '配偶' || '共处' || 'spouse':
+        return CommandResult(text: spouseInteract());
+      case '培养' || 'rear':
+        final parts = args.split(RegExp(r'\s+'));
+        if (parts.length < 2) {
+          return const CommandResult(text: '培养谁、往哪个方向？如「培养 罗柏 sword」。方向：sword/politics/speech/riding。');
+        }
+        return CommandResult(text: rearChild(parts[0], parts[1]));
+      case '督导' || 'tutor':
+        if (args.isEmpty) {
+          return const CommandResult(text: '亲自督导哪个子女？如「督导 罗柏」。');
+        }
+        return CommandResult(text: tutorChild(args));
+      case '送学' || 'school':
+        if (args.isEmpty) {
+          return const CommandResult(text: '送哪个子女去学城/骑士团？如「送学 罗柏」。');
+        }
+        return CommandResult(text: sendChildToSchool(args));
+      case '家族树' || '谱系' || 'tree':
+        return CommandResult(text: formatMultiGenTree());
       case '过月' || 'advance':
         return CommandResult(
           text: advanceMonth(),
@@ -334,6 +361,12 @@ mixin GameCommandsMixin
 关系 / relations     查看全部 NPC 关系/心情/任务数
 家谱 / family       查看家谱与继承人
 立嗣 / addchild [名字] 为家族添丁（如 立嗣 罗柏）
+求婚 / marry [身世]   成婚（平民/商人/战士/贵族，如 求婚 平民）
+配偶 / spouse       与配偶共处（每日 1 次，恢复精力）
+培养 / rear [子女] [方向] 为子女定培养方向（sword/politics/speech/riding）
+督导 / tutor [子女]  亲自督导子女（声望 +3）
+送学 / school [子女] 送子女去学城/骑士团进修（声望 +5）
+家族树 / tree       查看家族树多代谱系
 休息 / rest         恢复精力/饱食（花 2 金币）
 过月 / advance      推进一个月
 帮助 / help         显示本帮助

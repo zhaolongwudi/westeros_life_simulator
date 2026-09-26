@@ -3,6 +3,8 @@
 /// 字段设计参考 docs/02_家族百科.md 与 docs/08_玩法设计.md。
 library;
 
+import 'marital.dart';
+
 /// 玩家身份类型。
 enum PlayerIdentity {
   noble, // 贵族
@@ -40,6 +42,9 @@ class Player {
     this.title = '',
     this.house = '',
     this.children = const [],
+    this.spouse,
+    this.childRearing = const [],
+    this.generationRecords = const [],
   });
 
   /// 唯一标识。
@@ -99,6 +104,12 @@ class Player {
   final String house;
   /// 子女 ID 列表（Batch 10-14 多世代：继承人从子女中产生）。
   final List<String> children;
+  /// 配偶详情（Batch 10-17 婚姻系统；null 表示未婚）。
+  final SpouseDetail? spouse;
+  /// 子女培养档案（Batch 10-17：培养方向/督导/送学）。
+  final List<ChildRearing> childRearing;
+  /// 世代谱系（Batch 10-17：家族树多代展示）。
+  final List<GenerationRecord> generationRecords;
 
   /// 创建默认玩家（用于测试与初始化）。
   factory Player.defaultPlayer() {
@@ -159,7 +170,12 @@ class Player {
     String? title,
     String? house,
     List<String>? children,
+    SpouseDetail? spouse,
+    List<ChildRearing>? childRearing,
+    List<GenerationRecord>? generationRecords,
   }) {
+    // 允许显式清空配偶（离婚/丧偶）：null 无法用 ?? 区分，用哨兵
+    final spouseValue = identical(spouse, _noSpouse) ? null : (spouse ?? this.spouse);
     return Player(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -181,8 +197,14 @@ class Player {
       title: title ?? this.title,
       house: house ?? this.house,
       children: children ?? this.children,
+      spouse: spouseValue,
+      childRearing: childRearing ?? this.childRearing,
+      generationRecords: generationRecords ?? this.generationRecords,
     );
   }
+
+  /// 哨兵：显式清空配偶用（copyWith 传 [Player._noSpouse] 表示置 null）。
+  static const Object _noSpouse = Object();
 
   /// 序列化为 JSON Map（用于存档）。
   Map<String, dynamic> toJson() {
@@ -207,6 +229,9 @@ class Player {
       'title': title,
       'house': house,
       'children': children,
+      'spouse': spouse?.toJson(),
+      'childRearing': childRearing.map((e) => e.toJson()).toList(),
+      'generationRecords': generationRecords.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -233,6 +258,17 @@ class Player {
       title: json['title'] as String? ?? '',
       house: json['house'] as String? ?? '',
       children: (json['children'] as List?)?.cast<String>() ?? const [],
+      spouse: json['spouse'] == null
+          ? null
+          : SpouseDetail.fromJson(json['spouse'] as Map<String, dynamic>),
+      childRearing: (json['childRearing'] as List?)
+              ?.map((e) => ChildRearing.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      generationRecords: (json['generationRecords'] as List?)
+              ?.map((e) => GenerationRecord.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 
