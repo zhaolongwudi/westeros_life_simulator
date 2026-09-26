@@ -47,6 +47,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // ListView 懒加载：滚动到「婚姻与子女培养」区块
+      await tester.scrollUntilVisible(
+        find.text('婚姻与子女培养'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
       expect(find.text('婚姻与子女培养'), findsOneWidget);
       expect(find.textContaining('配偶：梅拉'), findsOneWidget);
       expect(find.textContaining('罗柏'), findsWidgets);
@@ -98,6 +106,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // ListView 懒加载：滚动到「进行中的任务」区块
+      await tester.scrollUntilVisible(
+        find.text('进行中的任务'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
       expect(find.text('进行中的任务'), findsOneWidget);
       expect(find.textContaining('护送北境信使至君临'), findsOneWidget);
       expect(find.textContaining('期限 283年9月'), findsOneWidget);
@@ -112,6 +128,14 @@ void main() {
       final engine = GameEngine()..startNewGame();
       await tester.pumpWidget(
         MaterialApp(home: NpcPanelScreen(engine: engine)),
+      );
+      await tester.pumpAndSettle();
+
+      // ListView 懒加载：滚动到「进行中的任务」区块
+      await tester.scrollUntilVisible(
+        find.text('进行中的任务'),
+        300,
+        scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
 
