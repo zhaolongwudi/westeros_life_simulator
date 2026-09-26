@@ -154,6 +154,7 @@ class _GameScreenState extends State<GameScreen> {
       context: context,
       availableEvents: _engine.eventTemplates,
       season: _engine.progress.season,
+      currentYear: _engine.progress.year,
     );
 
     if (!mounted) return;

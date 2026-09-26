@@ -203,8 +203,8 @@ const List<Npc> allNpcs = [
     skills: const {'sword': 9, 'leadership': 8, 'politics': 6},
     faith: '旧神',
     isAlive: true,
+    tasks: const ['长城巡逻与补给', '寻找失踪的冰原狼'],
   ),
-
   // ==================== 北境：波顿家族 ====================
   Npc(
     id: 'npc_roose_bolton',
@@ -413,6 +413,7 @@ const List<Npc> allNpcs = [
     skills: const {'sword': 6, 'leadership': 8, 'politics': 9},
     faith: '七神',
     isAlive: true,
+    tasks: const ['揪出宫中的叛徒', '散布王后的流言'],
   ),
   Npc(
     id: 'npc_jaime',
@@ -652,6 +653,7 @@ const List<Npc> allNpcs = [
     skills: const {'sword': 5, 'leadership': 8, 'politics': 10},
     faith: '七神',
     isAlive: true,
+    tasks: const ['运一批高庭红酒至君临', '为玛格丽物色夫婿'],
   ),
   Npc(
     id: 'npc_margaery',

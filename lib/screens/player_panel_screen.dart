@@ -149,7 +149,7 @@ class PlayerPanelScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text('家主：${p.name}（${p.age}岁）'),
-                  Text('婚姻：${e.flagOf('isMarried') ? '已婚' : '未婚'}'),
+                  Text('婚姻：${e.isMarried ? '已婚' : '未婚'}'),
                   Text(
                     p.children.isEmpty
                         ? '子女：尚无子嗣'
@@ -162,6 +162,46 @@ class PlayerPanelScreen extends StatelessWidget {
               ),
             ),
           ),
+          // 婚姻与子女培养（Batch 10-19：UI 面板展示婚姻/培养新数据）
+          if (e.isMarried || p.children.isNotEmpty)
+            Card(
+              margin: const EdgeInsets.only(top: 8),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        const Icon(Icons.favorite_outline, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          '婚姻与子女培养',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    if (e.isMarried && p.spouse != null) ...[
+                      Text(
+                        '配偶：${p.spouse!.name}'
+                        '（${p.spouse!.origin.name}，'
+                        '结缡 ${e.progress.year - p.spouse!.marriedYear} 年）',
+                      ),
+                      const SizedBox(height: 4),
+                    ],
+                    if (p.children.isNotEmpty) ...[
+                      Text('子女培养档案：'),
+                      for (final c in p.children)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12, top: 2),
+                          child: _buildChildRearingLine(e, c),
+                        ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
           // 关系
           if (p.relations.isNotEmpty)
             _SectionCard(
@@ -248,4 +288,27 @@ class _Entry {
 
   final String key;
   final String value;
+}
+
+/// 渲染单个子女的培养档案行。
+Widget _buildChildRearingLine(GameEngine e, String childName) {
+  final text = _childRearingText(e, childName);
+  return Text(text, style: const TextStyle(fontSize: 13));
+}
+
+/// 生成子女培养档案文本（Batch 10-19）。
+String _childRearingText(GameEngine e, String childName) {
+  final p = e.player;
+  final records = p.childRearing.where((r) => r.name == childName).toList();
+  final parts = <String>[];
+  if (records.isNotEmpty) {
+    final r = records.first;
+    if (r.focus.isNotEmpty) parts.add('培养：${r.focus}');
+    if (r.tutored) parts.add('已督导');
+    if (r.sentToSchool) parts.add('进修中');
+    if (r.reputationGain > 0) parts.add('声望 +${r.reputationGain}');
+  } else {
+    parts.add('尚未培养');
+  }
+  return '· $childName：${parts.isEmpty ? '无记录' : parts.join(' / ')}';
 }

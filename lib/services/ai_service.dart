@@ -57,10 +57,11 @@ class AiService {
     required String context,
     required List<GameEvent> availableEvents,
     String season = '',
+    int currentYear = 0,
     int maxTokens = 2000,
     int maxRetries = 3,
   }) async {
-    final prompt = _buildPrompt(player, context, availableEvents, season);
+    final prompt = _buildPrompt(player, context, availableEvents, season, currentYear);
     var attempt = 0;
 
     while (true) {
@@ -144,6 +145,7 @@ class AiService {
     String context,
     List<GameEvent> availableEvents,
     String season,
+    int currentYear,
   ) {
     final eventsDesc = availableEvents
         .map((e) => '- ${e.name}: ${e.description}')
@@ -167,6 +169,27 @@ class AiService {
         ? '（空）'
         : player.inventory.join('、');
     final titleDesc = player.title.isEmpty ? '（无）' : player.title;
+    // Batch 10-19：注入婚姻状态/子女培养/进行中任务
+    final marriageDesc = player.spouse == null
+        ? '（未婚）'
+        : '配偶 ${player.spouse!.name}（${player.spouse!.origin.name}，'
+            '结婚 ${currentYear <= 0 ? "?" : currentYear - player.spouse!.marriedYear} 年）';
+    final childDesc = player.children.isEmpty
+        ? '（无子女）'
+        : player.children
+            .map((c) {
+              final r = player.childRearing.where((x) => x.name == c).toList();
+              if (r.isEmpty) return c;
+              final focus = r.first.focus.isEmpty ? '' : '（培养 ${r.first.focus}）';
+              final school = r.first.sentToSchool ? '（进修中）' : '';
+              return '$c$focus$school';
+            })
+            .join('、');
+    final taskDesc = player.activeTasks.isEmpty
+        ? '（无进行中任务）'
+        : player.activeTasks
+            .map((t) => '${t.title}（${t.completed ? "已完成" : t.failed ? "已失败" : "进行中 ${t.stepIndex} 步"}）')
+            .join('、');
     final equipmentDesc = player.flags.entries
         .where((e) => e.key.startsWith('equipped.') && e.value)
         .map((e) => e.key.substring(9))
@@ -199,6 +222,9 @@ class AiService {
 - 在场 NPC：${onSiteNpcDesc.isEmpty ? '（无）' : onSiteNpcDesc}
 - 背包：$inventoryDesc
 - 已装备：${equipmentDesc.isEmpty ? '（无）' : equipmentDesc}
+- 婚姻：$marriageDesc
+- 子女：$childDesc
+- 进行中任务：$taskDesc
 - 状态：${flagDesc.isEmpty ? '（无特殊状态）' : flagDesc}
 当前情境：
 ${context}

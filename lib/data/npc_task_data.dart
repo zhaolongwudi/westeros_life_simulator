@@ -106,6 +106,103 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
     rewardReputation: 6,
     rewardRelation: 7,
   ),
+
+  // ==================== 琼恩·雪诺（临冬城/长城） ====================
+  NpcTaskTemplate(
+    id: 'task_jon_watch',
+    npcId: 'npc_jon_snow',
+    title: '长城巡逻与补给',
+    type: NpcTaskType.escort,
+    difficulty: 2,
+    deadlineMonths: 4,
+    steps: [
+      NpcTaskStep(description: '清点守夜人的冬储物资', turnsRequired: 1),
+      NpcTaskStep(description: '沿长城巡逻，确认没有野人越墙', turnsRequired: 2),
+    ],
+    rewardGold: 35,
+    rewardReputation: 4,
+    rewardRelation: 6,
+  ),
+  NpcTaskTemplate(
+    id: 'task_jon_ghost',
+    npcId: 'npc_jon_snow',
+    title: '寻找失踪的冰原狼',
+    type: NpcTaskType.hunt,
+    difficulty: 3,
+    deadlineMonths: 4,
+    steps: [
+      NpcTaskStep(description: '循着雪地里的足迹深入狼林', turnsRequired: 2),
+      NpcTaskStep(description: '从陷阱中救出白灵', turnsRequired: 1),
+    ],
+    rewardGold: 45,
+    rewardReputation: 5,
+    rewardRelation: 8,
+  ),
+
+  // ==================== 瑟曦·兰尼斯特（君临） ====================
+  NpcTaskTemplate(
+    id: 'task_cersei_spy',
+    npcId: 'npc_cersei',
+    title: '揪出宫中的叛徒',
+    type: NpcTaskType.investigate,
+    difficulty: 3,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '盘问御林铁卫，找出泄密者', turnsRequired: 1),
+      NpcTaskStep(description: '设局引蛇出洞', turnsRequired: 2),
+    ],
+    rewardGold: 55,
+    rewardReputation: 4,
+    rewardRelation: 6,
+  ),
+  NpcTaskTemplate(
+    id: 'task_cersei_rumor',
+    npcId: 'npc_cersei',
+    title: '散布王后的流言',
+    type: NpcTaskType.diplomacy,
+    difficulty: 4,
+    deadlineMonths: 6,
+    steps: [
+      NpcTaskStep(description: '在君临的酒馆间传播消息', turnsRequired: 1),
+      NpcTaskStep(description: '买通说书人，让流言传遍红堡', turnsRequired: 2),
+      NpcTaskStep(description: '观察朝臣反应，回报瑟曦', turnsRequired: 1),
+    ],
+    rewardGold: 70,
+    rewardReputation: 3,
+    rewardRelation: 7,
+  ),
+
+  // ==================== 奥莲娜·提利尔（高庭） ====================
+  NpcTaskTemplate(
+    id: 'task_olenna_wine',
+    npcId: 'npc_olenna_tyrell',
+    title: '运一批高庭红酒至君临',
+    type: NpcTaskType.delivery,
+    difficulty: 2,
+    deadlineMonths: 3,
+    steps: [
+      NpcTaskStep(description: '在酒窖挑出上等红酒装车', turnsRequired: 1),
+      NpcTaskStep(description: '沿玫瑰大道护送至君临', turnsRequired: 1),
+    ],
+    rewardGold: 40,
+    rewardReputation: 4,
+    rewardRelation: 5,
+  ),
+  NpcTaskTemplate(
+    id: 'task_olenna_marriage',
+    npcId: 'npc_olenna_tyrell',
+    title: '为玛格丽物色夫婿',
+    type: NpcTaskType.diplomacy,
+    difficulty: 3,
+    deadlineMonths: 6,
+    steps: [
+      NpcTaskStep(description: '收集各大家族适婚贵族的资料', turnsRequired: 1),
+      NpcTaskStep(description: '游说其中一位登门提亲', turnsRequired: 2),
+    ],
+    rewardGold: 60,
+    rewardReputation: 5,
+    rewardRelation: 7,
+  ),
 ];
 
 /// 按 ID 查找任务模板。

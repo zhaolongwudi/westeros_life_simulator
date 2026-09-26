@@ -119,6 +119,45 @@ class NpcPanelScreen extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 8),
+          // 进行中的任务（Batch 10-19：任务进度面板 UI）
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      const Icon(Icons.task_alt_outlined, size: 18),
+                      const SizedBox(width: 8),
+                      Text('进行中的任务', style: theme.textTheme.titleMedium),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if (e.activeTasks.isEmpty)
+                    const Text('目前没有进行中的任务。')
+                  else
+                    ...e.activeTasks.map((t) {
+                      final status = t.completed
+                          ? '✅ 已完成'
+                          : t.failed
+                              ? '❌ 已失败'
+                              : '⏳ 进行中';
+                      final deadline =
+                          '期限 ${t.deadlineYear}年${t.deadlineMonth}月';
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          '· ${t.title}：$status｜$deadline',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      );
+                    }),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
