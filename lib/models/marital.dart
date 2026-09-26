@@ -9,7 +9,7 @@ enum SpouseOrigin {
   noble, // 贵族联姻（声望 +10，聘礼重）
   commoner, // 平民（开销低）
   merchant, // 商人（带来金币嫁妆）
-  warrior, // 战士（婚后家宅安宁）
+  warrior; // 战士（婚后家宅安宁）
 
   /// 生育子女数上限。
   int get childLimit {
