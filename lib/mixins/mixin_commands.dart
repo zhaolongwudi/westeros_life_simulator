@@ -12,6 +12,7 @@ import 'mixin_letter.dart';
 import 'mixin_life.dart';
 import 'mixin_marriage.dart';
 import 'mixin_npc_interact.dart';
+import 'mixin_npc_task.dart';
 import 'mixin_play.dart';
 import 'mixin_systems.dart';
 
@@ -43,7 +44,8 @@ mixin GameCommandsMixin
         GameLifeMixin,
         GameNpcInteractMixin,
         GameGenerationMixin,
-        GameMarriageMixin {
+        GameMarriageMixin,
+        GameNpcTaskMixin {
   /// 解析并执行一条玩家指令。
   ///
   /// 返回响应文本。未知指令返回帮助提示。
@@ -155,6 +157,15 @@ mixin GameCommandsMixin
         return CommandResult(text: acceptNpcTask(_normalizeNpc(args)));
       case '关系' || '关系面板' || 'relations':
         return CommandResult(text: formatNpcRelationPanel());
+      case '任务列表' || '任务2' || 'tasks2':
+        return CommandResult(text: formatNpcTaskPanelV2());
+      case '接任务' || 'accept':
+        if (args.isEmpty) {
+          return const CommandResult(text: '接谁的任务？如「接任务 艾德·史塔克」。输入「任务列表」看可接任务。');
+        }
+        return CommandResult(text: acceptNpcTaskV2(_normalizeNpc(args)));
+      case '进度' || '任务进度' || 'progress':
+        return CommandResult(text: formatNpcTaskProgressPanel());
       case '休息' || 'rest':
         return CommandResult(text: rest());
       case '家谱' || '家族' || 'family':
@@ -358,6 +369,9 @@ mixin GameCommandsMixin
 示好 / favor [名字]   向在场 NPC 示好送礼（每日 3 次）
 深聊 / chat [名字]    与 NPC 深聊（相识以上，每日 3 次，更深入）
 任务 / task [名字]    查看可接任务；带名字则接下委托
+任务列表 / tasks2    查看多步骤任务（难度/期限/奖励）
+接任务 / accept [名字] 接下多步骤任务（如 接任务 艾德·史塔克）
+进度 / progress     查看任务进度（进行中/完成/失败）
 关系 / relations     查看全部 NPC 关系/心情/任务数
 家谱 / family       查看家谱与继承人
 立嗣 / addchild [名字] 为家族添丁（如 立嗣 罗柏）

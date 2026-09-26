@@ -9,8 +9,14 @@ import '../models/location.dart';
 import '../providers/game_provider_base.dart';
 import 'mixin_life.dart';
 import 'mixin_npc_interact.dart';
+import 'mixin_npc_task.dart';
 /// 冒险混入。挂在 [GameProviderBase] 上。
-mixin GameAdventureMixin on GameProviderBase, GameLifeMixin, GameNpcInteractMixin {
+mixin GameAdventureMixin
+    on
+        GameProviderBase,
+        GameLifeMixin,
+        GameNpcInteractMixin,
+        GameNpcTaskMixin {
   /// 旅行：前往一个相连的地点。
   ///
   /// 返回旅行叙事文本；目标不在地点相连列表中则拒绝。
@@ -93,12 +99,10 @@ mixin GameAdventureMixin on GameProviderBase, GameLifeMixin, GameNpcInteractMixi
       buf.writeln('一无所获。${danger >= 5 ? '这地方不宜久留。' : '也许下次会有收获。'}');
     }
 
-    // Batch 10-15：探索有 40% 概率结算一项已接 NPC 任务
-    if (rnd.nextDouble() < 0.4) {
-      final taskText = maybeResolveNpcTask();
-      if (taskText.isNotEmpty) {
-        buf.writeln(taskText);
-      }
+    // Batch 10-18：探索推进多步骤任务（替代 10-15 的简单任务结算）
+    final taskText = advanceNpcTasks();
+    if (taskText.isNotEmpty) {
+      buf.writeln(taskText);
     }
 
     // 探索推进时间（半天=0.5 月，用 turnCount 模拟）

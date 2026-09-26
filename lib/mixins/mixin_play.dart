@@ -11,13 +11,15 @@ import 'mixin_generation.dart';
 import 'mixin_life.dart';
 import 'mixin_marriage.dart';
 import 'mixin_npc_interact.dart';
+import 'mixin_npc_task.dart';
 import 'mixin_systems.dart';
 /// 日常玩法混入。挂在 [GameProviderBase] 上。
 ///
 /// [advanceMonth] 需要调用 [GameSystemsMixin.applyMonthlySystems]、
 /// [GameLifeMixin.applyMonthlyLife] 与 [GameNpcInteractMixin.maybeNpcStoryEvent]、
-/// [GameGenerationMixin.maybeSuccessionStory]、[GameMarriageMixin.maybeFamilyEvent]，
-/// 因此 on 约束中列出五者。
+/// [GameGenerationMixin.maybeSuccessionStory]、[GameMarriageMixin.maybeFamilyEvent]、
+/// [GameNpcTaskMixin.advanceNpcTasks/checkNpcTaskDeadlines]，
+/// 因此 on 约束中列出六者。
 mixin GamePlayMixin
     on
         GameProviderBase,
@@ -25,7 +27,8 @@ mixin GamePlayMixin
         GameLifeMixin,
         GameNpcInteractMixin,
         GameGenerationMixin,
-        GameMarriageMixin {
+        GameMarriageMixin,
+        GameNpcTaskMixin {
   /// 每日活动次数上限（防数值刷子，参考 docs/08 玩法限制）。
   static const Map<String, int> kDailyLimits = {
     'train': 3,
@@ -193,6 +196,9 @@ mixin GamePlayMixin
     final succession = maybeSuccessionStory();
     // 婚后生育（Batch 10-17：已婚且未满上限时有概率添丁）
     final familyEvent = maybeFamilyEvent(seed: progress.turnCount);
+    // NPC 多步骤任务：月度推进 + 逾期检查（Batch 10-18）
+    final npcTaskAdvance = advanceNpcTasks();
+    final npcTaskDeadline = checkNpcTaskDeadlines();
     advanceTime();
     // 月度世界事件浮现（30% 概率触发一个可触发事件作为叙事提示）
     final worldEvent = _maybeWorldEvent(seed: progress.turnCount);
@@ -214,6 +220,12 @@ mixin GamePlayMixin
     }
     if (familyEvent.isNotEmpty) {
       buf.writeln(familyEvent);
+    }
+    if (npcTaskAdvance.isNotEmpty) {
+      buf.writeln(npcTaskAdvance);
+    }
+    if (npcTaskDeadline.isNotEmpty) {
+      buf.writeln(npcTaskDeadline);
     }
     if (titlePromotion.isNotEmpty) {
       buf.writeln('🏆 你获得新头衔：$titlePromotion！');

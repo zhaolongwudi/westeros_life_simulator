@@ -4,6 +4,7 @@
 library;
 
 import 'marital.dart';
+import 'npc_task.dart';
 
 /// 玩家身份类型。
 enum PlayerIdentity {
@@ -45,6 +46,7 @@ class Player {
     this.spouse,
     this.childRearing = const [],
     this.generationRecords = const [],
+    this.activeTasks = const [],
   });
 
   /// 唯一标识。
@@ -110,6 +112,8 @@ class Player {
   final List<ChildRearing> childRearing;
   /// 世代谱系（Batch 10-17：家族树多代展示）。
   final List<GenerationRecord> generationRecords;
+  /// 进行中的 NPC 任务（Batch 10-18：多步骤任务实例）。
+  final List<NpcTaskProgress> activeTasks;
 
   /// 创建默认玩家（用于测试与初始化）。
   factory Player.defaultPlayer() {
@@ -173,6 +177,7 @@ class Player {
     SpouseDetail? spouse,
     List<ChildRearing>? childRearing,
     List<GenerationRecord>? generationRecords,
+    List<NpcTaskProgress>? activeTasks,
   }) {
     // 允许显式清空配偶（离婚/丧偶）：null 无法用 ?? 区分，用哨兵
     final spouseValue = identical(spouse, _noSpouse) ? null : (spouse ?? this.spouse);
@@ -200,6 +205,7 @@ class Player {
       spouse: spouseValue,
       childRearing: childRearing ?? this.childRearing,
       generationRecords: generationRecords ?? this.generationRecords,
+      activeTasks: activeTasks ?? this.activeTasks,
     );
   }
 
@@ -232,6 +238,7 @@ class Player {
       'spouse': spouse?.toJson(),
       'childRearing': childRearing.map((e) => e.toJson()).toList(),
       'generationRecords': generationRecords.map((e) => e.toJson()).toList(),
+      'activeTasks': activeTasks.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -267,6 +274,10 @@ class Player {
           const [],
       generationRecords: (json['generationRecords'] as List?)
               ?.map((e) => GenerationRecord.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      activeTasks: (json['activeTasks'] as List?)
+              ?.map((e) => NpcTaskProgress.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
     );

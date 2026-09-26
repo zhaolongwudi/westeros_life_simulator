@@ -16,6 +16,7 @@ import 'mixins/mixin_letter.dart';
 import 'mixins/mixin_life.dart';
 import 'mixins/mixin_marriage.dart';
 import 'mixins/mixin_npc_interact.dart';
+import 'mixins/mixin_npc_task.dart';
 import 'mixins/mixin_play.dart';
 import 'mixins/mixin_systems.dart';
 import 'providers/game_provider_base.dart';
@@ -25,6 +26,7 @@ class GameEngine extends GameProviderBase
         GameSystemsMixin,
         GameLifeMixin,
         GameNpcInteractMixin,
+        GameNpcTaskMixin,
         GameGenerationMixin,
         GameMarriageMixin,
         GamePlayMixin,
