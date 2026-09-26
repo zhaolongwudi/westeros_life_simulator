@@ -17,7 +17,7 @@ class MapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final e = engine ?? GameEngine()..startNewGame();
+    final e = engine ?? (GameEngine()..startNewGame());
     final locations = e.locations;
     final playerLocId = e.player.locationId;
 

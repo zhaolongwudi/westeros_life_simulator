@@ -17,7 +17,7 @@ class FamilyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final e = engine ?? GameEngine()..startNewGame();
+    final e = engine ?? (GameEngine()..startNewGame());
     final myFamily = e.playerFamily;
     final families = e.families;
 

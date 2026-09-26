@@ -21,7 +21,7 @@ class LettersScreen extends StatefulWidget {
 }
 
 class _LettersScreenState extends State<LettersScreen> {
-  late final GameEngine _engine = widget.engine ?? GameEngine()..startNewGame();
+  late final GameEngine _engine = widget.engine ?? (GameEngine()..startNewGame());
   final TextEditingController _replyController = TextEditingController();
 
   @override

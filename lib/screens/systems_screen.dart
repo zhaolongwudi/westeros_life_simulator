@@ -17,7 +17,7 @@ class SystemsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final e = engine ?? GameEngine()..startNewGame();
+    final e = engine ?? (GameEngine()..startNewGame());
     final available = e.availableSystems();
     final all = e.systemCount;
 

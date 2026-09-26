@@ -26,7 +26,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late final GameEngine _engine = widget.engine ?? GameEngine()..startNewGame();
+  late final GameEngine _engine = widget.engine ?? (GameEngine()..startNewGame());
   late final SaveService _saveService =
       widget.saveService ?? SaveService();
 

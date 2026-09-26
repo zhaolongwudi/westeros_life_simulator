@@ -15,7 +15,9 @@ class NpcPanelScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final e = engine ?? GameEngine()..startNewGame();
+    // 注意：`??` 优先级高于级联 `..`，必须加括号，否则传入 engine 时
+    // (engine ?? GameEngine())..startNewGame() 会重置传入引擎的玩家数据（坑 23）
+    final e = engine ?? (GameEngine()..startNewGame());
     final theme = Theme.of(context);
     final onSite = e.npcsAtCurrentLocation;
     return Scaffold(

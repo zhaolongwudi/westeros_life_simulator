@@ -41,7 +41,7 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  late final GameEngine _engine = widget.engine ?? GameEngine()..startNewGame();
+  late final GameEngine _engine = widget.engine ?? (GameEngine()..startNewGame());
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 

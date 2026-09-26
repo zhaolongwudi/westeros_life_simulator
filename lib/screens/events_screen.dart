@@ -19,7 +19,7 @@ class EventsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final e = engine ?? GameEngine()..startNewGame();
+    final e = engine ?? (GameEngine()..startNewGame());
     final allEvents = e.eventTemplates;
     final available = e.eventProvider.getAvailableEvents(
       e.player,
