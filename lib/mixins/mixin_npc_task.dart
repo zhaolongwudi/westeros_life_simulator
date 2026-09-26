@@ -82,7 +82,7 @@ mixin GameNpcTaskMixin
     if (template == null) return '没有找到这个任务。';
     // 生成任务实例：期限 = 当前时间 + deadlineMonths
     final deadline = _addMonths(progress.year, progress.month, template.deadlineMonths);
-    final progress = NpcTaskProgress(
+    final taskProgress = NpcTaskProgress(
       taskId: template.id,
       npcId: npc.id,
       title: template.title,
@@ -91,7 +91,7 @@ mixin GameNpcTaskMixin
       deadlineYear: deadline.$1,
       deadlineMonth: deadline.$2,
     );
-    final tasks = List<NpcTaskProgress>.from(player.activeTasks)..add(progress);
+    final tasks = List<NpcTaskProgress>.from(player.activeTasks)..add(taskProgress);
     updatePlayer(player.copyWith(activeTasks: tasks));
     adjustRelation(npc.id, 2);
     final firstStep = template.steps.first.description;
