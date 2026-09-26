@@ -56,7 +56,12 @@ void main() {
       expect(result, contains('接下'));
       expect(engine.activeTasks, hasLength(1));
       expect(engine.activeTasks.first.stepIndex, 0);
-      expect(engine.activeTasks.first.deadlineYear, greaterThan(283));
+      // 期限应在未来：283年3月 + 6 个月 = 283年8月（同年）
+      final dl = engine.activeTasks.first;
+      expect(dl.deadlineYear, greaterThanOrEqualTo(283));
+      if (dl.deadlineYear == 283) {
+        expect(dl.deadlineMonth, greaterThan(3));
+      }
     });
     test('重复接同一 NPC 任务不再给新任务', () {
       final engine = GameEngine()..startNewGame();
