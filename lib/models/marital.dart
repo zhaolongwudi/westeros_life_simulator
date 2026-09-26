@@ -10,6 +10,39 @@ enum SpouseOrigin {
   commoner, // 平民（开销低）
   merchant, // 商人（带来金币嫁妆）
   warrior, // 战士（婚后家宅安宁）
+
+  /// 生育子女数上限。
+  int get childLimit {
+    return switch (this) {
+      SpouseOrigin.noble => 4,
+      SpouseOrigin.commoner => 3,
+      SpouseOrigin.merchant => 3,
+      SpouseOrigin.warrior => 2,
+    };
+  }
+
+  /// 婚礼开销（金币）。
+  int get weddingCost {
+    return switch (this) {
+      SpouseOrigin.noble => 80,
+      SpouseOrigin.commoner => 20,
+      SpouseOrigin.merchant => 40,
+      SpouseOrigin.warrior => 30,
+    };
+  }
+
+  /// 婚后声望加值。
+  int get reputationBonus {
+    return switch (this) {
+      SpouseOrigin.noble => 10,
+      SpouseOrigin.commoner => 0,
+      SpouseOrigin.merchant => 3,
+      SpouseOrigin.warrior => 2,
+    };
+  }
+
+  /// 商人配偶带来的嫁妆。
+  int get dowry => this == SpouseOrigin.merchant ? 60 : 0;
 }
 
 /// 配偶详情。
@@ -32,41 +65,6 @@ class SpouseDetail {
 
   /// 配偶家族 ID（贵族联姻有值）。
   final String familyId;
-
-  /// 生育子女数标记（结婚后随月度增长，最多 4 个）。
-  int get childLimit {
-    return switch (origin) {
-      SpouseOrigin.noble => 4,
-      SpouseOrigin.commoner => 3,
-      SpouseOrigin.merchant => 3,
-      SpouseOrigin.warrior => 2,
-    };
-  }
-
-  /// 婚礼开销（金币）。
-  int get weddingCost {
-    return switch (origin) {
-      SpouseOrigin.noble => 80,
-      SpouseOrigin.commoner => 20,
-      SpouseOrigin.merchant => 40,
-      SpouseOrigin.warrior => 30,
-    };
-  }
-
-  /// 婚后声望加值。
-  int get reputationBonus {
-    return switch (origin) {
-      SpouseOrigin.noble => 10,
-      SpouseOrigin.commoner => 0,
-      SpouseOrigin.merchant => 3,
-      SpouseOrigin.warrior => 2,
-    };
-  }
-
-  /// 商人配偶带来的嫁妆。
-  int get dowry {
-    return origin == SpouseOrigin.merchant ? 60 : 0;
-  }
 
   Map<String, dynamic> toJson() {
     return {

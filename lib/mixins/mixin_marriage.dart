@@ -108,7 +108,7 @@ mixin GameMarriageMixin
     if (!isGameActive || isGameOver) return '';
     if (!isMarried) return '';
     final spouse = player.spouse!;
-    final limit = spouse.childLimit;
+    final limit = spouse.origin.childLimit;
     if (player.children.length >= limit) return '';
     final rnd = rng(seed);
     if (rnd.nextDouble() > 0.25) return '';
