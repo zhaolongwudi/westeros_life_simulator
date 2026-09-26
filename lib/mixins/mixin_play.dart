@@ -235,7 +235,6 @@ mixin GamePlayMixin
       if (heir != null) {
         final newPlayer = advanceGeneration();
         if (newPlayer != null) {
-          updatePlayer(newPlayer);
           return '⚜️ 你溘然长逝。血脉延续——「$heir」继承家业，成为新的家主。'
               '（第 ${generationNumber()} 代，金币 ${newPlayer.gold}，声望 ${newPlayer.reputation}）';
         }

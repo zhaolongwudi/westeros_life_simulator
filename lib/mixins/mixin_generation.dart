@@ -125,6 +125,8 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
     );
     // 标记继承人为已继位（从后续继承人候选中移除）
     setFlag('house.childDead.$heir', true);
+    // 直接切换为继承者（行动方法风格：调用即生效）
+    updatePlayer(newPlayer);
     return newPlayer;
   }
 
