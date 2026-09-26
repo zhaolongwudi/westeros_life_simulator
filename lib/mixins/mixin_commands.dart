@@ -7,6 +7,7 @@ import '../data/item_data.dart';
 import '../models/npc.dart';
 import '../providers/game_provider_base.dart';
 import 'mixin_adventure.dart';
+import 'mixin_generation.dart';
 import 'mixin_letter.dart';
 import 'mixin_life.dart';
 import 'mixin_npc_interact.dart';
@@ -39,7 +40,8 @@ mixin GameCommandsMixin
         GameLetterMixin,
         GameAdventureMixin,
         GameLifeMixin,
-        GameNpcInteractMixin {
+        GameNpcInteractMixin,
+        GameGenerationMixin {
   /// 解析并执行一条玩家指令。
   ///
   /// 返回响应文本。未知指令返回帮助提示。
@@ -141,6 +143,13 @@ mixin GameCommandsMixin
         return CommandResult(text: npcFavor(_normalizeNpc(args)));
       case '休息' || 'rest':
         return CommandResult(text: rest());
+      case '家谱' || '家族' || 'family':
+        return CommandResult(text: formatFamilyTree());
+      case '立嗣' || '添丁' || 'addchild':
+        if (args.isEmpty) {
+          return const CommandResult(text: '给子女起个名字吧。如「立嗣 罗柏」。');
+        }
+        return CommandResult(text: addChild(args));
       case '过月' || 'advance':
         return CommandResult(
           text: advanceMonth(),
@@ -308,10 +317,11 @@ mixin GameCommandsMixin
 在场 / npc         查看当前在场的 NPC 与关系
 互动 / interact [名字]  与在场 NPC 深度互动（好感越高内容越深）
 示好 / favor [名字]   向在场 NPC 示好送礼（每日 3 次）
+家谱 / family       查看家谱与继承人
+立嗣 / addchild [名字] 为家族添丁（如 立嗣 罗柏）
 休息 / rest         恢复精力/饱食（花 2 金币）
 过月 / advance      推进一个月
 帮助 / help         显示本帮助
-
 提示：精力与饱食每月结算，饥饿会掉健康，注意休息与进食。
 ''';
   }

@@ -263,6 +263,14 @@ class GameStateProvider extends ChangeNotifier {
     _player = player;
     notifyListeners();
   }
+  /// 结束游戏（置 isGameOver，停止时间推进）。
+  ///
+  /// 供家族血脉断绝等全局终结场景调用。
+  void endGame() {
+    _isGameOver = true;
+    _isGameActive = false;
+    notifyListeners();
+  }
 
   /// 从另一个状态复制全部字段（用于加载存档/导入）。
   void applyState(GameStateProvider other) {

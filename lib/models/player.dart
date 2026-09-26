@@ -38,6 +38,8 @@ class Player {
     this.energy = 100,
     this.hunger = 0,
     this.title = '',
+    this.house = '',
+    this.children = const [],
   });
 
   /// 唯一标识。
@@ -93,6 +95,10 @@ class Player {
 
   /// 头衔（如 '爵士'、'守夜人总司令'，随声望/事件晋升）。
   final String title;
+  /// 家族别名/玩家姓氏（如 '史塔克'、'坦格利安'；自由民可自定义）。
+  final String house;
+  /// 子女 ID 列表（Batch 10-14 多世代：继承人从子女中产生）。
+  final List<String> children;
 
   /// 创建默认玩家（用于测试与初始化）。
   factory Player.defaultPlayer() {
@@ -151,6 +157,8 @@ class Player {
     int? energy,
     int? hunger,
     String? title,
+    String? house,
+    List<String>? children,
   }) {
     return Player(
       id: id ?? this.id,
@@ -171,6 +179,8 @@ class Player {
       energy: energy ?? this.energy,
       hunger: hunger ?? this.hunger,
       title: title ?? this.title,
+      house: house ?? this.house,
+      children: children ?? this.children,
     );
   }
 
@@ -195,6 +205,8 @@ class Player {
       'energy': energy,
       'hunger': hunger,
       'title': title,
+      'house': house,
+      'children': children,
     };
   }
 
@@ -219,6 +231,8 @@ class Player {
       energy: json['energy'] as int? ?? 100,
       hunger: json['hunger'] as int? ?? 0,
       title: json['title'] as String? ?? '',
+      house: json['house'] as String? ?? '',
+      children: (json['children'] as List?)?.cast<String>() ?? const [],
     );
   }
 

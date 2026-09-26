@@ -4,20 +4,26 @@
 library;
 
 import 'dart:math';
-
 import '../models/location.dart';
 import '../models/player.dart';
 import '../providers/game_provider_base.dart';
+import 'mixin_generation.dart';
 import 'mixin_life.dart';
 import 'mixin_npc_interact.dart';
 import 'mixin_systems.dart';
-
 /// 日常玩法混入。挂在 [GameProviderBase] 上。
 ///
 /// [advanceMonth] 需要调用 [GameSystemsMixin.applyMonthlySystems]、
-/// [GameLifeMixin.applyMonthlyLife] 与 [GameNpcInteractMixin.maybeNpcStoryEvent]，
-/// 因此 on 约束中列出三者。
-mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin, GameNpcInteractMixin {
+/// [GameLifeMixin.applyMonthlyLife] 与 [GameNpcInteractMixin.maybeNpcStoryEvent]、
+/// [GameGenerationMixin.maybeSuccessionStory]，
+/// 因此 on 约束中列出四者。
+mixin GamePlayMixin
+    on
+        GameProviderBase,
+        GameSystemsMixin,
+        GameLifeMixin,
+        GameNpcInteractMixin,
+        GameGenerationMixin {
   /// 每日活动次数上限（防数值刷子，参考 docs/08 玩法限制）。
   static const Map<String, int> kDailyLimits = {
     'train': 3,
@@ -181,9 +187,13 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin, GameNp
     final titlePromotion = checkTitlePromotion();
     // NPC 好感度事件链（关系突破阈值触发专属剧情）
     final npcStory = maybeNpcStoryEvent(seed: progress.turnCount);
+    // 家族传承提示（年长/濒死时立嗣）
+    final succession = maybeSuccessionStory();
     advanceTime();
     // 月度世界事件浮现（30% 概率触发一个可触发事件作为叙事提示）
     final worldEvent = _maybeWorldEvent(seed: progress.turnCount);
+    // 死亡：尝试世代传承
+    final inheritance = _tryInheritance();
     final buf = StringBuffer()
       ..writeln('⏳ 时间推进到 ${progress.year}年${progress.month}月（${progress.season}）');
     if (monthText.isNotEmpty) {
@@ -195,8 +205,14 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin, GameNp
     if (npcStory.isNotEmpty) {
       buf.writeln(npcStory);
     }
+    if (succession.isNotEmpty) {
+      buf.writeln(succession);
+    }
     if (titlePromotion.isNotEmpty) {
       buf.writeln('🏆 你获得新头衔：$titlePromotion！');
+    }
+    if (inheritance != null) {
+      buf.writeln(inheritance);
     }
     if (worldEvent.isNotEmpty) {
       buf.writeln(worldEvent);
@@ -206,6 +222,29 @@ mixin GamePlayMixin on GameProviderBase, GameSystemsMixin, GameLifeMixin, GameNp
       buf.writeln('你身处 ${loc.name}（${loc.region}）。');
     }
     return buf.toString().trim();
+  }
+  /// 玩家死亡后的世代传承尝试。
+  ///
+  /// - 有继承人：切换为继承人（新玩家），返回传承叙事，游戏继续。
+  /// - 无继承人：家族血脉断绝，游戏结束（isGameOver），返回落幕叙事。
+  ///
+  /// 返回追加到叙事的文本；玩家存活返回 null。
+  String? _tryInheritance() {
+    if (!(player.flags['isAlive'] ?? true)) {
+      final heir = heirName;
+      if (heir != null) {
+        final newPlayer = advanceGeneration();
+        if (newPlayer != null) {
+          updatePlayer(newPlayer);
+          return '⚜️ 你溘然长逝。血脉延续——「$heir」继承家业，成为新的家主。'
+              '（第 ${generationNumber()} 代，金币 ${newPlayer.gold}，声望 ${newPlayer.reputation}）';
+        }
+      }
+      // 无继承人：血脉断绝
+      endGame();
+      return '🕯️ 你没有留下子嗣。家族血脉随你一同断绝，传奇落幕。';
+    }
+    return null;
   }
 
   /// 月度世界事件浮现：从可触发事件中随机选一个作叙事提示。

@@ -129,6 +129,39 @@ class PlayerPanelScreen extends StatelessWidget {
                   })
                   .toList(),
             ),
+          // 家谱（Batch 10-14：家族继承与多世代）
+          Card(
+            margin: const EdgeInsets.only(top: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      const Icon(Icons.account_tree_outlined, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        '家谱 · ${e.houseName}家（第 ${e.generationNumber()} 代）',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text('家主：${p.name}（${p.age}岁）'),
+                  Text('婚姻：${e.flagOf('isMarried') ? '已婚' : '未婚'}'),
+                  Text(
+                    p.children.isEmpty
+                        ? '子女：尚无子嗣'
+                        : '子女：${p.children.join('、')}',
+                  ),
+                  if (e.heirName != null)
+                    Text('继承人：${e.heirName}',
+                        style: Theme.of(context).textTheme.bodyMedium),
+                ],
+              ),
+            ),
+          ),
           // 关系
           if (p.relations.isNotEmpty)
             _SectionCard(
