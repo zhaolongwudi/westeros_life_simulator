@@ -25,15 +25,18 @@ lib/
 │   ├── event_data.dart            # 72 事件（60 + 12 复合）
 │   ├── system_data.dart           # 74 系统
 │   ├── item_data.dart             # 34 物品
-│   └── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节）
+│   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节）
+│   └── npc_task_data.dart         # NPC 多步骤任务模板（6 个：艾德/提利昂/丹妮莉丝，Batch 10-18）
 │
 ├── models/                        # 【模型层】不可变实体（copyWith + toJson/fromJson）
-│   ├── player.dart                # Player（含 health/energy/hunger/title/house/children）
+│   ├── player.dart                # Player（含 health/energy/hunger/title/house/children/spouse/childRearing/generationRecords/activeTasks）
 │   ├── family.dart                # Family + FamilyScale
 │   ├── npc.dart                   # Npc + NpcType（含 tasks/mood，Batch 10-15）
 │   ├── location.dart              # Location + LocationType
 │   ├── event.dart                 # GameEvent + EventChoice + EventType
-│   └── system.dart                # GameSystem
+│   ├── system.dart                # GameSystem
+│   ├── marital.dart               # SpouseDetail/ChildRearing/GenerationRecord（婚姻/培养/谱系状态对象，Batch 10-17）
+│   └── npc_task.dart              # NpcTaskType/NpcTaskStep/NpcTaskTemplate/NpcTaskProgress（任务模板+实例，Batch 10-18）
 │
 ├── providers/                     # 【状态层】ChangeNotifier
 │   ├── game_state_provider.dart   # GameStateProvider：玩家/进度/事件历史 + applyEffects + endGame
@@ -47,7 +50,9 @@ lib/
 │   ├── mixin_adventure.dart       # 旅行/探索/遭遇（探索含 NPC 任务结算）
 │   ├── mixin_letter.dart          # NPC 来信/回信/关系培养
 │   ├── mixin_npc_interact.dart    # NPC 深度交互：关系等级/互动/示好/事件链 + 任务链/深聊/关系面板
-│   ├── mixin_generation.dart      # ⭐ 家族继承与多世代：立嗣/家谱/死亡传承（Batch 10-14）
+│   ├── mixin_generation.dart      # ⭐ 家族继承与多世代：立嗣/家谱/死亡传承（Batch 10-14；advanceGeneration 写谱系记录，Batch 10-17）
+│   ├── mixin_marriage.dart        # ⭐ 婚姻系统：求婚/配偶互动/婚后每月事件/子女培养/督导送学/多代家族树（Batch 10-17，245 行）
+│   ├── mixin_npc_task.dart        # ⭐ NPC 任务链二轮：多步骤任务/期限系统/奖励差异化（Batch 10-18，221 行）
 │   ├── mixin_commands.dart        # ⭐ 指令解析：resolveCommand 分发全部指令
 │   └── mixin_ai.dart              # AI 回合混入（applyAiChoice）
 │
@@ -79,8 +84,9 @@ lib/
 
 ```
 GameEngine extends GameProviderBase with:
-  GameSystemsMixin → GameLifeMixin → GameNpcInteractMixin → GameGenerationMixin
-  → GamePlayMixin → GameLetterMixin → GameAdventureMixin → GameCommandsMixin → GameAiMixin
+  GameSystemsMixin → GameLifeMixin → GameNpcInteractMixin → GameNpcTaskMixin
+  → GameGenerationMixin → GameMarriageMixin → GamePlayMixin → GameLetterMixin
+  → GameAdventureMixin → GameCommandsMixin → GameAiMixin
 ```
 
 **规则**：mixin 的 `on` 子句列出依赖；**被依赖者必须在宿主 with 中排在前面**。
@@ -90,9 +96,11 @@ GameEngine extends GameProviderBase with:
 |-------|---------|------|
 | GameLifeMixin | GameProviderBase | 生存/物品/贸易/装备/头衔 |
 | GameNpcInteractMixin | Base, Life | NPC 交互 |
+| GameNpcTaskMixin | Base, Life, NpcInteract | 多步骤任务/期限（Batch 10-18） |
 | GameGenerationMixin | Base, Life | 家族继承（Batch 10-14） |
+| GameMarriageMixin | Base, Life, Generation | 婚姻/培养/家族树（Batch 10-17） |
 | GamePlayMixin | Base, Systems, Life, NpcInteract, Generation | 日常玩法+过月 |
-| GameAdventureMixin | Base, Life, NpcInteract | 旅行/探索（探索结算 NPC 任务） |
+| GameAdventureMixin | Base, Life, NpcInteract, NpcTask | 旅行/探索（探索推进任务，Batch 10-18） |
 | GameCommandsMixin | 全部 | 指令解析 |
 | GameAiMixin | ？ | AI 回合（见 mixin_ai.dart） |
 
@@ -120,7 +128,16 @@ GameEngine extends GameProviderBase with:
 | NPC 深聊 | mixin_npc_interact.dart（npcChat） |
 | NPC 关系面板 | mixin_npc_interact.dart（formatNpcRelationPanel） |
 | 家谱/立嗣 | mixin_generation.dart（addChild/formatFamilyTree） |
-| 继承人/世代传承 | mixin_generation.dart（heirName/advanceGeneration） |
+| 继承人/世代传承 | mixin_generation.dart（heirName/advanceGeneration，Batch 10-17 写谱系记录） |
+| 求婚/成婚 | mixin_marriage.dart（marry，Batch 10-17） |
+| 配偶互动 | mixin_marriage.dart（spouseInteract，恢复精力，Batch 10-17） |
+| 婚后每月事件 | mixin_marriage.dart（maybeFamilyEvent，挂 advanceMonth，Batch 10-17） |
+| 子女培养 | mixin_marriage.dart（rearChild/tutorChild/sendChildToSchool，Batch 10-17） |
+| 多代家族树 | mixin_marriage.dart（formatMultiGenTree，Batch 10-17） |
+| NPC 多步骤任务列表 | mixin_npc_task.dart（availableTasksOf/formatNpcTaskPanelV2，Batch 10-18） |
+| NPC 接任务 | mixin_npc_task.dart（acceptNpcTaskV2，Batch 10-18） |
+| NPC 任务推进/期限 | mixin_npc_task.dart（advanceNpcTasks/checkNpcTaskDeadlines，探索+过月挂载，Batch 10-18） |
+| NPC 任务进度面板 | mixin_npc_task.dart（formatNpcTaskProgressPanel，Batch 10-18） |
 | 效果应用（事件/AI 共用） | providers/game_state_provider.dart（applyEffects） |
 | 游戏结束/血脉断绝 | providers/game_state_provider.dart（endGame）+ mixin_play.dart（_tryInheritance） |
 | AI 叙事生成 | services/ai_service.dart（generateNarrative/_buildPrompt） |
@@ -164,14 +181,23 @@ GameEngine extends GameProviderBase with:
 | 示好 | 送礼/favor [名字] | npcFavor | 否 |
 | 深聊 | 聊天/chat [名字] | npcChat（Batch 10-15） | 否 |
 | 任务 | 委托/task [名字] | formatNpcTaskPanel / acceptNpcTask | 否 |
+| 任务列表 | 任务2/tasks2 | formatNpcTaskPanelV2（Batch 10-18） | 否 |
+| 接任务 | accept | acceptNpcTaskV2（Batch 10-18） | 否 |
+| 进度 | 任务进度/progress | formatNpcTaskProgressPanel（Batch 10-18） | 否 |
 | 关系 | 关系面板/relations | formatNpcRelationPanel（Batch 10-15） | 否 |
 | 家谱 | 家族/family | formatFamilyTree（Batch 10-14） | 否 |
 | 立嗣 | 添丁/addchild [名字] | addChild（Batch 10-14） | 否 |
+| 求婚 | 成婚/marry [名字] | marry（Batch 10-17） | 否 |
+| 配偶 | 共处/spouse | spouseInteract（Batch 10-17） | 否 |
+| 培养 | rear [孩子] [方向] | rearChild（Batch 10-17） | 否 |
+| 督导 | tutor [孩子] | tutorChild（Batch 10-17） | 否 |
+| 送学 | school [孩子] | sendChildToSchool（Batch 10-17） | 否 |
+| 家族树 | 谱系/tree | formatMultiGenTree（Batch 10-17） | 否 |
 | 休息 | rest | rest | 否 |
 | 过月 | advance | advanceMonth | 是 |
 | 帮助 | help | _helpText | 否 |
 
-## 五、测试文件映射（test/ 35 文件，总 4880+ 行）
+## 五、测试文件映射（test/ 37 文件，总 4880+ 行）
 
 | 测试文件 | 覆盖 |
 |----------|------|
@@ -196,6 +222,8 @@ GameEngine extends GameProviderBase with:
 | batch10_13_npc_interact_test | NPC 深度交互（10-13） |
 | batch10_14_inheritance_test | 家族继承/多世代（10-14） |
 | batch10_15_npc_tasks_test | NPC 任务链/深聊/关系面板（10-15） |
+| batch10_17_marriage_test | 婚姻/培养/家族树（10-17，25 用例） |
+| batch10_18_npc_task2_test | 多步骤任务/期限/奖励差异化（10-18，15 用例） |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
 > （grep `allEvents.length` / `eventsByType(...).length`）。
@@ -208,6 +236,11 @@ GameEngine extends GameProviderBase with:
 - **私有成员跨 mixin 不可见** → 新计数用独立前缀自建（坑 16）
 - **toJson/fromJson 字段必须对齐** → 新增字段给默认值 + fromJson `??` 兜底（坑 8/12）
 - **Dio mock 捕获** → 用 List 容器而非 record 值拷贝（坑 14）
+- **枚举带方法体** → 最后一个枚举成员必须 `;` 结尾（坑 20）
+- **行为 getter 放枚举不放数据类** → SpouseOrigin 承载开销/声望/嫁妆/子女上限（坑 20）
+- **测试避免对满值做增量断言** → 先构造可增长初始值（坑 20）
+- **局部变量勿与基类 getter 重名** → progress 遮蔽，改名 taskProgress（坑 21）
+- **期限断言注意跨年边界** → 用 _addMonths 推算，勿臆测 +1 年（坑 21）
 - **本地无 Flutter** → 靠 GitHub Actions CI 验证；括号用 python 脚本检查
 - **gitdata_push 多 commit 极慢** → 必须后台跑 + 轮询日志（坑 10）；网络断了可重跑（幂等）
 - **HANDOVER.md 已 gitignore** → 只本地更新；README 正常推送
@@ -216,7 +249,8 @@ GameEngine extends GameProviderBase with:
 
 1. 不要用 heredoc 传中文（shell 破坏 UTF-8）→ 用 create_file/edit_file 工具
 2. 单文件不要太大（用户偏好，便于维护）；mixin_life 已 769 行，新功能优先拆新文件
+   （Batch 10-17/10-18 新功能全部拆独立文件：mixin_marriage 245 行 / mixin_npc_task 221 行）
 3. 每次改完先括号检查（python 脚本），再 commit → push → CI → 绿后更新 HANDOVER + README
 
 ---
-*文档版本：v1.0（Batch 10-16 新增）· 最后更新：2026-09-26*
+*文档版本：v1.1（Batch 10-18 更新）· 最后更新：2026-09-26*
