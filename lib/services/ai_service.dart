@@ -190,6 +190,15 @@ class AiService {
         : player.activeTasks
             .map((t) => '${t.title}（${t.completed ? "已完成" : t.failed ? "已失败" : "进行中 ${t.stepIndex} 步"}）')
             .join('、');
+    // Batch 10-20：注入世代谱系（历代家主）与头衔晋升进度
+    final lineageDesc = player.generationRecords.isEmpty
+        ? '（第一代家主）'
+        : '第 ${player.generationRecords.length + 1} 代，先祖：'
+            '${player.generationRecords.map((g) => '${g.generation}代 ${g.name}（${g.title}${g.achievement.isEmpty ? '' : "，${g.achievement}"}）').join(' → ')}';
+    final titleProgressDesc = player.title.isEmpty
+        ? '（暂无头衔）'
+        : '当前头衔 ${player.title}，声望 ${player.reputation}/100'
+            '${player.reputation >= 90 ? '，已接近王国之巅' : player.reputation >= 70 ? '，距更高头衔一步之遥' : '，声望仍可继续攀升'}';
     final equipmentDesc = player.flags.entries
         .where((e) => e.key.startsWith('equipped.') && e.value)
         .map((e) => e.key.substring(9))
@@ -210,6 +219,8 @@ class AiService {
 - 姓名：${player.name}
 - 身份：${identityLabel(player.identity)}
 - 头衔：$titleDesc
+- 头衔晋升：$titleProgressDesc
+- 世代谱系：$lineageDesc
 - 家族：${player.familyId}
 - 年龄：${player.age}
 - 地点：${player.locationId}（${region.isEmpty ? '未知区域' : region}）

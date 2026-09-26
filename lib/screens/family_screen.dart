@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../game_engine.dart';
 import '../models/family.dart';
+import 'family_tree_screen.dart';
 
 /// 家族面板。
 class FamilyScreen extends StatelessWidget {
@@ -31,6 +32,26 @@ class FamilyScreen extends StatelessWidget {
             Text('我的家族', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             _FamilyCard(family: myFamily, highlight: true),
+            const SizedBox(height: 8),
+            // 家族树入口（Batch 10-20：多代家族树可视化）
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.account_tree_outlined),
+                title: const Text('查看家族树'),
+                subtitle: Text(
+                  '${e.houseName}家 · 第 ${e.generationNumber()} 代'
+                  '${e.player.generationRecords.isEmpty ? '' : '（${e.player.generationRecords.length} 位先祖）'}',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => FamilyTreeScreen(engine: e),
+                    ),
+                  );
+                },
+              ),
+            ),
             const SizedBox(height: 16),
           ],
           // 全部家族
