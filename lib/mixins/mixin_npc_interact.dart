@@ -211,4 +211,121 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
     }
     return buf.toString().trim();
   }
+  // ==================== Batch 10-15：NPC 任务链 / 深聊 / 关系面板 ====================
+  /// 某 NPC 的任务列表（无则空列表）。
+  List<String> npcTasks(String npcId) {
+    final npc = npcById(npcId);
+    return npc == null ? const <String>[] : npc.tasks;
+  }
+  /// 任务面板：列出在场 NPC 的可接任务。
+  String formatNpcTaskPanel() {
+    final buf = StringBuffer()..writeln('【可接任务】');
+    var any = false;
+    for (final n in npcsAtCurrentLocation) {
+      if (n.tasks.isEmpty) continue;
+      any = true;
+      buf.writeln('· ${n.name}：${n.tasks.join(' / ')}');
+    }
+    if (!any) return '【可接任务】\n在场的人没有委托给你任务。';
+    return buf.toString().trim();
+  }
+  /// 接受一位在场 NPC 的任务（关系 ≥ 相识 才肯委托）。
+  ///
+  /// 返回叙事文本；未达关系/不在场返回说明。
+  String acceptNpcTask(String npcId) {
+    final npc = npcById(npcId);
+    if (npc == null) return '没有叫「$npcId」的人。';
+    if (!npc.isAlive) return '${npc.name}已经不在了。';
+    if (npc.locationId != player.locationId) return '${npc.name}不在这里。';
+    if (npc.tasks.isEmpty) return '${npc.name}没有委托给你的任务。';
+    final rel = npcRelation(npc.id);
+    if (rel < 20) {
+      return '${npc.name}还信不过你：「等你我熟络些，再说这些事吧。」';
+    }
+    // 接受任务：记录任务标记（一次性）
+    final task = npc.tasks.first;
+    final flagKey = 'npc_task.${npc.id}.$task';
+    if (flagOf(flagKey)) {
+      return '你已经接下「$task」，${npc.name}在等你带回消息。';
+    }
+    setFlag(flagKey, true);
+    adjustRelation(npc.id, 2);
+    return '📜 你接下${npc.name}的委托：「$task」。他/她郑重道：「事成之后，不会亏待你。」关系 +2。';
+  }
+  /// 任务进度检查：已接任务在探索/过月后结算。
+  ///
+  /// 当前简化：探索时 40% 概率完成一项已接任务（获得金币+声望+关系）。
+  String maybeResolveNpcTask() {
+    final buf = StringBuffer();
+    for (final n in npcsAtCurrentLocation) {
+      for (final task in n.tasks) {
+        final flagKey = 'npc_task.${n.id}.$task';
+        if (!flagOf(flagKey)) continue;
+        if (flagOf('npc_task_done.${n.id}.$task')) continue;
+        // 模拟结算：直接完成（探索时调用，概率在外层控制）
+        setFlag('npc_task_done.${n.id}.$task', true);
+        setFlag(flagKey, false);
+        final reward = 20 + npcRelation(n.id) ~/ 2;
+        gainGold(reward);
+        adjustRelation(n.id, 5);
+        adjustReputation(2);
+        buf.writeln('✅ 你完成了${n.name}的委托：「$task」。获得 $reward 金币，关系 +5，声望 +2。');
+      }
+    }
+    return buf.toString().trim();
+  }
+  /// 与 NPC 深聊（每日限次，比示好更深入，需相识以上）。
+  ///
+  /// 按心情与关系产出叙事；提升好感。
+  String npcChat(String npcId) {
+    if (!_canChat()) return '你今天已经聊得够多了。';
+    final npc = npcById(npcId);
+    if (npc == null) return '没有叫「$npcId」的人。';
+    if (!npc.isAlive) return '${npc.name}已经不在了。';
+    if (npc.locationId != player.locationId) return '${npc.name}不在这里。';
+    final rel = npcRelation(npc.id);
+    if (rel < 20) return '${npc.name}与你还不熟，聊不到深处。';
+    _recordChat();
+    final moodText = npc.mood.isEmpty ? '' : '（${npc.mood}）';
+    final topic = npc.goals.isNotEmpty ? npc.goals.first : '往事';
+    final rnd = rng();
+    final gain = 3 + skillLevel('speech') ~/ 2 + rnd.nextInt(3);
+    adjustRelation(npc.id, gain);
+    final level = npcRelationLabel(npcRelation(npc.id));
+    return '🍻 你与${npc.name}$moodText 深聊起「$topic」。'
+        '他/她吐露了更多心声，你们之间多了一份默契。关系 +$gain（$level）。';
+  }
+  /// 深聊每日次数（独立于示好）。
+  static const int kChatDailyLimit = 3;
+  Map<String, int> _chatDailyCount = <String, int>{};
+  String? _chatDailyMonth;
+  bool _canChat() {
+    _rollChatDaily();
+    final total = _chatDailyCount.values.fold(0, (a, b) => a + b);
+    return total < kChatDailyLimit;
+  }
+  void _recordChat() {
+    _rollChatDaily();
+    _chatDailyCount['chat'] = (_chatDailyCount['chat'] ?? 0) + 1;
+  }
+  void _rollChatDaily() {
+    final today = '${progress.year}-${progress.month}';
+    if (_chatDailyMonth != today) {
+      _chatDailyMonth = today;
+      _chatDailyCount = <String, int>{};
+    }
+  }
+  /// NPC 关系面板文本（全部 NPC 的关系等级/心情/任务数）。
+  String formatNpcRelationPanel() {
+    final buf = StringBuffer()..writeln('【NPC 关系】');
+    for (final n in npcs) {
+      if (!n.isAlive) continue;
+      final rel = npcRelation(n.id);
+      final level = npcRelationLabel(rel);
+      final mood = n.mood.isEmpty ? '' : '·${n.mood}';
+      final tasks = n.tasks.isEmpty ? '' : '·任务 ${n.tasks.length}';
+      buf.writeln('· ${n.name}（$level，$rel$mood$tasks）');
+    }
+    return buf.toString().trim();
+  }
 }

@@ -5,9 +5,9 @@
 library;
 import 'dart:convert';
 import 'package:dio/dio.dart';
-
 import '../data/location_data.dart';
 import '../data/narrative_templates.dart';
+import '../data/npc_data.dart';
 import '../models/event.dart';
 import '../models/player.dart';
 import '../utils/labels.dart';
@@ -151,6 +151,14 @@ class AiService {
     final relationDesc = player.relations.entries
         .map((e) => '${e.key}: ${e.value}')
         .join('、');
+    // Batch 10-15：注入在场 NPC 关系（名字 + 关系值 + 心情 + 任务）
+    final onSiteNpcDesc = allNpcs
+        .where((n) => n.isAlive && n.locationId == player.locationId)
+        .map((n) {
+      final rel = player.relations[n.id] ?? 0;
+      return '${n.name}（关系 $rel${n.mood.isEmpty ? '' : '，心情${n.mood}'}'
+          '${n.tasks.isEmpty ? '' : '，可委托${n.tasks.first}'}）';
+    }).join('、');
     final flagDesc = player.flags.entries
         .where((e) => e.value)
         .map((e) => e.key)
@@ -188,6 +196,7 @@ class AiService {
 - 技能：${player.skills}
 - 属性：${player.attributes}
 - 关系（NPC: 好感度）：${relationDesc.isEmpty ? '（无）' : relationDesc}
+- 在场 NPC：${onSiteNpcDesc.isEmpty ? '（无）' : onSiteNpcDesc}
 - 背包：$inventoryDesc
 - 已装备：${equipmentDesc.isEmpty ? '（无）' : equipmentDesc}
 - 状态：${flagDesc.isEmpty ? '（无特殊状态）' : flagDesc}

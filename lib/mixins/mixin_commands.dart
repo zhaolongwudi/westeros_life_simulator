@@ -141,6 +141,18 @@ mixin GameCommandsMixin
           return const CommandResult(text: '向谁示好？如「示好 提利昂」或「送礼 npc_tyrion」。');
         }
         return CommandResult(text: npcFavor(_normalizeNpc(args)));
+      case '深聊' || '聊天' || 'chat':
+        if (args.isEmpty) {
+          return const CommandResult(text: '和谁深聊？如「深聊 提利昂」。输入「在场」看谁在这里。');
+        }
+        return CommandResult(text: npcChat(_normalizeNpc(args)));
+      case '任务' || '委托' || 'task':
+        if (args.isEmpty) {
+          return CommandResult(text: formatNpcTaskPanel());
+        }
+        return CommandResult(text: acceptNpcTask(_normalizeNpc(args)));
+      case '关系' || '关系面板' || 'relations':
+        return CommandResult(text: formatNpcRelationPanel());
       case '休息' || 'rest':
         return CommandResult(text: rest());
       case '家谱' || '家族' || 'family':
@@ -317,6 +329,9 @@ mixin GameCommandsMixin
 在场 / npc         查看当前在场的 NPC 与关系
 互动 / interact [名字]  与在场 NPC 深度互动（好感越高内容越深）
 示好 / favor [名字]   向在场 NPC 示好送礼（每日 3 次）
+深聊 / chat [名字]    与 NPC 深聊（相识以上，每日 3 次，更深入）
+任务 / task [名字]    查看可接任务；带名字则接下委托
+关系 / relations     查看全部 NPC 关系/心情/任务数
 家谱 / family       查看家谱与继承人
 立嗣 / addchild [名字] 为家族添丁（如 立嗣 罗柏）
 休息 / rest         恢复精力/饱食（花 2 金币）

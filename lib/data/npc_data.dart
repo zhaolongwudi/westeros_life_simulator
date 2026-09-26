@@ -32,6 +32,8 @@ const List<Npc> allNpcs = [
     skills: const {'sword': 8, 'leadership': 9, 'politics': 7},
     faith: '旧神',
     isAlive: true,
+    tasks: const ['护送北境信使至君临', '调查野人踪迹'],
+    mood: '沉稳',
   ),
   Npc(
     id: 'npc_catelyn',
@@ -453,6 +455,8 @@ const List<Npc> allNpcs = [
     skills: const {'sword': 4, 'leadership': 7, 'politics': 10},
     faith: '七神',
     isAlive: true,
+    tasks: const ['收集君临流言', '寻找失窃的账册'],
+    mood: '狡黠',
   ),
 
   // ==================== 王领：拜拉席恩家族 ====================
@@ -605,6 +609,8 @@ const List<Npc> allNpcs = [
     skills: const {'sword': 6, 'leadership': 8, 'politics': 7},
     faith: '旧神',
     isAlive: true,
+    tasks: const ['寻找龙蛋的线索', '召集支持者'],
+    mood: '炽热',
   ),
 
   // ==================== 风暴地：拜拉席恩家族 ====================

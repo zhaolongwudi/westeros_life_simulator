@@ -1,0 +1,133 @@
+/// NPC 关系面板（Batch 10-15）。
+///
+/// 展示全部存活 NPC 的关系等级/心情/可接任务，
+/// 并提供在场 NPC 的快捷互动入口（互动/深聊/示好/任务）。
+library;
+
+import 'package:flutter/material.dart';
+import '../game_engine.dart';
+
+/// NPC 关系面板。
+class NpcPanelScreen extends StatelessWidget {
+  const NpcPanelScreen({super.key, this.engine});
+  /// 可选：传入共享引擎（默认新建，用于独立浏览）。
+  final GameEngine? engine;
+
+  @override
+  Widget build(BuildContext context) {
+    final e = engine ?? GameEngine()..startNewGame();
+    final theme = Theme.of(context);
+    final onSite = e.npcsAtCurrentLocation;
+    return Scaffold(
+      appBar: AppBar(title: const Text('NPC 关系')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: <Widget>[
+          // 在场 NPC（可互动）
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('在场（${e.currentLocation?.name ?? '未知'}）',
+                      style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  if (onSite.isEmpty)
+                    const Text('身边没有其他人。')
+                  else
+                    ...onSite.map((n) {
+                      final rel = e.npcRelation(n.id);
+                      return ListTile(
+                        dense: true,
+                        leading: CircleAvatar(
+                          child: Text(n.name.substring(0, 1)),
+                        ),
+                        title: Text(n.name),
+                        subtitle: Text(
+                          '${e.npcRelationLabel(rel)}（$rel）'
+                          '${n.mood.isEmpty ? '' : ' · ${n.mood}'}'
+                          '${n.tasks.isEmpty ? '' : ' · 任务 ${n.tasks.length}'}',
+                        ),
+                        trailing: Wrap(
+                          spacing: 4,
+                          children: <Widget>[
+                            ActionChip(
+                              label: const Text('互动'),
+                              onPressed: () => _showResult(
+                                context,
+                                e.npcInteract(n.id),
+                              ),
+                            ),
+                            ActionChip(
+                              label: const Text('深聊'),
+                              onPressed: () => _showResult(
+                                context,
+                                e.npcChat(n.id),
+                              ),
+                            ),
+                            ActionChip(
+                              label: const Text('示好'),
+                              onPressed: () => _showResult(
+                                context,
+                                e.npcFavor(n.id),
+                              ),
+                            ),
+                            if (n.tasks.isNotEmpty)
+                              ActionChip(
+                                label: const Text('任务'),
+                                onPressed: () => _showResult(
+                                  context,
+                                  e.acceptNpcTask(n.id),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    }),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          // 全部 NPC 关系列表
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('全部 NPC', style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  ...e.npcs.where((n) => n.isAlive).map((n) {
+                    final rel = e.npcRelation(n.id);
+                    return ListTile(
+                      dense: true,
+                      title: Text(n.name),
+                      subtitle: Text(
+                        '${e.npcRelationLabel(rel)}（$rel）'
+                        '${n.mood.isEmpty ? '' : ' · ${n.mood}'}'
+                        '${n.tasks.isEmpty ? '' : ' · 可委托 ${n.tasks.join('/')}'}',
+                      ),
+                      trailing: Text(
+                        n.locationId == e.player.locationId ? '在场' : '',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 弹出互动结果。
+  void _showResult(BuildContext context, String text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text), duration: const Duration(seconds: 4)),
+    );
+  }
+}

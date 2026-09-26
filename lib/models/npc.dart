@@ -36,6 +36,8 @@ class Npc {
     required this.skills,
     required this.faith,
     required this.isAlive,
+    this.tasks = const [],
+    this.mood = '',
   });
 
   final String id;
@@ -66,9 +68,12 @@ class Npc {
 
   /// 信仰（如 七神、旧神、光之王）。
   final String faith;
-
   /// 是否存活。
   final bool isAlive;
+  /// 任务链（Batch 10-15：NPC 主动委托任务，元素为「任务标题」）。
+  final List<String> tasks;
+  /// 心情（Batch 10-15：NPC 当前心情，影响互动叙事）。
+  final String mood;
 
   /// 创建默认 NPC（用于测试）。
   factory Npc.defaultNpc() {
@@ -114,6 +119,8 @@ class Npc {
     Map<String, int>? skills,
     String? faith,
     bool? isAlive,
+    List<String>? tasks,
+    String? mood,
   }) {
     return Npc(
       id: id ?? this.id,
@@ -131,6 +138,8 @@ class Npc {
       skills: skills ?? this.skills,
       faith: faith ?? this.faith,
       isAlive: isAlive ?? this.isAlive,
+      tasks: tasks ?? this.tasks,
+      mood: mood ?? this.mood,
     );
   }
 
@@ -151,6 +160,8 @@ class Npc {
       'skills': skills,
       'faith': faith,
       'isAlive': isAlive,
+      'tasks': tasks,
+      'mood': mood,
     };
   }
 
@@ -171,6 +182,8 @@ class Npc {
       skills: (json['skills'] as Map).cast<String, int>(),
       faith: json['faith'] as String,
       isAlive: json['isAlive'] as bool,
+      tasks: (json['tasks'] as List?)?.cast<String>() ?? const [],
+      mood: json['mood'] as String? ?? '',
     );
   }
 

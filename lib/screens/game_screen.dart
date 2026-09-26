@@ -16,6 +16,7 @@ import 'events_screen.dart';
 import 'family_screen.dart';
 import 'letters_screen.dart';
 import 'map_screen.dart';
+import 'npc_panel_screen.dart';
 import 'player_panel_screen.dart';
 import 'settings_screen.dart';
 import 'systems_screen.dart';
@@ -210,6 +211,11 @@ class _GameScreenState extends State<GameScreen> {
             icon: const Icon(Icons.mail_outlined),
             tooltip: '信件',
             onPressed: () => _openScreen(LettersScreen(engine: _engine)),
+          ),
+          IconButton(
+            icon: const Icon(Icons.people_alt_outlined),
+            tooltip: 'NPC 关系',
+            onPressed: () => _openScreen(NpcPanelScreen(engine: _engine)),
           ),
           IconButton(
             icon: const Icon(Icons.map_outlined),
@@ -463,6 +469,12 @@ class _NarrativeView extends StatelessWidget {
                   label: '家族面板',
                   color: theme.colorScheme.tertiary,
                   onTap: () => onOpenPanel(FamilyScreen(engine: engine)),
+                ),
+                _PanelEntry(
+                  icon: Icons.people_alt_outlined,
+                  label: 'NPC 关系',
+                  color: theme.colorScheme.tertiary,
+                  onTap: () => onOpenPanel(NpcPanelScreen(engine: engine)),
                 ),
                 _PanelEntry(
                   icon: Icons.grid_view_outlined,
