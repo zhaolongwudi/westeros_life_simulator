@@ -22,7 +22,7 @@ import 'package:westeros_life_simulator/services/ai_service.dart';
 void main() {
   group('Batch 10-19 player_panel 婚姻与培养区块', () {
     testWidgets('已婚有子女显示配偶与培养档案', (tester) async {
-      tester.view.physicalSize = const Size(1080, 4000);
+      tester.view.physicalSize = const Size(1080, 12000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
@@ -44,14 +44,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(home: PlayerPanelScreen(engine: engine)),
-      );
-      await tester.pumpAndSettle();
-
-      // ListView 懒加载：滚动到「婚姻与子女培养」区块
-      await tester.scrollUntilVisible(
-        find.text('婚姻与子女培养'),
-        300,
-        scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
 
@@ -80,7 +72,7 @@ void main() {
 
   group('Batch 10-19 npc_panel 任务进度区块', () {
     testWidgets('进行中任务显示标题与期限', (tester) async {
-      tester.view.physicalSize = const Size(1080, 4000);
+      tester.view.physicalSize = const Size(1080, 12000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
@@ -106,14 +98,6 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // ListView 懒加载：滚动到「进行中的任务」区块
-      await tester.scrollUntilVisible(
-        find.text('进行中的任务'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
-
       expect(find.text('进行中的任务'), findsOneWidget);
       expect(find.textContaining('护送北境信使至君临'), findsOneWidget);
       expect(find.textContaining('期限 283年9月'), findsOneWidget);
@@ -121,21 +105,13 @@ void main() {
     });
 
     testWidgets('无任务显示空态', (tester) async {
-      tester.view.physicalSize = const Size(1080, 4000);
+      tester.view.physicalSize = const Size(1080, 12000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
       final engine = GameEngine()..startNewGame();
       await tester.pumpWidget(
         MaterialApp(home: NpcPanelScreen(engine: engine)),
-      );
-      await tester.pumpAndSettle();
-
-      // ListView 懒加载：滚动到「进行中的任务」区块
-      await tester.scrollUntilVisible(
-        find.text('进行中的任务'),
-        300,
-        scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
 
