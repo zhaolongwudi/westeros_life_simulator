@@ -88,9 +88,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('进行中的任务'), findsOneWidget);
-      expect(find.textContaining('护送北境信使至君临'), findsOneWidget);
-      expect(find.textContaining('期限'), findsOneWidget);
-      expect(find.textContaining('⏳ 进行中'), findsOneWidget);
+      // 「护送北境信使至君临」同时出现在在场 NPC 可委托与进行中任务两处
+      expect(find.textContaining('护送北境信使至君临'), findsNWidgets(2));
+      expect(find.textContaining('⏳ 进行中｜期限'), findsOneWidget);
+      expect(find.textContaining('⏳ 进行中'), findsWidgets);
     });
 
     testWidgets('无任务显示空态', (tester) async {
