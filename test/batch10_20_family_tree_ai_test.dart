@@ -79,7 +79,8 @@ void main() {
       expect(find.text('历代家主'), findsOneWidget);
       expect(find.text('第 1 代'), findsOneWidget);
       expect(find.text('第 2 代'), findsOneWidget);
-      expect(find.text('第 3 代'), findsOneWidget);
+      // 标题含完整文本「史塔克家 · 第 3 代」，用 textContaining
+      expect(find.textContaining('第 3 代'), findsOneWidget);
       expect(find.textContaining('家主：琼恩'), findsOneWidget);
       expect(find.textContaining('接过先祖的传承'), findsOneWidget);
     });

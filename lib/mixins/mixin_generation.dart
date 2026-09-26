@@ -145,8 +145,15 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
     return newPlayer;
   }
 
-  /// 当前世代数（1 起；传承过一次即 2）。
-  int generationNumber() => flagOf('generation') ? 2 : 1;
+  /// 当前世代数（1 起；世代谱系 N 条即第 N+1 代，更精确表达三代以上）。
+  ///
+  /// 旧实现 `flagOf('generation') ? 2 : 1` 只能表达 1/2 两档（坑 24：
+  /// 三代以上显示错误），现以 generationRecords 长度 + 1 计算。
+  int generationNumber() {
+    final records = player.generationRecords.length;
+    if (records > 0) return records + 1;
+    return flagOf('generation') ? 2 : 1;
+  }
 
   /// 传位叙事：年长或濒死时提示立嗣/传承。
   ///
