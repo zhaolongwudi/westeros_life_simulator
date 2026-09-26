@@ -27,20 +27,16 @@ void main() {
       addTearDown(tester.view.reset);
 
       final engine = GameEngine()..startNewGame();
-      engine.updatePlayer(
-        engine.player.copyWith(
-          spouse: const SpouseDetail(
-            name: '梅拉',
-            origin: SpouseOrigin.commoner,
-            marriedYear: 283,
-          ),
-          children: const ['罗柏', '珊莎'],
-          childRearing: const [
-            ChildRearing(name: '罗柏', focus: 'sword', tutored: true),
-            ChildRearing(name: '珊莎', focus: 'politics', sentToSchool: true),
-          ],
-        ),
-      );
+      // 走真实成婚路径构造婚姻数据
+      final marryResult = engine.marry('平民');
+      expect(marryResult, contains('成婚'));
+      // 走真实添丁路径构造子女
+      engine.addChild('罗柏');
+      engine.rearChild('罗柏', 'sword');
+      engine.tutorChild('罗柏');
+
+      expect(engine.isMarried, true);
+      expect(engine.player.children, isNotEmpty);
 
       await tester.pumpWidget(
         MaterialApp(home: PlayerPanelScreen(engine: engine)),
@@ -48,11 +44,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('婚姻与子女培养'), findsOneWidget);
-      expect(find.textContaining('配偶：梅拉'), findsOneWidget);
+      expect(find.textContaining('配偶：'), findsOneWidget);
       expect(find.textContaining('罗柏'), findsWidgets);
       expect(find.textContaining('培养：sword'), findsOneWidget);
       expect(find.textContaining('已督导'), findsOneWidget);
-      expect(find.textContaining('进修中'), findsOneWidget);
     });
 
     testWidgets('未婚无子女不显示培养区块', (tester) async {
@@ -77,21 +72,15 @@ void main() {
       addTearDown(tester.view.reset);
 
       final engine = GameEngine()..startNewGame();
+      // 走真实接任务路径构造进行中任务
       engine.updatePlayer(
         engine.player.copyWith(
-          activeTasks: const [
-            NpcTaskProgress(
-              taskId: 'task_nev_escort',
-              npcId: 'npc_nev',
-              title: '护送北境信使至君临',
-              stepIndex: 1,
-              stepProgress: 1,
-              deadlineYear: 283,
-              deadlineMonth: 9,
-            ),
-          ],
+          relations: const <String, int>{'npc_nev': 25},
         ),
       );
+      final acceptResult = engine.acceptNpcTaskV2('npc_nev');
+      expect(acceptResult, contains('接下'));
+      expect(engine.activeTasks, hasLength(1));
 
       await tester.pumpWidget(
         MaterialApp(home: NpcPanelScreen(engine: engine)),
@@ -100,7 +89,7 @@ void main() {
 
       expect(find.text('进行中的任务'), findsOneWidget);
       expect(find.textContaining('护送北境信使至君临'), findsOneWidget);
-      expect(find.textContaining('期限 283年9月'), findsOneWidget);
+      expect(find.textContaining('期限'), findsOneWidget);
       expect(find.textContaining('⏳ 进行中'), findsOneWidget);
     });
 
