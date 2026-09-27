@@ -210,11 +210,18 @@ class AiService {
         break;
       }
     }
-    final familyDesc = playerFamily == null
-        ? '（自由民，无家族）'
-        : '${playerFamily!.name}家族（族语「${playerFamily!.motto}」，'
-            '${playerFamily!.scale == FamilyScale.great ? '大家族' : playerFamily!.scale == FamilyScale.minor ? '小家族' : '家户'}，'
-            '影响力 ${playerFamily!.influence}）';
+    final String familyDesc;
+    final pf = playerFamily;
+    if (pf == null) {
+      familyDesc = '（自由民，无家族）';
+    } else {
+      final scaleLabel = pf.scale == FamilyScale.great
+          ? '大家族'
+          : pf.scale == FamilyScale.minor
+              ? '小家族'
+              : '家户';
+      familyDesc = '${pf.name}家族（族语「${pf.motto}」，$scaleLabel，影响力 ${pf.influence}）';
+    }
     final titleProgressDesc = player.title.isEmpty
         ? '（暂无头衔）'
         : '当前头衔 ${player.title}，声望 ${player.reputation}/100'
