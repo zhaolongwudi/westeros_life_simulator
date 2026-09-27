@@ -8,7 +8,8 @@
 /// 5. 劳勃·拜拉席恩（君临）：陪劳勃国王狩猎 / 为国王搜罗佳酿
 /// 6. 史坦尼斯·拜拉席恩（龙石岛）：修缮龙石岛的舰队 / 摸清诸侯的忠诚
 /// 7. 模板总量 20 → 32，每位 NPC 各 2 个
-/// 8. 接任务 → 逐步推进完成 → 结算奖励（史坦尼斯全流程）
+/// 8. 接任务 → 逐步推进完成 → 结算奖励（珊莎全流程；不在场的詹姆/劳勃/史坦尼斯
+///    仅验证模板可见性，与 batch10_21 的玛格丽/泰温一致）
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -41,6 +42,26 @@ void main() {
       expect(tasks, isNotEmpty);
       expect(tasks.map((t) => t.title), contains('为珊莎采买上等丝绸'));
       expect(tasks.map((t) => t.title), contains('打探君临宫廷的礼数'));
+    });
+    test('接任务生成实例并逐步完成', () {
+      final engine = GameEngine()..startNewGame();
+      engine.updatePlayer(
+        engine.player.copyWith(
+          relations: const <String, int>{'npc_sansa': 25},
+        ),
+      );
+      final result = engine.acceptNpcTaskV2('npc_sansa');
+      expect(result, contains('接下'));
+      expect(engine.activeTasks, hasLength(1));
+      final goldBefore = engine.player.gold;
+      var completed = false;
+      for (var i = 0; i < 20 && !completed; i++) {
+        final text = engine.advanceNpcTasks();
+        if (text.contains('完成')) completed = true;
+      }
+      expect(completed, true);
+      expect(engine.activeTasks.first.completed, true);
+      expect(engine.player.gold, greaterThan(goldBefore));
     });
   });
 
@@ -85,32 +106,14 @@ void main() {
   });
 
   group('Batch 10-23 史坦尼斯·拜拉席恩', () {
+    // 史坦尼斯在风息堡（不在玩家默认出生地临冬城），
+    // 与 batch10_21 的玛格丽/泰温一致：只验证模板可见性，不做接任务全流程。
     test('有可接任务', () {
       final engine = GameEngine()..startNewGame();
       final tasks = engine.availableTasksOf('npc_stannis_baratheon');
       expect(tasks, isNotEmpty);
       expect(tasks.map((t) => t.title), contains('修缮龙石岛的舰队'));
       expect(tasks.map((t) => t.title), contains('摸清诸侯的忠诚'));
-    });
-    test('接任务生成实例并逐步完成', () {
-      final engine = GameEngine()..startNewGame();
-      engine.updatePlayer(
-        engine.player.copyWith(
-          relations: const <String, int>{'npc_stannis_baratheon': 25},
-        ),
-      );
-      final result = engine.acceptNpcTaskV2('npc_stannis_baratheon');
-      expect(result, contains('接下'));
-      expect(engine.activeTasks, hasLength(1));
-      final goldBefore = engine.player.gold;
-      var completed = false;
-      for (var i = 0; i < 20 && !completed; i++) {
-        final text = engine.advanceNpcTasks();
-        if (text.contains('完成')) completed = true;
-      }
-      expect(completed, true);
-      expect(engine.activeTasks.first.completed, true);
-      expect(engine.player.gold, greaterThan(goldBefore));
     });
   });
 }
