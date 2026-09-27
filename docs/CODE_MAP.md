@@ -69,7 +69,7 @@ lib/
 │   └── settings_screen.dart       # 设置/存档
 │
 ├── services/                      # 【服务层】外部/IO
-│   ├── ai_service.dart            # AiService：AI 叙事/选项生成（Dio，含在场 NPC 注入）
+│   ├── ai_service.dart            # AiService：AI 叙事/选项生成（Dio，含在场 NPC 多步骤任务模板/家族信息注入，Batch 10-22）
 │   ├── ai_config.dart             # AI Key/模型/BaseURL 持久化
 │   ├── event_service.dart         # 事件触发/效果/存档（注意：与 provider 双实现）
 │   └── save_service.dart          # 存档序列化/导入导出
@@ -141,7 +141,8 @@ GameEngine extends GameProviderBase with:
 | 效果应用（事件/AI 共用） | providers/game_state_provider.dart（applyEffects） |
 | 游戏结束/血脉断绝 | providers/game_state_provider.dart（endGame）+ mixin_play.dart（_tryInheritance） |
 | AI 叙事生成 | services/ai_service.dart（generateNarrative/_buildPrompt） |
-| AI 提示词注入在场 NPC | ai_service.dart（_buildPrompt 内 onSiteNpcDesc） |
+| AI 提示词注入在场 NPC | ai_service.dart（_buildPrompt 内 onSiteNpcDesc，Batch 10-22 升级为多步骤任务模板：标题/难度/期限） |
+| AI 提示词注入家族信息 | ai_service.dart（_buildPrompt 内 familyDesc：族语/规模/影响力，Batch 10-22） |
 | 存档 | services/save_service.dart |
 | 事件触发/选项 | providers/event_provider.dart |
 | 玩家面板 UI | screens/player_panel_screen.dart |
