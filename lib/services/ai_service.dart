@@ -8,7 +8,10 @@ import 'package:dio/dio.dart';
 import '../data/location_data.dart';
 import '../data/narrative_templates.dart';
 import '../data/npc_data.dart';
+import '../data/npc_task_data.dart';
+import '../data/family_data.dart';
 import '../models/event.dart';
+import '../models/family.dart';
 import '../models/player.dart';
 import '../utils/labels.dart';
 
@@ -154,12 +157,16 @@ class AiService {
         .map((e) => '${e.key}: ${e.value}')
         .join('、');
     // Batch 10-15：注入在场 NPC 关系（名字 + 关系值 + 心情 + 任务）
+    // Batch 10-22：在场 NPC 多步骤任务模板注入（标题 + 难度 + 期限，替代旧 tasks.first）
     final onSiteNpcDesc = allNpcs
         .where((n) => n.isAlive && n.locationId == player.locationId)
         .map((n) {
       final rel = player.relations[n.id] ?? 0;
-      return '${n.name}（关系 $rel${n.mood.isEmpty ? '' : '，心情${n.mood}'}'
-          '${n.tasks.isEmpty ? '' : '，可委托${n.tasks.first}'}）';
+      final templates = npcTaskTemplatesOf(n.id);
+      final taskPart = templates.isEmpty
+          ? ''
+          : '，可委托：${templates.map((t) => '「${t.title}」（${t.typeLabel}，难度 ${t.difficulty}，期限 ${t.deadlineMonths} 月）').join('、')}';
+      return '${n.name}（关系 $rel${n.mood.isEmpty ? '' : '，心情${n.mood}'}$taskPart）';
     }).join('、');
     final flagDesc = player.flags.entries
         .where((e) => e.value)
@@ -195,6 +202,19 @@ class AiService {
         ? '（第一代家主）'
         : '第 ${player.generationRecords.length + 1} 代，先祖：'
             '${player.generationRecords.map((g) => '${g.generation}代 ${g.name}（${g.title}${g.achievement.isEmpty ? '' : "，${g.achievement}"}）').join(' → ')}';
+    // Batch 10-22：注入家族信息（名称/族语/规模/影响力）
+    Family? playerFamily;
+    for (final f in allFamilies) {
+      if (f.id == player.familyId) {
+        playerFamily = f;
+        break;
+      }
+    }
+    final familyDesc = playerFamily == null
+        ? '（自由民，无家族）'
+        : '${playerFamily!.name}家族（族语「${playerFamily!.motto}」，'
+            '${playerFamily!.scale == FamilyScale.great ? '大家族' : playerFamily!.scale == FamilyScale.minor ? '小家族' : '家户'}，'
+            '影响力 ${playerFamily!.influence}）';
     final titleProgressDesc = player.title.isEmpty
         ? '（暂无头衔）'
         : '当前头衔 ${player.title}，声望 ${player.reputation}/100'
@@ -221,7 +241,7 @@ class AiService {
 - 头衔：$titleDesc
 - 头衔晋升：$titleProgressDesc
 - 世代谱系：$lineageDesc
-- 家族：${player.familyId}
+- 家族：$familyDesc
 - 年龄：${player.age}
 - 地点：${player.locationId}（${region.isEmpty ? '未知区域' : region}）
 - 金币：${player.gold}
