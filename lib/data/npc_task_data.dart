@@ -203,6 +203,140 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
     rewardReputation: 5,
     rewardRelation: 7,
   ),
+
+  // ==================== 凯特琳·史塔克（临冬城） ====================
+  NpcTaskTemplate(
+    id: 'task_catelyn_escort',
+    npcId: 'npc_catelyn',
+    title: '护送信使前往奔流城',
+    type: NpcTaskType.escort,
+    difficulty: 3,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '在临冬城备好马匹与干粮', turnsRequired: 1),
+      NpcTaskStep(description: '沿国王大道南下，穿过颈泽', turnsRequired: 2),
+      NpcTaskStep(description: '将家书交予奔流城的徒利家族', turnsRequired: 1),
+    ],
+    rewardGold: 55,
+    rewardReputation: 5,
+    rewardRelation: 7,
+  ),
+  NpcTaskTemplate(
+    id: 'task_catelyn_children',
+    npcId: 'npc_catelyn',
+    title: '打探孩子们的安危',
+    type: NpcTaskType.investigate,
+    difficulty: 4,
+    deadlineMonths: 6,
+    steps: [
+      NpcTaskStep(description: '在临冬城与集市间打听各家消息', turnsRequired: 1),
+      NpcTaskStep(description: '循着线索南下，探明孩子们的处境', turnsRequired: 2),
+      NpcTaskStep(description: '把打探到的消息回报凯特琳', turnsRequired: 1),
+    ],
+    rewardGold: 65,
+    rewardReputation: 4,
+    rewardRelation: 9,
+  ),
+
+  // ==================== 罗柏·史塔克（临冬城） ====================
+  NpcTaskTemplate(
+    id: 'task_robb_recruit',
+    npcId: 'npc_robb',
+    title: '召集北境封臣',
+    type: NpcTaskType.diplomacy,
+    difficulty: 3,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '起草一封封臣召集令', turnsRequired: 1),
+      NpcTaskStep(description: '分派渡鸦送往北境各堡', turnsRequired: 1),
+      NpcTaskStep(description: '在临冬城接待响应召集的领主', turnsRequired: 1),
+    ],
+    rewardGold: 50,
+    rewardReputation: 6,
+    rewardRelation: 7,
+  ),
+  NpcTaskTemplate(
+    id: 'task_robb_wolf',
+    npcId: 'npc_robb',
+    title: '追猎偷羊的狼群',
+    type: NpcTaskType.hunt,
+    difficulty: 2,
+    deadlineMonths: 3,
+    steps: [
+      NpcTaskStep(description: '沿狼群留下的爪印深入林间', turnsRequired: 1),
+      NpcTaskStep(description: '设下陷阱，猎杀头狼', turnsRequired: 1),
+    ],
+    rewardGold: 35,
+    rewardReputation: 4,
+    rewardRelation: 6,
+  ),
+
+  // ==================== 玛格丽·提利尔（高庭） ====================
+  NpcTaskTemplate(
+    id: 'task_margaery_supper',
+    npcId: 'npc_margaery',
+    title: '筹办高庭的晚宴',
+    type: NpcTaskType.delivery,
+    difficulty: 2,
+    deadlineMonths: 3,
+    steps: [
+      NpcTaskStep(description: '向高庭周边的庄园采买新鲜蔬果', turnsRequired: 1),
+      NpcTaskStep(description: '监督仆役布置宴会厅', turnsRequired: 1),
+    ],
+    rewardGold: 40,
+    rewardReputation: 4,
+    rewardRelation: 6,
+  ),
+  NpcTaskTemplate(
+    id: 'task_margaery_support',
+    npcId: 'npc_margaery',
+    title: '争取王领贵族的支持',
+    type: NpcTaskType.diplomacy,
+    difficulty: 4,
+    deadlineMonths: 6,
+    steps: [
+      NpcTaskStep(description: '整理各大家族在王领的态度', turnsRequired: 1),
+      NpcTaskStep(description: '拜访两位摇摆不定的领主', turnsRequired: 2),
+      NpcTaskStep(description: '将他们的承诺回报玛格丽', turnsRequired: 1),
+    ],
+    rewardGold: 75,
+    rewardReputation: 6,
+    rewardRelation: 8,
+  ),
+
+  // ==================== 泰温·兰尼斯特（凯岩城） ====================
+  NpcTaskTemplate(
+    id: 'task_tywin_escort',
+    npcId: 'npc_tywin_lannister',
+    title: '护送金库账册至君临',
+    type: NpcTaskType.escort,
+    difficulty: 3,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '在凯岩城金库清点账册封存', turnsRequired: 1),
+      NpcTaskStep(description: '走黄金大道，提防山匪', turnsRequired: 2),
+      NpcTaskStep(description: '将账册交予御前财政大臣', turnsRequired: 1),
+    ],
+    rewardGold: 60,
+    rewardReputation: 5,
+    rewardRelation: 7,
+  ),
+  NpcTaskTemplate(
+    id: 'task_tywin_house',
+    npcId: 'npc_tywin_lannister',
+    title: '调查西境领主的私通',
+    type: NpcTaskType.investigate,
+    difficulty: 4,
+    deadlineMonths: 6,
+    steps: [
+      NpcTaskStep(description: '在各家封臣的领地搜集往来信件', turnsRequired: 2),
+      NpcTaskStep(description: '从账目出入中找出私通的证据', turnsRequired: 2),
+      NpcTaskStep(description: '把证据带回凯岩城呈给泰温', turnsRequired: 1),
+    ],
+    rewardGold: 90,
+    rewardReputation: 5,
+    rewardRelation: 8,
+  ),
 ];
 
 /// 按 ID 查找任务模板。
