@@ -26,7 +26,7 @@ lib/
 │   ├── system_data.dart           # 74 系统
 │   ├── item_data.dart             # 34 物品
 │   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节）
-│   └── npc_task_data.dart         # NPC 多步骤任务模板（6 个：艾德/提利昂/丹妮莉丝，Batch 10-18）
+│   └── npc_task_data.dart         # NPC 多步骤任务模板（20 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温，Batch 10-18 起逐步扩充）
 │
 ├── models/                        # 【模型层】不可变实体（copyWith + toJson/fromJson）
 │   ├── player.dart                # Player（含 health/energy/hunger/title/house/children/spouse/childRearing/generationRecords/activeTasks）
