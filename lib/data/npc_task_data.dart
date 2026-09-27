@@ -337,6 +337,201 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
     rewardReputation: 5,
     rewardRelation: 8,
   ),
+
+  // ==================== 珊莎·史塔克（临冬城） ====================
+  NpcTaskTemplate(
+    id: 'task_sansa_needlework',
+    npcId: 'npc_sansa',
+    title: '为珊莎采买上等丝绸',
+    type: NpcTaskType.delivery,
+    difficulty: 1,
+    deadlineMonths: 3,
+    steps: [
+      NpcTaskStep(description: '到白港的织坊挑选上好丝绸', turnsRequired: 1),
+      NpcTaskStep(description: '将丝绸带回临冬城交给珊莎', turnsRequired: 1),
+    ],
+    rewardGold: 30,
+    rewardReputation: 3,
+    rewardRelation: 6,
+  ),
+  NpcTaskTemplate(
+    id: 'task_sansa_court',
+    npcId: 'npc_sansa',
+    title: '打探君临宫廷的礼数',
+    type: NpcTaskType.investigate,
+    difficulty: 3,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '向到访临冬城的贵族打听宫中礼数', turnsRequired: 1),
+      NpcTaskStep(description: '整理成礼数手册送给珊莎', turnsRequired: 1),
+    ],
+    rewardGold: 45,
+    rewardReputation: 4,
+    rewardRelation: 7,
+  ),
+
+  // ==================== 艾莉亚·史塔克（临冬城） ====================
+  NpcTaskTemplate(
+    id: 'task_arya_sword',
+    npcId: 'npc_arya',
+    title: '陪艾莉亚练剑',
+    type: NpcTaskType.hunt,
+    difficulty: 2,
+    deadlineMonths: 3,
+    steps: [
+      NpcTaskStep(description: '在临冬城校场陪艾莉亚对练', turnsRequired: 1),
+      NpcTaskStep(description: '教她几招实用剑术', turnsRequired: 1),
+    ],
+    rewardGold: 25,
+    rewardReputation: 3,
+    rewardRelation: 7,
+  ),
+  NpcTaskTemplate(
+    id: 'task_arya_sneak',
+    npcId: 'npc_arya',
+    title: '掩护艾莉亚溜出城',
+    type: NpcTaskType.investigate,
+    difficulty: 3,
+    deadlineMonths: 4,
+    steps: [
+      NpcTaskStep(description: '摸清守卫换岗的时辰', turnsRequired: 1),
+      NpcTaskStep(description: '引开城门守卫，掩护艾莉亚出城', turnsRequired: 1),
+      NpcTaskStep(description: '天亮前接应她安全返回', turnsRequired: 1),
+    ],
+    rewardGold: 50,
+    rewardReputation: 3,
+    rewardRelation: 8,
+  ),
+
+  // ==================== 布兰·史塔克（临冬城） ====================
+  NpcTaskTemplate(
+    id: 'task_bran_climb',
+    npcId: 'npc_bran',
+    title: '带布兰登高看鹰巢',
+    type: NpcTaskType.escort,
+    difficulty: 1,
+    deadlineMonths: 2,
+    steps: [
+      NpcTaskStep(description: '护送布兰登上临冬城最高的瞭望塔', turnsRequired: 1),
+      NpcTaskStep(description: '陪他瞭望原野，讲远方故事', turnsRequired: 1),
+    ],
+    rewardGold: 20,
+    rewardReputation: 2,
+    rewardRelation: 6,
+  ),
+  NpcTaskTemplate(
+    id: 'task_bran_stories',
+    npcId: 'npc_bran',
+    title: '为布兰收集古堡传说',
+    type: NpcTaskType.investigate,
+    difficulty: 2,
+    deadlineMonths: 4,
+    steps: [
+      NpcTaskStep(description: '拜访临冬城的老人与学士搜集传说', turnsRequired: 1),
+      NpcTaskStep(description: '整理成册交给布兰', turnsRequired: 1),
+    ],
+    rewardGold: 35,
+    rewardReputation: 3,
+    rewardRelation: 6,
+  ),
+
+  // ==================== 詹姆·兰尼斯特（君临） ====================
+  NpcTaskTemplate(
+    id: 'task_jaime_sword',
+    npcId: 'npc_jaime',
+    title: '与詹姆切磋剑术',
+    type: NpcTaskType.hunt,
+    difficulty: 4,
+    deadlineMonths: 4,
+    steps: [
+      NpcTaskStep(description: '在君临校场与詹姆对练', turnsRequired: 1),
+      NpcTaskStep(description: '承受他的连环攻势并坚持到最后', turnsRequired: 1),
+      NpcTaskStep(description: '与詹姆复盘切磋心得', turnsRequired: 1),
+    ],
+    rewardGold: 60,
+    rewardReputation: 5,
+    rewardRelation: 8,
+  ),
+  NpcTaskTemplate(
+    id: 'task_jaime_letter',
+    npcId: 'npc_jaime',
+    title: '为詹姆送一封密信',
+    type: NpcTaskType.delivery,
+    difficulty: 2,
+    deadlineMonths: 3,
+    steps: [
+      NpcTaskStep(description: '将密信藏入行囊，避开城中耳目', turnsRequired: 1),
+      NpcTaskStep(description: '把信送到城外指定的人手中', turnsRequired: 1),
+    ],
+    rewardGold: 40,
+    rewardReputation: 3,
+    rewardRelation: 6,
+  ),
+
+  // ==================== 劳勃·拜拉席恩（君临） ====================
+  NpcTaskTemplate(
+    id: 'task_robert_hunt',
+    npcId: 'npc_robert_baratheon',
+    title: '陪劳勃国王狩猎',
+    type: NpcTaskType.hunt,
+    difficulty: 3,
+    deadlineMonths: 3,
+    steps: [
+      NpcTaskStep(description: '备好猎犬与长矛，随国王出猎', turnsRequired: 1),
+      NpcTaskStep(description: '在御林深处驱赶野猪', turnsRequired: 1),
+    ],
+    rewardGold: 55,
+    rewardReputation: 6,
+    rewardRelation: 7,
+  ),
+  NpcTaskTemplate(
+    id: 'task_robert_mead',
+    npcId: 'npc_robert_baratheon',
+    title: '为国王搜罗佳酿',
+    type: NpcTaskType.delivery,
+    difficulty: 2,
+    deadlineMonths: 3,
+    steps: [
+      NpcTaskStep(description: '到君临的酒窖与市集挑选名酒', turnsRequired: 1),
+      NpcTaskStep(description: '把酒送回红堡献给国王', turnsRequired: 1),
+    ],
+    rewardGold: 35,
+    rewardReputation: 4,
+    rewardRelation: 5,
+  ),
+
+  // ==================== 史坦尼斯·拜拉席恩（龙石岛） ====================
+  NpcTaskTemplate(
+    id: 'task_stannis_ship',
+    npcId: 'npc_stannis_baratheon',
+    title: '修缮龙石岛的舰队',
+    type: NpcTaskType.escort,
+    difficulty: 3,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '清点龙石岛港内的破损船只', turnsRequired: 1),
+      NpcTaskStep(description: '采购木材与沥青，监督工匠修缮', turnsRequired: 2),
+    ],
+    rewardGold: 50,
+    rewardReputation: 5,
+    rewardRelation: 7,
+  ),
+  NpcTaskTemplate(
+    id: 'task_stannis_loyalty',
+    npcId: 'npc_stannis_baratheon',
+    title: '摸清诸侯的忠诚',
+    type: NpcTaskType.investigate,
+    difficulty: 4,
+    deadlineMonths: 6,
+    steps: [
+      NpcTaskStep(description: '在龙石岛的领主间打探态度', turnsRequired: 2),
+      NpcTaskStep(description: '从信件往来中找出摇摆者', turnsRequired: 2),
+      NpcTaskStep(description: '把名单呈给史坦尼斯', turnsRequired: 1),
+    ],
+    rewardGold: 85,
+    rewardReputation: 5,
+    rewardRelation: 8,
+  ),
 ];
 
 /// 按 ID 查找任务模板。
