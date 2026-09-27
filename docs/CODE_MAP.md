@@ -26,7 +26,7 @@ lib/
 │   ├── system_data.dart           # 74 系统
 │   ├── item_data.dart             # 34 物品
 │   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节）
-│   └── npc_task_data.dart         # NPC 多步骤任务模板（20 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温，Batch 10-18 起逐步扩充）
+│   └── npc_task_data.dart         # NPC 多步骤任务模板（32 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯，Batch 10-18 起逐步扩充，10-23 扩至 32）
 │
 ├── models/                        # 【模型层】不可变实体（copyWith + toJson/fromJson）
 │   ├── player.dart                # Player（含 health/energy/hunger/title/house/children/spouse/childRearing/generationRecords/activeTasks）
@@ -198,7 +198,7 @@ GameEngine extends GameProviderBase with:
 | 过月 | advance | advanceMonth | 是 |
 | 帮助 | help | _helpText | 否 |
 
-## 五、测试文件映射（test/ 37 文件，总 4880+ 行）
+## 五、测试文件映射（test/ 39 文件）
 
 | 测试文件 | 覆盖 |
 |----------|------|
@@ -225,6 +225,11 @@ GameEngine extends GameProviderBase with:
 | batch10_15_npc_tasks_test | NPC 任务链/深聊/关系面板（10-15） |
 | batch10_17_marriage_test | 婚姻/培养/家族树（10-17，25 用例） |
 | batch10_18_npc_task2_test | 多步骤任务/期限/奖励差异化（10-18，15 用例） |
+| batch10_19_panel_ai_test | UI 婚姻/任务区块 + AI 注入 + 任务模板扩充（10-19） |
+| batch10_20_family_tree_ai_test | 家族树 UI 可视化 + AI 注入世代谱系/头衔晋升（10-20） |
+| batch10_21_task_templates_test | 任务模板扩充 12→20（10-21） |
+| batch10_22_ai_prompt_inject_test | AI prompt 注入：在场 NPC 任务模板/家族信息/自由民空态（10-22） |
+| batch10_23_task_templates_test | 任务模板扩充 20→32：珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯（10-23） |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
 > （grep `allEvents.length` / `eventsByType(...).length`）。
@@ -254,4 +259,4 @@ GameEngine extends GameProviderBase with:
 3. 每次改完先括号检查（python 脚本），再 commit → push → CI → 绿后更新 HANDOVER + README
 
 ---
-*文档版本：v1.1（Batch 10-18 更新）· 最后更新：2026-09-26*
+*文档版本：v1.2（Batch 10-23 更新）· 最后更新：2026-09-28*
