@@ -175,12 +175,13 @@ class Player {
     String? house,
     List<String>? children,
     SpouseDetail? spouse,
+    bool clearSpouse = false,
     List<ChildRearing>? childRearing,
     List<GenerationRecord>? generationRecords,
     List<NpcTaskProgress>? activeTasks,
   }) {
-    // 允许显式清空配偶（离婚/丧偶）：null 无法用 ?? 区分，用哨兵
-    final spouseValue = identical(spouse, _noSpouse) ? null : (spouse ?? this.spouse);
+    // 显式清空配偶（离婚/丧偶）：clearSpouse=true 时置 null
+    final spouseValue = clearSpouse ? null : (spouse ?? this.spouse);
     return Player(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -208,9 +209,6 @@ class Player {
       activeTasks: activeTasks ?? this.activeTasks,
     );
   }
-
-  /// 哨兵：显式清空配偶用（copyWith 传 [Player._noSpouse] 表示置 null）。
-  static const Object _noSpouse = Object();
 
   /// 序列化为 JSON Map（用于存档）。
   Map<String, dynamic> toJson() {

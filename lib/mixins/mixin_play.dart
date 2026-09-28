@@ -196,10 +196,14 @@ mixin GamePlayMixin
     final succession = maybeSuccessionStory();
     // 婚后生育（Batch 10-17：已婚且未满上限时有概率添丁）
     final familyEvent = maybeFamilyEvent(seed: progress.turnCount);
+    // 婚后月度事件（Batch 10-25：按身世触发的家宅事件）
+    final spouseMonthly = maybeSpouseMonthlyEvent(seed: progress.turnCount);
     // NPC 多步骤任务：月度推进 + 逾期检查（Batch 10-18）
     final npcTaskAdvance = advanceNpcTasks();
     final npcTaskDeadline = checkNpcTaskDeadlines();
     advanceTime();
+    // 跨年清除离婚标记（Batch 10-25：再婚冷却一年）
+    maybeClearDivorceFlag();
     // 月度世界事件浮现（30% 概率触发一个可触发事件作为叙事提示）
     final worldEvent = _maybeWorldEvent(seed: progress.turnCount);
     // 死亡：尝试世代传承
@@ -220,6 +224,9 @@ mixin GamePlayMixin
     }
     if (familyEvent.isNotEmpty) {
       buf.writeln(familyEvent);
+    }
+    if (spouseMonthly.isNotEmpty) {
+      buf.writeln(spouseMonthly);
     }
     if (npcTaskAdvance.isNotEmpty) {
       buf.writeln(npcTaskAdvance);

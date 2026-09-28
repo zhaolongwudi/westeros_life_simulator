@@ -182,6 +182,14 @@ mixin GameCommandsMixin
         return CommandResult(text: marry(args));
       case '配偶' || '共处' || 'spouse':
         return CommandResult(text: spouseInteract());
+      case '婚姻' || '婚姻面板' || 'marriage':
+        return CommandResult(text: formatMarriagePanel());
+      case '私语' || '谈心' || 'chatspouse':
+        return CommandResult(text: spouseChat(args.isEmpty ? null : args));
+      case '离婚' || 'divorce':
+        return CommandResult(text: divorce());
+      case '丧偶' || 'widow':
+        return CommandResult(text: spousePassesAway());
       case '培养' || 'rear':
         final parts = args.split(RegExp(r'\s+'));
         if (parts.length < 2) {
@@ -377,6 +385,10 @@ mixin GameCommandsMixin
 立嗣 / addchild [名字] 为家族添丁（如 立嗣 罗柏）
 求婚 / marry [身世]   成婚（平民/商人/战士/贵族，如 求婚 平民）
 配偶 / spouse       与配偶共处（每日 1 次，恢复精力）
+婚姻 / marriage     查看婚姻面板（配偶/感情/子女培养）
+私语 / chatspouse [话题]  与配偶谈心（每日 2 次，增进感情）
+离婚 / divorce      解除婚姻（需结婚满一年，耗 30 金币、声望 -10）
+丧偶 / widow        配偶离世（解除婚姻，贵族联姻声望 -5）
 培养 / rear [子女] [方向] 为子女定培养方向（sword/politics/speech/riding）
 督导 / tutor [子女]  亲自督导子女（声望 +3）
 送学 / school [子女] 送子女去学城/骑士团进修（声望 +5）

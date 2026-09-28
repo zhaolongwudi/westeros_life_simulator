@@ -190,6 +190,10 @@ class PlayerPanelScreen extends StatelessWidget {
                         '（${p.spouse!.origin.name}，'
                         '结缡 ${e.progress.year - p.spouse!.marriedYear} 年）',
                       ),
+                      Text(
+                        '感情：${p.spouse!.affection}/100'
+                        '（${e.affectionLabel(p.spouse!.affection)}）',
+                      ),
                       const SizedBox(height: 4),
                     ],
                     if (p.children.isNotEmpty) ...[

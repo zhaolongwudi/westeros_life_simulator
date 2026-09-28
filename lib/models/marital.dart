@@ -52,6 +52,7 @@ class SpouseDetail {
     required this.origin,
     required this.marriedYear,
     this.familyId = '',
+    this.affection = 50,
   });
 
   /// 配偶姓名。
@@ -66,12 +67,17 @@ class SpouseDetail {
   /// 配偶家族 ID（贵族联姻有值）。
   final String familyId;
 
+  /// 夫妻感情（0-100，初始 50；配偶互动/谈心/事件提升，离婚/丧偶重置）。
+  /// Batch 10-25 婚姻二轮新增。
+  final int affection;
+
   Map<String, dynamic> toJson() {
     return {
       'name': name,
       'origin': origin.name,
       'marriedYear': marriedYear,
       'familyId': familyId,
+      'affection': affection,
     };
   }
 
@@ -81,6 +87,23 @@ class SpouseDetail {
       origin: SpouseOrigin.values.byName(json['origin'] as String),
       marriedYear: json['marriedYear'] as int,
       familyId: json['familyId'] as String? ?? '',
+      affection: json['affection'] as int? ?? 50,
+    );
+  }
+
+  SpouseDetail copyWith({
+    String? name,
+    SpouseOrigin? origin,
+    int? marriedYear,
+    String? familyId,
+    int? affection,
+  }) {
+    return SpouseDetail(
+      name: name ?? this.name,
+      origin: origin ?? this.origin,
+      marriedYear: marriedYear ?? this.marriedYear,
+      familyId: familyId ?? this.familyId,
+      affection: affection ?? this.affection,
     );
   }
 }

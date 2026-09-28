@@ -49,6 +49,9 @@ mixin GameMarriageMixin
   /// 同一玩家只能成婚一次。返回叙事文本。
   String marry(String originStr) {
     if (isMarried) return '你已有家室，不可再娶/再嫁。';
+    if (divorcedThisYear) {
+      return '你今年方和离，名声未复。待来年风声过去，再谈婚嫁不迟。';
+    }
     final origin = _originOf(originStr);
     if (origin == null) {
       return '你想与什么样的人成婚？可选：平民 / 商人 / 战士 / 贵族。';
@@ -242,5 +245,271 @@ mixin GameMarriageMixin
       _spouseDailyMonth = today;
       _spouseDailyCount = 0;
     }
+  }
+
+  // ==================== Batch 10-25：婚姻系统二轮 ====================
+  // 离婚/丧偶、配偶谈心（好感度）、婚后月度事件、婚姻面板。
+
+  /// 离婚补偿金（防无限再婚刷声望：每次离婚耗金币且当年不可再婚）。
+  static const int kDivorceCost = 30;
+
+  /// 配偶谈心每日次数上限。
+  static const int kSpouseChatDailyLimit = 2;
+
+  /// 夫妻感情等级标签。
+  String affectionLabel(int affection) {
+    if (affection >= 70) return '恩爱';
+    if (affection >= 30) return '和睦';
+    return '疏离';
+  }
+
+  /// 调整夫妻感情（clamp 0~100）。
+  void adjustSpouseAffection(int delta) {
+    final s = player.spouse;
+    if (s == null) return;
+    final newAff = (s.affection + delta).clamp(0, 100);
+    updatePlayer(player.copyWith(
+      spouse: s.copyWith(affection: newAff),
+    ));
+  }
+
+  /// 感情是否疏离（<30）：互动/事件效果减半。
+  bool get spouseAlienated {
+    final s = spouseDetail;
+    return s != null && s.affection < 30;
+  }
+
+  /// 感情是否恩爱（>=70）：事件触发率与效果加成。
+  bool get spouseDevoted {
+    final s = spouseDetail;
+    return s != null && s.affection >= 70;
+  }
+
+  /// 离婚：解除婚姻，补偿配偶，声望受损，当年不可再婚。
+  ///
+  /// 返回叙事文本；未婚/不足一年/金币不足返回提示。
+  String divorce() {
+    if (!isMarried) return '你尚未成婚，何谈离婚？';
+    final s = player.spouse!;
+    if (progress.year - s.marriedYear < 1) {
+      return '你们成婚不足一年，就这样离散，名声有损。再等等吧。';
+    }
+    if (player.gold < kDivorceCost) {
+      return '离婚需要 $kDivorceCost 金币作为补偿。你囊中羞涩。';
+    }
+    gainGold(-kDivorceCost);
+    adjustReputation(-10);
+    updatePlayer(player.copyWith(
+      clearSpouse: true,
+      flags: {...player.flags, 'isMarried': false, 'divorceYear': true},
+    ));
+    return '💔 你与「${s.name}」和离。补偿 $kDivorceCost 金币，付之一炬的还有昔年情分（声望 -10）。'
+        '一别两宽，各生欢喜。';
+  }
+
+  /// 是否当年已离婚（再婚冷却一年）。
+  bool get divorcedThisYear => flagOf('divorceYear');
+
+  /// 丧偶：配偶离世，婚姻解除；贵族联姻的世家纽带断裂（声望损失）。
+  ///
+  /// 返回叙事文本；未婚返回提示。已婚玩家在月度结算中被触发。
+  String spousePassesAway() {
+    if (!isMarried) return '你并无配偶，何来丧偶。';
+    final s = player.spouse!;
+    final repDelta = s.origin == SpouseOrigin.noble ? -5 : 0;
+    updatePlayer(player.copyWith(
+      clearSpouse: true,
+      flags: {...player.flags, 'isMarried': false, 'widowed': true},
+    ));
+    if (repDelta != 0) adjustReputation(repDelta);
+    return '🕯️ 你的配偶「${s.name}」溘然长逝，你为其守灵七日，泣不成声。'
+        '${repDelta != 0 ? '世家联姻的纽带也随之中断（声望 -5）。' : ''}愿你安息。';
+  }
+
+  /// 配偶谈心：按身世 × 话题给出回应，增进夫妻感情。
+  ///
+  /// 话题可选：'朝局' / '家业' / '江湖' / '家常'（缺省随机）。
+  /// 每日限 [kSpouseChatDailyLimit] 次。恩爱加成（好感 +5，否则 +3）。
+  String spouseChat([String? topic]) {
+    if (!isMarried) return '你尚未成婚。先去「求婚 平民」找个知心人吧。';
+    if (!_canSpouseChat()) return '你们今天已经说了很多知心话。改日再聊吧。';
+    _recordSpouseChat();
+    final s = player.spouse!;
+    final t = topic?.trim();
+    final normalized = (t == null || t.isEmpty)
+        ? _randomChatTopic()
+        : (t.contains('朝') || t.contains('政') ? '朝局'
+            : t.contains('家') || t.contains('业') ? '家业'
+            : t.contains('江湖') || t.contains('冒险') || t.contains('闯荡') ? '江湖'
+            : '家常');
+    final text = switch (s.origin) {
+      SpouseOrigin.noble => _nobleChat(normalized, s.name),
+      SpouseOrigin.commoner => _commonerChat(normalized, s.name),
+      SpouseOrigin.merchant => _merchantChat(normalized, s.name),
+      SpouseOrigin.warrior => _warriorChat(normalized, s.name),
+    };
+    final gain = spouseDevoted ? 5 : 3;
+    adjustSpouseAffection(gain);
+    return '$text\n（与「${s.name}」的感情 +$gain，当前 ${affectionLabel(s.affection + gain > 100 ? 100 : s.affection + gain)}）';
+  }
+
+  String _randomChatTopic() {
+    const topics = ['朝局', '家业', '江湖', '家常'];
+    return topics[rng().nextInt(topics.length)];
+  }
+
+  String _nobleChat(String topic, String name) {
+    return switch (topic) {
+      '朝局' => '🏰 $name 抚着家徽低声道：「铁王座上的风暴从未平息。你我需步步为营。」',
+      '家业' => '👑 $name 与你讨论封地收成与税赋：「领民安，则家族安。」',
+      '江湖' => '⚔️ $name 听你讲游历见闻，眼中闪烁：「等局势安定，我也想去看看你说的山川。」',
+      _ => '🕯️ 炉火旁，$name 与你共读一卷旧史，家族的荣光在纸页间流淌。',
+    };
+  }
+
+  String _commonerChat(String topic, String name) {
+    return switch (topic) {
+      '朝局' => '🍞 $name 摆摆手：「老爷们的事我们管不着，日子过踏实就好。」',
+      '家业' => '🔥 $name 缝着衣裳笑道：「等你回来，饭总是热的。」',
+      '江湖' => '🌾 $name 摇摇头：「外面凶险，你却总爱往外跑。平安回来就好。」',
+      _ => '🐔 $name 说起邻家趣事，鸡毛蒜皮里都是烟火气。',
+    };
+  }
+
+  String _merchantChat(String topic, String name) {
+    return switch (topic) {
+      '朝局' => '💰 $name 拨着算盘：「仗一打，粮价就涨。咱们得囤些货。」',
+      '家业' => '📜 $name 摊开账本：「这条商路若打通，够家里宽裕十年。」',
+      '江湖' => '🐎 $name 笑道：「你那趟买卖若带我同去，准能多赚三成。」',
+      _ => '🍷 $name 为你斟酒：「生意场上见惯冷暖，只有你，是真心待我。」',
+    };
+  }
+
+  String _warriorChat(String topic, String name) {
+    return switch (topic) {
+      '朝局' => '🛡️ $name 握紧剑柄：「乱世将至，护好这个家，比什么都强。」',
+      '家业' => '🗡️ $name 擦拭兵刃：「孩子们该学武了。这世道，拳头才靠得住。」',
+      '江湖' => '⚡ $name 眼睛一亮：「下次闯荡，带上我。我还没见过你说的战场。」',
+      _ => '🔥 $name 替你按了按肩膀：「受了伤别硬撑。有我在。」',
+    };
+  }
+
+  // ==================== 谈心每日计数（独立前缀 _b1025，坑 16） ====================
+
+  int _b1025ChatCount = 0;
+  String? _b1025ChatMonth;
+
+  bool _canSpouseChat() {
+    _b1025RollChat();
+    return _b1025ChatCount < kSpouseChatDailyLimit;
+  }
+
+  void _recordSpouseChat() {
+    _b1025RollChat();
+    _b1025ChatCount++;
+  }
+
+  void _b1025RollChat() {
+    final today = '${progress.year}-${progress.month}';
+    if (_b1025ChatMonth != today) {
+      _b1025ChatMonth = today;
+      _b1025ChatCount = 0;
+    }
+  }
+
+  /// 跨年清除离婚标记（再婚冷却一年，满一年后允许再婚）。
+  ///
+  /// 由 [GamePlayMixin.advanceMonth] 在 `advanceTime()` 之后调用。
+  /// 判断条件：当前月份为 1（即刚跨年）且 `divorceYear` flag 为 true。
+  void maybeClearDivorceFlag() {
+    if (flagOf('divorceYear') && progress.month == 1) {
+      final newFlags = Map<String, bool>.from(player.flags);
+      newFlags.remove('divorceYear');
+      updatePlayer(player.copyWith(flags: newFlags));
+    }
+  }
+
+  // ==================== 婚后月度事件（Batch 10-25） ====================
+
+  /// 婚后月度事件：按身世触发专属家宅事件（恢复/增益），感情恩爱时效果更强。
+  ///
+  /// 由 [GamePlayMixin.advanceMonth] 调用；未触发返回空串。
+  /// 25% 概率触发；恩爱（感情>=70）时概率提升至 35%。
+  String maybeSpouseMonthlyEvent({int? seed}) {
+    if (!isGameActive || isGameOver) return '';
+    if (!isMarried) return '';
+    final s = player.spouse!;
+    final rnd = rng(seed);
+    final chance = spouseDevoted ? 0.35 : 0.25;
+    if (rnd.nextDouble() > chance) return '';
+    final text = switch (s.origin) {
+      SpouseOrigin.noble => _nobleMonthly(s.name),
+      SpouseOrigin.commoner => _commonerMonthly(s.name),
+      SpouseOrigin.merchant => _merchantMonthly(s.name),
+      SpouseOrigin.warrior => _warriorMonthly(s.name),
+    };
+    adjustSpouseAffection(spouseDevoted ? 4 : 2);
+    return text;
+  }
+
+  String _nobleMonthly(String name) {
+    final repGain = spouseDevoted ? 4 : 2;
+    adjustReputation(repGain);
+    return '🏯 $name 打理封地井井有条，又在朝中为你周旋。家族声望 +$repGain。';
+  }
+
+  String _commonerMonthly(String name) {
+    final gain = spouseDevoted ? 18 : 10;
+    adjustEnergy(gain);
+    return '🍲 $name 起早贪黑打理家务，为你备好热饭暖汤。精力恢复 $gain。';
+  }
+
+  String _merchantMonthly(String name) {
+    final goldGain = spouseDevoted ? 25 : 15;
+    gainGold(goldGain);
+    return '💰 $name 的商队捎回一笔红利，账上多了 $goldGain 金币。';
+  }
+
+  String _warriorMonthly(String name) {
+    final gain = spouseDevoted ? 20 : 10;
+    adjustEnergy(gain);
+    adjustHealth(spouseDevoted ? 3 : 1);
+    return '🛡️ $name 夜里替你巡守，又拉你晨练。精力恢复 $gain，身体也硬朗了些。';
+  }
+
+  /// 婚姻面板：配偶 / 感情 / 子女培养完整展示。
+  String formatMarriagePanel() {
+    final p = player;
+    final buf = StringBuffer()..writeln('【婚姻】');
+    if (!isMarried || p.spouse == null) {
+      buf.writeln('· 状态：未婚');
+      buf.writeln('· 可尝试「求婚 平民/商人/战士/贵族」。');
+      return buf.toString().trim();
+    }
+    final s = p.spouse!;
+    final years = progress.year - s.marriedYear;
+    buf.writeln('· 配偶：${s.name}（${s.origin.name}，结缡 ${years <= 0 ? '元年' : '$years 年'}）');
+    buf.writeln('· 感情：${s.affection}/100（${affectionLabel(s.affection)}）');
+    if (s.familyId.isNotEmpty) {
+      final fam = familyById(s.familyId);
+      if (fam != null) buf.writeln('· 联姻家族：${fam.name}');
+    }
+    if (p.children.isEmpty) {
+      buf.writeln('· 子女：尚无子嗣');
+    } else {
+      buf.writeln('· 子女：${p.children.join('、')}');
+      final rearing = p.childRearing;
+      if (rearing.isNotEmpty) {
+        buf.writeln('· 培养档案：');
+        for (final r in rearing) {
+          final bits = <String>[];
+          if (r.focus.isNotEmpty) bits.add('方向 ${r.focus}');
+          if (r.tutored) bits.add('已督导');
+          if (r.sentToSchool) bits.add('在学城/骑士团进修');
+          buf.writeln('  - ${r.name}${bits.isEmpty ? '' : '（${bits.join('、')}）'}');
+        }
+      }
+    }
+    return buf.toString().trim();
   }
 }
