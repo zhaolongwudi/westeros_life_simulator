@@ -90,6 +90,9 @@ class NpcTaskTemplate {
         NpcTaskType.investigate => '调查',
         NpcTaskType.diplomacy => '游说',
       };
+
+  /// 全部步骤所需总推进次数（进度条分母，Batch 10-24）。
+  int get totalTurns => steps.fold(0, (sum, s) => sum + s.turnsRequired);
 }
 
 /// 玩家进行中的任务实例。

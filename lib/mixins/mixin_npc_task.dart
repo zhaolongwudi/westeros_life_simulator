@@ -189,6 +189,8 @@ mixin GameNpcTaskMixin
   }
 
   /// 任务进度面板：列出进行中/已完成/失败任务。
+  ///
+  /// Batch 10-24 增强：进行中任务附整体进度百分比与剩余月数。
   String formatNpcTaskProgressPanel() {
     if (player.activeTasks.isEmpty) return '【任务进度】\n你目前没有进行中的任务。';
     final buf = StringBuffer()..writeln('【任务进度】');
@@ -200,9 +202,57 @@ mixin GameNpcTaskMixin
               ? '❌ 已失败'
               : '⏳ 进行中（${t.stepIndex}/${template?.steps.length ?? '?'} 步）';
       final deadline = '期限 ${t.deadlineYear}年${t.deadlineMonth}月';
-      buf.writeln('· ${t.title}：$status｜$deadline');
+      final left = t.isActive ? npcTaskRemainingMonths(t) : null;
+      final leftText = (left == null || left < 0) ? '' : '（剩余 $left 个月）';
+      final ratio = t.isActive ? npcTaskOverallRatio(t) : null;
+      final ratioText = ratio == null ? '' : '，进度 ${(ratio * 100).round()}%';
+      buf.writeln('· ${t.title}：$status｜$deadline$leftText$ratioText');
     }
     return buf.toString().trim();
+  }
+
+  // ==================== 进度/期限派生（Batch 10-24） ====================
+
+  /// 任务整体进度（0.0~1.0）：已完成推进次数 / 总推进次数。
+  ///
+  /// 已完成任务恒为 1.0，失败任务按其失败时推进情况计算（UI 不展示条）。
+  double npcTaskOverallRatio(NpcTaskProgress task) {
+    final template = npcTaskTemplateById(task.taskId);
+    final total = template?.totalTurns ?? 0;
+    if (total == 0) return task.completed ? 1.0 : 0.0;
+    var done = task.stepProgress;
+    final steps = template?.steps ?? const <NpcTaskStep>[];
+    for (var i = 0; i < task.stepIndex && i < steps.length; i++) {
+      done += steps[i].turnsRequired;
+    }
+    final ratio = done / total;
+    return ratio.clamp(0.0, 1.0).toDouble();
+  }
+
+  /// 任务剩余月数（当前时间到下期限；逾期为负数，当月到期为 0）。
+  int npcTaskRemainingMonths(
+    NpcTaskProgress task, {
+    int? year,
+    int? month,
+  }) {
+    final nowYear = year ?? progress.year;
+    final nowMonth = month ?? progress.month;
+    final due = task.deadlineYear * 12 + task.deadlineMonth;
+    final now = nowYear * 12 + nowMonth;
+    return due - now;
+  }
+
+  /// 任务当前步骤描述（按任务快照的 stepIndex 查模板）。
+  String npcTaskCurrentStepDesc(NpcTaskProgress task) {
+    final template = npcTaskTemplateById(task.taskId);
+    if (template == null || task.stepIndex >= template.steps.length) return '';
+    return template.steps[task.stepIndex].description;
+  }
+
+  /// 任务总步骤数（用于「第 x/y 步」展示）。
+  int npcTaskTotalSteps(NpcTaskProgress task) {
+    final template = npcTaskTemplateById(task.taskId);
+    return template?.steps.length ?? 0;
   }
 
   // ==================== 内部工具 ====================

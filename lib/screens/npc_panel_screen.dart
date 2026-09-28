@@ -148,11 +148,43 @@ class NpcPanelScreen extends StatelessWidget {
                               : '⏳ 进行中';
                       final deadline =
                           '期限 ${t.deadlineYear}年${t.deadlineMonth}月';
+                      // Batch 10-24：进度条 + 剩余月数 + 当前步骤
+                      final ratio = t.isActive ? e.npcTaskOverallRatio(t) : null;
+                      final left = t.isActive ? e.npcTaskRemainingMonths(t) : null;
+                      final totalSteps = e.npcTaskTotalSteps(t);
+                      final leftText = (left == null || left < 0)
+                          ? ''
+                          : '剩余 $left 个月';
                       return Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          '· ${t.title}：$status｜$deadline',
-                          style: theme.textTheme.bodyMedium,
+                        padding: const EdgeInsets.only(top: 8, bottom: 4),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              '· ${t.title}：$status｜$deadline'
+                              '${leftText.isEmpty ? '' : '｜$leftText'}',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                            if (ratio != null) ...<Widget>[
+                              const SizedBox(height: 6),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: LinearProgressIndicator(
+                                  value: ratio,
+                                  minHeight: 8,
+                                  backgroundColor:
+                                      theme.colorScheme.surfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '进度 ${(ratio * 100).round()}%'
+                                '（第 ${t.stepIndex + 1}/$totalSteps 步）'
+                                '${e.npcTaskCurrentStepDesc(t).isEmpty ? '' : ' · ${e.npcTaskCurrentStepDesc(t)}'}',
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ],
+                          ],
                         ),
                       );
                     }),
