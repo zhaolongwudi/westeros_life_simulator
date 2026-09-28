@@ -137,6 +137,7 @@ GameEngine extends GameProviderBase with:
 | NPC 多步骤任务列表 | mixin_npc_task.dart（availableTasksOf/formatNpcTaskPanelV2，Batch 10-18） |
 | NPC 接任务 | mixin_npc_task.dart（acceptNpcTaskV2，Batch 10-18） |
 | NPC 任务推进/期限 | mixin_npc_task.dart（advanceNpcTasks/checkNpcTaskDeadlines，探索+过月挂载，Batch 10-18） |
+| NPC 任务整体进度/剩余月数 | mixin_npc_task.dart（npcTaskOverallRatio/npcTaskRemainingMonths/npcTaskCurrentStepDesc，Batch 10-24） |
 | NPC 任务进度面板 | mixin_npc_task.dart（formatNpcTaskProgressPanel，Batch 10-18） |
 | 效果应用（事件/AI 共用） | providers/game_state_provider.dart（applyEffects） |
 | 游戏结束/血脉断绝 | providers/game_state_provider.dart（endGame）+ mixin_play.dart（_tryInheritance） |
@@ -146,7 +147,7 @@ GameEngine extends GameProviderBase with:
 | 存档 | services/save_service.dart |
 | 事件触发/选项 | providers/event_provider.dart |
 | 玩家面板 UI | screens/player_panel_screen.dart |
-| NPC 面板 UI | screens/npc_panel_screen.dart（Batch 10-15） |
+| NPC 面板 UI | screens/npc_panel_screen.dart（Batch 10-15；进行中任务区块进度条/剩余月数/当前步骤，Batch 10-24） |
 | 叙事分段渲染 | utils/narrative_format.dart（splitNarrative） |
 
 ---
@@ -230,6 +231,7 @@ GameEngine extends GameProviderBase with:
 | batch10_21_task_templates_test | 任务模板扩充 12→20（10-21） |
 | batch10_22_ai_prompt_inject_test | AI prompt 注入：在场 NPC 任务模板/家族信息/自由民空态（10-22） |
 | batch10_23_task_templates_test | 任务模板扩充 20→32：珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯（10-23） |
+| batch10_24_task_progress_ui_test | NPC 任务进度 UI 化：totalTurns/整体进度/剩余月数/进度条渲染/契约回归（10-24，10 用例） |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
 > （grep `allEvents.length` / `eventsByType(...).length`）。
@@ -259,4 +261,4 @@ GameEngine extends GameProviderBase with:
 3. 每次改完先括号检查（python 脚本），再 commit → push → CI → 绿后更新 HANDOVER + README
 
 ---
-*文档版本：v1.2（Batch 10-23 更新）· 最后更新：2026-09-28*
+*文档版本：v1.3（Batch 10-24 更新）· 最后更新：2026-09-28*
