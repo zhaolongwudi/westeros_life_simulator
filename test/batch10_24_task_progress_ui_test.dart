@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:westeros_life_simulator/data/npc_task_data.dart';
 import 'package:westeros_life_simulator/game_engine.dart';
 import 'package:westeros_life_simulator/models/npc_task.dart';
 import 'package:westeros_life_simulator/screens/npc_panel_screen.dart';
@@ -17,7 +18,6 @@ import 'package:westeros_life_simulator/screens/npc_panel_screen.dart';
 void main() {
   group('Batch 10-24 NpcTaskTemplate.totalTurns', () {
     test('护送任务总推进次数为各步之和', () {
-      final engine = GameEngine()..startNewGame();
       final template = npcTaskTemplateById('task_nev_escort');
       expect(template, isNotNull);
       // 步骤 turnsRequired 1+2+2=5
