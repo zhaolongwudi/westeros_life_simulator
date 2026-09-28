@@ -44,8 +44,8 @@ void main() {
       final task = engine.activeTasks.first;
       // 艾德护送任务 totalTurns=5，初始 stepProgress=0
       expect(engine.npcTaskOverallRatio(task), 0.0);
-      // 默认 283 年 3 月接，期限 283 年 8 月 → 剩余 5 个月
-      expect(engine.npcTaskRemainingMonths(task), 5);
+      // 默认 283 年 3 月接，期限 283 年 9 月 → 剩余 6 个月
+      expect(engine.npcTaskRemainingMonths(task), 6);
       // 当前步骤描述
       expect(
         engine.npcTaskCurrentStepDesc(task),
@@ -104,10 +104,10 @@ void main() {
         ),
       );
       engine.acceptNpcTaskV2('npc_nev');
-      expect(engine.npcTaskRemainingMonths(engine.activeTasks.first), 5);
-      // 过 1 个月 → 剩余 4
+      expect(engine.npcTaskRemainingMonths(engine.activeTasks.first), 6);
+      // 过 1 个月 → 剩余 5
       engine.advanceMonth();
-      expect(engine.npcTaskRemainingMonths(engine.activeTasks.first), 4);
+      expect(engine.npcTaskRemainingMonths(engine.activeTasks.first), 5);
     });
   });
 
@@ -123,13 +123,13 @@ void main() {
       final panel = engine.formatNpcTaskProgressPanel();
       expect(panel, contains('任务进度'));
       expect(panel, contains('期限'));
-      expect(panel, contains('剩余 5 个月'));
+      expect(panel, contains('剩余 6 个月'));
       expect(panel, contains('进度 0%'));
       // 推进一次后
       engine.advanceNpcTasks();
       final panel2 = engine.formatNpcTaskProgressPanel();
       expect(panel2, contains('进度 20%'));
-      expect(panel2, contains('剩余 5 个月'));
+      expect(panel2, contains('剩余 6 个月'));
     });
   });
 
@@ -161,7 +161,7 @@ void main() {
       // 新增：进度条渲染
       expect(find.byType(LinearProgressIndicator), findsWidgets);
       // 剩余月数 + 进度 + 当前步骤
-      expect(find.textContaining('剩余 5 个月'), findsOneWidget);
+      expect(find.textContaining('剩余 6 个月'), findsOneWidget);
       expect(find.textContaining('进度 0%'), findsOneWidget);
       expect(find.textContaining('第 1/3 步'), findsOneWidget);
     });
