@@ -31,7 +31,7 @@ lib/
 │   ├── item_data.dart             # 34 物品
 │   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节）
 │   ├── balance_data.dart           # ⭐ 数值配置集中（初始值/生存消耗/每日上限/头衔阶梯/活动经济/婚姻与世代阈值，Batch 10-30 · M4a；无 import 依赖的叶子模块）
-│   └── npc_task_data.dart         # NPC 多步骤任务模板（32 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯，Batch 10-18 起逐步扩充，10-23 扩至 32）
+│   └── npc_task_data.dart         # NPC 多步骤任务模板（44 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯/奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈，Batch 10-18 起逐步扩充，10-39 扩至 44）
 │
 ├── models/                        # 【模型层】不可变实体（copyWith + toJson/fromJson）
 │   ├── player.dart                # Player（含 health/energy/hunger/title/house/children/spouse/childRearing/generationRecords/activeTasks）
@@ -272,6 +272,7 @@ GameEngine extends GameProviderBase with:
 | batch10_21_task_templates_test | 任务模板扩充 12→20（10-21） |
 | batch10_22_ai_prompt_inject_test | AI prompt 注入：在场 NPC 任务模板/家族信息/自由民空态（10-22） |
 | batch10_23_task_templates_test | 任务模板扩充 20→32：珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯（10-23） |
+| batch10_39_task_templates_test | 任务模板扩充 32→44：奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈（10-39，瑞肯在场全流程） |
 | batch10_24_task_progress_ui_test | NPC 任务进度 UI 化：totalTurns/整体进度/剩余月数/进度条渲染/契约回归（10-24，10 用例） |
 | batch10_25_marriage2_test | 婚姻二轮：离婚/丧偶/配偶谈心/月度事件/婚姻面板（10-25） |
 | m1_save_migration_test | **M1 存档契约**（10-26，22 用例）：schemaVersion 写入 / v0→v1 迁移 / 高版本抛异常 / 防御式 fromJson（坏类型/坏列表元素/空 Map）/ 坏档隔离 .corrupted / 旧档加载 / 保存往返 |
