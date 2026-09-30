@@ -18,6 +18,10 @@ lib/
 ├── app.dart                       # 根组件：StartScreen → GameScreen
 ├── game_engine.dart               # ⭐ 引擎宿主：组合全部 mixin（含混入顺序）
 │
+├── core/                           # 【框架层】纯 Dart，无状态层依赖（Batch 10-28 · M3a 新增）
+│   ├── command_registry.dart      # ⭐ CommandSpec/CommandRegistry：指令注册表（别名分发/帮助生成/重复别名记录），132 行
+│   └── monthly_pipeline.dart      # ⭐ MonthlyPhase/MonthlyHookSpec/MonthlyPipeline：月度结算管线（phase × order × outputOrder 三轴，runMonth 注入 advanceClock），129 行
+│
 ├── data/                          # 【静态数据层】世界常量数据
 │   ├── family_data.dart           # 27 家族
 │   ├── location_data.dart         # 68 地点
@@ -53,8 +57,10 @@ lib/
 │   ├── mixin_generation.dart      # ⭐ 家族继承与多世代：立嗣/家谱/死亡传承（Batch 10-14；advanceGeneration 写谱系记录，Batch 10-17）
 │   ├── mixin_marriage.dart        # ⭐ 婚姻系统：求婚/配偶互动/婚后每月事件/子女培养/督导送学/多代家族树（Batch 10-17，245 行）
 │   ├── mixin_npc_task.dart        # ⭐ NPC 任务链二轮：多步骤任务/期限系统/奖励差异化（Batch 10-18，221 行）
-│   ├── mixin_commands.dart        # ⭐ 指令解析：resolveCommand 分发全部指令
+│   ├── mixin_commands.dart        # ⭐ 指令分发器（Batch 10-28 · M3a：401→100 行，只「拉齐 10 个领域自注册 + 按别名分发 + 帮助/未知指令」；**新增指令请去对应领域 mixin 的 registerXxxCommands**，不要再改这里）
 │   └── mixin_ai.dart              # AI 回合混入（applyAiChoice）
+│
+│   （Batch 10-28 · M3a 自注册约定：9 个领域 mixin 各有 `registerXxxCommands(CommandRegistry)`；6 个领域各有 `registerXxxMonthlyHooks(MonthlyPipeline)`；共 12 个月度钩子 id）
 │
 ├── screens/                       # 【UI 层】
 │   ├── start_screen.dart          # 开局选择界面
@@ -79,6 +85,7 @@ lib/
     ├── labels.dart                # 中文标签（身份/物品分类/技能/配偶身世 spouseOriginLabel，Batch 10-27）
     ├── json_safe.dart             # ⭐ JSON 防御式解析（Batch 10-26 · M1）：safeStr/safeInt/safeBool/safeMap/safeList/safeStrList/safeIntMap/safeBoolMap/safeStringMap/safeObject/safeObjectList/safeEnum/asJsonMap/asInt/asBool
     ├── text_formats.dart          # 文本格式化
+    ├── command_alias.dart         # ⭐ 指令别名归一化（物品/技能/NPC 别名，Batch 10-28 · M3a：新增别名写这里，别在 switch 分支写 if-else 链）
     └── narrative_format.dart      # 叙事分段/效果标签/选项编号（Batch 10-12）
 ```
 
@@ -184,7 +191,7 @@ GameEngine extends GameProviderBase with:
 | 卸下 | unequip [物品] | unequip | 否 |
 | 装备栏 | 装备面板/equipment | formatEquipmentPanel | 否 |
 | 头衔 | title | formatTitlePanel | 否 |
-| 在场 | npc/人物 | _npcListText | 否 |
+| 在场 | npc/人物 | npcListText（mixin_npc_interact，Batch 10-28 起不再是 `_` 私有） | 否 |
 | 互动 | 交谈/interact [名字] | npcInteract | 否 |
 | 示好 | 送礼/favor [名字] | npcFavor | 否 |
 | 深聊 | 聊天/chat [名字] | npcChat（Batch 10-15） | 否 |
@@ -241,6 +248,7 @@ GameEngine extends GameProviderBase with:
 | batch10_25_marriage2_test | 婚姻二轮：离婚/丧偶/配偶谈心/月度事件/婚姻面板（10-25） |
 | m1_save_migration_test | **M1 存档契约**（10-26，22 用例）：schemaVersion 写入 / v0→v1 迁移 / 高版本抛异常 / 防御式 fromJson（坏类型/坏列表元素/空 Map）/ 坏档隔离 .corrupted / 旧档加载 / 保存往返 |
 | m2_identity_history_test | **M2 状态权威与身份正确性**（10-27，16 用例）：身份/身世中文化 / isIdentity 逐身份命中 / 商人贸易加成实证 / history 环形上限 200 + 丢弃计数 + 存档往返 |
+| m3_registry_test | **M3a 架构解耦**（10-28，24 用例）：46 条指令注册完整性 / order 唯一连续 1..46 / 帮助文本与旧版逐字一致 / 重复别名与重复 id 记录 / 12 个管线 id 的 phase×order×outputOrder 映射 / 时钟恰好推进一次 / 执行序与文本序分离 / **自注册演示（新增「钓鱼」指令不改分发器即可分发）** |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
 > （grep `allEvents.length` / `eventsByType(...).length`）。
@@ -265,6 +273,11 @@ GameEngine extends GameProviderBase with:
 - **审查报告先验证再执行** → 时间推进/身份匹配两条为误判，见坑 30
 - **状态载体加字段** → 6 处清单：构造器初始化列表/字段声明/startNewGame/applyState/toJson/fromJson（坑 30）
 - **列表截断收口唯一入口** → `_appendHistory` 内部截断，fromJson 预截断并记账（坑 30）
+- **月度钩子顺序是「两序一种子」** → `MonthlyPhase`（advanceTime 前/后）× `order`（执行序）× `outputOrder`（文本序）三轴解耦，照抄旧顺序会改随机结果（坑 32）
+- **搬迁长文案/巨型 switch 必须「生成器 + 逐字比对」** → git 取旧值 → 脚本写入 → 脚本断言一致，禁止手打（坑 32）
+- **`git checkout <file>` 会丢同文件手工改动** → 整块用生成脚本重建（坑 32）
+- **ai_service.dart 括号不平衡是预存误报** → git HEAD 上同样报同一数字，别再排查（坑 32）
+- **新增玩法只加 1 mixin + 1 行 with + 自注册指令 + 月度 hook** → 不得改 mixin_commands/mixin_play/game_engine 内部逻辑（坑 33）
 - **HANDOVER.md 已 gitignore** → 只本地更新；README 正常推送
 
 ## 七、文件写入约定（复用 HANDOVER 第二节）
@@ -276,4 +289,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v1.5（新增上下文预算指针）· 最后更新：2026-09-30*
+*文档版本：v1.6（新增 lib/core 框架层 + M3a 自注册约定 + 坑 32/33）· 最后更新：2026-09-30*
