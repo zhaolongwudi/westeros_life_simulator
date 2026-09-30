@@ -185,7 +185,7 @@ Future<void> _configureAiKey() async {
 }
 
 /// mock 种类。
-enum _MockKind { badRequest, narrativeOnly }
+enum _MockKind { badRequest }
 
 /// 构造一个不触网的 [AiService]（Dio 拦截器直接返回预设响应）。
 AiService _mockService(_MockKind kind) {
