@@ -99,7 +99,8 @@ lib/
 │   └── save_migration.dart        # ⭐ 存档迁移机制（Batch 10-26 · M1）：kSaveSchemaVersion=1 / kSaveMigrations 迁移表 / migrateSave / readSchemaVersion / UnsupportedSaveVersionException
 │
 └── utils/                         # 【工具层】纯函数
-    ├── labels.dart                # 中文标签（身份/物品分类/技能/配偶身世 spouseOriginLabel，Batch 10-27）
+    ├── labels.dart                # 中文标签（身份/物品分类/技能/配偶身世 spouseOriginLabel，Batch 10-27；M6 契约：全项目文案唯一集中层）
+    ├── command_sanitizer.dart     # ⭐ 指令输入防护（Batch 10-37 · M6a）：kMaxCommandLength=80 超长截断 + isCommandNoise 纯符号/空白噪声判定；resolveCommand 入口接入，AI 模式描述性输入不走防护
     ├── json_safe.dart             # ⭐ JSON 防御式解析（Batch 10-26 · M1）：safeStr/safeInt/safeBool/safeMap/safeList/safeStrList/safeIntMap/safeBoolMap/safeStringMap/safeObject/safeObjectList/safeEnum/asJsonMap/asInt/asBool
     ├── text_formats.dart          # 文本格式化
     ├── command_alias.dart         # ⭐ 指令别名归一化（物品/技能/NPC 别名，Batch 10-28 · M3a：新增别名写这里，别在 switch 分支写 if-else 链）
@@ -135,7 +136,8 @@ GameEngine extends GameProviderBase with:
 | 功能 | 位置 |
 |------|------|
 | 开局选择/角色生成 | screens/start_screen.dart（buildSetupPlayer/buildSetupProgress） |
-| 指令入口（所有指令分发） | mixins/mixin_commands.dart（resolveCommand） |
+| 指令入口（所有指令分发） | mixins/mixin_commands.dart（resolveCommand，入口护栏：超长截断+纯符号/空白兜底，Batch 10-37 · M6a） |
+| 指令输入防护 | utils/command_sanitizer.dart（sanitizeCommand 截断 / isCommandNoise 噪声判定，Batch 10-37 · M6a） |
 | 帮助文本 | mixin_commands.dart（_helpText） |
 | 状态面板（属性/技能/背包） | mixin_play.dart（formatPlayerPanel） |
 | 生存结算（饱食/饥饿/健康） | mixin_life.dart（applyMonthlyLife） |
@@ -282,6 +284,7 @@ GameEngine extends GameProviderBase with:
 | **m4c2_event_prompt_filter_test** | **M4c-2 事件 prompt 预算筛选**（10-33，8 用例）：预算截断（≤12 全量 / >12 截断）/ 相关度排序（地点/季节/数值/标记命中排前）/ 真实事件库契约（临冬城·冬 event_frozen_lake 双命中第一 / 夏季让位） |
 | **m5_experience_test** | **M5 体验层**（10-34/35，10 用例）：AI 失败降级（失败行+降级提示行 / 本地指令续玩 / 降级常量唯一）/ 长会话叙事（200 条渲染 / 200 条滚动到底 / 1000 条不崩 / GameScreen 冒烟）/ 导航宫格（窄屏 3 列 / 宽屏 4 列 / AppBar 宫格按钮弹出 9 入口） |
 | **m5_responsive_test** | **M5 响应式适配**（10-36，6 用例）：AdaptiveFrame 窄屏原样全宽不包 Center / 宽屏限宽可配置 / GameScreen 宽屏状态条≤700 + 契约不回归 / 窄屏状态条全宽 / PlayerPanelScreen·FamilyTreeScreen 宽屏 ListView 宽 900 |
+| **m6_robustness_test** | **M6 输入防护**（10-37，10 用例）：sanitizeCommand 正常/超长截断/恰好 80 不截断 / isCommandNoise 噪声判定 8 值 / resolveCommand 空·纯符号·超长·正常 / labels 文案集中层关键值 7 项 |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
 > （grep `allEvents.length` / `eventsByType(...).length`）。
@@ -328,4 +331,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v2.2（新增 responsive.dart 组件 + m5_responsive_test 映射 + M5c 响应式速查）· 最后更新：2026-10-01*
+*文档版本：v2.3（新增 command_sanitizer 组件 + m6_robustness_test 映射 + M6a 输入防护速查）· 最后更新：2026-10-01*
