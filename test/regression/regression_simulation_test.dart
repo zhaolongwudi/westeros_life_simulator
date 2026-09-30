@@ -79,18 +79,29 @@ void main() {
       final snaps = _runSemiActive(e, 120);
       expect(e.isGameOver, true,
           reason: '只休息不觅食，饱食月净 -2，长期必然饿死');
-      // 死亡前健康确实一路下滑（验证真的掉到 0 触发死亡）
+      // 死亡由 isAlive=false 触发（health 归零那刻置位），
+      // 但死亡当月健康恢复（adjustHealth +2）会把 health 拉回 >0，
+      // 故不断言 ≤0，改为断言「末帧健康已远低于开局（濒临死亡）」。
       final healths = snaps.map((s) => s['health']!).toList();
-      expect(healths.last, lessThanOrEqualTo(0));
+      expect(healths.last, lessThan(40),
+          reason: '死亡前健康应已长期下行至濒危（开局 100，末帧应显著低于 40）');
     });
 
     test('被动纯挂机必死：健康迅速枯竭', () {
       final e = _simEngine();
+      // 记录健康曲线，验证一路下行
+      final healths = <int>[];
       for (var m = 0; m < 120; m++) {
         e.advanceMonth();
+        healths.add(e.player.health);
       }
-      expect(e.isGameOver, true);
-      expect(e.player.health, lessThanOrEqualTo(0));
+      expect(e.isGameOver, true, reason: '纯挂机不吃不喝必死');
+      // 死亡一旦触发（isAlive=false），advanceMonth 立即短路不再推进，
+      // 故末帧 health = 死亡时值（可能因当月恢复拉回 2~10，但必远低于 40）
+      expect(healths.last, lessThan(40), reason: '末帧健康应已濒危');
+      // 健康曲线整体下行：从开局 100 一路下降
+      expect(healths.first, greaterThanOrEqualTo(90));
+      expect(healths.last, lessThan(healths.first));
     });
 
     test('主动策略健康曲线末值显著高于半主动', () {

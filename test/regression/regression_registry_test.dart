@@ -61,7 +61,15 @@ void main() {
     test('未知指令返回未知提示 + 帮助文本', () {
       final engine = GameEngine()..startNewGame();
       final result = engine.resolveCommand('飞天扫帚');
-      expect(result.text, contains('不是一条你能执行的指令'));
+      // _unknownHelp 用 Random(exact.hashCode) 三句随机选一，用 anyOf 覆盖
+      expect(
+        result.text,
+        anyOf(
+          contains('不是一条你能执行的指令'),
+          contains('维斯特洛不认这个命令'),
+          contains('你张了张嘴，却不知道要做什么'),
+        ),
+      );
       expect(result.text, contains('帮助 / help'));
     });
 
