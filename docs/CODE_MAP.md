@@ -85,6 +85,7 @@ lib/
 │       ├── ai_toggle.dart         # ⭐ AiModeToggle（AI 行动模式开关 + loading 转圈）
 │       ├── narrative.dart         # ⭐ NarrativeView + AiChoiceCard + PanelEntry（叙事区/AI 选项卡片/面板入口，286 行）
 │       ├── nav_grid.dart          # ⭐ NavGrid + NavGridEntry（导航宫格：GridView.count 窄屏 3 列/宽屏 4 列自适应，Batch 10-35 · M5b，99 行）
+│       ├── responsive.dart        # ⭐ 响应式工具（Batch 10-36 · M5c，60 行）：Breakpoints 断点（kTablet=600/kDesktop=900）+ AdaptiveFrame 宽屏限宽居中帧（窄屏原样全宽/宽屏 >=600 限宽）
 │       └── input.dart             # ⭐ CommandInputBar（指令输入栏 + 发送按钮）
 │
 │   （改主界面 UI 的正确姿势：**改 widgets/game/ 下的组件**，不要把展示逻辑塞回 game_screen）
@@ -174,6 +175,7 @@ GameEngine extends GameProviderBase with:
 | AI 选项效果落盘 + 推进 | mixin_ai.dart（applyAiChoice） |
 | 主界面状态条/快捷条/AI开关/叙事区/输入栏 | widgets/game/status.dart · quick.dart · ai_toggle.dart · narrative.dart · input.dart（Batch 10-29 · M3b） |
 | **导航宫格（9 入口 + 窄屏/宽屏自适应）** | widgets/game/nav_grid.dart（NavGrid/NavGridEntry，Batch 10-35 · M5b）+ game_screen.dart（_openNavGrid 弹出） |
+| **响应式断点 / 宽屏限宽帧** | widgets/game/responsive.dart（Breakpoints kTablet=600/kDesktop=900 / AdaptiveFrame，Batch 10-36 · M5c）；game_screen 限宽 700、player_panel/family_tree 限宽 900 |
 | 信件数据模型 | models/letter.dart（Letter，Batch 10-29 · M3b 从 mixin_letter 迁出） |
 | AI 提示词注入在场 NPC | ai_service.dart（_buildPrompt 内 onSiteNpcDesc，Batch 10-22 升级为多步骤任务模板：标题/难度/期限） |
 | AI 提示词注入家族信息 | ai_service.dart（_buildPrompt 内 familyDesc：族语/规模/影响力，Batch 10-22） |
@@ -279,6 +281,7 @@ GameEngine extends GameProviderBase with:
 | m4c1_content_sync_test | **M4c-1 内容 JSON 资产对账**（10-32，8 用例）：7 域 JSON 资产存在且可解析 / 每域 JSON id 集合 == Dart 常量 id 集合 / 关键文本非空 / 跨域引用（npc.familyId→families、task.npcId→npcs）/ 每条事件 ≥2 选项且至少一个无条件 |
 | **m4c2_event_prompt_filter_test** | **M4c-2 事件 prompt 预算筛选**（10-33，8 用例）：预算截断（≤12 全量 / >12 截断）/ 相关度排序（地点/季节/数值/标记命中排前）/ 真实事件库契约（临冬城·冬 event_frozen_lake 双命中第一 / 夏季让位） |
 | **m5_experience_test** | **M5 体验层**（10-34/35，10 用例）：AI 失败降级（失败行+降级提示行 / 本地指令续玩 / 降级常量唯一）/ 长会话叙事（200 条渲染 / 200 条滚动到底 / 1000 条不崩 / GameScreen 冒烟）/ 导航宫格（窄屏 3 列 / 宽屏 4 列 / AppBar 宫格按钮弹出 9 入口） |
+| **m5_responsive_test** | **M5 响应式适配**（10-36，6 用例）：AdaptiveFrame 窄屏原样全宽不包 Center / 宽屏限宽可配置 / GameScreen 宽屏状态条≤700 + 契约不回归 / 窄屏状态条全宽 / PlayerPanelScreen·FamilyTreeScreen 宽屏 ListView 宽 900 |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
 > （grep `allEvents.length` / `eventsByType(...).length`）。
@@ -325,4 +328,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v2.1（新增 nav_grid 组件 + m5_experience_test 映射 + M5a 降级提示/degradedLine + 导航宫格速查）· 最后更新：2026-10-01*
+*文档版本：v2.2（新增 responsive.dart 组件 + m5_responsive_test 映射 + M5c 响应式速查）· 最后更新：2026-10-01*
