@@ -18,13 +18,18 @@ import '../models/event.dart';
 import '../widgets/game/ai_toggle.dart';
 import '../widgets/game/input.dart';
 import '../widgets/game/narrative.dart';
+import '../widgets/game/nav_grid.dart';
 import '../widgets/game/quick.dart';
 import '../widgets/game/status.dart';
 import 'events_screen.dart';
+import 'family_screen.dart';
+import 'family_tree_screen.dart';
 import 'letters_screen.dart';
 import 'map_screen.dart';
 import 'npc_panel_screen.dart';
+import 'player_panel_screen.dart';
 import 'settings_screen.dart';
+import 'systems_screen.dart';
 
 /// 快捷指令（参考 mixin_commands 帮助）。
 const List<QuickCommand> _quickCommands = <QuickCommand>[
@@ -167,6 +172,79 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  /// 打开导航宫格（AppBar 单入口 → 全部面板）。
+  void _openNavGrid() {
+    final theme = Theme.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => NavGrid(
+        entries: <NavGridEntry>[
+          NavGridEntry(
+            icon: Icons.person_outline,
+            label: '玩家详情',
+            color: theme.colorScheme.primary,
+            onTap: () => _openPanelFromSheet(sheetContext, PlayerPanelScreen(engine: _engine)),
+          ),
+          NavGridEntry(
+            icon: Icons.family_restroom,
+            label: '家族面板',
+            color: theme.colorScheme.tertiary,
+            onTap: () => _openPanelFromSheet(sheetContext, FamilyScreen(engine: _engine)),
+          ),
+          NavGridEntry(
+            icon: Icons.account_tree_outlined,
+            label: '家族树',
+            color: theme.colorScheme.tertiary,
+            onTap: () => _openPanelFromSheet(sheetContext, FamilyTreeScreen(engine: _engine)),
+          ),
+          NavGridEntry(
+            icon: Icons.people_alt_outlined,
+            label: 'NPC 关系',
+            color: theme.colorScheme.tertiary,
+            onTap: () => _openPanelFromSheet(sheetContext, NpcPanelScreen(engine: _engine)),
+          ),
+          NavGridEntry(
+            icon: Icons.event_note_outlined,
+            label: '事件',
+            color: theme.colorScheme.primary,
+            onTap: () => _openPanelFromSheet(sheetContext, EventsScreen(engine: _engine)),
+          ),
+          NavGridEntry(
+            icon: Icons.mail_outlined,
+            label: '信件',
+            color: theme.colorScheme.primary,
+            onTap: () => _openPanelFromSheet(sheetContext, LettersScreen(engine: _engine)),
+          ),
+          NavGridEntry(
+            icon: Icons.grid_view_outlined,
+            label: '系统面板',
+            color: theme.colorScheme.secondary,
+            onTap: () => _openPanelFromSheet(sheetContext, SystemsScreen(engine: _engine)),
+          ),
+          NavGridEntry(
+            icon: Icons.map_outlined,
+            label: '地图',
+            color: theme.colorScheme.primary,
+            onTap: () => _openPanelFromSheet(sheetContext, MapScreen(engine: _engine)),
+          ),
+          NavGridEntry(
+            icon: Icons.settings_outlined,
+            label: '设置/存档',
+            color: theme.colorScheme.secondary,
+            onTap: () => _openPanelFromSheet(sheetContext, SettingsScreen(engine: _engine)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 关闭宫格弹层后打开目标界面。
+  void _openPanelFromSheet(BuildContext sheetContext, Widget screen) {
+    Navigator.of(sheetContext).pop();
+    _openScreen(screen);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -184,19 +262,9 @@ class _GameScreenState extends State<GameScreen> {
             onPressed: () => _openScreen(LettersScreen(engine: _engine)),
           ),
           IconButton(
-            icon: const Icon(Icons.people_alt_outlined),
-            tooltip: 'NPC 关系',
-            onPressed: () => _openScreen(NpcPanelScreen(engine: _engine)),
-          ),
-          IconButton(
-            icon: const Icon(Icons.map_outlined),
-            tooltip: '地图',
-            onPressed: () => _openScreen(MapScreen(engine: _engine)),
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: '设置/存档',
-            onPressed: () => _openScreen(SettingsScreen(engine: _engine)),
+            icon: const Icon(Icons.grid_view_outlined),
+            tooltip: '导航',
+            onPressed: _openNavGrid,
           ),
         ],
       ),

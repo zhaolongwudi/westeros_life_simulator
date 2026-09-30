@@ -18,6 +18,7 @@ import 'package:westeros_life_simulator/screens/game_screen.dart';
 import 'package:westeros_life_simulator/services/ai_config.dart';
 import 'package:westeros_life_simulator/services/ai_service.dart';
 import 'package:westeros_life_simulator/widgets/game/narrative.dart';
+import 'package:westeros_life_simulator/widgets/game/nav_grid.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -172,8 +173,108 @@ void main() {
       expect(find.text('AI 行动模式'), findsOneWidget);
     });
   });
-}
 
+  group('M5 · 导航宫格', () {
+    const List<NavGridEntry> sampleEntries = <NavGridEntry>[
+      NavGridEntry(
+        icon: Icons.person_outline,
+        label: '玩家详情',
+        color: Color(0xFF000000),
+        onTap: _noop,
+      ),
+      NavGridEntry(
+        icon: Icons.family_restroom,
+        label: '家族面板',
+        color: Color(0xFF000000),
+        onTap: _noop,
+      ),
+      NavGridEntry(
+        icon: Icons.map_outlined,
+        label: '地图',
+        color: Color(0xFF000000),
+        onTap: _noop,
+      ),
+      NavGridEntry(
+        icon: Icons.settings_outlined,
+        label: '设置/存档',
+        color: Color(0xFF000000),
+        onTap: _noop,
+      ),
+    ];
+
+    testWidgets('NavGrid 窄屏（<480）3 列渲染全部入口', (tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NavGrid(entries: sampleEntries),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('导航'), findsOneWidget);
+      expect(find.text('玩家详情'), findsOneWidget);
+      expect(find.text('家族面板'), findsOneWidget);
+      expect(find.text('地图'), findsOneWidget);
+      expect(find.text('设置/存档'), findsOneWidget);
+    });
+
+    testWidgets('NavGrid 宽屏（>=480）4 列渲染全部入口', (tester) async {
+      tester.view.physicalSize = const Size(600, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NavGrid(entries: sampleEntries),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('玩家详情'), findsOneWidget);
+      expect(find.text('家族面板'), findsOneWidget);
+    });
+
+    testWidgets('GameScreen AppBar 宫格按钮 → 弹出 9 入口', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      final engine = GameEngine()..startNewGame();
+      await tester.pumpWidget(
+        MaterialApp(home: GameScreen(engine: engine)),
+      );
+      await tester.pumpAndSettle();
+
+      // AppBar 宫格按钮存在
+      expect(find.byIcon(Icons.grid_view_outlined), findsOneWidget);
+
+      // 点击宫格按钮弹出导航宫格
+      await tester.tap(find.byIcon(Icons.grid_view_outlined));
+      await tester.pumpAndSettle();
+
+      // 宫格 9 入口齐全
+      expect(find.text('导航'), findsOneWidget);
+      expect(find.text('玩家详情'), findsOneWidget);
+      expect(find.text('家族面板'), findsOneWidget);
+      expect(find.text('家族树'), findsOneWidget);
+      expect(find.text('NPC 关系'), findsOneWidget);
+      expect(find.text('事件'), findsWidgets);
+      expect(find.text('信件'), findsWidgets);
+      expect(find.text('系统面板'), findsOneWidget);
+      expect(find.text('地图'), findsWidgets);
+      expect(find.text('设置/存档'), findsOneWidget);
+    });
+  });
+}
+ 
+/// 空操作回调（测试用 const entry）。
+void _noop() {}
+ 
 /// 配置一个测试用 AI Key（跳过「未配置」短路）。
 Future<void> _configureAiKey() async {
   final config = AiConfig(
