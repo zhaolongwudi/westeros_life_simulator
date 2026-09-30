@@ -292,7 +292,19 @@ class BalanceData {
 
   /// 谱系记录环形上限（防存档线性膨胀）。
   static const int generationRecordCap = 20;
-
+  // ==================== M4c-2 AI Prompt 预算 ====================
+  /// AI 叙事 prompt 单次最多注入的事件数（全量 72 → 预算 12，token 成本约降 83%）。
+  static const int kAiPromptEventBudget = 12;
+  /// 强相关事件不足时，兜底注入的最少事件数（保证 AI 有事件可参考）。
+  static const int kAiPromptEventFloor = 3;
+  /// 硬相关评分：地点命中。
+  static const int kAiScoreLocation = 3;
+  /// 硬相关评分：季节命中。
+  static const int kAiScoreSeason = 2;
+  /// 硬相关评分：身份命中。
+  static const int kAiScoreIdentity = 2;
+  /// 数值条件匹配评分（minGold/minEnergy/maxEnergy/minAge 等命中一次）。
+  static const int kAiScoreNumeric = 1;
   // ==================== 便捷派生 ====================
 
   /// 夫妻感情等级标签。

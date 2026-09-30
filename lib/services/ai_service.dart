@@ -14,6 +14,7 @@ import '../models/event.dart';
 import '../models/family.dart';
 import '../models/player.dart';
 import '../utils/labels.dart';
+import 'event_prompt_filter.dart';
 
 /// AI 响应结果。
 class AiResponse {
@@ -150,7 +151,12 @@ class AiService {
     String season,
     int currentYear,
   ) {
-    final eventsDesc = availableEvents
+    final selectedEvents = selectEventsForPrompt(
+      availableEvents,
+      player: player,
+      season: season,
+    );
+    final eventsDesc = selectedEvents
         .map((e) => '- ${e.name}: ${e.description}')
         .join('\n');
     final relationDesc = player.relations.entries
