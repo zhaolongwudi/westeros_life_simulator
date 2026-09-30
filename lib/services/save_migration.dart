@@ -67,9 +67,10 @@ int readSchemaVersion(Map<String, dynamic> raw) {
 
 /// 将任意版本的存档 Map 迁移到 [kSaveSchemaVersion]。
 ///
-/// 返回值是**新的** Map（不修改入参），其中 metadata.schemaVersion 必等于
-/// [kSaveSchemaVersion]。版本高于当前支持时抛 [UnsupportedSaveVersionException]；
-/// 迁移链断裂（缺关键版本迁移函数）时抛 [StateError]。
+/// 返回值是**新的** Map：顶层逐项拷贝，且 `metadata` 子 Map 单独复制，
+/// 因此打版本戳不会污染调用方传入的原对象。版本高于当前支持时抛
+/// [UnsupportedSaveVersionException]；迁移链断裂（缺关键版本迁移函数）时抛
+/// [StateError]。
 Map<String, dynamic> migrateSave(Map<String, dynamic> raw) {
   var current = readSchemaVersion(raw);
   if (current > kSaveSchemaVersion) {
@@ -80,6 +81,12 @@ Map<String, dynamic> migrateSave(Map<String, dynamic> raw) {
   }
 
   var migrated = Map<String, dynamic>.from(raw);
+  // 关键：metadata 是嵌套 Map，浅拷贝顶层仍与入参共享同一对象。
+  // 单独复制一层，保证 [migrateSave] 对入参无副作用（Batch 10-26 CI 修复）。
+  final rawMetadata = raw['metadata'];
+  if (rawMetadata is Map) {
+    migrated['metadata'] = Map<String, dynamic>.from(rawMetadata);
+  }
   var guard = 0;
   while (current < kSaveSchemaVersion) {
     final step = kSaveMigrations[current];
