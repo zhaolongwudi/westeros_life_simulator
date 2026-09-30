@@ -2,7 +2,11 @@
 ///
 /// 将配偶详情、子女培养、世代谱系封装为独立可序列化模型，
 /// 避免塞进 Player.flags（坑 16：flags 只存 bool）。
+///
+/// fromJson 自 Batch 10-26 起为防御式解析（M1-T02），字段缺失/类型错不抛。
 library;
+
+import '../utils/json_safe.dart';
 
 /// 配偶身世类型（影响婚礼开销与联姻声望）。
 enum SpouseOrigin {
@@ -83,11 +87,11 @@ class SpouseDetail {
 
   factory SpouseDetail.fromJson(Map<String, dynamic> json) {
     return SpouseDetail(
-      name: json['name'] as String,
-      origin: SpouseOrigin.values.byName(json['origin'] as String),
-      marriedYear: json['marriedYear'] as int,
-      familyId: json['familyId'] as String? ?? '',
-      affection: json['affection'] as int? ?? 50,
+      name: safeStr(json, 'name', fallback: '无名氏'),
+      origin: safeEnum(SpouseOrigin.values, json['origin'], SpouseOrigin.commoner),
+      marriedYear: safeInt(json, 'marriedYear'),
+      familyId: safeStr(json, 'familyId'),
+      affection: safeInt(json, 'affection', fallback: 50),
     );
   }
 
@@ -161,11 +165,11 @@ class ChildRearing {
 
   factory ChildRearing.fromJson(Map<String, dynamic> json) {
     return ChildRearing(
-      name: json['name'] as String,
-      focus: json['focus'] as String? ?? '',
-      tutored: json['tutored'] as bool? ?? false,
-      sentToSchool: json['sentToSchool'] as bool? ?? false,
-      reputationGain: json['reputationGain'] as int? ?? 0,
+      name: safeStr(json, 'name', fallback: '无名'),
+      focus: safeStr(json, 'focus'),
+      tutored: safeBool(json, 'tutored'),
+      sentToSchool: safeBool(json, 'sentToSchool'),
+      reputationGain: safeInt(json, 'reputationGain'),
     );
   }
 }
@@ -207,11 +211,11 @@ class GenerationRecord {
 
   factory GenerationRecord.fromJson(Map<String, dynamic> json) {
     return GenerationRecord(
-      generation: json['generation'] as int,
-      name: json['name'] as String,
-      reignYears: json['reignYears'] as String,
-      title: json['title'] as String,
-      achievement: json['achievement'] as String? ?? '',
+      generation: safeInt(json, 'generation', fallback: 1),
+      name: safeStr(json, 'name', fallback: '无名'),
+      reignYears: safeStr(json, 'reignYears'),
+      title: safeStr(json, 'title'),
+      achievement: safeStr(json, 'achievement'),
     );
   }
 }

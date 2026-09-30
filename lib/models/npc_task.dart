@@ -6,7 +6,11 @@
 /// - NpcTaskProgress：玩家进行中的任务实例（当前步骤/期限/完成/失败）
 ///
 /// 玩家进行中任务存 Player.activeTasks（可序列化，坑 16 避免 flags）。
+///
+/// fromJson 自 Batch 10-26 起为防御式解析（M1-T02），字段缺失/类型错不抛。
 library;
+
+import '../utils/json_safe.dart';
 
 /// 任务类型（决定叙事与部分奖励方向）。
 enum NpcTaskType {
@@ -174,15 +178,15 @@ class NpcTaskProgress {
 
   factory NpcTaskProgress.fromJson(Map<String, dynamic> json) {
     return NpcTaskProgress(
-      taskId: json['taskId'] as String,
-      npcId: json['npcId'] as String,
-      title: json['title'] as String,
-      stepIndex: json['stepIndex'] as int? ?? 0,
-      stepProgress: json['stepProgress'] as int? ?? 0,
-      deadlineYear: json['deadlineYear'] as int,
-      deadlineMonth: json['deadlineMonth'] as int,
-      completed: json['completed'] as bool? ?? false,
-      failed: json['failed'] as bool? ?? false,
+      taskId: safeStr(json, 'taskId'),
+      npcId: safeStr(json, 'npcId'),
+      title: safeStr(json, 'title', fallback: '无名任务'),
+      stepIndex: safeInt(json, 'stepIndex'),
+      stepProgress: safeInt(json, 'stepProgress'),
+      deadlineYear: safeInt(json, 'deadlineYear'),
+      deadlineMonth: safeInt(json, 'deadlineMonth'),
+      completed: safeBool(json, 'completed'),
+      failed: safeBool(json, 'failed'),
     );
   }
 }

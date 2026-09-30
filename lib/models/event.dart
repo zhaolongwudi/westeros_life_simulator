@@ -1,7 +1,11 @@
 /// 事件模型：游戏事件与事件模板。
 ///
 /// 字段设计参考 docs/06_事件库.md。
+///
+/// fromJson 自 Batch 10-26 起为防御式解析（M1-T02），字段缺失/类型错不抛。
 library;
+
+import '../utils/json_safe.dart';
 
 /// 事件类型。
 enum EventType {
@@ -49,14 +53,14 @@ class EventChoice {
     };
   }
 
-  /// 从 JSON Map 反序列化。
+  /// 从 JSON Map 反序列化（防御式：字段缺失/类型错一律回落默认值，绝不抛）。
   factory EventChoice.fromJson(Map<String, dynamic> json) {
     return EventChoice(
-      id: json['id'] as String,
-      text: json['text'] as String,
-      requirements: (json['requirements'] as Map).cast<String, int>(),
-      effects: (json['effects'] as Map).cast<String, int>(),
-      narrative: json['narrative'] as String,
+      id: safeStr(json, 'id', fallback: 'choice_unknown'),
+      text: safeStr(json, 'text', fallback: '（无内容）'),
+      requirements: safeIntMap(json, 'requirements'),
+      effects: safeIntMap(json, 'effects'),
+      narrative: safeStr(json, 'narrative'),
     );
   }
 }
@@ -168,17 +172,15 @@ class GameEvent {
 
   factory GameEvent.fromJson(Map<String, dynamic> json) {
     return GameEvent(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      type: EventType.values.byName(json['type'] as String),
-      description: json['description'] as String,
-      triggerConditions: (json['triggerConditions'] as Map).cast<String, String>(),
-      choices: (json['choices'] as List)
-          .map((c) => EventChoice.fromJson(c as Map<String, dynamic>))
-          .toList(),
-      narrative: json['narrative'] as String,
-      tags: (json['tags'] as List).cast<String>(),
-      isOneTime: json['isOneTime'] as bool,
+      id: safeStr(json, 'id', fallback: 'event_unknown'),
+      name: safeStr(json, 'name', fallback: '无名事件'),
+      type: safeEnum(EventType.values, json['type'], EventType.daily),
+      description: safeStr(json, 'description'),
+      triggerConditions: safeStringMap(json, 'triggerConditions'),
+      choices: safeObjectList(json, 'choices', EventChoice.fromJson),
+      narrative: safeStr(json, 'narrative'),
+      tags: safeStrList(json, 'tags'),
+      isOneTime: safeBool(json, 'isOneTime'),
     );
   }
 

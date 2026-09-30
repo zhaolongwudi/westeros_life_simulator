@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/event.dart';
 import '../models/player.dart';
+import '../utils/json_safe.dart';
 
 /// 游戏进度：时间、季节、纪元。
 class GameProgress {
@@ -80,11 +81,11 @@ class GameProgress {
 
   factory GameProgress.fromJson(Map<String, dynamic> json) {
     return GameProgress(
-      year: json['year'] as int,
-      month: json['month'] as int,
-      season: json['season'] as String,
-      era: json['era'] as String,
-      turnCount: json['turnCount'] as int,
+      year: safeInt(json, 'year', fallback: 283),
+      month: safeInt(json, 'month', fallback: 3),
+      season: safeStr(json, 'season', fallback: 'spring'),
+      era: safeStr(json, 'era', fallback: '征服纪元'),
+      turnCount: safeInt(json, 'turnCount'),
     );
   }
 }
@@ -295,19 +296,19 @@ class GameStateProvider extends ChangeNotifier {
     };
   }
 
-  /// 从 JSON 反序列化。
+  /// 从 JSON 反序列化（防御式：字段缺失/类型错一律回落默认值，绝不抛）。
+  ///
+  /// Batch 10-26 · M1-T02。player/progress 整块缺失时退化为默认玩家与
+  /// 默认进度，保证半残存档仍能进游戏而不是崩在加载页。
   factory GameStateProvider.fromJson(Map<String, dynamic> json) {
     return GameStateProvider(
-      player: Player.fromJson(json['player'] as Map<String, dynamic>),
-      progress: GameProgress.fromJson(json['progress'] as Map<String, dynamic>),
-      history: (json['history'] as List)
-          .map((e) => GameEvent.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      currentEvent: json['currentEvent'] == null
-          ? null
-          : GameEvent.fromJson(json['currentEvent'] as Map<String, dynamic>),
-      isGameActive: json['isGameActive'] as bool? ?? false,
-      isGameOver: json['isGameOver'] as bool? ?? false,
+      player: safeObject(json['player'], Player.fromJson) ?? Player.defaultPlayer(),
+      progress: safeObject(json['progress'], GameProgress.fromJson) ??
+          GameProgress.defaultProgress(),
+      history: safeObjectList(json, 'history', GameEvent.fromJson),
+      currentEvent: safeObject(json['currentEvent'], GameEvent.fromJson),
+      isGameActive: safeBool(json, 'isGameActive'),
+      isGameOver: safeBool(json, 'isGameOver'),
     );
   }
 }

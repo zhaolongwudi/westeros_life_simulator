@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../game_engine.dart';
+import '../providers/game_state_provider.dart';
 import '../services/ai_config.dart';
 import '../services/save_service.dart';
 import '../utils/text_formats.dart';
@@ -71,11 +72,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   /// 加载指定存档。
+  ///
+  /// 失败语义（M1 存档契约）：
+  /// - 坏档 → service 返回 null，文件已被隔离为 .corrupted，提示「已损坏」。
+  /// - 版本过高 → service 抛 [UnsupportedSaveVersionException]，提示「请升级游戏」。
   Future<void> _loadGame(String saveId) async {
-    final state = await _saveService.loadGame(saveId);
+    GameStateProvider? result;
+    try {
+      result = await _saveService.loadGame(saveId);
+    } on UnsupportedSaveVersionException {
+      if (mounted) _showSnack('存档来自更新版本，请升级游戏');
+      return;
+    }
+    final state = result;
     if (!mounted) return;
     if (state == null) {
-      _showSnack('存档加载失败');
+      _showSnack('存档已损坏，已隔离备份');
+      await _refreshSaves();
       return;
     }
     // 用加载的 state 重置引擎（保留世界静态数据；默认引擎携带世界数据）
@@ -98,7 +111,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _importSave() async {
     final content = await _promptText('粘贴存档 JSON');
     if (content == null || content.trim().isEmpty) return;
-    final state = _saveService.importSave(content.trim());
+    GameStateProvider? result;
+    try {
+      result = _saveService.importSave(content.trim());
+    } on UnsupportedSaveVersionException {
+      if (mounted) _showSnack('存档来自更新版本，请升级游戏');
+      return;
+    } on Object {
+      if (mounted) _showSnack('存档格式无效');
+      return;
+    }
+    final state = result;
     if (!mounted) return;
     if (state == null) {
       _showSnack('存档格式无效');

@@ -3,6 +3,7 @@
 /// 字段设计参考 docs/02_家族百科.md 与 docs/08_玩法设计.md。
 library;
 
+import '../utils/json_safe.dart';
 import 'marital.dart';
 import 'npc_task.dart';
 
@@ -240,44 +241,37 @@ class Player {
     };
   }
 
-  /// 从 JSON Map 反序列化。
+  /// 从 JSON Map 反序列化（防御式：字段缺失/类型错一律回落默认值，绝不抛）。
+  ///
+  /// Batch 10-26 · M1-T02。旧存档缺 marriage/generation/tasks 等后加字段时
+  /// 正常加载，新字段取默认值；`gold` 给成字符串等错误类型亦不抛。
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      identity: PlayerIdentity.values.byName(json['identity'] as String),
-      familyId: json['familyId'] as String,
-      age: json['age'] as int,
-      gender: json['gender'] as String,
-      locationId: json['locationId'] as String,
-      gold: json['gold'] as int,
-      reputation: json['reputation'] as int,
-      skills: (json['skills'] as Map).cast<String, int>(),
-      attributes: (json['attributes'] as Map).cast<String, int>(),
-      inventory: (json['inventory'] as List).cast<String>(),
-      relations: (json['relations'] as Map).cast<String, int>(),
-      flags: (json['flags'] as Map).cast<String, bool>(),
-      health: json['health'] as int? ?? 100,
-      energy: json['energy'] as int? ?? 100,
-      hunger: json['hunger'] as int? ?? 0,
-      title: json['title'] as String? ?? '',
-      house: json['house'] as String? ?? '',
-      children: (json['children'] as List?)?.cast<String>() ?? const [],
-      spouse: json['spouse'] == null
-          ? null
-          : SpouseDetail.fromJson(json['spouse'] as Map<String, dynamic>),
-      childRearing: (json['childRearing'] as List?)
-              ?.map((e) => ChildRearing.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      generationRecords: (json['generationRecords'] as List?)
-              ?.map((e) => GenerationRecord.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      activeTasks: (json['activeTasks'] as List?)
-              ?.map((e) => NpcTaskProgress.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
+      id: safeStr(json, 'id', fallback: 'player_unknown'),
+      name: safeStr(json, 'name', fallback: '无名者'),
+      identity: safeEnum(PlayerIdentity.values, json['identity'], PlayerIdentity.noble),
+      familyId: safeStr(json, 'familyId'),
+      age: safeInt(json, 'age', fallback: 18),
+      gender: safeStr(json, 'gender', fallback: 'male'),
+      locationId: safeStr(json, 'locationId'),
+      gold: safeInt(json, 'gold'),
+      reputation: safeInt(json, 'reputation', fallback: 50),
+      skills: safeIntMap(json, 'skills'),
+      attributes: safeIntMap(json, 'attributes'),
+      inventory: safeStrList(json, 'inventory'),
+      relations: safeIntMap(json, 'relations'),
+      flags: safeBoolMap(json, 'flags'),
+      health: safeInt(json, 'health', fallback: 100),
+      energy: safeInt(json, 'energy', fallback: 100),
+      hunger: safeInt(json, 'hunger'),
+      title: safeStr(json, 'title'),
+      house: safeStr(json, 'house'),
+      children: safeStrList(json, 'children'),
+      spouse: safeObject(json['spouse'], SpouseDetail.fromJson),
+      childRearing: safeObjectList(json, 'childRearing', ChildRearing.fromJson),
+      generationRecords:
+          safeObjectList(json, 'generationRecords', GenerationRecord.fromJson),
+      activeTasks: safeObjectList(json, 'activeTasks', NpcTaskProgress.fromJson),
     );
   }
 
