@@ -89,7 +89,8 @@ lib/
 │   （改主界面 UI 的正确姿势：**改 widgets/game/ 下的组件**，不要把展示逻辑塞回 game_screen）
 │
 ├── services/                      # 【服务层】外部/IO
-│   ├── ai_service.dart            # AiService：AI 叙事/选项生成（Dio，含在场 NPC 多步骤任务模板/家族信息注入，Batch 10-22）
+│   ├── ai_service.dart            # AiService：AI 叙事/选项生成（Dio，含在场 NPC 多步骤任务模板/家族信息注入，Batch 10-22；事件注入走 event_prompt_filter 预算化，Batch 10-33）
+│   ├── event_prompt_filter.dart   # ⭐ 事件 prompt 预算筛选器（Batch 10-33 · M4c-2）：selectEventsForPrompt 按相关度评分（地点+3/季节+2/数值/标记+1）截取预算 12，全量 72→12 token 约降 83%；预算常量在 balance_data.dart
 │   ├── ai_config.dart             # AI Key/模型/BaseURL 持久化
 │   ├── event_service.dart         # 事件触发/效果/存档（注意：与 provider 双实现）
 │   ├── save_service.dart          # ⭐ 存档序列化/导入导出（Batch 10-26 · M1：写入 schemaVersion / 读档先 migrateSave / 坏档隔离 .corrupted）
@@ -166,6 +167,7 @@ GameEngine extends GameProviderBase with:
 | 效果应用（事件/AI 共用） | providers/game_state_provider.dart（applyEffects） |
 | 游戏结束/血脉断绝 | providers/game_state_provider.dart（endGame）+ mixin_play.dart（_tryInheritance） |
 | AI 叙事生成 | services/ai_service.dart（generateNarrative/_buildPrompt） |
+| **AI 事件预算筛选** | services/event_prompt_filter.dart（selectEventsForPrompt，Batch 10-33 · M4c-2：地点/季节/数值/标记相关度评分，72→12 token 约降 83%） |
 | **AI 回合编排（读配置→拼上下文→请求→装配）** | **mixins/mixin_ai.dart（runAiAction，Batch 10-29 · M3b；返回 `AiTurnResult`）** |
 | AI 回合结果对象 | models/ai_turn.dart（AiTurnResult：lines/choices/isSuccess + notConfiguredLine/notStartedLine） |
 | AI 选项效果落盘 + 推进 | mixin_ai.dart（applyAiChoice） |
@@ -232,7 +234,7 @@ GameEngine extends GameProviderBase with:
 | 过月 | advance | advanceMonth | 是 |
 | 帮助 | help | _helpText | 否 |
 
-## 五、测试文件映射（test/ 51 文件）
+## 五、测试文件映射（test/ 52 文件）
 
 | 测试文件 | 覆盖 |
 |----------|------|
@@ -273,6 +275,7 @@ GameEngine extends GameProviderBase with:
 | m4_balance_test | **M4a 数值配置集中**（10-30，15 用例）：10 身份阶梯全覆盖 / 每条阶梯升序无重复 / 全档位边界（门槛 / 门槛-1 / 下一档门槛）/ 登顶返回 0 / 未知身份空阶梯 / 引擎 checkTitlePromotion 与配置逐档一致 / 面板门槛与配置一致（10 身份 × 11 档声望）/ 不降级 / mixin 常量转发一致 / 月度生存结算按配置生效 |
 | m4_balance_sim_test | **M4b 资源仿真**（10-31，5 用例）：headless 驱动完整 GameEngine 跑 120 个月——hunt+rest+work 主动生存不 game over、金币有界（>0 且 <5000）、健康/精力/饱食不枯竭 / 主动 vs 被动对比（被动必死验证生存约束）/ 固定策略 160 个月曲线（金币非负有界 + 时间年龄正确推进）/ 数值引用与 balance_data 一致（开局 hunger 对齐真实开局 60） |
 | m4c1_content_sync_test | **M4c-1 内容 JSON 资产对账**（10-32，8 用例）：7 域 JSON 资产存在且可解析 / 每域 JSON id 集合 == Dart 常量 id 集合 / 关键文本非空 / 跨域引用（npc.familyId→families、task.npcId→npcs）/ 每条事件 ≥2 选项且至少一个无条件 |
+| **m4c2_event_prompt_filter_test** | **M4c-2 事件 prompt 预算筛选**（10-33，8 用例）：预算截断（≤12 全量 / >12 截断）/ 相关度排序（地点/季节/数值/标记命中排前）/ 真实事件库契约（临冬城·冬 event_frozen_lake 双命中第一 / 夏季让位） |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
 > （grep `allEvents.length` / `eventsByType(...).length`）。
@@ -319,4 +322,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v1.9（新增 m4c1_content_sync_test 测试映射 + M4c-1 内容 JSON 资产/对账护栏）· 最后更新：2026-10-01*
+*文档版本：v2.0（新增 event_prompt_filter 服务 + m4c2 测试映射 + M4c-2 事件 prompt 预算化）· 最后更新：2026-10-01*
