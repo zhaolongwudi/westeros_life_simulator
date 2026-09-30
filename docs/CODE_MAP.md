@@ -30,6 +30,7 @@ lib/
 │   ├── system_data.dart           # 74 系统
 │   ├── item_data.dart             # 34 物品
 │   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节）
+│   ├── balance_data.dart           # ⭐ 数值配置集中（初始值/生存消耗/每日上限/头衔阶梯/活动经济/婚姻与世代阈值，Batch 10-30 · M4a；无 import 依赖的叶子模块）
 │   └── npc_task_data.dart         # NPC 多步骤任务模板（32 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯，Batch 10-18 起逐步扩充，10-23 扩至 32）
 │
 ├── models/                        # 【模型层】不可变实体（copyWith + toJson/fromJson）
@@ -139,7 +140,8 @@ GameEngine extends GameProviderBase with:
 | 贸易买卖/定价 | mixin_life.dart（buyPriceOf/sellPriceOf/buyItem/sellItem） |
 | 地区特产/议价/商队 | mixin_life.dart（tradeSpecialty/negotiate/convoy） |
 | 装备系统/战斗值 | mixin_life.dart（equip/unequip/combatPower） |
-| 头衔晋升 | mixin_life.dart（checkTitlePromotion/formatTitlePanel） |
+| 头衔晋升 | mixin_life.dart（checkTitlePromotion/formatTitlePanel）→ 阶梯数据 data/balance_data.dart（titleLadders，Batch 10-30 · M4a 单一真相） |
+| **全部数值（生存/活动/头衔/婚姻/世代）** | **data/balance_data.dart（BalanceData，Batch 10-30 · M4a 集中；调平衡只改这一个文件）** |
 | 训练/工作/休息/狩猎/贸易 | mixin_play.dart（train/work/rest/hunt/trade） |
 | 月度循环 | mixin_play.dart（advanceMonth，含死亡传承 _tryInheritance） |
 | 旅行/探索 | mixin_adventure.dart（travel/explore） |
@@ -268,6 +270,7 @@ GameEngine extends GameProviderBase with:
 | m2_identity_history_test | **M2 状态权威与身份正确性**（10-27，16 用例）：身份/身世中文化 / isIdentity 逐身份命中 / 商人贸易加成实证 / history 环形上限 200 + 丢弃计数 + 存档往返 |
 | m3_registry_test | **M3a 架构解耦**（10-28，24 用例）：46 条指令注册完整性 / order 唯一连续 1..46 / 帮助文本与旧版逐字一致 / 重复别名与重复 id 记录 / 12 个管线 id 的 phase×order×outputOrder 映射 / 时钟恰好推进一次 / 执行序与文本序分离 / **自注册演示（新增「钓鱼」指令不改分发器即可分发）** |
 | m3b_ui_decoupling_test | **M3b UI 收口**（10-29，14 用例）：runAiAction 四条分支（未开局 / 未配置 Key / HTTP 400 失败 / 成功无选项 / 成功带选项）/ 编排不改世界状态 / AiTurnResult 常量与默认值 / **分层约束（遍历 lib/screens 断言无 `mixins/` import + mixin_letter 不再含 `class Letter`）** / 拆分后主界面（标题·状态条·AI 开关·快捷 chip 可点）与信件面板（空态 + 卡片标题）契约不回归 |
+| m4_balance_test | **M4a 数值配置集中**（10-30，15 用例）：10 身份阶梯全覆盖 / 每条阶梯升序无重复 / 全档位边界（门槛 / 门槛-1 / 下一档门槛）/ 登顶返回 0 / 未知身份空阶梯 / 引擎 checkTitlePromotion 与配置逐档一致 / 面板门槛与配置一致（10 身份 × 11 档声望）/ 不降级 / mixin 常量转发一致 / 月度生存结算按配置生效 |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
 > （grep `allEvents.length` / `eventsByType(...).length`）。
