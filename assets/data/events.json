@@ -2399,6 +2399,15 @@
           "energy": -10
         },
         "narrative": "你借着夜色从匪帮的视线死角悄然穿过。"
+      },
+      {
+        "id": "choice_flee_road",
+        "text": "避让绕路",
+        "requirements": {},
+        "effects": {
+          "energy": -5
+        },
+        "narrative": "你不想生事，远远绕开匪帮的营火，多花了些脚程。"
       }
     ],
     "narrative": "前方尘土飞扬，几个蒙面大汉拦住了去路，刀锋在日光下泛着寒光。",
@@ -2554,6 +2563,13 @@
           "reputation": 10
         },
         "narrative": "你与商队签下契约，赌他们能平安穿过狭海。"
+      },
+      {
+        "id": "choice_walk_away",
+        "text": "转身离开",
+        "requirements": {},
+        "effects": {},
+        "narrative": "你克制住对奇珍的渴望，与商队擦肩而过。"
       }
     ],
     "narrative": "商队的驼铃声远远传来，满载着厄索斯的奇珍异宝。",
@@ -3010,6 +3026,16 @@
           "reputation": 8
         },
         "narrative": "你摆下丰盛的宴席款待邻里，名声大涨。"
+      },
+      {
+        "id": "choice_buy_basic",
+        "text": "只买些口粮",
+        "requirements": {},
+        "effects": {
+          "gold": -5,
+          "inventory.item_bread": 1
+        },
+        "narrative": "你只买了一块足够果腹的黑面包，不去凑热闹。"
       }
     ],
     "narrative": "集市上人来人往，谷物与肉类的香气飘散在夏日的空气里。",
@@ -3275,6 +3301,13 @@
           "reputation": -5
         },
         "narrative": "你趁夜潜入行会地下室抄下秘方，但老匠人似乎早已察觉，行会的门对你关上了。"
+      },
+      {
+        "id": "choice_leave_guild",
+        "text": "离开行会",
+        "requirements": {},
+        "effects": {},
+        "narrative": "你嗅到行会里的暗流，选择退避三舍，不趟这浑水。"
       }
     ],
     "narrative": "锻炉的火光把石壁映得通红，铁锤声在夜色中叮当作响。",
@@ -3331,6 +3364,16 @@
           "reputation": -5
         },
         "narrative": "你塞给征兵官一枚银币，换来一纸免役令。民兵们投来鄙夷的目光。"
+      },
+      {
+        "id": "choice_enlist_basic",
+        "text": "从军服役",
+        "requirements": {},
+        "effects": {
+          "gold": 10,
+          "health": -5
+        },
+        "narrative": "你随着人流入了伍，领到一杆长矛与微薄的军饷。"
       }
     ],
     "narrative": "城门下，征兵官扯着嗓子念着名单，队伍里每个人的兵器都在晨光中闪光。",
@@ -3442,6 +3485,13 @@
           "reputation": 8
         },
         "narrative": "你把证据呈给领主。领主当众杖责了那几个奸商，并赏了你一枚银质徽章。"
+      },
+      {
+        "id": "choice_keep_out",
+        "text": "远离是非",
+        "requirements": {},
+        "effects": {},
+        "narrative": "你不想卷入粮价漩涡，转身离开了粮铺门口的长队。"
       }
     ],
     "narrative": "粮铺门口排着长队，价格牌上的数字一天比一天刺眼。",
@@ -3499,6 +3549,13 @@
           "reputation": 3
         },
         "narrative": "你在酒馆角落请了几个水手喝酒，换来一耳朵的远方行情与私下传闻。"
+      },
+      {
+        "id": "choice_just_look",
+        "text": "只看不买",
+        "requirements": {},
+        "effects": {},
+        "narrative": "你在集市里逛了一圈，件件昂贵，终究空手而归。"
       }
     ],
     "narrative": "码头泊满挂陌生旗帜的商船，异邦口音与七国话在集市上空交织。",
@@ -3656,6 +3713,13 @@
           "reputation": -3
         },
         "narrative": "你花钱请人代跑这趟差事。委托是完成了，但学城对你的评价也打了折扣。"
+      },
+      {
+        "id": "choice_refuse_task",
+        "text": "婉拒委托",
+        "requirements": {},
+        "effects": {},
+        "narrative": "你推说另有要事，学士略显失望地收回了羊皮卷。"
       }
     ],
     "narrative": "学士将羊皮卷仔细裹好交到你手中，低声叮嘱：「这笔墨比刀剑更锋利，请务必小心。」",
