@@ -250,24 +250,54 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // AppBar 宫格按钮存在
-      expect(find.byIcon(Icons.grid_view_outlined), findsOneWidget);
+      // AppBar 宫格按钮存在（tooltip「导航」精确匹配，避开叙事区同名图标）
+      expect(find.byTooltip('导航'), findsOneWidget);
 
       // 点击宫格按钮弹出导航宫格
-      await tester.tap(find.byIcon(Icons.grid_view_outlined));
+      await tester.tap(find.byTooltip('导航'));
       await tester.pumpAndSettle();
 
-      // 宫格 9 入口齐全
-      expect(find.text('导航'), findsOneWidget);
-      expect(find.text('玩家详情'), findsOneWidget);
-      expect(find.text('家族面板'), findsOneWidget);
-      expect(find.text('家族树'), findsOneWidget);
-      expect(find.text('NPC 关系'), findsOneWidget);
-      expect(find.text('事件'), findsWidgets);
-      expect(find.text('信件'), findsWidgets);
-      expect(find.text('系统面板'), findsOneWidget);
-      expect(find.text('地图'), findsWidgets);
-      expect(find.text('设置/存档'), findsOneWidget);
+      // 宫格弹层出现
+      expect(find.byType(NavGrid), findsOneWidget);
+
+      // 宫格 9 入口齐全（在 NavGrid 内部查找，避开叙事区重复文案）
+      final navFinder = find.descendant(
+        of: find.byType(NavGrid),
+        matching: find.text('玩家详情'),
+      );
+      expect(navFinder, findsOneWidget);
+      expect(
+        find.descendant(of: find.byType(NavGrid), matching: find.text('家族面板')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: find.byType(NavGrid), matching: find.text('家族树')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: find.byType(NavGrid), matching: find.text('NPC 关系')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: find.byType(NavGrid), matching: find.text('事件')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: find.byType(NavGrid), matching: find.text('信件')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: find.byType(NavGrid), matching: find.text('系统面板')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: find.byType(NavGrid), matching: find.text('地图')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: find.byType(NavGrid), matching: find.text('设置/存档')),
+        findsOneWidget,
+      );
     });
   });
 }
