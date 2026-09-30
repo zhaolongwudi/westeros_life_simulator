@@ -106,6 +106,14 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**生成
 ---
 
 ## 最近更新
+**2026-10-01 · 内容 JSON 外置资产 + 对账护栏（Batch 10-32 · M4c-1）**
+Dart 常量仍是运行时真相源，同时把 7 个内容域程序化导出为 `assets/data/*.json`，为「内容可外置/可对账/可 AI 生产」铺路：
+- 📦 **7 域 JSON 资产落成**（Batch 10-32 · M4c-1）——`scripts/dart_content_extract.py` 从 `lib/data/*.dart` 程序化提取 27 家族 / 69 地点 / 36 NPC / 72 事件 / 74 系统 / 33 物品 / 32 任务模板，生成 `assets/data/` 下 7 个 JSON（结构对齐 `docs/specs/content-schema.md`）
+- 🛡️ **对账护栏进 CI**（Batch 10-32 · M4c-1）——`scripts/check_content_sync.py` 挂进 GitHub Actions（Test 之后）：JSON 与 Dart id 集合一致、跨域引用完整（npc→family/location、task→npc、seat→location 等）、关键字段非空。**改 Dart 数据后忘记重新导出 → CI 直接红**
+- 🧪 **8 条新测试**（Batch 10-32 · M4c-1）——`test/m4c1_content_sync_test.dart` 在 Dart 侧复验 JSON 资产与常量对齐 + 每条事件 ≥2 选项且至少一个无条件
+- 🐛 **对账护栏首秀抓 2 类真实内容缺陷**（Batch 10-32 · M4c-1）——①坦格利安族堡与 3 个流亡 NPC 的 `location_exile` 悬空引用（已补地点）；②8 个事件全部选项都有门槛、玩家可能被卡死（已各补 1 个无条件选项）
+- 🧪 **631 条测试全绿**（Batch 10-32 · M4c-1，run 36768327694 ✅）
+
 **2026-10-01 · 120 个月资源仿真测试：数值收口后的生存曲线护航（Batch 10-31 · M4b）**
 M4a 把所有数值收口进一个文件后，最怕「调一个参数炸掉整条生存曲线」——于是补了长周期仿真：
 - 🧪 **headless 跑 120 个月**（Batch 10-31 · M4b）——`test/m4_balance_sim_test.dart` 驱动完整游戏引擎连续推进 120 个月（约 10 年）：狩猎+休息+工作策略不 game over、金币有界（不枯竭也不爆炸）、健康/精力/饱食全程不枯竭

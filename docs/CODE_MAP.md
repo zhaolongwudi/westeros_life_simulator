@@ -232,7 +232,7 @@ GameEngine extends GameProviderBase with:
 | 过月 | advance | advanceMonth | 是 |
 | 帮助 | help | _helpText | 否 |
 
-## 五、测试文件映射（test/ 49 文件）
+## 五、测试文件映射（test/ 51 文件）
 
 | 测试文件 | 覆盖 |
 |----------|------|
@@ -272,9 +272,12 @@ GameEngine extends GameProviderBase with:
 | m3b_ui_decoupling_test | **M3b UI 收口**（10-29，14 用例）：runAiAction 四条分支（未开局 / 未配置 Key / HTTP 400 失败 / 成功无选项 / 成功带选项）/ 编排不改世界状态 / AiTurnResult 常量与默认值 / **分层约束（遍历 lib/screens 断言无 `mixins/` import + mixin_letter 不再含 `class Letter`）** / 拆分后主界面（标题·状态条·AI 开关·快捷 chip 可点）与信件面板（空态 + 卡片标题）契约不回归 |
 | m4_balance_test | **M4a 数值配置集中**（10-30，15 用例）：10 身份阶梯全覆盖 / 每条阶梯升序无重复 / 全档位边界（门槛 / 门槛-1 / 下一档门槛）/ 登顶返回 0 / 未知身份空阶梯 / 引擎 checkTitlePromotion 与配置逐档一致 / 面板门槛与配置一致（10 身份 × 11 档声望）/ 不降级 / mixin 常量转发一致 / 月度生存结算按配置生效 |
 | m4_balance_sim_test | **M4b 资源仿真**（10-31，5 用例）：headless 驱动完整 GameEngine 跑 120 个月——hunt+rest+work 主动生存不 game over、金币有界（>0 且 <5000）、健康/精力/饱食不枯竭 / 主动 vs 被动对比（被动必死验证生存约束）/ 固定策略 160 个月曲线（金币非负有界 + 时间年龄正确推进）/ 数值引用与 balance_data 一致（开局 hunger 对齐真实开局 60） |
+| m4c1_content_sync_test | **M4c-1 内容 JSON 资产对账**（10-32，8 用例）：7 域 JSON 资产存在且可解析 / 每域 JSON id 集合 == Dart 常量 id 集合 / 关键文本非空 / 跨域引用（npc.familyId→families、task.npcId→npcs）/ 每条事件 ≥2 选项且至少一个无条件 |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
 > （grep `allEvents.length` / `eventsByType(...).length`）。
+> **坑（M4c-1）：改 lib/data/*.dart 数据后必须重跑 `python3 scripts/dart_content_extract.py` 再提交，
+> 否则 CI 的 Content sync check 步骤直接红。**
 
 ## 六、已踩坑速查（详细原因见 HANDOVER 第三、四节）
 
@@ -316,4 +319,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v1.8（新增 m4_balance_sim_test 测试映射 + M4b 仿真）· 最后更新：2026-10-01*
+*文档版本：v1.9（新增 m4c1_content_sync_test 测试映射 + M4c-1 内容 JSON 资产/对账护栏）· 最后更新：2026-10-01*
