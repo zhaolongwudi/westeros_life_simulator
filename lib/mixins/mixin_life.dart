@@ -6,6 +6,7 @@
 /// - 健康：0 死亡；受伤/疾病/危险事件会降低
 /// - 物品：背包增删、使用消耗品（health/energy/hunger 效果）
 library;
+import '../data/balance_data.dart';
 import '../data/item_data.dart';
 import '../models/location.dart';
 import '../models/player.dart';
@@ -20,23 +21,26 @@ import '../utils/labels.dart';
 /// 供 [GamePlayMixin] 在月度循环中调用 [applyMonthlyLife]，
 /// 因此宿主混入顺序需保证本 mixin 在 GamePlayMixin 之前。
 mixin GameLifeMixin on GameProviderBase {
+  // 数值统一收口在 lib/data/balance_data.dart（Batch 10-30 · M4a）。
+  // 以下常量保留原名并转发，避免调用点与既有测试改动。
+
   /// 精力不足时活动成功率折扣。
-  static const double kLowEnergyPenalty = 0.5;
+  static const double kLowEnergyPenalty = BalanceData.lowEnergyPenalty;
 
   /// 饱食每月的自然下降量。
-  static const int kHungerDecayPerMonth = 12;
+  static const int kHungerDecayPerMonth = BalanceData.hungerDecayPerMonth;
 
   /// 饱食低于此阈值视为饥饿（每月掉健康）。
-  static const int kStarvationThreshold = 25;
+  static const int kStarvationThreshold = BalanceData.starvationThreshold;
 
   /// 精力恢复：休息/进食的恢复量。
-  static const int kRestEnergyRecovery = 40;
+  static const int kRestEnergyRecovery = BalanceData.restEnergyRecovery;
 
   /// 健康自然恢复（非受伤时每月 +2）。
-  static const int kHealthRegen = 2;
+  static const int kHealthRegen = BalanceData.healthRegen;
 
   /// 精力是否充足（低于 20 视为疲惫）。
-  bool get isExhausted => player.energy < 20;
+  bool get isExhausted => player.energy < BalanceData.exhaustedEnergy;
 
   /// 饱食是否过低（饥饿）。
   bool get isStarving => player.hunger < kStarvationThreshold;
@@ -49,20 +53,20 @@ mixin GameLifeMixin on GameProviderBase {
   /// 调整精力（clamp 0~100），并写入玩家。
   void adjustEnergy(int delta) {
     updatePlayer(
-      player.copyWith(energy: (player.energy + delta).clamp(0, 100)),
+      player.copyWith(energy: (player.energy + delta).clamp(0, BalanceData.fullVital)),
     );
   }
 
   /// 调整饱食（clamp 0~100，0 表示最饿）。
   void adjustHunger(int delta) {
     updatePlayer(
-      player.copyWith(hunger: (player.hunger + delta).clamp(0, 100)),
+      player.copyWith(hunger: (player.hunger + delta).clamp(0, BalanceData.fullVital)),
     );
   }
 
   /// 调整健康（clamp 0~100；0 触发死亡判定）。
   void adjustHealth(int delta) {
-    final newHealth = (player.health + delta).clamp(0, 100);
+    final newHealth = (player.health + delta).clamp(0, BalanceData.fullVital);
     updatePlayer(player.copyWith(health: newHealth));
     if (newHealth <= 0 && (player.flags['isAlive'] ?? true)) {
       setFlag('isAlive', false);
@@ -594,90 +598,10 @@ mixin GameLifeMixin on GameProviderBase {
     if (!(p.flags['isAlive'] ?? true)) return '';
     final rep = p.reputation;
     final current = p.title;
-    String target = current;
 
-    // 按身份分级设定头衔（声望门槛）
-    switch (p.identity) {
-      case PlayerIdentity.noble:
-        if (rep >= 80) {
-          target = '大领主';
-        } else if (rep >= 60) {
-          target = '伯爵';
-        } else if (rep >= 40) {
-          target = '爵士';
-        }
-        break;
-      case PlayerIdentity.soldier:
-        if (rep >= 70) {
-          target = '统帅';
-        } else if (rep >= 50) {
-          target = '骑士';
-        } else if (rep >= 30) {
-          target = '军士';
-        }
-        break;
-      case PlayerIdentity.merchant:
-        if (rep >= 70) {
-          target = '商会会长';
-        } else if (rep >= 50) {
-          target = '富商';
-        } else if (rep >= 30) {
-          target = '兴业商人';
-        }
-        break;
-      case PlayerIdentity.priest:
-        if (rep >= 70) {
-          target = '大主教';
-        } else if (rep >= 50) {
-          target = '主教';
-        } else if (rep >= 30) {
-          target = '司祭';
-        }
-        break;
-      case PlayerIdentity.scholar:
-      case PlayerIdentity.maester:
-        if (rep >= 70) {
-          target = '大学士';
-        } else if (rep >= 50) {
-          target = '资深学者';
-        } else if (rep >= 30) {
-          target = '讲席学者';
-        }
-        break;
-      case PlayerIdentity.adventurer:
-        if (rep >= 70) {
-          target = '传奇冒险家';
-        } else if (rep >= 50) {
-          target = '知名冒险家';
-        } else if (rep >= 30) {
-          target = '资深冒险家';
-        }
-        break;
-      case PlayerIdentity.assassin:
-        if (rep >= 70) {
-          target = '无面者';
-        } else if (rep >= 50) {
-          target = '血影';
-        } else if (rep >= 30) {
-          target = '暗行者';
-        }
-        break;
-      case PlayerIdentity.wildling:
-        if (rep >= 70) {
-          target = '自由民之王';
-        } else if (rep >= 50) {
-          target = '战首';
-        } else if (rep >= 30) {
-          target = '猎手';
-        }
-        break;
-      case PlayerIdentity.commoner:
-        if (rep >= 60) {
-          target = '乡绅';
-        }
-        break;
-    }
-
+    // 头衔阶梯统一收口在 BalanceData（Batch 10-30 · M4a），
+    // 与 formatTitlePanel 共用同一份数据，杜绝双真相。
+    final target = BalanceData.promotedTitle(p.identity, rep);
     if (target != current && target.isNotEmpty) {
       updatePlayer(player.copyWith(title: target));
       return target;
@@ -692,20 +616,9 @@ mixin GameLifeMixin on GameProviderBase {
       ..writeln('【头衔】')
       ..writeln('· 当前：${p.title.isEmpty ? '无名之辈' : p.title}');
     // 查询下一级门槛
-    final thresholds = switch (p.identity) {
-      PlayerIdentity.noble => const <int>[40, 60, 80],
-      PlayerIdentity.soldier => const <int>[30, 50, 70],
-      PlayerIdentity.merchant => const <int>[30, 50, 70],
-      PlayerIdentity.priest => const <int>[30, 50, 70],
-      PlayerIdentity.scholar || PlayerIdentity.maester => const <int>[30, 50, 70],
-      PlayerIdentity.adventurer => const <int>[30, 50, 70],
-      PlayerIdentity.assassin => const <int>[30, 50, 70],
-      PlayerIdentity.wildling => const <int>[30, 50, 70],
-      PlayerIdentity.commoner => const <int>[60],
-    };
-    final next = thresholds.where((t) => t > p.reputation).toList();
-    if (next.isNotEmpty) {
-      buf.writeln('· 距下次晋升还差 ${next.first - p.reputation} 点声望（${next.first}）。');
+    final nextRep = BalanceData.nextTierReputation(p.identity, p.reputation);
+    if (nextRep > 0) {
+      buf.writeln('· 距下次晋升还差 ${nextRep - p.reputation} 点声望（$nextRep）。');
     } else {
       buf.writeln('· 声望已达 ${identityLabel(p.identity)} 的巅峰。');
     }
@@ -725,37 +638,40 @@ mixin GameLifeMixin on GameProviderBase {
     // 1. 饱食自然下降
     final oldHunger = player.hunger;
     adjustHunger(-kHungerDecayPerMonth);
-    if (oldHunger >= 60 && player.hunger < 60) {
+    if (oldHunger >= BalanceData.hungerWarning &&
+        player.hunger < BalanceData.hungerWarning) {
       buf.writeln('🍞 你感到腹中空空，该去找点吃的了。');
     }
 
     // 2. 饥饿减益：持续饥饿掉健康
     if (isStarving) {
-      adjustHealth(-8);
+      adjustHealth(-BalanceData.starvationHealthPenalty);
       buf.writeln('⚠️ 长期饥饿正在侵蚀你的身体（健康 -8）。');
     }
 
     // 3. 精力/健康自然恢复（月内休息足够时）
-    final sleptWell = !isExhausted && rnd.nextDouble() < 0.7;
+    final sleptWell =
+        !isExhausted && rnd.nextDouble() < BalanceData.sleptWellChance;
     if (sleptWell) {
-      final energyGain = 15 + rnd.nextInt(15);
+      final energyGain =
+          BalanceData.sleepEnergyBase + rnd.nextInt(BalanceData.sleepEnergyVariance);
       adjustEnergy(energyGain);
     } else {
       buf.writeln('💤 你睡眠不佳，精力恢复缓慢。');
     }
-    if (!isInjured && player.health < 100) {
+    if (!isInjured && player.health < BalanceData.fullVital) {
       adjustHealth(kHealthRegen);
     }
 
     // 4. 受伤缓慢恢复（每月小概率好转）
-    if (isInjured && rnd.nextDouble() < 0.4) {
+    if (isInjured && rnd.nextDouble() < BalanceData.injuryHealChance) {
       setFlag('isInjured', false);
       buf.writeln('🩹 你的伤势渐渐好转，已经不妨碍行动了。');
     }
 
     // 5. 冬季更冷更饿
     if (progress.season == 'winter' || progress.season == 'longwinter') {
-      adjustHunger(-5);
+      adjustHunger(-BalanceData.winterHungerExtra);
       if (player.hunger < kStarvationThreshold) {
         buf.writeln('❄️ 凛冬的严寒让你消耗更快。');
       }

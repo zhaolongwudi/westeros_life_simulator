@@ -4,6 +4,7 @@
 library;
 
 import 'dart:math';
+import '../data/balance_data.dart';
 import '../models/location.dart';
 import '../models/player.dart';
 import '../core/command_registry.dart';
@@ -33,14 +34,9 @@ mixin GamePlayMixin
         GameGenerationMixin,
         GameMarriageMixin,
         GameNpcTaskMixin {
+  // 数值统一收口在 lib/data/balance_data.dart（Batch 10-30 · M4a）。
   /// 每日活动次数上限（防数值刷子，参考 docs/08 玩法限制）。
-  static const Map<String, int> kDailyLimits = {
-    'train': 3,
-    'hunt': 2,
-    'work': 2,
-    'trade': 2,
-    'rest': 99,
-  };
+  static const Map<String, int> kDailyLimits = BalanceData.dailyLimits;
 
   /// 训练：提升一项技能。
   ///
@@ -55,18 +51,20 @@ mixin GamePlayMixin
 
     final rnd = rng();
     final current = skillLevel(skillName);
-    if (current >= 10) {
+    if (current >= BalanceData.skillCap) {
       return '「$skillName」已臻化境，寻常训练已无法让你更进一步。';
     }
 
     // 精力消耗：疲惫时成功率减半
-    if (!canAffordEnergy(10)) {
+    if (!canAffordEnergy(BalanceData.trainEnergyCost)) {
       return '你精疲力竭，连剑都举不起来。先去休息吧。';
     }
-    adjustEnergy(-10);
+    adjustEnergy(-BalanceData.trainEnergyCost);
 
     // 成长：10 级封顶，越接近上限成功率越低（防止无限刷）。
-    final chance = (0.8 - (current * 0.05)) * energySuccessMultiplier();
+    final chance = (BalanceData.trainBaseChance -
+            current * BalanceData.trainChanceDecayPerLevel) *
+        energySuccessMultiplier();
     _recordDaily('train');
 
     if (rnd.nextDouble() < chance) {
@@ -80,15 +78,15 @@ mixin GamePlayMixin
 
   /// 休息：恢复精力与少量健康，消耗少量金币。
   String rest() {
-    if (player.gold < 2) {
+    if (player.gold < BalanceData.restInnCost) {
       return '你太穷了，连一顿像样的饭都吃不起。找个地方蜷缩着睡了一夜。';
     }
-    gainGold(-2);
+    gainGold(-BalanceData.restInnCost);
     adjustEnergy(GameLifeMixin.kRestEnergyRecovery);
     adjustHunger(10);
     // 受伤时休息恢复更快
     final healText = isInjured ? ' 伤口似乎也舒缓了一些。' : '';
-    return '你在旅店歇了一晚，吃了顿热饭，花去 2 金币。精力恢复 ${GameLifeMixin.kRestEnergyRecovery}。$healText';
+    return '你在旅店歇了一晚，吃了顿热饭，花去 ${BalanceData.restInnCost} 金币。精力恢复 ${GameLifeMixin.kRestEnergyRecovery}。$healText';
   }
 
   /// 工作：按身份/技能赚取金币（消耗精力）。
@@ -141,20 +139,26 @@ mixin GamePlayMixin
     // 成功率：技能/战斗值与危险度对抗（疲惫打折；装备加成）
     final power = combatPower();
     final successChance =
-        (0.5 + skill * 0.05 + power * 0.02 - danger * 0.03).clamp(0.1, 0.95) *
+        (BalanceData.huntBaseChance +
+                skill * BalanceData.huntChancePerSkill +
+                power * BalanceData.huntChancePerPower -
+                danger * BalanceData.huntChancePerDanger)
+            .clamp(BalanceData.huntChanceMin, BalanceData.huntChanceMax) *
             energySuccessMultiplier();
 
     if (rnd.nextDouble() < successChance) {
-      final reward = 10 + skill * 3 + rnd.nextInt(10);
+      final reward = BalanceData.huntRewardBase +
+          skill * BalanceData.huntRewardPerSkill +
+          rnd.nextInt(BalanceData.huntRewardVariance);
       gainGold(reward);
       // 顺便补充食物
-      adjustHunger(15);
+      adjustHunger(BalanceData.huntHungerGain);
       return '你在${loc.name}附近的林地猎到猎物，收获 $reward 金币，饱餐一顿。';
     }
     // 失败：危险度高时可能受伤（掉血由 flags 模拟）
-    if (rnd.nextDouble() < 0.3) {
+    if (rnd.nextDouble() < BalanceData.huntInjuryChance) {
       setFlag('isInjured', true);
-      adjustHealth(-5);
+      adjustHealth(-BalanceData.huntInjuryHealthCost);
       return '狩猎时你失手摔伤，空手而归。（受了点轻伤，健康 -5）';
     }
     return '你在${loc.name}附近转了一天，什么也没猎到。';

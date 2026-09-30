@@ -9,6 +9,7 @@
 /// 避免 flags 只存 bool 的限制（坑 16）。
 library;
 
+import '../data/balance_data.dart';
 import '../models/marital.dart';
 import '../core/command_registry.dart';
 import '../core/monthly_pipeline.dart';
@@ -231,7 +232,7 @@ mixin GameMarriageMixin
   }
 
   // ==================== 每日配偶互动计数（独立于其它 mixin，坑 16） ====================
-  static const int kSpouseDailyLimit = 1;
+  static const int kSpouseDailyLimit = BalanceData.spouseDailyLimit;
   int _spouseDailyCount = 0;
   String? _spouseDailyMonth;
   bool _canSpouseDaily() {
@@ -254,17 +255,13 @@ mixin GameMarriageMixin
   // 离婚/丧偶、配偶谈心（好感度）、婚后月度事件、婚姻面板。
 
   /// 离婚补偿金（防无限再婚刷声望：每次离婚耗金币且当年不可再婚）。
-  static const int kDivorceCost = 30;
+  static const int kDivorceCost = BalanceData.divorceCost;
 
   /// 配偶谈心每日次数上限。
-  static const int kSpouseChatDailyLimit = 2;
+  static const int kSpouseChatDailyLimit = BalanceData.spouseChatDailyLimit;
 
   /// 夫妻感情等级标签。
-  String affectionLabel(int affection) {
-    if (affection >= 70) return '恩爱';
-    if (affection >= 30) return '和睦';
-    return '疏离';
-  }
+  String affectionLabel(int affection) => BalanceData.affectionLabel(affection);
 
   /// 调整夫妻感情（clamp 0~100）。
   void adjustSpouseAffection(int delta) {
@@ -279,13 +276,13 @@ mixin GameMarriageMixin
   /// 感情是否疏离（<30）：互动/事件效果减半。
   bool get spouseAlienated {
     final s = spouseDetail;
-    return s != null && s.affection < 30;
+    return s != null && s.affection < BalanceData.spouseHarmoniousAffection;
   }
 
   /// 感情是否恩爱（>=70）：事件触发率与效果加成。
   bool get spouseDevoted {
     final s = spouseDetail;
-    return s != null && s.affection >= 70;
+    return s != null && s.affection >= BalanceData.spouseDevotedAffection;
   }
 
   /// 离婚：解除婚姻，补偿配偶，声望受损，当年不可再婚。

@@ -7,6 +7,7 @@
 /// - 传位叙事：maybeSuccessionStory（年长/濒死时提示立嗣）
 library;
 
+import '../data/balance_data.dart';
 import '../models/marital.dart';
 import '../models/player.dart';
 import '../core/command_registry.dart';
@@ -21,9 +22,9 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
   /// 玩家是否已死亡（由生存系统置 isAlive=false）。
   bool get isDead => !(player.flags['isAlive'] ?? true);
   /// 玩家是否年长（≥55 岁，触发立嗣提示）。
-  bool get isElder => player.age >= 55;
+  bool get isElder => player.age >= BalanceData.elderAge;
   /// 玩家是否濒死（健康 < 20，触发立嗣提示）。
-  bool get isDying => player.health < 20;
+  bool get isDying => player.health < BalanceData.dyingHealth;
 
   /// 玩家姓氏（house 或家族名或 '自由民'）。
   String get houseName {
