@@ -13,7 +13,6 @@
 /// - 婚姻与世代：感情等级/离婚成本/立嗣与濒死阈值
 library;
 
-
 /// 头衔档位：声望达到 [reputation] 即晋升为 [title]。
 class TitleTier {
   const TitleTier(this.reputation, this.title);
@@ -112,84 +111,60 @@ class BalanceData {
   static const int nobleTier2Rep = 60;
   static const int nobleTier3Rep = 80;
 
-  /// 贵族的头衔名（与 [nobleLadder] 顺序一致）。
-  static const List<String> nobleTitles = ['爵士', '伯爵', '大领主'];
-
-  /// 士兵的头衔名。
-  static const List<String> soldierTitles = ['军士', '骑士', '统帅'];
-
-  /// 商人的头衔名。
-  static const List<String> merchantTitles = ['兴业商人', '富商', '商会会长'];
-
-  /// 神职人员的头衔名。
-  static const List<String> priestTitles = ['司祭', '主教', '大主教'];
-
-  /// 学者的头衔名。
-  static const List<String> scholarTitles = ['讲席学者', '资深学者', '大学士'];
-
-  /// 冒险者的头衔名。
-  static const List<String> adventurerTitles = ['资深冒险家', '知名冒险家', '传奇冒险家'];
-
-  /// 刺客的头衔名。
-  static const List<String> assassinTitles = ['暗行者', '血影', '无面者'];
-
-  /// 野人的头衔名。
-  static const List<String> wildlingTitles = ['猎手', '战首', '自由民之王'];
-
   /// 贵族阶梯（声望升序）。
   static const List<TitleTier> nobleLadder = [
-    TitleTier(nobleTier1Rep, nobleTitles[0]),
-    TitleTier(nobleTier2Rep, nobleTitles[1]),
-    TitleTier(nobleTier3Rep, nobleTitles[2]),
+    TitleTier(nobleTier1Rep, '爵士'),
+    TitleTier(nobleTier2Rep, '伯爵'),
+    TitleTier(nobleTier3Rep, '大领主'),
   ];
 
   /// 士兵阶梯（声望升序）。
   static const List<TitleTier> soldierLadder = [
-    TitleTier(tier1Rep, soldierTitles[0]),
-    TitleTier(tier2Rep, soldierTitles[1]),
-    TitleTier(tier3Rep, soldierTitles[2]),
+    TitleTier(tier1Rep, '军士'),
+    TitleTier(tier2Rep, '骑士'),
+    TitleTier(tier3Rep, '统帅'),
   ];
 
   /// 商人阶梯（声望升序）。
   static const List<TitleTier> merchantLadder = [
-    TitleTier(tier1Rep, merchantTitles[0]),
-    TitleTier(tier2Rep, merchantTitles[1]),
-    TitleTier(tier3Rep, merchantTitles[2]),
+    TitleTier(tier1Rep, '兴业商人'),
+    TitleTier(tier2Rep, '富商'),
+    TitleTier(tier3Rep, '商会会长'),
   ];
 
   /// 神职阶梯（声望升序）。
   static const List<TitleTier> priestLadder = [
-    TitleTier(tier1Rep, priestTitles[0]),
-    TitleTier(tier2Rep, priestTitles[1]),
-    TitleTier(tier3Rep, priestTitles[2]),
+    TitleTier(tier1Rep, '司祭'),
+    TitleTier(tier2Rep, '主教'),
+    TitleTier(tier3Rep, '大主教'),
   ];
 
   /// 学者阶梯（声望升序，学士共用）。
   static const List<TitleTier> scholarLadder = [
-    TitleTier(tier1Rep, scholarTitles[0]),
-    TitleTier(tier2Rep, scholarTitles[1]),
-    TitleTier(tier3Rep, scholarTitles[2]),
+    TitleTier(tier1Rep, '讲席学者'),
+    TitleTier(tier2Rep, '资深学者'),
+    TitleTier(tier3Rep, '大学士'),
   ];
 
   /// 冒险者阶梯（声望升序）。
   static const List<TitleTier> adventurerLadder = [
-    TitleTier(tier1Rep, adventurerTitles[0]),
-    TitleTier(tier2Rep, adventurerTitles[1]),
-    TitleTier(tier3Rep, adventurerTitles[2]),
+    TitleTier(tier1Rep, '资深冒险家'),
+    TitleTier(tier2Rep, '知名冒险家'),
+    TitleTier(tier3Rep, '传奇冒险家'),
   ];
 
   /// 刺客阶梯（声望升序）。
   static const List<TitleTier> assassinLadder = [
-    TitleTier(tier1Rep, assassinTitles[0]),
-    TitleTier(tier2Rep, assassinTitles[1]),
-    TitleTier(tier3Rep, assassinTitles[2]),
+    TitleTier(tier1Rep, '暗行者'),
+    TitleTier(tier2Rep, '血影'),
+    TitleTier(tier3Rep, '无面者'),
   ];
 
   /// 野人阶梯（声望升序）。
   static const List<TitleTier> wildlingLadder = [
-    TitleTier(tier1Rep, wildlingTitles[0]),
-    TitleTier(tier2Rep, wildlingTitles[1]),
-    TitleTier(tier3Rep, wildlingTitles[2]),
+    TitleTier(tier1Rep, '猎手'),
+    TitleTier(tier2Rep, '战首'),
+    TitleTier(tier3Rep, '自由民之王'),
   ];
 
   /// 平民阶梯（仅一档）。

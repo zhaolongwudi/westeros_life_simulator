@@ -601,7 +601,7 @@ mixin GameLifeMixin on GameProviderBase {
 
     // 头衔阶梯统一收口在 BalanceData（Batch 10-30 · M4a），
     // 与 formatTitlePanel 共用同一份数据，杜绝双真相。
-    final target = BalanceData.promotedTitle(p.identity, rep);
+    final target = BalanceData.promotedTitle(p.identity.name, rep);
     if (target != current && target.isNotEmpty) {
       updatePlayer(player.copyWith(title: target));
       return target;
@@ -616,7 +616,7 @@ mixin GameLifeMixin on GameProviderBase {
       ..writeln('【头衔】')
       ..writeln('· 当前：${p.title.isEmpty ? '无名之辈' : p.title}');
     // 查询下一级门槛
-    final nextRep = BalanceData.nextTierReputation(p.identity, p.reputation);
+    final nextRep = BalanceData.nextTierReputation(p.identity.name, p.reputation);
     if (nextRep > 0) {
       buf.writeln('· 距下次晋升还差 ${nextRep - p.reputation} 点声望（$nextRep）。');
     } else {
