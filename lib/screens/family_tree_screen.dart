@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import '../game_engine.dart';
 import '../models/marital.dart';
 import '../utils/labels.dart';
+import '../widgets/game/responsive.dart';
 
 /// 家族树面板。
 class FamilyTreeScreen extends StatelessWidget {
@@ -27,8 +28,10 @@ class FamilyTreeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('家族树')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: SafeArea(
+        child: AdaptiveFrame(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
         children: <Widget>[
           // 标题：家族 + 世代
           Text(
@@ -61,6 +64,8 @@ class FamilyTreeScreen extends StatelessWidget {
             isAfterInheritance: p.generationRecords.isNotEmpty,
           ),
         ],
+          ),
+        ),
       ),
     );
   }

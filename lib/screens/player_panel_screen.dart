@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../data/item_data.dart';
 import '../game_engine.dart';
 import '../utils/labels.dart';
+import '../widgets/game/responsive.dart';
 
 /// 玩家详情面板。
 class PlayerPanelScreen extends StatelessWidget {
@@ -27,8 +28,10 @@ class PlayerPanelScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('玩家详情')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: SafeArea(
+        child: AdaptiveFrame(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
         children: <Widget>[
           // 身份卡片
           Card(
@@ -235,6 +238,8 @@ class PlayerPanelScreen extends StatelessWidget {
               entries: p.inventory.map((e) => _Entry(e, '')).toList(),
             ),
         ],
+          ),
+        ),
       ),
     );
   }
