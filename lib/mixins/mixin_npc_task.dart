@@ -137,9 +137,20 @@ mixin GameNpcTaskMixin
           gainGold(gold);
           adjustReputation(template.rewardReputation);
           adjustRelation(task.npcId, template.rewardRelation);
+          final left = npcTaskRemainingMonths(task);
+          // 按时完成（剩余月数 ≥ 0 且 ≥ 期限一半）→ 额外关系加成
+          final bonus = left >= (template.deadlineMonths / 2).ceil()
+              ? 2
+              : left >= 0
+                  ? 1
+                  : 0;
+          if (bonus > 0) {
+            adjustRelation(task.npcId, bonus);
+          }
           buf.writeln('✅ 你完成了${npcById(task.npcId)?.name ?? '委托人'}的委托：'
               '「${template.title}」。获得 $gold 金币，'
-              '声望 +${template.rewardReputation}，关系 +${template.rewardRelation}。');
+              '声望 +${template.rewardReputation}，关系 +${template.rewardRelation}'
+              '${bonus > 0 ? '（按时完成，关系额外 +$bonus）' : ''}。');
         } else {
           // 进入下一步
           next = task.copyWith(
@@ -158,12 +169,14 @@ mixin GameNpcTaskMixin
     return buf.toString().trim();
   }
 
-  /// 月度期限检查：逾期任务标记失败。
+  /// 月度期限检查：逾期任务标记失败并施加惩罚。
   ///
+  /// 惩罚：声望 -2×难度，关系 -5；文案含逾期月数与损失。
   /// 由 [GamePlayMixin.advanceMonth] 调用；返回追加叙事。
   String checkNpcTaskDeadlines() {
     if (player.activeTasks.isEmpty) return '';
     final buf = StringBuffer();
+    var anyFail = false;
     final updated = <NpcTaskProgress>[];
     for (final task in player.activeTasks) {
       if (!task.isActive) {
@@ -177,15 +190,23 @@ mixin GameNpcTaskMixin
         task.deadlineMonth,
       );
       if (overdue) {
+        final template = npcTaskTemplateById(task.taskId);
+        final diff = npcTaskRemainingMonths(task);
+        final repPenalty = 2 * (template?.difficulty ?? 1);
+        final relPenalty = 5;
+        adjustReputation(-repPenalty);
+        adjustRelation(task.npcId, -relPenalty);
         updated.add(task.copyWith(failed: true));
-        buf.writeln('⏰ 你逾期未完成「${task.title}」，委托失败。'
-            '${npcById(task.npcId)?.name ?? '委托人'}对你失望不已。');
+        final who = npcById(task.npcId)?.name ?? '委托人';
+        buf.writeln('⏰ 你逾期 ${-diff} 个月仍未完成「${task.title}」，委托失败。'
+            '$who 对你失望不已：声望 -$repPenalty，关系 -$relPenalty。');
+        anyFail = true;
       } else {
         updated.add(task);
       }
     }
     // 仅当有任务逾期失败时才落盘（避免无谓 notify）
-    if (updated.any((t) => t.failed)) {
+    if (anyFail) {
       updatePlayer(player.copyWith(activeTasks: updated));
     }
     return buf.toString().trim();
