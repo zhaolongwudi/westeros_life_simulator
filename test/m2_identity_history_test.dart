@@ -51,8 +51,10 @@ Player _playerWith(PlayerIdentity identity, {String locationId = 'location_winte
 }
 
 /// 从文本中取第一个整数（用于解析收益数字）。
+/// 注意：正则必须用非 raw string 才会做字符串插值，
+/// raw string（r'...'）里 $label 是字面量，会导致永远匹配不到。
 int _firstInt(String text, String label) {
-  final m = RegExp(r'$label (\d+)').firstMatch(text);
+  final m = RegExp('${RegExp.escape(label)}\\s*(\\d+)').firstMatch(text);
   if (m == null) {
     fail('未能从文本解析「$label N」：\n$text');
   }

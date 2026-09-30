@@ -273,6 +273,7 @@ GameEngine extends GameProviderBase with:
 2. 单文件不要太大（用户偏好，便于维护）；mixin_life 已 769 行，新功能优先拆新文件
    （Batch 10-17/10-18 新功能全部拆独立文件：mixin_marriage 245 行 / mixin_npc_task 221 行）
 3. 每次改完先括号检查（python 脚本），再 commit → push → CI → 绿后更新 HANDOVER + README
+4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v1.4（Batch 10-26 M1 + Batch 10-27 M2 更新）· 最后更新：2026-09-30*
+*文档版本：v1.5（新增上下文预算指针）· 最后更新：2026-09-30*
