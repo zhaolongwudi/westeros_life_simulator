@@ -40,6 +40,8 @@ lib/
 │   ├── event.dart                 # GameEvent + EventChoice + EventType
 │   ├── system.dart                # GameSystem
 │   ├── marital.dart               # SpouseDetail/ChildRearing/GenerationRecord（婚姻/培养/谱系状态对象，Batch 10-17）
+│   ├── letter.dart                # ⭐ Letter（信件数据，Batch 10-29 · M3b 从 mixin_letter 迁到模型层，UI 才不用 import 混入层）
+│   ├── ai_turn.dart               # ⭐ AiTurnResult（AI 回合结果：lines/choices/isSuccess + 两条提示常量，Batch 10-29 · M3b）
 │   └── npc_task.dart              # NpcTaskType/NpcTaskStep/NpcTaskTemplate/NpcTaskProgress（任务模板+实例，Batch 10-18）
 │
 ├── providers/                     # 【状态层】ChangeNotifier
@@ -62,17 +64,28 @@ lib/
 │
 │   （Batch 10-28 · M3a 自注册约定：9 个领域 mixin 各有 `registerXxxCommands(CommandRegistry)`；6 个领域各有 `registerXxxMonthlyHooks(MonthlyPipeline)`；共 12 个月度钩子 id）
 │
-├── screens/                       # 【UI 层】
+├── screens/                       # 【UI 层】全部为「壳」：只接线 + 布局，不含业务编排（Batch 10-29 · M3b）
 │   ├── start_screen.dart          # 开局选择界面
-│   ├── game_screen.dart           # 主界面（状态条+快捷指令+叙事+输入+面板入口）
+│   ├── game_screen.dart           # ⭐ 主界面 245 行（Batch 10-29 · M3b 从 709 行瘦身；只做接线：引擎调用 + widgets 组合 + AI loading 态）
 │   ├── player_panel_screen.dart   # 玩家详情（含家谱区块，Batch 10-14）
 │   ├── npc_panel_screen.dart      # NPC 关系面板（Batch 10-15 新增）
 │   ├── family_screen.dart         # 家族面板
+│   ├── family_tree_screen.dart    # 家族树可视化（Batch 10-20 新增）
 │   ├── map_screen.dart            # 地图
 │   ├── events_screen.dart         # 事件面板
-│   ├── letters_screen.dart        # 信件面板
+│   ├── letters_screen.dart        # 信件面板（Batch 10-29 · M3b 起只 import models/letter.dart，不再 import mixin_letter）
 │   ├── systems_screen.dart        # 系统面板
 │   └── settings_screen.dart       # 设置/存档
+│
+├── widgets/                       # 【UI 组件层】Batch 10-29 · M3b 新增（从 game_screen 逐字拆出）
+│   └── game/
+│       ├── status.dart            # ⭐ StatusBar（顶部状态条：姓名/身份/年龄/地点/生命精力饱食/年月季节）
+│       ├── quick.dart             # ⭐ QuickCommand + QuickCommandBar（快捷指令 chip 条）
+│       ├── ai_toggle.dart         # ⭐ AiModeToggle（AI 行动模式开关 + loading 转圈）
+│       ├── narrative.dart         # ⭐ NarrativeView + AiChoiceCard + PanelEntry（叙事区/AI 选项卡片/面板入口，286 行）
+│       └── input.dart             # ⭐ CommandInputBar（指令输入栏 + 发送按钮）
+│
+│   （改主界面 UI 的正确姿势：**改 widgets/game/ 下的组件**，不要把展示逻辑塞回 game_screen）
 │
 ├── services/                      # 【服务层】外部/IO
 │   ├── ai_service.dart            # AiService：AI 叙事/选项生成（Dio，含在场 NPC 多步骤任务模板/家族信息注入，Batch 10-22）
@@ -111,7 +124,7 @@ GameEngine extends GameProviderBase with:
 | GamePlayMixin | Base, Systems, Life, NpcInteract, Generation | 日常玩法+过月 |
 | GameAdventureMixin | Base, Life, NpcInteract, NpcTask | 旅行/探索（探索推进任务，Batch 10-18） |
 | GameCommandsMixin | 全部 | 指令解析 |
-| GameAiMixin | ？ | AI 回合（见 mixin_ai.dart） |
+| GameAiMixin | Base, Systems, Life, Play, Letter | AI 回合：runAiAction（编排，Batch 10-29 · M3b）/ applyAiChoice |
 
 ## 三、功能速查表（找「功能」→ 定位「文件:方法」）
 
@@ -151,6 +164,11 @@ GameEngine extends GameProviderBase with:
 | 效果应用（事件/AI 共用） | providers/game_state_provider.dart（applyEffects） |
 | 游戏结束/血脉断绝 | providers/game_state_provider.dart（endGame）+ mixin_play.dart（_tryInheritance） |
 | AI 叙事生成 | services/ai_service.dart（generateNarrative/_buildPrompt） |
+| **AI 回合编排（读配置→拼上下文→请求→装配）** | **mixins/mixin_ai.dart（runAiAction，Batch 10-29 · M3b；返回 `AiTurnResult`）** |
+| AI 回合结果对象 | models/ai_turn.dart（AiTurnResult：lines/choices/isSuccess + notConfiguredLine/notStartedLine） |
+| AI 选项效果落盘 + 推进 | mixin_ai.dart（applyAiChoice） |
+| 主界面状态条/快捷条/AI开关/叙事区/输入栏 | widgets/game/status.dart · quick.dart · ai_toggle.dart · narrative.dart · input.dart（Batch 10-29 · M3b） |
+| 信件数据模型 | models/letter.dart（Letter，Batch 10-29 · M3b 从 mixin_letter 迁出） |
 | AI 提示词注入在场 NPC | ai_service.dart（_buildPrompt 内 onSiteNpcDesc，Batch 10-22 升级为多步骤任务模板：标题/难度/期限） |
 | AI 提示词注入家族信息 | ai_service.dart（_buildPrompt 内 familyDesc：族语/规模/影响力，Batch 10-22） |
 | 存档 | services/save_service.dart（Batch 10-26 · M1：metadata 写 schemaVersion / 读档先 migrateSave / 坏档改 .corrupted） |
@@ -249,6 +267,7 @@ GameEngine extends GameProviderBase with:
 | m1_save_migration_test | **M1 存档契约**（10-26，22 用例）：schemaVersion 写入 / v0→v1 迁移 / 高版本抛异常 / 防御式 fromJson（坏类型/坏列表元素/空 Map）/ 坏档隔离 .corrupted / 旧档加载 / 保存往返 |
 | m2_identity_history_test | **M2 状态权威与身份正确性**（10-27，16 用例）：身份/身世中文化 / isIdentity 逐身份命中 / 商人贸易加成实证 / history 环形上限 200 + 丢弃计数 + 存档往返 |
 | m3_registry_test | **M3a 架构解耦**（10-28，24 用例）：46 条指令注册完整性 / order 唯一连续 1..46 / 帮助文本与旧版逐字一致 / 重复别名与重复 id 记录 / 12 个管线 id 的 phase×order×outputOrder 映射 / 时钟恰好推进一次 / 执行序与文本序分离 / **自注册演示（新增「钓鱼」指令不改分发器即可分发）** |
+| m3b_ui_decoupling_test | **M3b UI 收口**（10-29，14 用例）：runAiAction 四条分支（未开局 / 未配置 Key / HTTP 400 失败 / 成功无选项 / 成功带选项）/ 编排不改世界状态 / AiTurnResult 常量与默认值 / **分层约束（遍历 lib/screens 断言无 `mixins/` import + mixin_letter 不再含 `class Letter`）** / 拆分后主界面（标题·状态条·AI 开关·快捷 chip 可点）与信件面板（空态 + 卡片标题）契约不回归 |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
 > （grep `allEvents.length` / `eventsByType(...).length`）。
@@ -278,6 +297,10 @@ GameEngine extends GameProviderBase with:
 - **`git checkout <file>` 会丢同文件手工改动** → 整块用生成脚本重建（坑 32）
 - **ai_service.dart 括号不平衡是预存误报** → git HEAD 上同样报同一数字，别再排查（坑 32）
 - **新增玩法只加 1 mixin + 1 行 with + 自注册指令 + 月度 hook** → 不得改 mixin_commands/mixin_play/game_engine 内部逻辑（坑 33）
+- **搬迁长文案/巨型组件必须「生成器 + 逐字比对」** → git 取旧值 → 脚本切块搬迁 → 脚本断言去私有化后逐字相等，禁止手打（坑 32 的组件版，本轮 M3b 实测有效）
+- **改共享行为不要只改调用方** → 本轮 3 个缺陷：未用 import（CI 红）、shared_preferences mock 键前缀靠猜（静默假绿）、UI 断言文本写错（假绿）——**共享层要同时给注入点（`runAiAction(service:)`）与可断言常量**
+- **校验脚本本身要有回归** → `scripts/check_brackets_selftest.py` 17 条合成用例（raw string / 三引号 / 嵌套插值 / 嵌套块注释 / 转义），改脚本先跑自检
+- **SharedPreferences mock 别猜键名** → 用 `AiConfig().save()` 写入，键前缀猜错会静默走「未配置」分支变成假绿（坑 34）
 - **HANDOVER.md 已 gitignore** → 只本地更新；README 正常推送
 
 ## 七、文件写入约定（复用 HANDOVER 第二节）
@@ -289,4 +312,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v1.6（新增 lib/core 框架层 + M3a 自注册约定 + 坑 32/33）· 最后更新：2026-09-30*
+*文档版本：v1.7（新增 lib/widgets/game 组件层 + models/letter·ai_turn + M3b「UI 只做接线」约定 + 坑 34）· 最后更新：2026-10-01*

@@ -162,9 +162,17 @@ void main() {
     });
 
     test('LettersScreen 只 import 模型层拿 Letter 类型', () {
+      // 注意：只对 import 行断言；文件头注释里允许出现 mixin_letter 字样的说明文字。
       final text = File('lib/screens/letters_screen.dart').readAsStringSync();
-      expect(text.contains("import '../models/letter.dart';"), true);
-      expect(text.contains('mixin_letter'), false);
+      final imports = text
+          .split('\n')
+          .map((l) => l.trim())
+          .where((l) => l.startsWith('import '))
+          .toList();
+      expect(imports.contains("import '../models/letter.dart';"), isTrue,
+          reason: 'Letter 类型应来自模型层');
+      expect(imports.any((l) => l.contains('mixins/')), isFalse,
+          reason: 'UI 层不得 import 混入层');
     });
   });
 
