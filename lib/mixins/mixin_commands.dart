@@ -9,6 +9,7 @@ import 'dart:math';
 
 import '../core/command_registry.dart';
 import '../providers/game_provider_base.dart';
+import '../utils/command_sanitizer.dart';
 import 'mixin_adventure.dart';
 import 'mixin_generation.dart';
 import 'mixin_letter.dart';
@@ -61,10 +62,15 @@ mixin GameCommandsMixin
   /// 解析并执行一条玩家指令。
   ///
   /// 返回响应文本。未知指令返回帮助提示。
+  /// 入口护栏（Batch 10-37 · M6）：超长截断 + 纯符号/空白兜底。
   CommandResult resolveCommand(String raw) {
-    final input = raw.trim();
+    // 输入护栏：截断 + 去空白
+    final input = sanitizeCommand(raw);
     if (input.isEmpty) {
       return const CommandResult(text: '请输入指令。输入「帮助」查看可用指令。');
+    }
+    if (isCommandNoise(input)) {
+      return const CommandResult(text: '这条指令我看不太懂……输入「帮助」查看可用指令。');
     }
     final registry = commandRegistry;
     final exact = input.split(RegExp(r'\s+')).first;

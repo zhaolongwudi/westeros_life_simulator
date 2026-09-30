@@ -2,6 +2,12 @@
 ///
 /// 从 start_screen / events_screen / game_screen 迁移而来，
 /// 全项目统一引用，避免重复 switch。
+///
+/// M6（Batch 10-37）契约：本文件是**全项目文案的唯一集中层**
+/// （可替换资源接口的雏形）。规则：
+/// - 新增任何面向玩家的中文文案（身份/季节/事件/身世等）必须在此定义函数，
+///   禁止在 mixin / screen / service 里直接写中文标签字面量（坑 17 同类）。
+/// - 将来若做 i18n，只改本文件函数体即可，调用点零改动。
 library;
 
 import '../models/event.dart';
