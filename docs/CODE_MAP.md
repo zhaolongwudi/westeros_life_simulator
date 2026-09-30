@@ -240,7 +240,7 @@ GameEngine extends GameProviderBase with:
 | 过月 | advance | advanceMonth | 是 |
 | 帮助 | help | _helpText | 否 |
 
-## 五、测试文件映射（test/ 52 文件）
+## 五、测试文件映射（test/ 57 文件）
 
 | 测试文件 | 覆盖 |
 |----------|------|
@@ -285,6 +285,7 @@ GameEngine extends GameProviderBase with:
 | **m5_experience_test** | **M5 体验层**（10-34/35，10 用例）：AI 失败降级（失败行+降级提示行 / 本地指令续玩 / 降级常量唯一）/ 长会话叙事（200 条渲染 / 200 条滚动到底 / 1000 条不崩 / GameScreen 冒烟）/ 导航宫格（窄屏 3 列 / 宽屏 4 列 / AppBar 宫格按钮弹出 9 入口） |
 | **m5_responsive_test** | **M5 响应式适配**（10-36，6 用例）：AdaptiveFrame 窄屏原样全宽不包 Center / 宽屏限宽可配置 / GameScreen 宽屏状态条≤700 + 契约不回归 / 窄屏状态条全宽 / PlayerPanelScreen·FamilyTreeScreen 宽屏 ListView 宽 900 |
 | **m6_robustness_test** | **M6 输入防护**（10-37，10 用例）：sanitizeCommand 正常/超长截断/恰好 80 不截断 / isCommandNoise 噪声判定 8 值 / resolveCommand 空·纯符号·超长·正常 / labels 文案集中层关键值 7 项 |
+| **regression/（5 文件）** | **M6 跨批次回归**（10-38 · M6b，32 用例）：regression_legacy_save_test（旧档加载→引擎续玩→存档往返）/ regression_identity_branch_test（6 档工作收入互不越界 + 贸易商人差 17）/ regression_registry_test（46 指令引擎级可执行/消费回合/缺参/中英别名）/ regression_simulation_test（三策略对照/濒危救回/冬夏对比/200 月有界）/ regression_long_session_test（200/1000 回合 history 环形≤200/存档体积有界） |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
 > （grep `allEvents.length` / `eventsByType(...).length`）。
@@ -331,4 +332,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v2.3（新增 command_sanitizer 组件 + m6_robustness_test 映射 + M6a 输入防护速查）· 最后更新：2026-10-01*
+*文档版本：v2.4（新增 test/regression/ 跨批次回归套件映射 + M6b 回归防线速查）· 最后更新：2026-10-01*

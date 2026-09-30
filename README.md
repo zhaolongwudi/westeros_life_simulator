@@ -106,6 +106,18 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**生成
 ---
 
 ## 最近更新
+**2026-10-01 · M6 健壮性收官二批：跨批次回归套件（Batch 10-38 · M6b）**
+
+M6 第二批不再加新功能，而是把**十多个批次攒下的行为契约**串成一条回归防线——任何未来改动破坏旧玩法，这里先红：
+
+- 💾 **旧档加载端到端回归**（Batch 10-38 · M6b）——`test/regression/regression_legacy_save_test.dart`：v0 无版本号旧档 / 更老缺生存三维档 / 半残档，加载后**真正进引擎续玩**（状态/工作/过月/存档往返），不再只测「解析不抛」
+- 🎭 **身份收入分档回归**（Batch 10-38 · M6b）——`test/regression/regression_identity_branch_test.dart`：商人/士兵/学者/神职/平民/默认档 6 档收入**互不越界**（商人 20+、士兵 15+、平民 5+……），贸易商人加成固定差 17——兜住 Batch 4「身份判断落空」的历史隐患
+- 🧩 **指令注册表引擎级回归**（Batch 10-38 · M6b）——`test/regression/regression_registry_test.dart`：46 条指令真实可执行 / order 连续 / 别名无撞车 / 消费回合标记 / 缺参提示 / 未知指令兜底 / 中英别名归一化一致
+- 📈 **策略仿真对照回归**（Batch 10-38 · M6b）——`test/regression/regression_simulation_test.dart`：三策略对照（主动存活 / 半主动饿死 / 被动必死）、濒危开局救回、冬夏饱食压力对比（winterHungerExtra 生效）、200 个月极长曲线有界
+- 📜 **长会话状态回归**（Batch 10-38 · M6b）——`test/regression/regression_long_session_test.dart`：引擎真实驱动 200/1000 回合，history 环形截断 ≤200、droppedHistoryCount 记账、存档体积有界、toJson→fromJson 往返全保留
+- 🧪 **32 条新测试**（Batch 10-38 · M6b）——`test/regression/` 5 个文件，**697 条测试全绿**（665 + 32，run 36787280010 ✅）
+> 玩法可以继续加，但「老的玩法还活着」这件事，从此有机器替你盯着。
+
 **2026-10-01 · M6 健壮性收官开篇：垃圾输入不再伤人（Batch 10-37 · M6a）**
 
 M6 只加护栏、不扩张——第一批把「玩家输入」这条最容易被乱敲的链路护住了：
