@@ -6,8 +6,8 @@ import 'package:westeros_life_simulator/data/location_data.dart';
 
 void main() {
   group('地点数据', () {
-    test('allLocations 包含 68 个地点', () {
-      expect(allLocations.length, 68);
+    test('allLocations 包含 69 个地点', () {
+      expect(allLocations.length, 69);
     });
 
     test('所有地点 ID 唯一', () {

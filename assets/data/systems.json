@@ -1,0 +1,1186 @@
+[
+  {
+    "id": "system_feudal",
+    "name": "封建体系",
+    "category": "封建",
+    "description": "维斯特洛的封建等级制度。",
+    "rules": [
+      "领主效忠国王",
+      "国王授予领地",
+      "领主提供军队"
+    ],
+    "features": [
+      "等级制度",
+      "效忠关系",
+      "领地授予"
+    ]
+  },
+  {
+    "id": "system_family",
+    "name": "家族体系",
+    "category": "家族",
+    "description": "维斯特洛的家族制度。",
+    "rules": [
+      "家族继承",
+      "家族联姻",
+      "家族秘密"
+    ],
+    "features": [
+      "家族继承",
+      "家族联姻",
+      "家族秘密"
+    ]
+  },
+  {
+    "id": "system_church",
+    "name": "教会体系",
+    "category": "教会",
+    "description": "七神教会的组织体系。",
+    "rules": [
+      "总主教领导",
+      "红袍祭司",
+      "教会审判"
+    ],
+    "features": [
+      "总主教",
+      "红袍祭司",
+      "教会审判"
+    ]
+  },
+  {
+    "id": "system_citadel",
+    "name": "学城体系",
+    "category": "学城",
+    "description": "学城的大学士体系。",
+    "rules": [
+      "大学士领导",
+      "学士网络",
+      "知识传承"
+    ],
+    "features": [
+      "大学士",
+      "学士网络",
+      "知识传承"
+    ]
+  },
+  {
+    "id": "system_nightswatch",
+    "name": "守夜人体系",
+    "category": "守夜人",
+    "description": "长城守夜人的组织体系。",
+    "rules": [
+      "总司令领导",
+      "守夜人誓言",
+      "长城防御"
+    ],
+    "features": [
+      "总司令",
+      "守夜人誓言",
+      "长城防御"
+    ]
+  },
+  {
+    "id": "system_mercenary",
+    "name": "雇佣兵体系",
+    "category": "雇佣兵",
+    "description": "雇佣兵的组织体系。",
+    "rules": [
+      "雇佣兵合同",
+      "雇佣兵纪律",
+      "雇佣兵报酬"
+    ],
+    "features": [
+      "雇佣兵合同",
+      "雇佣兵纪律",
+      "雇佣兵报酬"
+    ]
+  },
+  {
+    "id": "system_trade",
+    "name": "贸易体系",
+    "category": "贸易",
+    "description": "维斯特洛的贸易体系。",
+    "rules": [
+      "贸易路线",
+      "贸易关税",
+      "贸易保护"
+    ],
+    "features": [
+      "贸易路线",
+      "贸易关税",
+      "贸易保护"
+    ]
+  },
+  {
+    "id": "system_religion",
+    "name": "宗教体系",
+    "category": "宗教",
+    "description": "维斯特洛的宗教体系。",
+    "rules": [
+      "七神信仰",
+      "旧神信仰",
+      "异端审判"
+    ],
+    "features": [
+      "七神信仰",
+      "旧神信仰",
+      "异端审判"
+    ]
+  },
+  {
+    "id": "system_magic",
+    "name": "魔法体系",
+    "category": "魔法",
+    "description": "维斯特洛的魔法体系。",
+    "rules": [
+      "魔法稀有",
+      "魔法代价",
+      "魔法传承"
+    ],
+    "features": [
+      "魔法稀有",
+      "魔法代价",
+      "魔法传承"
+    ]
+  },
+  {
+    "id": "system_green_seer",
+    "name": "绿先知系统",
+    "category": "魔法",
+    "description": "绿先知的预言能力。",
+    "rules": [
+      "绿先知预言",
+      "绿先知传承",
+      "绿先知代价"
+    ],
+    "features": [
+      "绿先知预言",
+      "绿先知传承",
+      "绿先知代价"
+    ]
+  },
+  {
+    "id": "system_skinchanger",
+    "name": "易形者系统",
+    "category": "魔法",
+    "description": "易形者的变形能力。",
+    "rules": [
+      "易形者变形",
+      "易形者传承",
+      "易形者代价"
+    ],
+    "features": [
+      "易形者变形",
+      "易形者传承",
+      "易形者代价"
+    ]
+  },
+  {
+    "id": "system_blood_magic",
+    "name": "血魔法系统",
+    "category": "魔法",
+    "description": "血魔法的诅咒能力。",
+    "rules": [
+      "血魔法诅咒",
+      "血魔法代价",
+      "血魔法传承"
+    ],
+    "features": [
+      "血魔法诅咒",
+      "血魔法代价",
+      "血魔法传承"
+    ]
+  },
+  {
+    "id": "system_prophecy",
+    "name": "预言系统",
+    "category": "魔法",
+    "description": "预言的应验能力。",
+    "rules": [
+      "预言应验",
+      "预言代价",
+      "预言传承"
+    ],
+    "features": [
+      "预言应验",
+      "预言代价",
+      "预言传承"
+    ]
+  },
+  {
+    "id": "system_wolf_dream",
+    "name": "狼梦系统",
+    "category": "魔法",
+    "description": "狼梦的梦境能力。",
+    "rules": [
+      "狼梦梦境",
+      "狼梦代价",
+      "狼梦传承"
+    ],
+    "features": [
+      "狼梦梦境",
+      "狼梦代价",
+      "狼梦传承"
+    ]
+  },
+  {
+    "id": "system_dragon_dream",
+    "name": "龙梦系统",
+    "category": "魔法",
+    "description": "龙梦的梦境能力。",
+    "rules": [
+      "龙梦梦境",
+      "龙梦代价",
+      "龙梦传承"
+    ],
+    "features": [
+      "龙梦梦境",
+      "龙梦代价",
+      "龙梦传承"
+    ]
+  },
+  {
+    "id": "system_war",
+    "name": "战争系统",
+    "category": "战争",
+    "description": "维斯特洛的战争体系。",
+    "rules": [
+      "战争规则",
+      "战争代价",
+      "战争传承"
+    ],
+    "features": [
+      "战争规则",
+      "战争代价",
+      "战争传承"
+    ]
+  },
+  {
+    "id": "system_siege",
+    "name": "城堡攻防系统",
+    "category": "战争",
+    "description": "城堡攻防的战争体系。",
+    "rules": [
+      "城堡防御",
+      "城堡进攻",
+      "城堡代价"
+    ],
+    "features": [
+      "城堡防御",
+      "城堡进攻",
+      "城堡代价"
+    ]
+  },
+  {
+    "id": "system_army",
+    "name": "军队系统",
+    "category": "战争",
+    "description": "军队的组织体系。",
+    "rules": [
+      "军队编制",
+      "军队纪律",
+      "军队报酬"
+    ],
+    "features": [
+      "军队编制",
+      "军队纪律",
+      "军队报酬"
+    ]
+  },
+  {
+    "id": "system_trial",
+    "name": "审判系统",
+    "category": "战争",
+    "description": "审判的战争体系。",
+    "rules": [
+      "审判规则",
+      "审判代价",
+      "审判传承"
+    ],
+    "features": [
+      "审判规则",
+      "审判代价",
+      "审判传承"
+    ]
+  },
+  {
+    "id": "system_trial_by_combat",
+    "name": "比武审判系统",
+    "category": "战争",
+    "description": "比武审判的战争体系。",
+    "rules": [
+      "比武规则",
+      "比武代价",
+      "比武传承"
+    ],
+    "features": [
+      "比武规则",
+      "比武代价",
+      "比武传承"
+    ]
+  },
+  {
+    "id": "system_marriage",
+    "name": "婚姻系统",
+    "category": "婚姻",
+    "description": "维斯特洛的婚姻体系。",
+    "rules": [
+      "婚姻规则",
+      "婚姻代价",
+      "婚姻传承"
+    ],
+    "features": [
+      "婚姻规则",
+      "婚姻代价",
+      "婚姻传承"
+    ]
+  },
+  {
+    "id": "system_succession",
+    "name": "继承系统",
+    "category": "继承",
+    "description": "维斯特洛的继承体系。",
+    "rules": [
+      "继承规则",
+      "继承代价",
+      "继承传承"
+    ],
+    "features": [
+      "继承规则",
+      "继承代价",
+      "继承传承"
+    ]
+  },
+  {
+    "id": "system_women",
+    "name": "女性地位系统",
+    "category": "婚姻",
+    "description": "维斯特洛的女性地位体系。",
+    "rules": [
+      "女性地位",
+      "女性代价",
+      "女性传承"
+    ],
+    "features": [
+      "女性地位",
+      "女性代价",
+      "女性传承"
+    ]
+  },
+  {
+    "id": "system_economy",
+    "name": "经济系统",
+    "category": "经济",
+    "description": "维斯特洛的经济体系。",
+    "rules": [
+      "经济规则",
+      "经济代价",
+      "经济传承"
+    ],
+    "features": [
+      "经济规则",
+      "经济代价",
+      "经济传承"
+    ]
+  },
+  {
+    "id": "system_currency",
+    "name": "货币系统",
+    "category": "经济",
+    "description": "维斯特洛的货币体系。",
+    "rules": [
+      "货币规则",
+      "货币代价",
+      "货币传承"
+    ],
+    "features": [
+      "货币规则",
+      "货币代价",
+      "货币传承"
+    ]
+  },
+  {
+    "id": "system_education",
+    "name": "教育系统",
+    "category": "经济",
+    "description": "维斯特洛的教育体系。",
+    "rules": [
+      "教育规则",
+      "教育代价",
+      "教育传承"
+    ],
+    "features": [
+      "教育规则",
+      "教育代价",
+      "教育传承"
+    ]
+  },
+  {
+    "id": "system_language",
+    "name": "语言系统",
+    "category": "经济",
+    "description": "维斯特洛的语言体系。",
+    "rules": [
+      "语言规则",
+      "语言代价",
+      "语言传承"
+    ],
+    "features": [
+      "语言规则",
+      "语言代价",
+      "语言传承"
+    ]
+  },
+  {
+    "id": "system_festival",
+    "name": "节日系统",
+    "category": "经济",
+    "description": "维斯特洛的节日体系。",
+    "rules": [
+      "节日规则",
+      "节日代价",
+      "节日传承"
+    ],
+    "features": [
+      "节日规则",
+      "节日代价",
+      "节日传承"
+    ]
+  },
+  {
+    "id": "system_family_life",
+    "name": "家庭系统",
+    "category": "经济",
+    "description": "维斯特洛的家庭体系。",
+    "rules": [
+      "家庭规则",
+      "家庭代价",
+      "家庭传承"
+    ],
+    "features": [
+      "家庭规则",
+      "家庭代价",
+      "家庭传承"
+    ]
+  },
+  {
+    "id": "system_lands",
+    "name": "领地系统",
+    "category": "经济",
+    "description": "维斯特洛的领地体系。",
+    "rules": [
+      "领地规则",
+      "领地代价",
+      "领地传承"
+    ],
+    "features": [
+      "领地规则",
+      "领地代价",
+      "领地传承"
+    ]
+  },
+  {
+    "id": "system_cities",
+    "name": "城市系统",
+    "category": "经济",
+    "description": "维斯特洛的城市体系。",
+    "rules": [
+      "城市规则",
+      "城市代价",
+      "城市传承"
+    ],
+    "features": [
+      "城市规则",
+      "城市代价",
+      "城市传承"
+    ]
+  },
+  {
+    "id": "system_intelligence",
+    "name": "情报系统",
+    "category": "情报",
+    "description": "维斯特洛的情报体系。",
+    "rules": [
+      "情报规则",
+      "情报代价",
+      "情报传承"
+    ],
+    "features": [
+      "情报规则",
+      "情报代价",
+      "情报传承"
+    ]
+  },
+  {
+    "id": "system_travel",
+    "name": "旅行系统",
+    "category": "情报",
+    "description": "维斯特洛的旅行体系。",
+    "rules": [
+      "旅行规则",
+      "旅行代价",
+      "旅行传承"
+    ],
+    "features": [
+      "旅行规则",
+      "旅行代价",
+      "旅行传承"
+    ]
+  },
+  {
+    "id": "system_adventure",
+    "name": "冒险系统",
+    "category": "情报",
+    "description": "维斯特洛的冒险体系。",
+    "rules": [
+      "冒险规则",
+      "冒险代价",
+      "冒险传承"
+    ],
+    "features": [
+      "冒险规则",
+      "冒险代价",
+      "冒险传承"
+    ]
+  },
+  {
+    "id": "system_relic",
+    "name": "神器系统",
+    "category": "情报",
+    "description": "维斯特洛的神器体系。",
+    "rules": [
+      "神器规则",
+      "神器代价",
+      "神器传承"
+    ],
+    "features": [
+      "神器规则",
+      "神器代价",
+      "神器传承"
+    ]
+  },
+  {
+    "id": "system_legendary_weapon",
+    "name": "传奇武器系统",
+    "category": "情报",
+    "description": "维斯特洛的传奇武器体系。",
+    "rules": [
+      "武器规则",
+      "武器代价",
+      "武器传承"
+    ],
+    "features": [
+      "武器规则",
+      "武器代价",
+      "武器传承"
+    ]
+  },
+  {
+    "id": "system_valyrian_steel",
+    "name": "瓦雷利亚钢系统",
+    "category": "情报",
+    "description": "维斯特洛的瓦雷利亚钢体系。",
+    "rules": [
+      "瓦钢规则",
+      "瓦钢代价",
+      "瓦钢传承"
+    ],
+    "features": [
+      "瓦钢规则",
+      "瓦钢代价",
+      "瓦钢传承"
+    ]
+  },
+  {
+    "id": "system_dragon",
+    "name": "龙系统",
+    "category": "龙",
+    "description": "维斯特洛的龙体系。",
+    "rules": [
+      "龙规则",
+      "龙代价",
+      "龙传承"
+    ],
+    "features": [
+      "龙规则",
+      "龙代价",
+      "龙传承"
+    ]
+  },
+  {
+    "id": "system_white_walker",
+    "name": "异鬼系统",
+    "category": "异鬼",
+    "description": "维斯特洛的异鬼体系。",
+    "rules": [
+      "异鬼规则",
+      "异鬼代价",
+      "异鬼传承"
+    ],
+    "features": [
+      "异鬼规则",
+      "异鬼代价",
+      "异鬼传承"
+    ]
+  },
+  {
+    "id": "system_faceless",
+    "name": "无面者系统",
+    "category": "无面者",
+    "description": "维斯特洛的无面者体系。",
+    "rules": [
+      "无面者规则",
+      "无面者代价",
+      "无面者传承"
+    ],
+    "features": [
+      "无面者规则",
+      "无面者代价",
+      "无面者传承"
+    ]
+  },
+  {
+    "id": "system_red_priest",
+    "name": "红袍祭司系统",
+    "category": "红袍祭司",
+    "description": "维斯特洛的红袍祭司体系。",
+    "rules": [
+      "红袍规则",
+      "红袍代价",
+      "红袍传承"
+    ],
+    "features": [
+      "红袍规则",
+      "红袍代价",
+      "红袍传承"
+    ]
+  },
+  {
+    "id": "system_iron_bank",
+    "name": "铁金库系统",
+    "category": "铁金库",
+    "description": "维斯特洛的铁金库体系。",
+    "rules": [
+      "铁金库规则",
+      "铁金库代价",
+      "铁金库传承"
+    ],
+    "features": [
+      "铁金库规则",
+      "铁金库代价",
+      "铁金库传承"
+    ]
+  },
+  {
+    "id": "system_dothraki",
+    "name": "无垢者系统",
+    "category": "无垢者",
+    "description": "维斯特洛的无垢者体系。",
+    "rules": [
+      "无垢者规则",
+      "无垢者代价",
+      "无垢者传承"
+    ],
+    "features": [
+      "无垢者规则",
+      "无垢者代价",
+      "无垢者传承"
+    ]
+  },
+  {
+    "id": "system_dothraki_culture",
+    "name": "多斯拉克系统",
+    "category": "多斯拉克",
+    "description": "维斯特洛的多斯拉克体系。",
+    "rules": [
+      "多斯拉克规则",
+      "多斯拉克代价",
+      "多斯拉克传承"
+    ],
+    "features": [
+      "多斯拉克规则",
+      "多斯拉克代价",
+      "多斯拉克传承"
+    ]
+  },
+  {
+    "id": "system_wildling",
+    "name": "野人系统",
+    "category": "野人",
+    "description": "维斯特洛的野人体系。",
+    "rules": [
+      "野人规则",
+      "野人代价",
+      "野人传承"
+    ],
+    "features": [
+      "野人规则",
+      "野人代价",
+      "野人传承"
+    ]
+  },
+  {
+    "id": "system_ironborn",
+    "name": "铁民系统",
+    "category": "铁民",
+    "description": "维斯特洛的铁民体系。",
+    "rules": [
+      "铁民规则",
+      "铁民代价",
+      "铁民传承"
+    ],
+    "features": [
+      "铁民规则",
+      "铁民代价",
+      "铁民传承"
+    ]
+  },
+  {
+    "id": "system_law",
+    "name": "法律系统",
+    "category": "法律",
+    "description": "维斯特洛的法律体系。",
+    "rules": [
+      "法律规则",
+      "法律代价",
+      "法律传承"
+    ],
+    "features": [
+      "法律规则",
+      "法律代价",
+      "法律传承"
+    ]
+  },
+  {
+    "id": "system_identity",
+    "name": "身份法律",
+    "category": "法律",
+    "description": "维斯特洛的身份法律体系。",
+    "rules": [
+      "身份规则",
+      "身份代价",
+      "身份传承"
+    ],
+    "features": [
+      "身份规则",
+      "身份代价",
+      "身份传承"
+    ]
+  },
+  {
+    "id": "system_bastard",
+    "name": "私生子系统",
+    "category": "法律",
+    "description": "维斯特洛的私生子体系。",
+    "rules": [
+      "私生子规则",
+      "私生子代价",
+      "私生子传承"
+    ],
+    "features": [
+      "私生子规则",
+      "私生子代价",
+      "私生子传承"
+    ]
+  },
+  {
+    "id": "system_death",
+    "name": "死亡系统",
+    "category": "死亡",
+    "description": "维斯特洛的死亡体系。",
+    "rules": [
+      "死亡规则",
+      "死亡代价",
+      "死亡传承"
+    ],
+    "features": [
+      "死亡规则",
+      "死亡代价",
+      "死亡传承"
+    ]
+  },
+  {
+    "id": "system_succession_law",
+    "name": "继承系统",
+    "category": "继承",
+    "description": "维斯特洛的继承法律体系。",
+    "rules": [
+      "继承规则",
+      "继承代价",
+      "继承传承"
+    ],
+    "features": [
+      "继承规则",
+      "继承代价",
+      "继承传承"
+    ]
+  },
+  {
+    "id": "system_multigeneration",
+    "name": "多世代模式",
+    "category": "继承",
+    "description": "维斯特洛的多世代模式体系。",
+    "rules": [
+      "多世代规则",
+      "多世代代价",
+      "多世代传承"
+    ],
+    "features": [
+      "多世代规则",
+      "多世代代价",
+      "多世代传承"
+    ]
+  },
+  {
+    "id": "system_history_memory",
+    "name": "历史记忆",
+    "category": "继承",
+    "description": "维斯特洛的历史记忆体系。",
+    "rules": [
+      "历史规则",
+      "历史代价",
+      "历史传承"
+    ],
+    "features": [
+      "历史规则",
+      "历史代价",
+      "历史传承"
+    ]
+  },
+  {
+    "id": "system_world_history",
+    "name": "世界史书",
+    "category": "继承",
+    "description": "维斯特洛的世界史书体系。",
+    "rules": [
+      "史书规则",
+      "史书代价",
+      "史书传承"
+    ],
+    "features": [
+      "史书规则",
+      "史书代价",
+      "史书传承"
+    ]
+  },
+  {
+    "id": "system_reality_protection",
+    "name": "现实性保护协议",
+    "category": "保护",
+    "description": "维斯特洛的现实性保护体系。",
+    "rules": [
+      "现实性规则",
+      "现实性代价",
+      "现实性传承"
+    ],
+    "features": [
+      "现实性规则",
+      "现实性代价",
+      "现实性传承"
+    ]
+  },
+  {
+    "id": "system_magic_protection",
+    "name": "魔法体系漏洞保护",
+    "category": "保护",
+    "description": "维斯特洛的魔法体系漏洞保护体系。",
+    "rules": [
+      "魔法保护规则",
+      "魔法保护代价",
+      "魔法保护传承"
+    ],
+    "features": [
+      "魔法保护规则",
+      "魔法保护代价",
+      "魔法保护传承"
+    ]
+  },
+  {
+    "id": "system_god_protection",
+    "name": "神明力量保护",
+    "category": "保护",
+    "description": "维斯特洛的神明力量保护体系。",
+    "rules": [
+      "神明保护规则",
+      "神明保护代价",
+      "神明保护传承"
+    ],
+    "features": [
+      "神明保护规则",
+      "神明保护代价",
+      "神明保护传承"
+    ]
+  },
+  {
+    "id": "system_dragon_protection",
+    "name": "龙力量保护",
+    "category": "保护",
+    "description": "维斯特洛的龙力量保护体系。",
+    "rules": [
+      "龙保护规则",
+      "龙保护代价",
+      "龙保护传承"
+    ],
+    "features": [
+      "龙保护规则",
+      "龙保护代价",
+      "龙保护传承"
+    ]
+  },
+  {
+    "id": "system_walker_protection",
+    "name": "异鬼力量保护",
+    "category": "保护",
+    "description": "维斯特洛的异鬼力量保护体系。",
+    "rules": [
+      "异鬼保护规则",
+      "异鬼保护代价",
+      "异鬼保护传承"
+    ],
+    "features": [
+      "异鬼保护规则",
+      "异鬼保护代价",
+      "异鬼保护传承"
+    ]
+  },
+  {
+    "id": "system_information_protection",
+    "name": "世界信息保护",
+    "category": "保护",
+    "description": "维斯特洛的世界信息保护体系。",
+    "rules": [
+      "信息保护规则",
+      "信息保护代价",
+      "信息保护传承"
+    ],
+    "features": [
+      "信息保护规则",
+      "信息保护代价",
+      "信息保护传承"
+    ]
+  },
+  {
+    "id": "system_ai_freedom",
+    "name": "AI 绝对自由协议",
+    "category": "AI",
+    "description": "维斯特洛的 AI 绝对自由协议体系。",
+    "rules": [
+      "AI 自由规则",
+      "AI 自由代价",
+      "AI 自由传承"
+    ],
+    "features": [
+      "AI 自由规则",
+      "AI 自由代价",
+      "AI 自由传承"
+    ]
+  },
+  {
+    "id": "system_causality",
+    "name": "世界因果系统",
+    "category": "AI",
+    "description": "维斯特洛的世界因果体系。",
+    "rules": [
+      "因果规则",
+      "因果代价",
+      "因果传承"
+    ],
+    "features": [
+      "因果规则",
+      "因果代价",
+      "因果传承"
+    ]
+  },
+  {
+    "id": "system_opportunity",
+    "name": "世界不是围绕玩家生成机缘",
+    "category": "AI",
+    "description": "维斯特洛的世界不是围绕玩家生成机缘体系。",
+    "rules": [
+      "机缘规则",
+      "机缘代价",
+      "机缘传承"
+    ],
+    "features": [
+      "机缘规则",
+      "机缘代价",
+      "机缘传承"
+    ]
+  },
+  {
+    "id": "system_adventure_meaning",
+    "name": "冒险的真正意义",
+    "category": "AI",
+    "description": "维斯特洛的冒险的真正意义体系。",
+    "rules": [
+      "冒险意义规则",
+      "冒险意义代价",
+      "冒险意义传承"
+    ],
+    "features": [
+      "冒险意义规则",
+      "冒险意义代价",
+      "冒险意义传承"
+    ]
+  },
+  {
+    "id": "system_overcrowding_protection",
+    "name": "防止世界过度热闹",
+    "category": "AI",
+    "description": "维斯特洛的防止世界过度热闹体系。",
+    "rules": [
+      "过度热闹规则",
+      "过度热闹代价",
+      "过度热闹传承"
+    ],
+    "features": [
+      "过度热闹规则",
+      "过度热闹代价",
+      "过度热闹传承"
+    ]
+  },
+  {
+    "id": "system_protagonist_protection",
+    "name": "防止主角光环",
+    "category": "AI",
+    "description": "维斯特洛的防止主角光环体系。",
+    "rules": [
+      "主角光环规则",
+      "主角光环代价",
+      "主角光环传承"
+    ],
+    "features": [
+      "主角光环规则",
+      "主角光环代价",
+      "主角光环传承"
+    ]
+  },
+  {
+    "id": "system_number_protection",
+    "name": "防止数值刷子",
+    "category": "AI",
+    "description": "维斯特洛的防止数值刷子体系。",
+    "rules": [
+      "数值刷子规则",
+      "数值刷子代价",
+      "数值刷子传承"
+    ],
+    "features": [
+      "数值刷子规则",
+      "数值刷子代价",
+      "数值刷子传承"
+    ]
+  },
+  {
+    "id": "system_economy_protection",
+    "name": "世界经济漏洞检测",
+    "category": "AI",
+    "description": "维斯特洛的世界经济漏洞检测体系。",
+    "rules": [
+      "经济漏洞规则",
+      "经济漏洞代价",
+      "经济漏洞传承"
+    ],
+    "features": [
+      "经济漏洞规则",
+      "经济漏洞代价",
+      "经济漏洞传承"
+    ]
+  },
+  {
+    "id": "system_rule_update",
+    "name": "世界规则更新",
+    "category": "规则",
+    "description": "维斯特洛的世界规则更新体系。",
+    "rules": [
+      "规则更新规则",
+      "规则更新代价",
+      "规则更新传承"
+    ],
+    "features": [
+      "规则更新规则",
+      "规则更新代价",
+      "规则更新传承"
+    ]
+  },
+  {
+    "id": "system_version_patch",
+    "name": "版本补丁机制",
+    "category": "规则",
+    "description": "维斯特洛的版本补丁机制体系。",
+    "rules": [
+      "版本补丁规则",
+      "版本补丁代价",
+      "版本补丁传承"
+    ],
+    "features": [
+      "版本补丁规则",
+      "版本补丁代价",
+      "版本补丁传承"
+    ]
+  },
+  {
+    "id": "system_save",
+    "name": "存档系统",
+    "category": "存档",
+    "description": "维斯特洛的存档体系。",
+    "rules": [
+      "存档规则",
+      "存档代价",
+      "存档传承"
+    ],
+    "features": [
+      "存档规则",
+      "存档代价",
+      "存档传承"
+    ]
+  },
+  {
+    "id": "system_restore",
+    "name": "恢复系统",
+    "category": "存档",
+    "description": "维斯特洛的恢复体系。",
+    "rules": [
+      "恢复规则",
+      "恢复代价",
+      "恢复传承"
+    ],
+    "features": [
+      "恢复规则",
+      "恢复代价",
+      "恢复传承"
+    ]
+  },
+  {
+    "id": "system_ai_identity",
+    "name": "AI 运行身份",
+    "category": "AI",
+    "description": "维斯特洛的 AI 运行身份体系。",
+    "rules": [
+      "AI 身份规则",
+      "AI 身份代价",
+      "AI 身份传承"
+    ],
+    "features": [
+      "AI 身份规则",
+      "AI 身份代价",
+      "AI 身份传承"
+    ]
+  },
+  {
+    "id": "system_ultimate_principle",
+    "name": "终极原则",
+    "category": "规则",
+    "description": "维斯特洛的终极原则体系。",
+    "rules": [
+      "终极原则规则",
+      "终极原则代价",
+      "终极原则传承"
+    ],
+    "features": [
+      "终极原则规则",
+      "终极原则代价",
+      "终极原则传承"
+    ]
+  }
+]

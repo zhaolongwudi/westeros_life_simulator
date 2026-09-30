@@ -18,5 +18,8 @@ Thumbs.db
 # Secrets
 .env
 *.key
+# Python
+__pycache__/
+*.pyc
 *.pem
 docs/HANDOVER.md

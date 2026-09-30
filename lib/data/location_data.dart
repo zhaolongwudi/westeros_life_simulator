@@ -854,6 +854,18 @@ const List<Location> allLocations = [
     connectedTo: const [],
     description: '史塔克家族梦境领域。',
   ),
+  Location(
+    id: 'location_exile',
+    name: '流亡之地',
+    type: LocationType.supernatural,
+    region: '厄索斯',
+    dangerLevel: 5,
+    population: 0,
+    features: const ['坦格利安家族流亡地'],
+    governorId: null,
+    connectedTo: const ['location_dragonstone'],
+    description: '坦格利安家族流亡厄索斯期间的落脚之地。',
+  ),
 ];
 
 /// 按 ID 查找地点。

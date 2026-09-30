@@ -1,0 +1,3669 @@
+[
+  {
+    "id": "event_king_death",
+    "name": "国王死亡",
+    "type": "EventType.political",
+    "description": "国王驾崩，王位继承危机爆发。",
+    "triggerConditions": {
+      "kingAge": "60+"
+    },
+    "choices": [
+      {
+        "id": "choice_support_heir",
+        "text": "支持继承人",
+        "requirements": {},
+        "effects": {
+          "reputation": 5,
+          "political": 10
+        },
+        "narrative": "你公开支持合法继承人，赢得贵族尊重。"
+      },
+      {
+        "id": "choice_support_usurper",
+        "text": "支持篡位者",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "political": 15
+        },
+        "narrative": "你押注篡位者，若成功将获厚赏。"
+      },
+      {
+        "id": "choice_neutral",
+        "text": "保持中立",
+        "requirements": {},
+        "effects": {
+          "reputation": 0,
+          "political": 0
+        },
+        "narrative": "你按兵不动，等待局势明朗。"
+      },
+      {
+        "id": "choice_flee",
+        "text": "逃离",
+        "requirements": {},
+        "effects": {
+          "gold": -20,
+          "reputation": -5
+        },
+        "narrative": "你带着家眷逃离风暴中心。"
+      }
+    ],
+    "narrative": "国王驾崩的消息传遍七国，王座空悬。",
+    "tags": [
+      "political",
+      "succession",
+      "crisis"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_rebellion",
+    "name": "叛乱",
+    "type": "EventType.political",
+    "description": "领主不满，叛乱爆发。",
+    "triggerConditions": {
+      "lordDissatisfaction": "high"
+    },
+    "choices": [
+      {
+        "id": "choice_suppress",
+        "text": "镇压叛乱",
+        "requirements": {
+          "army": 500
+        },
+        "effects": {
+          "gold": -100,
+          "reputation": 10,
+          "political": 15
+        },
+        "narrative": "你率军镇压叛乱，恢复秩序。"
+      },
+      {
+        "id": "choice_negotiate",
+        "text": "谈判",
+        "requirements": {
+          "diplomacy": 5
+        },
+        "effects": {
+          "gold": -30,
+          "reputation": 5
+        },
+        "narrative": "你与叛军谈判，达成妥协。"
+      },
+      {
+        "id": "choice_join",
+        "text": "加入叛乱",
+        "requirements": {},
+        "effects": {
+          "reputation": -20,
+          "political": 20
+        },
+        "narrative": "你加入叛军，赌上家族命运。"
+      },
+      {
+        "id": "choice_flee",
+        "text": "逃离",
+        "requirements": {},
+        "effects": {
+          "gold": -20,
+          "reputation": -5
+        },
+        "narrative": "你带着家眷逃离叛乱区。"
+      }
+    ],
+    "narrative": "领主们联合起来，举起了反叛的旗帜。",
+    "tags": [
+      "political",
+      "rebellion",
+      "war"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_coup",
+    "name": "政变",
+    "type": "EventType.political",
+    "description": "宫廷政变，王位更替。",
+    "triggerConditions": {
+      "courtTension": "high"
+    },
+    "choices": [
+      {
+        "id": "choice_support_coup",
+        "text": "支持政变",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "political": 20
+        },
+        "narrative": "你支持政变者，赌上未来。"
+      },
+      {
+        "id": "choice_suppress_coup",
+        "text": "镇压政变",
+        "requirements": {
+          "army": 300
+        },
+        "effects": {
+          "gold": -80,
+          "reputation": 15
+        },
+        "narrative": "你率军镇压政变，保住旧王。"
+      },
+      {
+        "id": "choice_flee",
+        "text": "逃离",
+        "requirements": {},
+        "effects": {
+          "gold": -20,
+          "reputation": -5
+        },
+        "narrative": "你带着家眷逃离宫廷。"
+      }
+    ],
+    "narrative": "宫廷暗流涌动，政变一触即发。",
+    "tags": [
+      "political",
+      "coup",
+      "court"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_small_council",
+    "name": "御前会议",
+    "type": "EventType.political",
+    "description": "御前会议召开，讨论国事。",
+    "triggerConditions": {
+      "frequency": "monthly"
+    },
+    "choices": [
+      {
+        "id": "choice_attend",
+        "text": "参加",
+        "requirements": {},
+        "effects": {
+          "reputation": 3,
+          "political": 5
+        },
+        "narrative": "你出席御前会议，参与决策。"
+      },
+      {
+        "id": "choice_absent",
+        "text": "不参加",
+        "requirements": {},
+        "effects": {
+          "reputation": -2
+        },
+        "narrative": "你缺席会议，被视作不敬。"
+      },
+      {
+        "id": "choice_propose",
+        "text": "提出建议",
+        "requirements": {
+          "diplomacy": 5
+        },
+        "effects": {
+          "reputation": 5,
+          "political": 8
+        },
+        "narrative": "你提出建议，获得国王赏识。"
+      }
+    ],
+    "narrative": "御前会议在红堡召开，众领主齐聚。",
+    "tags": [
+      "political",
+      "council",
+      "court"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_hand_change",
+    "name": "国王之手更替",
+    "type": "EventType.political",
+    "description": "国王之手职位更替。",
+    "triggerConditions": {
+      "handStatus": "changed"
+    },
+    "choices": [
+      {
+        "id": "choice_support_new",
+        "text": "支持新国王之手",
+        "requirements": {},
+        "effects": {
+          "reputation": 5,
+          "political": 8
+        },
+        "narrative": "你支持新国王之手，赢得信任。"
+      },
+      {
+        "id": "choice_oppose_new",
+        "text": "反对新国王之手",
+        "requirements": {},
+        "effects": {
+          "reputation": -5,
+          "political": 5
+        },
+        "narrative": "你公开反对新国王之手。"
+      },
+      {
+        "id": "choice_neutral",
+        "text": "保持中立",
+        "requirements": {},
+        "effects": {
+          "reputation": 0
+        },
+        "narrative": "你按兵不动，观察局势。"
+      }
+    ],
+    "narrative": "国王之手职位更替，朝堂格局生变。",
+    "tags": [
+      "political",
+      "hand",
+      "court"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_high_septon_change",
+    "name": "总主教更替",
+    "type": "EventType.political",
+    "description": "七神教会总主教更替。",
+    "triggerConditions": {
+      "septonStatus": "changed"
+    },
+    "choices": [
+      {
+        "id": "choice_support_new",
+        "text": "支持新总主教",
+        "requirements": {},
+        "effects": {
+          "reputation": 5,
+          "faith": 8
+        },
+        "narrative": "你支持新总主教，赢得教会好感。"
+      },
+      {
+        "id": "choice_oppose_new",
+        "text": "反对新总主教",
+        "requirements": {},
+        "effects": {
+          "reputation": -5,
+          "faith": -5
+        },
+        "narrative": "你公开反对新总主教。"
+      },
+      {
+        "id": "choice_neutral",
+        "text": "保持中立",
+        "requirements": {},
+        "effects": {
+          "reputation": 0
+        },
+        "narrative": "你按兵不动，观察局势。"
+      }
+    ],
+    "narrative": "总主教更替，教会格局生变。",
+    "tags": [
+      "political",
+      "religious",
+      "church"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_maester_change",
+    "name": "大学士更替",
+    "type": "EventType.political",
+    "description": "学城大学士更替。",
+    "triggerConditions": {
+      "maesterStatus": "changed"
+    },
+    "choices": [
+      {
+        "id": "choice_support_new",
+        "text": "支持新大学士",
+        "requirements": {},
+        "effects": {
+          "reputation": 3,
+          "knowledge": 5
+        },
+        "narrative": "你支持新大学士，赢得学城好感。"
+      },
+      {
+        "id": "choice_oppose_new",
+        "text": "反对新大学士",
+        "requirements": {},
+        "effects": {
+          "reputation": -3
+        },
+        "narrative": "你公开反对新大学士。"
+      },
+      {
+        "id": "choice_neutral",
+        "text": "保持中立",
+        "requirements": {},
+        "effects": {
+          "reputation": 0
+        },
+        "narrative": "你按兵不动，观察局势。"
+      }
+    ],
+    "narrative": "大学士更替，学城格局生变。",
+    "tags": [
+      "political",
+      "maester",
+      "knowledge"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_castle_black_change",
+    "name": "长城总司令更替",
+    "type": "EventType.political",
+    "description": "长城守夜人总司令更替。",
+    "triggerConditions": {
+      "castellanStatus": "changed"
+    },
+    "choices": [
+      {
+        "id": "choice_support_new",
+        "text": "支持新总司令",
+        "requirements": {},
+        "effects": {
+          "reputation": 5,
+          "north": 8
+        },
+        "narrative": "你支持新总司令，赢得北境好感。"
+      },
+      {
+        "id": "choice_oppose_new",
+        "text": "反对新总司令",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你公开反对新总司令。"
+      },
+      {
+        "id": "choice_neutral",
+        "text": "保持中立",
+        "requirements": {},
+        "effects": {
+          "reputation": 0
+        },
+        "narrative": "你按兵不动，观察局势。"
+      }
+    ],
+    "narrative": "长城总司令更替，北境格局生变。",
+    "tags": [
+      "political",
+      "nightswatch",
+      "north"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_iron_bank_crisis",
+    "name": "铁金库债务危机",
+    "type": "EventType.political",
+    "description": "铁金库债务危机爆发。",
+    "triggerConditions": {
+      "debt": "high"
+    },
+    "choices": [
+      {
+        "id": "choice_repay",
+        "text": "偿还债务",
+        "requirements": {
+          "gold": 500
+        },
+        "effects": {
+          "gold": -500,
+          "reputation": 10
+        },
+        "narrative": "你偿还债务，赢得铁金库信任。"
+      },
+      {
+        "id": "choice_default",
+        "text": "违约",
+        "requirements": {},
+        "effects": {
+          "gold": 0,
+          "reputation": -20
+        },
+        "narrative": "你违约，铁金库对你不满。"
+      },
+      {
+        "id": "choice_negotiate",
+        "text": "谈判",
+        "requirements": {
+          "diplomacy": 5
+        },
+        "effects": {
+          "gold": -100,
+          "reputation": 3
+        },
+        "narrative": "你与铁金库谈判，达成妥协。"
+      }
+    ],
+    "narrative": "铁金库债务危机爆发，领主们焦头烂额。",
+    "tags": [
+      "political",
+      "economic",
+      "debt"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_free_cities_war",
+    "name": "自由贸易城邦战争",
+    "type": "EventType.political",
+    "description": "自由贸易城邦之间爆发战争。",
+    "triggerConditions": {
+      "tradeTension": "high"
+    },
+    "choices": [
+      {
+        "id": "choice_support_side_a",
+        "text": "支持一方",
+        "requirements": {},
+        "effects": {
+          "gold": 50,
+          "reputation": 5
+        },
+        "narrative": "你支持一方，赢得贸易利益。"
+      },
+      {
+        "id": "choice_support_side_b",
+        "text": "支持另一方",
+        "requirements": {},
+        "effects": {
+          "gold": 50,
+          "reputation": 5
+        },
+        "narrative": "你支持另一方，赢得贸易利益。"
+      },
+      {
+        "id": "choice_neutral",
+        "text": "保持中立",
+        "requirements": {},
+        "effects": {
+          "gold": 0,
+          "reputation": 0
+        },
+        "narrative": "你按兵不动，观察局势。"
+      }
+    ],
+    "narrative": "自由贸易城邦之间爆发战争，贸易受阻。",
+    "tags": [
+      "political",
+      "trade",
+      "war"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_family_marriage",
+    "name": "家族联姻",
+    "type": "EventType.family",
+    "description": "家族之间联姻。",
+    "triggerConditions": {
+      "familyRelation": "positive"
+    },
+    "choices": [
+      {
+        "id": "choice_accept",
+        "text": "接受联姻",
+        "requirements": {},
+        "effects": {
+          "reputation": 10,
+          "familyRelation": 20
+        },
+        "narrative": "你接受联姻，家族关系加深。"
+      },
+      {
+        "id": "choice_reject",
+        "text": "拒绝联姻",
+        "requirements": {},
+        "effects": {
+          "reputation": -5,
+          "familyRelation": -10
+        },
+        "narrative": "你拒绝联姻，家族关系恶化。"
+      },
+      {
+        "id": "choice_negotiate",
+        "text": "谈判",
+        "requirements": {
+          "diplomacy": 5
+        },
+        "effects": {
+          "reputation": 3,
+          "familyRelation": 5
+        },
+        "narrative": "你与对方谈判，达成妥协。"
+      }
+    ],
+    "narrative": "家族之间联姻，政治格局生变。",
+    "tags": [
+      "family",
+      "marriage",
+      "alliance"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_family_succession",
+    "name": "家族继承",
+    "type": "EventType.family",
+    "description": "家族继承危机。",
+    "triggerConditions": {
+      "headAge": "60+"
+    },
+    "choices": [
+      {
+        "id": "choice_support_eldest",
+        "text": "支持长子",
+        "requirements": {},
+        "effects": {
+          "reputation": 5,
+          "familyRelation": 10
+        },
+        "narrative": "你支持长子继承，家族稳定。"
+      },
+      {
+        "id": "choice_support_youngest",
+        "text": "支持幼子",
+        "requirements": {},
+        "effects": {
+          "reputation": -5,
+          "familyRelation": -5
+        },
+        "narrative": "你支持幼子继承，家族内斗。"
+      },
+      {
+        "id": "choice_support_daughter",
+        "text": "支持女儿",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "familyRelation": -10
+        },
+        "narrative": "你支持女儿继承，家族反对。"
+      }
+    ],
+    "narrative": "家族继承危机，家族内斗爆发。",
+    "tags": [
+      "family",
+      "succession",
+      "crisis"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_family_intrigue",
+    "name": "家族内斗",
+    "type": "EventType.family",
+    "description": "家族内部斗争。",
+    "triggerConditions": {
+      "familyTension": "high"
+    },
+    "choices": [
+      {
+        "id": "choice_side_a",
+        "text": "支持一方",
+        "requirements": {},
+        "effects": {
+          "reputation": 5,
+          "familyRelation": 10
+        },
+        "narrative": "你支持一方，赢得家族信任。"
+      },
+      {
+        "id": "choice_side_b",
+        "text": "支持另一方",
+        "requirements": {},
+        "effects": {
+          "reputation": 5,
+          "familyRelation": 10
+        },
+        "narrative": "你支持另一方，赢得家族信任。"
+      },
+      {
+        "id": "choice_neutral",
+        "text": "保持中立",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你按兵不动，家族不满。"
+      }
+    ],
+    "narrative": "家族内部斗争，家族关系紧张。",
+    "tags": [
+      "family",
+      "intrigue",
+      "conflict"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_family_secret",
+    "name": "家族秘密揭露",
+    "type": "EventType.family",
+    "description": "家族秘密被揭露。",
+    "triggerConditions": {
+      "secretExposure": "high"
+    },
+    "choices": [
+      {
+        "id": "choice_cover_up",
+        "text": "掩盖",
+        "requirements": {
+          "gold": 100
+        },
+        "effects": {
+          "gold": -100,
+          "reputation": 5
+        },
+        "narrative": "你掩盖秘密，家族稳定。"
+      },
+      {
+        "id": "choice_confess",
+        "text": "坦白",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "familyRelation": -5
+        },
+        "narrative": "你坦白秘密，家族不满。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你无视秘密，家族关系恶化。"
+      }
+    ],
+    "narrative": "家族秘密被揭露，家族关系紧张。",
+    "tags": [
+      "family",
+      "secret",
+      "crisis"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_family_curse",
+    "name": "家族诅咒",
+    "type": "EventType.family",
+    "description": "家族被诅咒。",
+    "triggerConditions": {
+      "curse": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_break_curse",
+        "text": "破除诅咒",
+        "requirements": {
+          "gold": 200
+        },
+        "effects": {
+          "gold": -200,
+          "reputation": 10
+        },
+        "narrative": "你破除诅咒，家族恢复。"
+      },
+      {
+        "id": "choice_accept_curse",
+        "text": "接受诅咒",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "familyRelation": -5
+        },
+        "narrative": "你接受诅咒，家族衰败。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你无视诅咒，家族关系恶化。"
+      }
+    ],
+    "narrative": "家族被诅咒，家族关系紧张。",
+    "tags": [
+      "family",
+      "curse",
+      "magic"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_family_prophecy",
+    "name": "家族预言",
+    "type": "EventType.family",
+    "description": "家族预言应验。",
+    "triggerConditions": {
+      "prophecy": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_fulfill",
+        "text": "应验预言",
+        "requirements": {},
+        "effects": {
+          "reputation": 10,
+          "familyRelation": 15
+        },
+        "narrative": "你应验预言，家族兴盛。"
+      },
+      {
+        "id": "choice_defy",
+        "text": "违背预言",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "familyRelation": -10
+        },
+        "narrative": "你违背预言，家族衰败。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你无视预言，家族关系恶化。"
+      }
+    ],
+    "narrative": "家族预言应验，家族关系紧张。",
+    "tags": [
+      "family",
+      "prophecy",
+      "magic"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_family_relic",
+    "name": "家族神器",
+    "type": "EventType.family",
+    "description": "家族神器现世。",
+    "triggerConditions": {
+      "relic": "discovered"
+    },
+    "choices": [
+      {
+        "id": "choice_claim",
+        "text": "认领神器",
+        "requirements": {},
+        "effects": {
+          "reputation": 10,
+          "familyRelation": 15
+        },
+        "narrative": "你认领神器，家族兴盛。"
+      },
+      {
+        "id": "choice_hide",
+        "text": "隐藏神器",
+        "requirements": {},
+        "effects": {
+          "reputation": -5,
+          "familyRelation": -5
+        },
+        "narrative": "你隐藏神器，家族关系恶化。"
+      },
+      {
+        "id": "choice_destroy",
+        "text": "销毁神器",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "familyRelation": -10
+        },
+        "narrative": "你销毁神器，家族衰败。"
+      }
+    ],
+    "narrative": "家族神器现世，家族关系紧张。",
+    "tags": [
+      "family",
+      "relic",
+      "magic"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_family_bloodline",
+    "name": "家族血脉",
+    "type": "EventType.family",
+    "description": "家族血脉危机。",
+    "triggerConditions": {
+      "bloodline": "crisis"
+    },
+    "choices": [
+      {
+        "id": "choice_preserve",
+        "text": "保存血脉",
+        "requirements": {
+          "gold": 100
+        },
+        "effects": {
+          "gold": -100,
+          "reputation": 10
+        },
+        "narrative": "你保存血脉，家族兴盛。"
+      },
+      {
+        "id": "choice_abandon",
+        "text": "放弃血脉",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "familyRelation": -10
+        },
+        "narrative": "你放弃血脉，家族衰败。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你无视血脉，家族关系恶化。"
+      }
+    ],
+    "narrative": "家族血脉危机，家族关系紧张。",
+    "tags": [
+      "family",
+      "bloodline",
+      "crisis"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_family_grudge",
+    "name": "家族仇恨",
+    "type": "EventType.family",
+    "description": "家族仇恨爆发。",
+    "triggerConditions": {
+      "grudge": "high"
+    },
+    "choices": [
+      {
+        "id": "choice_revenge",
+        "text": "复仇",
+        "requirements": {
+          "army": 300
+        },
+        "effects": {
+          "gold": -100,
+          "reputation": 5,
+          "familyRelation": -20
+        },
+        "narrative": "你复仇，家族仇恨加深。"
+      },
+      {
+        "id": "choice_forgive",
+        "text": "原谅",
+        "requirements": {},
+        "effects": {
+          "reputation": 10,
+          "familyRelation": 15
+        },
+        "narrative": "你原谅，家族关系缓和。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你无视仇恨，家族关系恶化。"
+      }
+    ],
+    "narrative": "家族仇恨爆发，家族关系紧张。",
+    "tags": [
+      "family",
+      "grudge",
+      "conflict"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_family_extinction",
+    "name": "家族灭亡",
+    "type": "EventType.family",
+    "description": "家族灭亡危机。",
+    "triggerConditions": {
+      "familyStatus": "critical"
+    },
+    "choices": [
+      {
+        "id": "choice_save",
+        "text": "拯救家族",
+        "requirements": {
+          "gold": 500
+        },
+        "effects": {
+          "gold": -500,
+          "reputation": 20
+        },
+        "narrative": "你拯救家族，家族兴盛。"
+      },
+      {
+        "id": "choice_abandon",
+        "text": "放弃家族",
+        "requirements": {},
+        "effects": {
+          "reputation": -20,
+          "familyRelation": -30
+        },
+        "narrative": "你放弃家族，家族灭亡。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -10
+        },
+        "narrative": "你无视危机，家族衰败。"
+      }
+    ],
+    "narrative": "家族灭亡危机，家族关系紧张。",
+    "tags": [
+      "family",
+      "extinction",
+      "crisis"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_battle",
+    "name": "战役",
+    "type": "EventType.war",
+    "description": "大规模战役爆发。",
+    "triggerConditions": {
+      "warStatus": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_fight",
+        "text": "参战",
+        "requirements": {
+          "army": 500
+        },
+        "effects": {
+          "gold": -100,
+          "reputation": 15,
+          "military": 20
+        },
+        "narrative": "你参战，赢得胜利。"
+      },
+      {
+        "id": "choice_retreat",
+        "text": "撤退",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "military": -5
+        },
+        "narrative": "你撤退，保住军队。"
+      },
+      {
+        "id": "choice_negotiate",
+        "text": "谈判",
+        "requirements": {
+          "diplomacy": 5
+        },
+        "effects": {
+          "gold": -30,
+          "reputation": 5
+        },
+        "narrative": "你谈判，达成妥协。"
+      }
+    ],
+    "narrative": "大规模战役爆发，战争一触即发。",
+    "tags": [
+      "war",
+      "battle",
+      "military"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_siege",
+    "name": "围城",
+    "type": "EventType.war",
+    "description": "城堡被围城。",
+    "triggerConditions": {
+      "siegeStatus": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_defend",
+        "text": "守城",
+        "requirements": {
+          "army": 300
+        },
+        "effects": {
+          "gold": -80,
+          "reputation": 15,
+          "military": 15
+        },
+        "narrative": "你守城，赢得胜利。"
+      },
+      {
+        "id": "choice_surrender",
+        "text": "投降",
+        "requirements": {},
+        "effects": {
+          "reputation": -20,
+          "military": -10
+        },
+        "narrative": "你投降，保住性命。"
+      },
+      {
+        "id": "choice_escape",
+        "text": "突围",
+        "requirements": {
+          "military": 5
+        },
+        "effects": {
+          "gold": -30,
+          "reputation": 5
+        },
+        "narrative": "你突围，保住军队。"
+      }
+    ],
+    "narrative": "城堡被围城，战争一触即发。",
+    "tags": [
+      "war",
+      "siege",
+      "military"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_betrayal",
+    "name": "背叛",
+    "type": "EventType.war",
+    "description": "盟友背叛。",
+    "triggerConditions": {
+      "allyRelation": "negative"
+    },
+    "choices": [
+      {
+        "id": "choice_revenge",
+        "text": "复仇",
+        "requirements": {
+          "army": 300
+        },
+        "effects": {
+          "gold": -100,
+          "reputation": 5,
+          "military": 15
+        },
+        "narrative": "你复仇，赢得胜利。"
+      },
+      {
+        "id": "choice_forgive",
+        "text": "原谅",
+        "requirements": {},
+        "effects": {
+          "reputation": 10,
+          "allyRelation": 15
+        },
+        "narrative": "你原谅，盟友关系缓和。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你无视背叛，盟友关系恶化。"
+      }
+    ],
+    "narrative": "盟友背叛，战争一触即发。",
+    "tags": [
+      "war",
+      "betrayal",
+      "conflict"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_assassination",
+    "name": "刺杀",
+    "type": "EventType.war",
+    "description": "重要人物被刺杀。",
+    "triggerConditions": {
+      "targetStatus": "targeted"
+    },
+    "choices": [
+      {
+        "id": "choice_investigate",
+        "text": "调查",
+        "requirements": {
+          "diplomacy": 5
+        },
+        "effects": {
+          "gold": -30,
+          "reputation": 10
+        },
+        "narrative": "你调查，找到凶手。"
+      },
+      {
+        "id": "choice_revenge",
+        "text": "复仇",
+        "requirements": {
+          "army": 100
+        },
+        "effects": {
+          "gold": -50,
+          "reputation": 5,
+          "military": 10
+        },
+        "narrative": "你复仇，赢得胜利。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -10
+        },
+        "narrative": "你无视刺杀，家族关系恶化。"
+      }
+    ],
+    "narrative": "重要人物被刺杀，战争一触即发。",
+    "tags": [
+      "war",
+      "assassination",
+      "conflict"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_trial_by_combat",
+    "name": "比武审判",
+    "type": "EventType.war",
+    "description": "比武审判开始。",
+    "triggerConditions": {
+      "trialStatus": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_fight",
+        "text": "参战",
+        "requirements": {
+          "military": 5
+        },
+        "effects": {
+          "gold": -30,
+          "reputation": 15,
+          "military": 10
+        },
+        "narrative": "你参战，赢得胜利。"
+      },
+      {
+        "id": "choice_hire_champion",
+        "text": "雇佣冠军",
+        "requirements": {
+          "gold": 200
+        },
+        "effects": {
+          "gold": -200,
+          "reputation": 10
+        },
+        "narrative": "你雇佣冠军，赢得胜利。"
+      },
+      {
+        "id": "choice_surrender",
+        "text": "投降",
+        "requirements": {},
+        "effects": {
+          "reputation": -15,
+          "military": -5
+        },
+        "narrative": "你投降，保住性命。"
+      }
+    ],
+    "narrative": "比武审判开始，战争一触即发。",
+    "tags": [
+      "war",
+      "trial",
+      "military"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_religious_trial",
+    "name": "宗教审判",
+    "type": "EventType.religious",
+    "description": "宗教审判开始。",
+    "triggerConditions": {
+      "trialStatus": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_defend",
+        "text": "辩护",
+        "requirements": {
+          "diplomacy": 5
+        },
+        "effects": {
+          "gold": -30,
+          "reputation": 10,
+          "faith": 10
+        },
+        "narrative": "你辩护，赢得胜利。"
+      },
+      {
+        "id": "choice_confess",
+        "text": "坦白",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "faith": -5
+        },
+        "narrative": "你坦白，保住性命。"
+      },
+      {
+        "id": "choice_escape",
+        "text": "逃跑",
+        "requirements": {},
+        "effects": {
+          "gold": -20,
+          "reputation": -15
+        },
+        "narrative": "你逃跑，保住性命。"
+      }
+    ],
+    "narrative": "宗教审判开始，教会一触即发。",
+    "tags": [
+      "religious",
+      "trial",
+      "church"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_miracle",
+    "name": "神迹",
+    "type": "EventType.religious",
+    "description": "神迹显现。",
+    "triggerConditions": {
+      "miracle": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_accept",
+        "text": "接受神迹",
+        "requirements": {},
+        "effects": {
+          "reputation": 10,
+          "faith": 20
+        },
+        "narrative": "你接受神迹，教会兴盛。"
+      },
+      {
+        "id": "choice_reject",
+        "text": "拒绝神迹",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "faith": -10
+        },
+        "narrative": "你拒绝神迹，教会衰败。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你无视神迹，教会关系恶化。"
+      }
+    ],
+    "narrative": "神迹显现，教会一触即发。",
+    "tags": [
+      "religious",
+      "miracle",
+      "church"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_heresy",
+    "name": "异端",
+    "type": "EventType.religious",
+    "description": "异端出现。",
+    "triggerConditions": {
+      "heresy": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_purge",
+        "text": "清除异端",
+        "requirements": {
+          "army": 100
+        },
+        "effects": {
+          "gold": -50,
+          "reputation": 10,
+          "faith": 15
+        },
+        "narrative": "你清除异端，教会兴盛。"
+      },
+      {
+        "id": "choice_tolerate",
+        "text": "容忍异端",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "faith": -10
+        },
+        "narrative": "你容忍异端，教会衰败。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你无视异端，教会关系恶化。"
+      }
+    ],
+    "narrative": "异端出现，教会一触即发。",
+    "tags": [
+      "religious",
+      "heresy",
+      "church"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_church_split",
+    "name": "教会分裂",
+    "type": "EventType.religious",
+    "description": "教会分裂。",
+    "triggerConditions": {
+      "churchTension": "high"
+    },
+    "choices": [
+      {
+        "id": "choice_side_a",
+        "text": "支持一方",
+        "requirements": {},
+        "effects": {
+          "reputation": 5,
+          "faith": 10
+        },
+        "narrative": "你支持一方，教会兴盛。"
+      },
+      {
+        "id": "choice_side_b",
+        "text": "支持另一方",
+        "requirements": {},
+        "effects": {
+          "reputation": 5,
+          "faith": 10
+        },
+        "narrative": "你支持另一方，教会兴盛。"
+      },
+      {
+        "id": "choice_neutral",
+        "text": "保持中立",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你按兵不动，教会关系恶化。"
+      }
+    ],
+    "narrative": "教会分裂，教会一触即发。",
+    "tags": [
+      "religious",
+      "split",
+      "church"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_high_septon_change_religious",
+    "name": "总主教更替（宗教）",
+    "type": "EventType.religious",
+    "description": "总主教更替。",
+    "triggerConditions": {
+      "septonStatus": "changed"
+    },
+    "choices": [
+      {
+        "id": "choice_support_new",
+        "text": "支持新总主教",
+        "requirements": {},
+        "effects": {
+          "reputation": 5,
+          "faith": 10
+        },
+        "narrative": "你支持新总主教，教会兴盛。"
+      },
+      {
+        "id": "choice_oppose_new",
+        "text": "反对新总主教",
+        "requirements": {},
+        "effects": {
+          "reputation": -5,
+          "faith": -5
+        },
+        "narrative": "你反对新总主教，教会衰败。"
+      },
+      {
+        "id": "choice_neutral",
+        "text": "保持中立",
+        "requirements": {},
+        "effects": {
+          "reputation": 0
+        },
+        "narrative": "你按兵不动，教会关系恶化。"
+      }
+    ],
+    "narrative": "总主教更替，教会一触即发。",
+    "tags": [
+      "religious",
+      "septon",
+      "church"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_harvest",
+    "name": "丰收",
+    "type": "EventType.economic",
+    "description": "丰收之年。",
+    "triggerConditions": {
+      "season": "autumn"
+    },
+    "choices": [
+      {
+        "id": "choice_stockpile",
+        "text": "囤积粮食",
+        "requirements": {
+          "gold": 50
+        },
+        "effects": {
+          "gold": -50,
+          "food": 50,
+          "reputation": 5
+        },
+        "narrative": "你囤积粮食，家族兴盛。"
+      },
+      {
+        "id": "choice_distribute",
+        "text": "分发粮食",
+        "requirements": {},
+        "effects": {
+          "food": -20,
+          "reputation": 15
+        },
+        "narrative": "你分发粮食，赢得民心。"
+      },
+      {
+        "id": "choice_export",
+        "text": "出口粮食",
+        "requirements": {},
+        "effects": {
+          "food": -30,
+          "gold": 100
+        },
+        "narrative": "你出口粮食，赚取金币。"
+      }
+    ],
+    "narrative": "丰收之年，家族兴盛。",
+    "tags": [
+      "economic",
+      "harvest",
+      "food"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_famine",
+    "name": "饥荒",
+    "type": "EventType.economic",
+    "description": "饥荒之年。",
+    "triggerConditions": {
+      "season": "winter"
+    },
+    "choices": [
+      {
+        "id": "choice_stockpile",
+        "text": "囤积粮食",
+        "requirements": {
+          "gold": 100
+        },
+        "effects": {
+          "gold": -100,
+          "food": 50,
+          "reputation": 10
+        },
+        "narrative": "你囤积粮食，家族兴盛。"
+      },
+      {
+        "id": "choice_distribute",
+        "text": "分发粮食",
+        "requirements": {},
+        "effects": {
+          "food": -30,
+          "reputation": 20
+        },
+        "narrative": "你分发粮食，赢得民心。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -20
+        },
+        "narrative": "你无视饥荒，家族衰败。"
+      }
+    ],
+    "narrative": "饥荒之年，家族衰败。",
+    "tags": [
+      "economic",
+      "famine",
+      "food"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_trade_boom",
+    "name": "贸易繁荣",
+    "type": "EventType.economic",
+    "description": "贸易繁荣。",
+    "triggerConditions": {
+      "tradeStatus": "boom"
+    },
+    "choices": [
+      {
+        "id": "choice_invest",
+        "text": "投资贸易",
+        "requirements": {
+          "gold": 200
+        },
+        "effects": {
+          "gold": 400,
+          "reputation": 10
+        },
+        "narrative": "你投资贸易，赚取金币。"
+      },
+      {
+        "id": "choice_export",
+        "text": "出口商品",
+        "requirements": {},
+        "effects": {
+          "gold": 150,
+          "reputation": 5
+        },
+        "narrative": "你出口商品，赚取金币。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你无视贸易，家族衰败。"
+      }
+    ],
+    "narrative": "贸易繁荣，家族兴盛。",
+    "tags": [
+      "economic",
+      "trade",
+      "boom"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_trade_crisis",
+    "name": "贸易危机",
+    "type": "EventType.economic",
+    "description": "贸易危机。",
+    "triggerConditions": {
+      "tradeStatus": "crisis"
+    },
+    "choices": [
+      {
+        "id": "choice_invest",
+        "text": "投资贸易",
+        "requirements": {
+          "gold": 200
+        },
+        "effects": {
+          "gold": -100,
+          "reputation": 5
+        },
+        "narrative": "你投资贸易，赌上未来。"
+      },
+      {
+        "id": "choice_export",
+        "text": "出口商品",
+        "requirements": {},
+        "effects": {
+          "gold": 50,
+          "reputation": 3
+        },
+        "narrative": "你出口商品，赚取金币。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -10
+        },
+        "narrative": "你无视贸易，家族衰败。"
+      }
+    ],
+    "narrative": "贸易危机，家族衰败。",
+    "tags": [
+      "economic",
+      "trade",
+      "crisis"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_iron_bank_debt",
+    "name": "铁金库债务",
+    "type": "EventType.economic",
+    "description": "铁金库债务。",
+    "triggerConditions": {
+      "debt": "high"
+    },
+    "choices": [
+      {
+        "id": "choice_repay",
+        "text": "偿还债务",
+        "requirements": {
+          "gold": 500
+        },
+        "effects": {
+          "gold": -500,
+          "reputation": 10
+        },
+        "narrative": "你偿还债务，赢得信任。"
+      },
+      {
+        "id": "choice_default",
+        "text": "违约",
+        "requirements": {},
+        "effects": {
+          "gold": 0,
+          "reputation": -20
+        },
+        "narrative": "你违约，铁金库不满。"
+      },
+      {
+        "id": "choice_negotiate",
+        "text": "谈判",
+        "requirements": {
+          "diplomacy": 5
+        },
+        "effects": {
+          "gold": -100,
+          "reputation": 3
+        },
+        "narrative": "你与铁金库谈判，达成妥协。"
+      }
+    ],
+    "narrative": "铁金库债务，家族衰败。",
+    "tags": [
+      "economic",
+      "debt",
+      "bank"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_dragon_appears",
+    "name": "龙出现",
+    "type": "EventType.magical",
+    "description": "龙出现。",
+    "triggerConditions": {
+      "dragonStatus": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_claim",
+        "text": "认领龙",
+        "requirements": {
+          "magic": 5
+        },
+        "effects": {
+          "reputation": 20,
+          "magic": 30
+        },
+        "narrative": "你认领龙，家族兴盛。"
+      },
+      {
+        "id": "choice_fight",
+        "text": "战斗",
+        "requirements": {
+          "military": 5
+        },
+        "effects": {
+          "gold": -100,
+          "reputation": 15,
+          "military": 20
+        },
+        "narrative": "你战斗，赢得胜利。"
+      },
+      {
+        "id": "choice_flee",
+        "text": "逃跑",
+        "requirements": {},
+        "effects": {
+          "reputation": -10
+        },
+        "narrative": "你逃跑，保住性命。"
+      }
+    ],
+    "narrative": "龙出现，家族兴盛。",
+    "tags": [
+      "magical",
+      "dragon",
+      "magic"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_white_walkers",
+    "name": "异鬼南下",
+    "type": "EventType.magical",
+    "description": "异鬼南下。",
+    "triggerConditions": {
+      "walkerStatus": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_fight",
+        "text": "战斗",
+        "requirements": {
+          "army": 500
+        },
+        "effects": {
+          "gold": -200,
+          "reputation": 20,
+          "military": 30
+        },
+        "narrative": "你战斗，赢得胜利。"
+      },
+      {
+        "id": "choice_retreat",
+        "text": "撤退",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "military": -5
+        },
+        "narrative": "你撤退，保住军队。"
+      },
+      {
+        "id": "choice_negotiate",
+        "text": "谈判",
+        "requirements": {
+          "diplomacy": 5
+        },
+        "effects": {
+          "gold": -30,
+          "reputation": 5
+        },
+        "narrative": "你谈判，达成妥协。"
+      }
+    ],
+    "narrative": "异鬼南下，家族兴盛。",
+    "tags": [
+      "magical",
+      "walker",
+      "magic"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_prophecy",
+    "name": "预言",
+    "type": "EventType.magical",
+    "description": "预言应验。",
+    "triggerConditions": {
+      "prophecy": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_fulfill",
+        "text": "应验预言",
+        "requirements": {},
+        "effects": {
+          "reputation": 10,
+          "magic": 15
+        },
+        "narrative": "你应验预言，家族兴盛。"
+      },
+      {
+        "id": "choice_defy",
+        "text": "违背预言",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "magic": -10
+        },
+        "narrative": "你违背预言，家族衰败。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你无视预言，家族关系恶化。"
+      }
+    ],
+    "narrative": "预言应验，家族兴盛。",
+    "tags": [
+      "magical",
+      "prophecy",
+      "magic"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_blood_magic",
+    "name": "血魔法",
+    "type": "EventType.magical",
+    "description": "血魔法出现。",
+    "triggerConditions": {
+      "bloodMagic": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_use",
+        "text": "使用血魔法",
+        "requirements": {
+          "magic": 5
+        },
+        "effects": {
+          "reputation": -10,
+          "magic": 20
+        },
+        "narrative": "你使用血魔法，家族兴盛。"
+      },
+      {
+        "id": "choice_refuse",
+        "text": "拒绝血魔法",
+        "requirements": {},
+        "effects": {
+          "reputation": 10,
+          "magic": -5
+        },
+        "narrative": "你拒绝血魔法，家族兴盛。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你无视血魔法，家族关系恶化。"
+      }
+    ],
+    "narrative": "血魔法出现，家族兴盛。",
+    "tags": [
+      "magical",
+      "blood",
+      "magic"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_green_seer",
+    "name": "绿先知",
+    "type": "EventType.magical",
+    "description": "绿先知出现。",
+    "triggerConditions": {
+      "greenSeer": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_follow",
+        "text": "跟随绿先知",
+        "requirements": {
+          "magic": 5
+        },
+        "effects": {
+          "reputation": 10,
+          "magic": 20
+        },
+        "narrative": "你跟随绿先知，家族兴盛。"
+      },
+      {
+        "id": "choice_refuse",
+        "text": "拒绝绿先知",
+        "requirements": {},
+        "effects": {
+          "reputation": -5,
+          "magic": -5
+        },
+        "narrative": "你拒绝绿先知，家族衰败。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "无视",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你无视绿先知，家族关系恶化。"
+      }
+    ],
+    "narrative": "绿先知出现，家族兴盛。",
+    "tags": [
+      "magical",
+      "green",
+      "magic"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_festival",
+    "name": "节日",
+    "type": "EventType.daily",
+    "description": "节日到来。",
+    "triggerConditions": {
+      "season": "any"
+    },
+    "choices": [
+      {
+        "id": "choice_celebrate",
+        "text": "庆祝",
+        "requirements": {
+          "gold": 50
+        },
+        "effects": {
+          "gold": -50,
+          "reputation": 10,
+          "happiness": 20
+        },
+        "narrative": "你庆祝节日，家族兴盛。"
+      },
+      {
+        "id": "choice_work",
+        "text": "工作",
+        "requirements": {},
+        "effects": {
+          "gold": 30,
+          "reputation": 3
+        },
+        "narrative": "你工作，赚取金币。"
+      },
+      {
+        "id": "choice_rest",
+        "text": "休息",
+        "requirements": {},
+        "effects": {
+          "happiness": 10
+        },
+        "narrative": "你休息，恢复精力。"
+      }
+    ],
+    "narrative": "节日到来，家族兴盛。",
+    "tags": [
+      "daily",
+      "festival",
+      "celebration"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_wedding",
+    "name": "婚礼",
+    "type": "EventType.daily",
+    "description": "婚礼举行。",
+    "triggerConditions": {
+      "marriageStatus": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_attend",
+        "text": "参加",
+        "requirements": {
+          "gold": 30
+        },
+        "effects": {
+          "gold": -30,
+          "reputation": 10,
+          "familyRelation": 15
+        },
+        "narrative": "你参加婚礼，家族兴盛。"
+      },
+      {
+        "id": "choice_absent",
+        "text": "不参加",
+        "requirements": {},
+        "effects": {
+          "reputation": -5,
+          "familyRelation": -5
+        },
+        "narrative": "你不参加婚礼，家族关系恶化。"
+      },
+      {
+        "id": "choice_propose",
+        "text": "求婚",
+        "requirements": {
+          "gold": 100
+        },
+        "effects": {
+          "gold": -100,
+          "reputation": 15,
+          "familyRelation": 20
+        },
+        "narrative": "你求婚，家族兴盛。"
+      }
+    ],
+    "narrative": "婚礼举行，家族兴盛。",
+    "tags": [
+      "daily",
+      "wedding",
+      "marriage"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_funeral",
+    "name": "葬礼",
+    "type": "EventType.daily",
+    "description": "葬礼举行。",
+    "triggerConditions": {
+      "deathStatus": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_attend",
+        "text": "参加",
+        "requirements": {
+          "gold": 20
+        },
+        "effects": {
+          "gold": -20,
+          "reputation": 5,
+          "familyRelation": 10
+        },
+        "narrative": "你参加葬礼，家族兴盛。"
+      },
+      {
+        "id": "choice_absent",
+        "text": "不参加",
+        "requirements": {},
+        "effects": {
+          "reputation": -10,
+          "familyRelation": -10
+        },
+        "narrative": "你不参加葬礼，家族关系恶化。"
+      },
+      {
+        "id": "choice_mourn",
+        "text": "哀悼",
+        "requirements": {},
+        "effects": {
+          "reputation": 5,
+          "happiness": -10
+        },
+        "narrative": "你哀悼，家族兴盛。"
+      }
+    ],
+    "narrative": "葬礼举行，家族兴盛。",
+    "tags": [
+      "daily",
+      "funeral",
+      "death"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_tournament",
+    "name": "比武大会",
+    "type": "EventType.daily",
+    "description": "比武大会举行。",
+    "triggerConditions": {
+      "tournamentStatus": "active"
+    },
+    "choices": [
+      {
+        "id": "choice_participate",
+        "text": "参加",
+        "requirements": {
+          "military": 5
+        },
+        "effects": {
+          "gold": -30,
+          "reputation": 15,
+          "military": 10
+        },
+        "narrative": "你参加比武，赢得胜利。"
+      },
+      {
+        "id": "choice_spectate",
+        "text": "观战",
+        "requirements": {
+          "gold": 10
+        },
+        "effects": {
+          "gold": -10,
+          "reputation": 3
+        },
+        "narrative": "你观战，家族兴盛。"
+      },
+      {
+        "id": "choice_absent",
+        "text": "不参加",
+        "requirements": {},
+        "effects": {
+          "reputation": -3
+        },
+        "narrative": "你不参加比武，家族关系恶化。"
+      }
+    ],
+    "narrative": "比武大会举行，家族兴盛。",
+    "tags": [
+      "daily",
+      "tournament",
+      "military"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_wound_fester",
+    "name": "伤口恶化",
+    "type": "EventType.adventure",
+    "description": "你身上未愈的伤口开始红肿发炎，需要及时处理。",
+    "triggerConditions": {
+      "flag": "isInjured"
+    },
+    "choices": [
+      {
+        "id": "choice_seek_maester",
+        "text": "寻求学士治疗",
+        "requirements": {
+          "gold": 30
+        },
+        "effects": {
+          "gold": -30,
+          "health": 15
+        },
+        "narrative": "学士用绷带与草药处理了你的伤口，炎症退去。"
+      },
+      {
+        "id": "choice_self_treat",
+        "text": "用烈酒灼烧伤口",
+        "requirements": {
+          "hasItem.item_wine": 1
+        },
+        "effects": {
+          "inventory.item_wine": -1,
+          "health": 8,
+          "energy": -10
+        },
+        "narrative": "你咬紧牙关，用烈酒清洗灼烧伤口，疼痛难忍但保住了性命。"
+      },
+      {
+        "id": "choice_ignore",
+        "text": "硬撑",
+        "requirements": {},
+        "effects": {
+          "health": -12
+        },
+        "narrative": "你强撑着继续赶路，伤口却在暗处持续溃烂。"
+      }
+    ],
+    "narrative": "伤口的疼痛在夜里格外清晰，你知道它正在恶化。",
+    "tags": [
+      "adventure",
+      "injury",
+      "survival"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_food_shortage",
+    "name": "粮食短缺",
+    "type": "EventType.economic",
+    "description": "收成欠佳，市场上的粮食价格飞涨，饥饿正在逼近。",
+    "triggerConditions": {
+      "season": "autumn"
+    },
+    "choices": [
+      {
+        "id": "choice_buy_grain",
+        "text": "高价购入粮食",
+        "requirements": {
+          "gold": 60
+        },
+        "effects": {
+          "gold": -60,
+          "hunger": 40
+        },
+        "narrative": "你花了大价钱买下一批谷物，至少这个冬天不会挨饿。"
+      },
+      {
+        "id": "choice_ration",
+        "text": "削减用度",
+        "requirements": {},
+        "effects": {
+          "hunger": -5,
+          "reputation": 2
+        },
+        "narrative": "你开始勒紧腰带，每一粒粮食都精打细算。"
+      },
+      {
+        "id": "choice_raid_granary",
+        "text": "洗劫粮仓",
+        "requirements": {
+          "skills.sword": 4
+        },
+        "effects": {
+          "hunger": 50,
+          "reputation": -15
+        },
+        "narrative": "你趁夜洗劫了领主的粮仓，虽然背上了骂名，但肚子是填饱了。"
+      }
+    ],
+    "narrative": "粮价一日三涨，酒馆里人人都在谈论饥饿。",
+    "tags": [
+      "economic",
+      "survival",
+      "famine"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_winter_sickness",
+    "name": "冬日寒疫",
+    "type": "EventType.daily",
+    "description": "凛冬的寒气带来了一场寒疫，你开始咳嗽发烧。",
+    "triggerConditions": {
+      "season": "winter"
+    },
+    "choices": [
+      {
+        "id": "choice_rest_heal",
+        "text": "卧床休养",
+        "requirements": {},
+        "effects": {
+          "health": 5,
+          "energy": -15
+        },
+        "narrative": "你在火炉边躺了数日，让身体与疾病搏斗。"
+      },
+      {
+        "id": "choice_herbal_remedy",
+        "text": "煎服草药",
+        "requirements": {
+          "hasItem.item_herb": 1
+        },
+        "effects": {
+          "inventory.item_herb": -1,
+          "health": 12
+        },
+        "narrative": "你煎了一碗苦涩的草药，热汤入腹，寒气稍退。"
+      },
+      {
+        "id": "choice_keep_working",
+        "text": "强撑劳作",
+        "requirements": {},
+        "effects": {
+          "health": -10,
+          "gold": 8
+        },
+        "narrative": "你带病劳作，挣了几个铜板，病情却加重了。"
+      }
+    ],
+    "narrative": "咳嗽声在寒夜里此起彼伏，火堆也挡不住这场瘟疫般的寒潮。",
+    "tags": [
+      "daily",
+      "winter",
+      "sickness"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_road_bandits",
+    "name": "路遇匪帮",
+    "type": "EventType.adventure",
+    "description": "商路上出现一伙匪帮，正拦路劫掠过往行人。",
+    "triggerConditions": {
+      "minGold": 20
+    },
+    "choices": [
+      {
+        "id": "choice_fight_bandits",
+        "text": "拔剑迎战",
+        "requirements": {
+          "skills.sword": 3
+        },
+        "effects": {
+          "gold": 25,
+          "reputation": 8,
+          "health": -10
+        },
+        "narrative": "你杀出一条血路，匪帮四散而逃，你夺回了他们的赃物。"
+      },
+      {
+        "id": "choice_pay_toll",
+        "text": "交买路钱",
+        "requirements": {
+          "gold": 20
+        },
+        "effects": {
+          "gold": -20
+        },
+        "narrative": "你丢下几枚银币，匪帮让开了道路。"
+      },
+      {
+        "id": "choice_sneak_past",
+        "text": "绕道潜行",
+        "requirements": {
+          "skills.stealth": 2
+        },
+        "effects": {
+          "energy": -10
+        },
+        "narrative": "你借着夜色从匪帮的视线死角悄然穿过。"
+      }
+    ],
+    "narrative": "前方尘土飞扬，几个蒙面大汉拦住了去路，刀锋在日光下泛着寒光。",
+    "tags": [
+      "adventure",
+      "danger",
+      "robbery"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_wild_beasts",
+    "name": "野兽袭营",
+    "type": "EventType.adventure",
+    "description": "一群饿狼在营地外游荡，盯着你的干粮与坐骑。",
+    "triggerConditions": {
+      "season": "autumn",
+      "noFlag": "hasShelter"
+    },
+    "choices": [
+      {
+        "id": "choice_light_fire",
+        "text": "生起篝火",
+        "requirements": {
+          "energy": 10
+        },
+        "effects": {
+          "energy": -10,
+          "flags.hasShelter": 1
+        },
+        "narrative": "你点燃一堆旺火，狼群在火光外徘徊许久，终于退去。"
+      },
+      {
+        "id": "choice_stand_guard",
+        "text": "持刀守夜",
+        "requirements": {
+          "skills.sword": 2
+        },
+        "effects": {
+          "energy": -15,
+          "reputation": 2
+        },
+        "narrative": "你整夜未眠，握着武器警惕每一处响动，狼群没有得手。"
+      },
+      {
+        "id": "choice_lose_supplies",
+        "text": "丢弃食物保命",
+        "requirements": {},
+        "effects": {
+          "hunger": -15
+        },
+        "narrative": "你把一部分干粮丢向远处，趁狼群争抢时逃离了营地。"
+      }
+    ],
+    "narrative": "暗处亮起一双双绿幽幽的眼睛，低沉的呜咽声让人毛骨悚然。",
+    "tags": [
+      "adventure",
+      "beasts",
+      "night"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_stray_direwolf",
+    "name": "落单的冰原狼",
+    "type": "EventType.adventure",
+    "description": "一头受伤的冰原狼幼崽倒在雪地里，奄奄一息。",
+    "triggerConditions": {
+      "season": "winter"
+    },
+    "choices": [
+      {
+        "id": "choice_save_wolf",
+        "text": "救下它",
+        "requirements": {
+          "hunger": 30
+        },
+        "effects": {
+          "hunger": -10,
+          "flags.hasDirewolf": 1
+        },
+        "narrative": "你分出一块肉干喂给幼狼，它舔了舔你的手，从此跟在你的身后。"
+      },
+      {
+        "id": "choice_leave_it",
+        "text": "转身离开",
+        "requirements": {},
+        "effects": {},
+        "narrative": "你叹了口气，狼是冰原的魂，不该死在人的怜悯里。"
+      },
+      {
+        "id": "choice_hunt_it",
+        "text": "捕杀充饥",
+        "requirements": {
+          "skills.archery": 3
+        },
+        "effects": {
+          "hunger": 20,
+          "reputation": -5
+        },
+        "narrative": "一箭了结它的痛苦，它的肉在寒夜里救了你一命。"
+      }
+    ],
+    "narrative": "雪地里蜷着一团灰白的影子，幼狼的呜咽几乎被风声吞没。",
+    "tags": [
+      "adventure",
+      "wolf",
+      "winter"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_trade_opportunity",
+    "name": "商路良机",
+    "type": "EventType.economic",
+    "description": "一支来自自由贸易城邦的商队经过，带来稀有货物。",
+    "triggerConditions": {
+      "minGold": 50
+    },
+    "choices": [
+      {
+        "id": "choice_buy_glass",
+        "text": "购入玻璃蜡烛",
+        "requirements": {
+          "gold": 80
+        },
+        "effects": {
+          "gold": -80,
+          "inventory.item_glass_candle": 1
+        },
+        "narrative": "你买下了一支玻璃蜡烛，据说它点燃时能照见远方。"
+      },
+      {
+        "id": "choice_buy_spices",
+        "text": "收购货物",
+        "requirements": {
+          "gold": 40
+        },
+        "effects": {
+          "gold": -40,
+          "inventory.item_meat": 1
+        },
+        "narrative": "你囤下一批来自北境的腊肉与腌货，转手就能卖出高价。"
+      },
+      {
+        "id": "choice_invest_venture",
+        "text": "入股商队",
+        "requirements": {
+          "gold": 100
+        },
+        "effects": {
+          "gold": -100,
+          "reputation": 10
+        },
+        "narrative": "你与商队签下契约，赌他们能平安穿过狭海。"
+      }
+    ],
+    "narrative": "商队的驼铃声远远传来，满载着厄索斯的奇珍异宝。",
+    "tags": [
+      "economic",
+      "trade",
+      "opportunity"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_ship_wreck",
+    "name": "沉船遗宝",
+    "type": "EventType.adventure",
+    "description": "海边冲上来一艘沉船的残骸，货物散落在沙滩上。",
+    "triggerConditions": {
+      "locationId": "location_white_harbor"
+    },
+    "choices": [
+      {
+        "id": "choice_salvage",
+        "text": "打捞货物",
+        "requirements": {
+          "energy": 15
+        },
+        "effects": {
+          "energy": -15,
+          "gold": 30,
+          "inventory.item_meat": 1
+        },
+        "narrative": "你在海浪间捞起几箱货物，收获颇丰。"
+      },
+      {
+        "id": "choice_report",
+        "text": "上报领主",
+        "requirements": {},
+        "effects": {
+          "reputation": 10
+        },
+        "narrative": "你把沉船之事上报领主，赢得了正直的名声。"
+      },
+      {
+        "id": "choice_dive",
+        "text": "冒险潜海",
+        "requirements": {
+          "attributes.strength": 6
+        },
+        "effects": {
+          "gold": 80,
+          "health": -15
+        },
+        "narrative": "你潜入冰冷的海水深处，摸到了沉船上的宝箱，却差点溺毙。"
+      }
+    ],
+    "narrative": "海风把残破的船板吹上沙滩，潮水中隐约可见散落的货物。",
+    "tags": [
+      "adventure",
+      "sea",
+      "treasure"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_hunt",
+    "name": "狩猎",
+    "type": "EventType.daily",
+    "description": "狩猎活动。",
+    "triggerConditions": {
+      "season": "autumn"
+    },
+    "choices": [
+      {
+        "id": "choice_hunt",
+        "text": "狩猎",
+        "requirements": {
+          "military": 3
+        },
+        "effects": {
+          "gold": 20,
+          "reputation": 5,
+          "happiness": 10
+        },
+        "narrative": "你狩猎，赢得胜利。"
+      },
+      {
+        "id": "choice_rest",
+        "text": "休息",
+        "requirements": {},
+        "effects": {
+          "happiness": 5
+        },
+        "narrative": "你休息，恢复精力。"
+      },
+      {
+        "id": "choice_work",
+        "text": "工作",
+        "requirements": {},
+        "effects": {
+          "gold": 10,
+          "reputation": 3
+        },
+        "narrative": "你工作，赚取金币。"
+      }
+    ],
+    "narrative": "狩猎活动，家族兴盛。",
+    "tags": [
+      "daily",
+      "hunt",
+      "military"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_ghost_road",
+    "name": "鬼影之路",
+    "type": "EventType.supernatural",
+    "description": "深夜的旧道上，你看到一个穿着破旧战甲的身影，若隐若现。",
+    "triggerConditions": {
+      "maxEnergy": 30,
+      "season": "winter"
+    },
+    "choices": [
+      {
+        "id": "choice_follow_ghost",
+        "text": "跟随身影",
+        "requirements": {},
+        "effects": {
+          "inventory.item_heart_tree_leaf": 1,
+          "health": -5
+        },
+        "narrative": "你跟着那个身影走了半夜，最后它化作一片心树之叶，落在你的掌心。"
+      },
+      {
+        "id": "choice_pray",
+        "text": "向旧神祈祷",
+        "requirements": {
+          "attributes.willpower": 4
+        },
+        "effects": {
+          "energy": 20,
+          "flags.hasBlessing": 1
+        },
+        "narrative": "你在心树下祈祷，一夜过后精神焕发，仿佛得到了回应。"
+      },
+      {
+        "id": "choice_flee",
+        "text": "逃离",
+        "requirements": {},
+        "effects": {
+          "energy": -15
+        },
+        "narrative": "你头也不回地跑出三里地，才敢停下来喘气。"
+      }
+    ],
+    "narrative": "月光下那个身影不在地上投下影子，你脊背一阵发凉。",
+    "tags": [
+      "supernatural",
+      "ghost",
+      "night"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_dream_omen",
+    "name": "梦兆",
+    "type": "EventType.supernatural",
+    "description": "你连续三夜做同一个梦：一条被寒冰冻结的巨龙，在长城之上盘旋。",
+    "triggerConditions": {
+      "minReputation": 30
+    },
+    "choices": [
+      {
+        "id": "choice_heed_omen",
+        "text": "寻求解读",
+        "requirements": {
+          "gold": 20
+        },
+        "effects": {
+          "gold": -20,
+          "flags.hasVision": 1,
+          "reputation": 5
+        },
+        "narrative": "红袍女祭司听了你的梦，眼神骤亮——这是旧神与新神的预兆。"
+      },
+      {
+        "id": "choice_ignore_dream",
+        "text": "当作寻常噩梦",
+        "requirements": {},
+        "effects": {
+          "energy": -5
+        },
+        "narrative": "你翻了个身，把梦抛在脑后，但那寒意却久久不散。"
+      },
+      {
+        "id": "choice_tell_maester",
+        "text": "向学士请教",
+        "requirements": {
+          "attributes.intelligence": 5
+        },
+        "effects": {
+          "reputation": 8,
+          "flags.hasVision": 1
+        },
+        "narrative": "学士在古卷里翻出一则关于冰与火的预言，若有所思。"
+      }
+    ],
+    "narrative": "梦醒时分，你仍然能感到那种刺骨的冰冷。",
+    "tags": [
+      "supernatural",
+      "dream",
+      "prophecy"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_red_comet",
+    "name": "血色彗星",
+    "type": "EventType.supernatural",
+    "description": "夜空中出现一颗血红彗星，七国上下议论纷纷，视为凶兆或吉兆。",
+    "triggerConditions": {
+      "minAge": 15
+    },
+    "choices": [
+      {
+        "id": "choice_see_omen",
+        "text": "视为凶兆",
+        "requirements": {},
+        "effects": {
+          "reputation": 3
+        },
+        "narrative": "你向邻里宣讲这是战乱的预兆，人们纷纷囤积物资。"
+      },
+      {
+        "id": "choice_see_blessing",
+        "text": "视为吉兆",
+        "requirements": {
+          "attributes.willpower": 4
+        },
+        "effects": {
+          "reputation": 5
+        },
+        "narrative": "你宣称这是诸神赐福的征兆，信徒们欢欣鼓舞。"
+      },
+      {
+        "id": "choice_study",
+        "text": "用望远镜观测",
+        "requirements": {
+          "attributes.intelligence": 6
+        },
+        "effects": {
+          "reputation": 8,
+          "flags.hasCometRecord": 1
+        },
+        "narrative": "你记录下彗星的位置与色泽，这一发现将载入学城档案。"
+      }
+    ],
+    "narrative": "那道红光划过天际时，整个维斯特洛都屏住了呼吸。",
+    "tags": [
+      "supernatural",
+      "comet",
+      "omen"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_glass_candle",
+    "name": "玻璃蜡烛",
+    "type": "EventType.magical",
+    "description": "学城送来一支玻璃蜡烛，据说点燃者能看见千里之外的景象。",
+    "triggerConditions": {
+      "hasItem.item_glass_candle": 1
+    },
+    "choices": [
+      {
+        "id": "choice_light_candle",
+        "text": "点燃它",
+        "requirements": {
+          "attributes.willpower": 5
+        },
+        "effects": {
+          "health": -10,
+          "flags.hasCandleVision": 1
+        },
+        "narrative": "蜡烛燃起黑烟般的火焰，你的视线穿越千里，看到了长城之外。"
+      },
+      {
+        "id": "choice_sell_candle",
+        "text": "高价出售",
+        "requirements": {},
+        "effects": {
+          "inventory.item_glass_candle": -1,
+          "gold": 150
+        },
+        "narrative": "你把蜡烛卖给一位收藏家，换回沉甸甸的金币。"
+      },
+      {
+        "id": "choice_keep_quiet",
+        "text": "小心收藏",
+        "requirements": {},
+        "effects": {},
+        "narrative": "你把它锁进箱底，这种力量不该轻易触碰。"
+      }
+    ],
+    "narrative": "玻璃蜡烛静静躺在匣中，仿佛在等你点燃那不可能的火。",
+    "tags": [
+      "magical",
+      "candle",
+      "mystery"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_white_walker_sighting",
+    "name": "长城外的影子",
+    "type": "EventType.supernatural",
+    "description": "守夜人传来消息：长城之外出现了不该存在的生物，冰蓝色的眼睛在夜里闪烁。",
+    "triggerConditions": {
+      "locationId": "location_the_wall"
+    },
+    "choices": [
+      {
+        "id": "choice_patrol",
+        "text": "随巡逻队出长城",
+        "requirements": {
+          "skills.sword": 5
+        },
+        "effects": {
+          "gold": 40,
+          "reputation": 15,
+          "health": -20
+        },
+        "narrative": "你在长城外的风雪中看到了那东西，带回了一截冰蓝的残肢。"
+      },
+      {
+        "id": "choice_report_warning",
+        "text": "向七国示警",
+        "requirements": {},
+        "effects": {
+          "reputation": 10,
+          "flags.hasWarned": 1
+        },
+        "narrative": "你的渡鸦飞向七国，警告凛冬将至。"
+      },
+      {
+        "id": "choice_stay_inside",
+        "text": "当作没看见",
+        "requirements": {},
+        "effects": {
+          "reputation": -5
+        },
+        "narrative": "你缩回温暖的营帐，假装那只是风雪中的幻影。"
+      }
+    ],
+    "narrative": "长城外的黑夜像活物一样凝视着你，冰冷刺骨。",
+    "tags": [
+      "supernatural",
+      "walker",
+      "wall"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_frozen_lake",
+    "name": "冰封湖面",
+    "type": "EventType.supernatural",
+    "description": "北境的湖面一夜之间结上厚冰，冰层下隐约可见许多面孔。",
+    "triggerConditions": {
+      "season": "winter",
+      "locationId": "location_winterfell"
+    },
+    "choices": [
+      {
+        "id": "choice_skate",
+        "text": "踏上冰面",
+        "requirements": {
+          "attributes.agility": 4
+        },
+        "effects": {
+          "flags.hasFrozenVision": 1,
+          "reputation": 5
+        },
+        "narrative": "你踏上冰面，脚下的面孔忽然睁开眼——那是数百年前沉湖的先民。"
+      },
+      {
+        "id": "choice_break_ice",
+        "text": "凿冰取水",
+        "requirements": {},
+        "effects": {
+          "energy": -10,
+          "health": -3
+        },
+        "narrative": "你凿开厚冰取水，寒意顺着斧柄钻进骨髓。"
+      },
+      {
+        "id": "choice_avoid",
+        "text": "绕道而行",
+        "requirements": {},
+        "effects": {
+          "energy": -5
+        },
+        "narrative": "你绕开这片诡异的冰面，脚下的寒意却挥之不去。"
+      }
+    ],
+    "narrative": "湖面静得像一面死镜，冰层下的面孔栩栩如生。",
+    "tags": [
+      "supernatural",
+      "frozen",
+      "north"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_market_surplus",
+    "name": "集市丰收",
+    "type": "EventType.economic",
+    "description": "今年的收成格外丰盛，集市上货物堆积如山，价格低廉。",
+    "triggerConditions": {
+      "season": "summer",
+      "minGold": 20
+    },
+    "choices": [
+      {
+        "id": "choice_buy_low",
+        "text": "大量囤货",
+        "requirements": {
+          "gold": 50
+        },
+        "effects": {
+          "gold": -50,
+          "inventory.item_bread": 3
+        },
+        "narrative": "你低价买下大量黑面包，足够撑过整个冬天。"
+      },
+      {
+        "id": "choice_sell_high",
+        "text": "趁价出售",
+        "requirements": {
+          "hasItem.item_meat": 1
+        },
+        "effects": {
+          "inventory.item_meat": -1,
+          "gold": 30
+        },
+        "narrative": "你把手头的腌货卖了个好价钱。"
+      },
+      {
+        "id": "choice_feast",
+        "text": "举办宴席",
+        "requirements": {
+          "gold": 30
+        },
+        "effects": {
+          "gold": -30,
+          "reputation": 8
+        },
+        "narrative": "你摆下丰盛的宴席款待邻里，名声大涨。"
+      }
+    ],
+    "narrative": "集市上人来人往，谷物与肉类的香气飘散在夏日的空气里。",
+    "tags": [
+      "economic",
+      "market",
+      "summer"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_armor_merchant",
+    "name": "行脚甲胄商",
+    "type": "EventType.economic",
+    "description": "一名行脚商人带来一批精良甲胄，声称来自河湾地的铁匠坊，要价不菲。",
+    "triggerConditions": {
+      "minGold": 50
+    },
+    "choices": [
+      {
+        "id": "choice_buy_armor",
+        "text": "买下甲胄并装备",
+        "requirements": {
+          "gold": 60
+        },
+        "effects": {
+          "gold": -60,
+          "flags.equipped.item_chainmail": 1,
+          "attributes.strength": 1
+        },
+        "narrative": "你付出沉甸甸的金币，换来一身链甲。穿上它的那一刻，你感觉自己高了一截。"
+      },
+      {
+        "id": "choice_haggle",
+        "text": "讨价还价",
+        "requirements": {
+          "skills.speech": 3
+        },
+        "effects": {
+          "gold": -40,
+          "flags.equipped.item_leather_armor": 1
+        },
+        "narrative": "你凭借三寸不烂之舌把价格压了下来，带回一件皮甲。商人摇头苦笑。"
+      },
+      {
+        "id": "choice_refuse",
+        "text": "婉拒离开",
+        "requirements": {},
+        "effects": {
+          "reputation": 2
+        },
+        "narrative": "你谢过商人，甲胄虽好，但眼下不是你花钱的时候。"
+      }
+    ],
+    "narrative": "商队营地里，一堆甲胄在火把下泛着冷光。",
+    "tags": [
+      "economic",
+      "equipment",
+      "trade"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_sword_inheritance",
+    "name": "家传之剑",
+    "type": "EventType.family",
+    "description": "一位远亲临终前托人送来一把剑，说是你们家族代代相传的旧物。",
+    "triggerConditions": {
+      "minReputation": 30
+    },
+    "choices": [
+      {
+        "id": "choice_accept_sword",
+        "text": "收下并佩戴",
+        "requirements": {},
+        "effects": {
+          "flags.equipped.item_sword": 1,
+          "reputation": 5,
+          "skills.sword": 1
+        },
+        "narrative": "你接过那把剑，剑柄缠着褪色的皮革——上一任主人是你的曾祖父。"
+      },
+      {
+        "id": "choice_entrust",
+        "text": "转赠给家族",
+        "requirements": {},
+        "effects": {
+          "reputation": 8,
+          "relations.family_head": 10
+        },
+        "narrative": "你把剑献给家族大厅，悬在祖先画像之下，族人们对你刮目相看。"
+      },
+      {
+        "id": "choice_sell",
+        "text": "典当换钱",
+        "requirements": {},
+        "effects": {
+          "gold": 80,
+          "reputation": -8
+        },
+        "narrative": "你把家传之剑送进当铺。钱到手了，但家族的眼睛里多了一丝寒意。"
+      }
+    ],
+    "narrative": "一把旧剑躺在粗布包裹里，剑身上刻着你们家族才懂的纹章。",
+    "tags": [
+      "family",
+      "equipment",
+      "legacy"
+    ],
+    "isOneTime": true
+  },
+  {
+    "id": "event_tournament_mount",
+    "name": "比武大会的坐骑",
+    "type": "EventType.war",
+    "description": "比武大会在即，你的战马又老又乏，一匹良驹将决定你在赛场上的成败。",
+    "triggerConditions": {
+      "minGold": 70,
+      "skills.riding": 3
+    },
+    "choices": [
+      {
+        "id": "choice_buy_warhorse",
+        "text": "购入战马",
+        "requirements": {
+          "gold": 100
+        },
+        "effects": {
+          "gold": -100,
+          "flags.equipped.item_horse": 1,
+          "attributes.agility": 1
+        },
+        "narrative": "你买下那匹黑鬃战马，它喷着鼻息，眼神桀骜不驯——这正是你需要的。"
+      },
+      {
+        "id": "choice_borrow",
+        "text": "向领主借马",
+        "requirements": {
+          "relations.lord": 20
+        },
+        "effects": {
+          "relations.lord": -5,
+          "reputation": 3
+        },
+        "narrative": "领主借你一匹白马，但代价是你在比武场上必须替他的旗帜争光。"
+      },
+      {
+        "id": "choice_ride_old",
+        "text": "骑老马参赛",
+        "requirements": {},
+        "effects": {
+          "reputation": -3,
+          "health": -5
+        },
+        "narrative": "你骑着老马上场，堪堪躲过对手的长枪，但摔下马背时扭伤了脚踝。"
+      }
+    ],
+    "narrative": "比武场外的马厩里，一匹黑马正用蹄子刨着地面。",
+    "tags": [
+      "war",
+      "equipment",
+      "tournament"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_septon_armor",
+    "name": "圣武士的请求",
+    "type": "EventType.religious",
+    "description": "一名伤痕累累的圣武士请求你资助他修复破损的盔甲，好继续北上讨伐异端。",
+    "triggerConditions": {
+      "minGold": 40,
+      "season": "summer"
+    },
+    "choices": [
+      {
+        "id": "choice_fund_septon",
+        "text": "出资修复",
+        "requirements": {
+          "gold": 50
+        },
+        "effects": {
+          "gold": -50,
+          "reputation": 6,
+          "flags.honor_pledge": 1
+        },
+        "narrative": "你为圣武士付了铁匠的钱，他向你庄严宣誓，若凯旋归来必报答你。"
+      },
+      {
+        "id": "choice_donate_armor",
+        "text": "捐出闲置甲胄",
+        "requirements": {
+          "hasItem.item_leather_armor": 1
+        },
+        "effects": {
+          "inventory.item_leather_armor": -1,
+          "reputation": 10
+        },
+        "narrative": "你把自己不用的皮甲交给圣武士。他单膝跪地，为你祈祷祝福。"
+      },
+      {
+        "id": "choice_turn_away",
+        "text": "婉言拒绝",
+        "requirements": {},
+        "effects": {
+          "reputation": -3
+        },
+        "narrative": "你表示无能为力。圣武士沉默片刻，转身离去，背影在尘土中渐渐模糊。"
+      }
+    ],
+    "narrative": "圣武士的臂甲上还卡着一支折断的箭，他神色疲倦，但目光坚定。",
+    "tags": [
+      "religious",
+      "equipment",
+      "honor"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_guild_tooling",
+    "name": "行会的秘密锻炉",
+    "type": "EventType.economic",
+    "description": "铁匠行会的老匠人请你投资一座秘密锻炉，据说能打出比肩瓦雷利亚的利刃。",
+    "triggerConditions": {
+      "minGold": 120,
+      "skills.alchemy": 2
+    },
+    "choices": [
+      {
+        "id": "choice_invest_forge",
+        "text": "投资锻炉",
+        "requirements": {
+          "gold": 150
+        },
+        "effects": {
+          "gold": -150,
+          "flags.guild_ally": 1,
+          "inventory.item_steel": 2
+        },
+        "narrative": "你的金币换来两锭上等精钢，也换来行会的友谊。老匠人眯眼笑了。"
+      },
+      {
+        "id": "choice_learn_secret",
+        "text": "拜师学艺",
+        "requirements": {
+          "skills.alchemy": 3
+        },
+        "effects": {
+          "skills.alchemy": 1,
+          "flags.guild_secret": 1
+        },
+        "narrative": "你放下身段，在锻炉边打了一整个夏天的铁，学会了行会的独门淬火法。"
+      },
+      {
+        "id": "choice_steal_secret",
+        "text": "偷学秘方",
+        "requirements": {
+          "attributes.agility": 5
+        },
+        "effects": {
+          "skills.alchemy": 1,
+          "flags.guild_enemy": 1,
+          "reputation": -5
+        },
+        "narrative": "你趁夜潜入行会地下室抄下秘方，但老匠人似乎早已察觉，行会的门对你关上了。"
+      }
+    ],
+    "narrative": "锻炉的火光把石壁映得通红，铁锤声在夜色中叮当作响。",
+    "tags": [
+      "economic",
+      "craft",
+      "trade"
+    ],
+    "isOneTime": true
+  },
+  {
+    "id": "event_lord_levies_gear",
+    "name": "征召令与军械",
+    "type": "EventType.war",
+    "description": "领主下达征召令，要求你自备武器甲胄随军出征。你的装备将决定你在军中的地位。",
+    "triggerConditions": {
+      "season": "summer"
+    },
+    "choices": [
+      {
+        "id": "choice_arm_up",
+        "text": "购置全套军械",
+        "requirements": {
+          "gold": 80
+        },
+        "effects": {
+          "gold": -80,
+          "flags.equipped.item_sword": 1,
+          "flags.equipped.item_leather_armor": 1,
+          "skills.sword": 1
+        },
+        "narrative": "你花重金置办刀剑与皮甲，入伍时军需官多看了你两眼——你像个真正的战士了。"
+      },
+      {
+        "id": "choice_serve_with_old",
+        "text": "带旧兵器从军",
+        "requirements": {
+          "hasItem.item_dagger": 1
+        },
+        "effects": {
+          "reputation": 2,
+          "health": -8
+        },
+        "narrative": "你揣着那把旧匕首上了战场。一仗下来你活着，但身上多了两道伤疤。"
+      },
+      {
+        "id": "choice_bribe_exemption",
+        "text": "花钱免役",
+        "requirements": {
+          "gold": 60
+        },
+        "effects": {
+          "gold": -60,
+          "reputation": -5
+        },
+        "narrative": "你塞给征兵官一枚银币，换来一纸免役令。民兵们投来鄙夷的目光。"
+      }
+    ],
+    "narrative": "城门下，征兵官扯着嗓子念着名单，队伍里每个人的兵器都在晨光中闪光。",
+    "tags": [
+      "war",
+      "equipment",
+      "levy"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_trade_convoy",
+    "name": "商队护送",
+    "type": "EventType.economic",
+    "description": "一支满载货物的商队想雇佣护卫穿过河间地，报酬丰厚，但沿途匪患猖獗。",
+    "triggerConditions": {
+      "minGold": 10,
+      "minEnergy": 30
+    },
+    "choices": [
+      {
+        "id": "choice_lead_convoy",
+        "text": "亲自护送",
+        "requirements": {
+          "skills.sword": 3,
+          "energy": 30
+        },
+        "effects": {
+          "gold": 60,
+          "energy": -20,
+          "reputation": 5
+        },
+        "narrative": "你一路护着商队穿过山口，砍翻了三个拦路强盗。商队老板数出金币时手都在抖。"
+      },
+      {
+        "id": "choice_hire_guards",
+        "text": "出资雇护卫",
+        "requirements": {
+          "gold": 40
+        },
+        "effects": {
+          "gold": -40,
+          "reputation": 3,
+          "relations.merchant_leader": 10
+        },
+        "narrative": "你出钱雇了一队雇佣兵替商队开路。虽然没有亲自上阵，商队老板仍记住了你的名字。"
+      },
+      {
+        "id": "choice_decline",
+        "text": "婉拒委托",
+        "requirements": {},
+        "effects": {
+          "reputation": -2
+        },
+        "narrative": "你谢绝了这份危险的委托。商队另寻他人，很快消失在官道尽头。"
+      }
+    ],
+    "narrative": "商队老板搓着手，把一袋银币在掌心掂了掂——「这一路不太平，朋友。」",
+    "tags": [
+      "economic",
+      "trade",
+      "adventure"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_market_cartel",
+    "name": "市场垄断",
+    "type": "EventType.economic",
+    "description": "几名大户联手哄抬物价，想在粮食上大捞一笔。小贩们敢怒不敢言。",
+    "triggerConditions": {
+      "minGold": 100,
+      "season": "autumn"
+    },
+    "choices": [
+      {
+        "id": "choice_join_cartel",
+        "text": "加入垄断",
+        "requirements": {
+          "gold": 100
+        },
+        "effects": {
+          "gold": 120,
+          "reputation": -10
+        },
+        "narrative": "你悄悄入股，一个月后账上多了一百多枚金币，但集市上的咒骂声也多了起来。"
+      },
+      {
+        "id": "choice_break_cartel",
+        "text": "低价抛售破局",
+        "requirements": {
+          "gold": 80
+        },
+        "effects": {
+          "gold": -80,
+          "reputation": 15,
+          "flags.market_hero": 1
+        },
+        "narrative": "你以成本价抛售存粮，大户们的囤积瞬间成了笑话。城中百姓开始传颂你的名字。"
+      },
+      {
+        "id": "choice_report",
+        "text": "向领主告发",
+        "requirements": {
+          "relations.lord": 15
+        },
+        "effects": {
+          "relations.lord": 5,
+          "reputation": 8
+        },
+        "narrative": "你把证据呈给领主。领主当众杖责了那几个奸商，并赏了你一枚银质徽章。"
+      }
+    ],
+    "narrative": "粮铺门口排着长队，价格牌上的数字一天比一天刺眼。",
+    "tags": [
+      "economic",
+      "trade",
+      "politics"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_trade_fair",
+    "name": "自由贸易集市",
+    "type": "EventType.economic",
+    "description": "一年一度的自由贸易集市开张了，来自厄索斯的商船停满了码头，奇货可居。",
+    "triggerConditions": {
+      "season": "summer",
+      "minGold": 50
+    },
+    "choices": [
+      {
+        "id": "choice_trade_rare",
+        "text": "收购异邦货",
+        "requirements": {
+          "gold": 80
+        },
+        "effects": {
+          "gold": -80,
+          "inventory.item_ruby": 1,
+          "inventory.item_wine": 2
+        },
+        "narrative": "你从厄索斯商人手里买下一颗鸽血红宝石和两桶上等蜜酒，转身就能翻倍出手。"
+      },
+      {
+        "id": "choice_open_stall",
+        "text": "摆摊售货",
+        "requirements": {
+          "hasItem.item_meat": 1
+        },
+        "effects": {
+          "inventory.item_meat": -1,
+          "gold": 45
+        },
+        "narrative": "你租了个摊位把自己的存货卖了个好价钱，还结识了几位常跑海外的商贩。"
+      },
+      {
+        "id": "choice_info_broker",
+        "text": "打听行情与流言",
+        "requirements": {
+          "skills.speech": 2
+        },
+        "effects": {
+          "gold": -10,
+          "flags.market_intel": 1,
+          "reputation": 3
+        },
+        "narrative": "你在酒馆角落请了几个水手喝酒，换来一耳朵的远方行情与私下传闻。"
+      }
+    ],
+    "narrative": "码头泊满挂陌生旗帜的商船，异邦口音与七国话在集市上空交织。",
+    "tags": [
+      "economic",
+      "trade",
+      "festival"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_title_ceremony",
+    "name": "授勋典礼",
+    "type": "EventType.political",
+    "description": "领主决定举行一场盛大典礼，表彰有功之人。据说任何人都有机会获得正式头衔。",
+    "triggerConditions": {
+      "minReputation": 55
+    },
+    "choices": [
+      {
+        "id": "choice_attend_ceremony",
+        "text": "出席典礼",
+        "requirements": {
+          "gold": 30
+        },
+        "effects": {
+          "gold": -30,
+          "reputation": 10
+        },
+        "narrative": "你盛装出席。领主在众人面前念出你的功绩，虽然头衔要另择吉日册封，但所有人都记住了你的名字。"
+      },
+      {
+        "id": "choice_perform_deed",
+        "text": "当众立誓效忠",
+        "requirements": {
+          "reputation": 60
+        },
+        "effects": {
+          "reputation": 8,
+          "flags.lord_favor": 1
+        },
+        "narrative": "你在典礼上单膝跪地，当众宣誓效忠。领主亲自扶起你，眼中满是赞许。"
+      },
+      {
+        "id": "choice_skip",
+        "text": "婉拒出席",
+        "requirements": {},
+        "effects": {
+          "reputation": -3
+        },
+        "narrative": "你以事务繁忙为由婉拒。领主面上不显，但宴席上的席位果然少了一个。"
+      }
+    ],
+    "narrative": "城堡大厅张灯结彩，乐师奏响凯旋曲，侍从捧着崭新的绶带鱼贯而入。",
+    "tags": [
+      "political",
+      "title",
+      "ceremony"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_knight_night_watch",
+    "name": "守夜人的邀请",
+    "type": "EventType.war",
+    "description": "一名守夜人游骑兵路过，向你讲述了长城外的黑暗。他暗示：长城需要更多人手。",
+    "triggerConditions": {
+      "season": "winter"
+    },
+    "choices": [
+      {
+        "id": "choice_join_watch",
+        "text": "加入守夜人",
+        "requirements": {},
+        "effects": {
+          "flags.sworn_brother": 1,
+          "reputation": 10,
+          "relations.castle_black": 15
+        },
+        "narrative": "你放下一切，走向长城。黑城堡的弟兄们为你披上黑衣——从此你与过去再无瓜葛。"
+      },
+      {
+        "id": "choice_donate",
+        "text": "捐赠物资",
+        "requirements": {
+          "gold": 50
+        },
+        "effects": {
+          "gold": -50,
+          "reputation": 6,
+          "flags.watch_friend": 1
+        },
+        "narrative": "你为守夜人捐出一批粮草与毛皮。游骑兵郑重向你行礼：「长城记得你的慷慨。」"
+      },
+      {
+        "id": "choice_decline",
+        "text": "婉言谢绝",
+        "requirements": {},
+        "effects": {
+          "reputation": -2
+        },
+        "narrative": "你谢绝了这份召唤。游骑兵没有多言，翻身上马消失在雪幕中。"
+      }
+    ],
+    "narrative": "游骑兵的黑斗篷上结着冰碴，他沉默地喝着热汤，目光却不时望向北方。",
+    "tags": [
+      "war",
+      "watch",
+      "winter"
+    ],
+    "isOneTime": false
+  },
+  {
+    "id": "event_maester_commission",
+    "name": "学城的委托",
+    "type": "EventType.religious",
+    "description": "一位学士捎来学城的委托：护送一卷载有上古知识的羊皮卷前往旧镇，报酬是知识的授予。",
+    "triggerConditions": {
+      "minReputation": 40
+    },
+    "choices": [
+      {
+        "id": "choice_deliver_scroll",
+        "text": "亲自护送",
+        "requirements": {
+          "energy": 20
+        },
+        "effects": {
+          "gold": 30,
+          "reputation": 5,
+          "inventory.item_parchment": 1
+        },
+        "narrative": "你日夜兼程将羊皮卷送到旧镇。学士们验看后抄录一份赠予你，作为知识与谢意。"
+      },
+      {
+        "id": "choice_copy_first",
+        "text": "先抄录再护送",
+        "requirements": {
+          "skills.alchemy": 2
+        },
+        "effects": {
+          "skills.alchemy": 1,
+          "reputation": 3
+        },
+        "narrative": "你花了一夜抄录卷轴，才动身护送原件。多出的这份抄本，日后或许有大用。"
+      },
+      {
+        "id": "choice_sell_route",
+        "text": "转手委托他人",
+        "requirements": {
+          "gold": 20
+        },
+        "effects": {
+          "gold": -20,
+          "reputation": -3
+        },
+        "narrative": "你花钱请人代跑这趟差事。委托是完成了，但学城对你的评价也打了折扣。"
+      }
+    ],
+    "narrative": "学士将羊皮卷仔细裹好交到你手中，低声叮嘱：「这笔墨比刀剑更锋利，请务必小心。」",
+    "tags": [
+      "religious",
+      "knowledge",
+      "trade"
+    ],
+    "isOneTime": true
+  }
+]

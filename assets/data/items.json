@@ -1,0 +1,381 @@
+[
+  {
+    "id": "item_bread",
+    "name": "黑面包",
+    "category": "ItemCategory.consumable",
+    "value": 2,
+    "description": "粗粝的黑面包，底层人的主食。",
+    "stackable": true,
+    "usable": true,
+    "useEffect": {
+      "hunger": 15
+    },
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_meat",
+    "name": "烤肉",
+    "category": "ItemCategory.consumable",
+    "value": 6,
+    "description": "滋滋作响的烤肉，饱腹又美味。",
+    "stackable": true,
+    "usable": true,
+    "useEffect": {
+      "hunger": 35
+    },
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_fish",
+    "name": "腌鱼",
+    "category": "ItemCategory.consumable",
+    "value": 4,
+    "description": "盐腌的鱼干，可以存放很久。",
+    "stackable": true,
+    "usable": true,
+    "useEffect": {
+      "hunger": 25
+    },
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_wine",
+    "name": "多恩红葡萄酒",
+    "category": "ItemCategory.consumable",
+    "value": 15,
+    "description": "浓烈的红色酒液，贵族宴会的常客。",
+    "stackable": true,
+    "usable": true,
+    "useEffect": {
+      "energy": 15,
+      "reputation": 1
+    },
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_herb",
+    "name": "草药",
+    "category": "ItemCategory.consumable",
+    "value": 8,
+    "description": "学士们常用的伤药原料，可缓解伤痛。",
+    "stackable": true,
+    "usable": true,
+    "useEffect": {
+      "health": 20
+    },
+    "requiresSkill": "alchemy"
+  },
+  {
+    "id": "item_poultice",
+    "name": "金疮药膏",
+    "category": "ItemCategory.consumable",
+    "value": 25,
+    "description": "敷在伤口上的药膏，能止血生肌。",
+    "stackable": true,
+    "usable": true,
+    "useEffect": {
+      "health": 40
+    },
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_dreamwine",
+    "name": "罂粟花蜜酒",
+    "category": "ItemCategory.consumable",
+    "value": 30,
+    "description": "学士的安眠药酒，痛时饮下能安睡一夜。",
+    "stackable": true,
+    "usable": true,
+    "useEffect": {
+      "health": 30,
+      "energy": 20
+    },
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_dagger",
+    "name": "匕首",
+    "category": "ItemCategory.weapon",
+    "value": 10,
+    "description": "藏在腰间的短刃，贴身防身的好帮手。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_sword",
+    "name": "长剑",
+    "category": "ItemCategory.weapon",
+    "value": 40,
+    "description": "铁匠锻打的寻常长剑，骑士的标配。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_bastard_sword",
+    "name": "杂种剑",
+    "category": "ItemCategory.weapon",
+    "value": 80,
+    "description": "介于长剑与巨剑之间，双手可握的利器。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_bow",
+    "name": "紫杉长弓",
+    "category": "ItemCategory.weapon",
+    "value": 30,
+    "description": "长城以北的野人擅长使的强弓。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_valyrian_dagger",
+    "name": "瓦雷利亚钢匕首",
+    "category": "ItemCategory.weapon",
+    "value": 500,
+    "description": "瓦雷利亚钢打造的匕首，轻若无物却削铁如泥。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_leather_armor",
+    "name": "皮甲",
+    "category": "ItemCategory.armor",
+    "value": 25,
+    "description": "鞣制皮革缝制的轻甲，灵活且便宜。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_chainmail",
+    "name": "锁子甲",
+    "category": "ItemCategory.armor",
+    "value": 90,
+    "description": "万千铁环扣成的链甲，寻常盗匪难伤分毫。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_plate_armor",
+    "name": "全身板甲",
+    "category": "ItemCategory.armor",
+    "value": 220,
+    "description": "精锻钢板覆盖全身的重甲，只有富裕骑士才穿得起。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_iron_ore",
+    "name": "铁矿石",
+    "category": "ItemCategory.material",
+    "value": 3,
+    "description": "未经熔炼的铁矿石，铁匠铺的原材料。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_steel",
+    "name": "精钢锭",
+    "category": "ItemCategory.material",
+    "value": 12,
+    "description": "反复锻打提纯的钢锭，可打造上等兵刃。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_leather",
+    "name": "鞣制皮革",
+    "category": "ItemCategory.material",
+    "value": 5,
+    "description": "硝制过的皮革，缝甲制靴都少不了。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_dragonbone",
+    "name": "龙骨",
+    "category": "ItemCategory.material",
+    "value": 150,
+    "description": "古老巨龙的遗骨，弓匠们梦寐以求的材料。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_glass_candle",
+    "name": "玻璃蜡烛",
+    "category": "ItemCategory.material",
+    "value": 400,
+    "description": "学城奇物，点燃后不需燃烧也能发光——无人知其原理。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_gold_chain",
+    "name": "金链",
+    "category": "ItemCategory.treasure",
+    "value": 100,
+    "description": "沉甸甸的金链，可以直接换成金币。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_ruby",
+    "name": "红宝石",
+    "category": "ItemCategory.treasure",
+    "value": 200,
+    "description": "鸽血红宝石，君临城珠宝商的珍爱。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_sapphire",
+    "name": "蓝宝石",
+    "category": "ItemCategory.treasure",
+    "value": 180,
+    "description": "产自西境的深蓝宝石，兰尼斯特的最爱。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_crown",
+    "name": "青铜王冠",
+    "category": "ItemCategory.treasure",
+    "value": 800,
+    "description": "旧王朝的遗物，戴过它的王早已成白骨。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_heart_tree_leaf",
+    "name": "心树之叶",
+    "category": "ItemCategory.relic",
+    "value": 120,
+    "description": "鱼梁木上采下的叶子，旧神信徒视为神圣。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_seven_star",
+    "name": "七芒星徽",
+    "category": "ItemCategory.relic",
+    "value": 100,
+    "description": "七神教会的银徽，大主教亲赐的祝福。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_lightbringer_shard",
+    "name": "光之使者残片",
+    "category": "ItemCategory.relic",
+    "value": 600,
+    "description": "传说中英雄之剑的碎片，摸上去微微发烫。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_parchment",
+    "name": "羊皮纸",
+    "category": "ItemCategory.document",
+    "value": 1,
+    "description": "学士写信常用的羊皮纸，也可以用来记账。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_raven_letter",
+    "name": "渡鸦信",
+    "category": "ItemCategory.document",
+    "value": 5,
+    "description": "密封的渡鸦信，可能藏着重要的情报。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_treaty",
+    "name": "盟约文书",
+    "category": "ItemCategory.document",
+    "value": 300,
+    "description": "盖着两家蜡印的盟约文书，见证过誓约与背叛。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_recipe_dragonfire",
+    "name": "野火配方",
+    "category": "ItemCategory.document",
+    "value": 450,
+    "description": "学城禁书中的配方，记载着绿色烈焰的调制秘法。",
+    "stackable": true,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_horse",
+    "name": "骏马",
+    "category": "ItemCategory.mount",
+    "value": 120,
+    "description": "一匹结实的北方战马，长途跋涉的忠实伙伴。",
+    "stackable": false,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  },
+  {
+    "id": "item_garron",
+    "name": "小矮马",
+    "category": "ItemCategory.mount",
+    "value": 60,
+    "description": "耐寒的小矮马，野人部落的心头好。",
+    "stackable": false,
+    "usable": false,
+    "useEffect": {},
+    "requiresSkill": ""
+  }
+]

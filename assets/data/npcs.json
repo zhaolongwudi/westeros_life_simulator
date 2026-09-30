@@ -1,0 +1,1228 @@
+[
+  {
+    "id": "npc_nev",
+    "name": "艾德·史塔克",
+    "type": "NpcType.noble",
+    "age": 42,
+    "gender": "male",
+    "familyId": "family_stark",
+    "locationId": "location_winterfell",
+    "personality": [
+      "正直",
+      "严肃",
+      "忠诚"
+    ],
+    "goals": [
+      "维护荣誉",
+      "保护家族"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [
+      "琼恩·雪诺的真实身份"
+    ],
+    "relations": {
+      "npc_catelyn": 90,
+      "npc_robb": 85,
+      "npc_sansa": 80,
+      "npc_arya": 80,
+      "npc_bran": 80,
+      "npc_rickon": 80,
+      "npc_jon_snow": 70
+    },
+    "skills": {
+      "sword": 8,
+      "leadership": 9,
+      "politics": 7
+    },
+    "faith": "旧神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_catelyn",
+    "name": "凯特琳·史塔克",
+    "type": "NpcType.noble",
+    "age": 38,
+    "gender": "female",
+    "familyId": "family_stark",
+    "locationId": "location_winterfell",
+    "personality": [
+      "坚强",
+      "聪明",
+      "保护欲强"
+    ],
+    "goals": [
+      "保护孩子"
+    ],
+    "fears": [
+      "失去孩子"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_nev": 90,
+      "npc_robb": 85,
+      "npc_sansa": 85,
+      "npc_arya": 85,
+      "npc_bran": 85,
+      "npc_rickon": 85
+    },
+    "skills": {
+      "sword": 6,
+      "leadership": 7,
+      "politics": 8
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_robb",
+    "name": "罗柏·史塔克",
+    "type": "NpcType.noble",
+    "age": 19,
+    "gender": "male",
+    "familyId": "family_stark",
+    "locationId": "location_winterfell",
+    "personality": [
+      "勇敢",
+      "聪明",
+      "有魅力"
+    ],
+    "goals": [
+      "成为北境之王"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_nev": 85,
+      "npc_catelyn": 85,
+      "npc_sansa": 70,
+      "npc_arya": 70,
+      "npc_bran": 70,
+      "npc_rickon": 70
+    },
+    "skills": {
+      "sword": 9,
+      "leadership": 8,
+      "politics": 6
+    },
+    "faith": "旧神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_sansa",
+    "name": "珊莎·史塔克",
+    "type": "NpcType.noble",
+    "age": 18,
+    "gender": "female",
+    "familyId": "family_stark",
+    "locationId": "location_winterfell",
+    "personality": [
+      "天真",
+      "浪漫",
+      "善良"
+    ],
+    "goals": [
+      "成为王后"
+    ],
+    "fears": [
+      "失去家人"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_nev": 80,
+      "npc_catelyn": 85,
+      "npc_robb": 70,
+      "npc_arya": 70,
+      "npc_bran": 70,
+      "npc_rickon": 70
+    },
+    "skills": {
+      "sword": 4,
+      "leadership": 5,
+      "politics": 6
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_arya",
+    "name": "艾莉亚·史塔克",
+    "type": "NpcType.noble",
+    "age": 13,
+    "gender": "female",
+    "familyId": "family_stark",
+    "locationId": "location_winterfell",
+    "personality": [
+      "勇敢",
+      "独立",
+      "叛逆"
+    ],
+    "goals": [
+      "成为战士"
+    ],
+    "fears": [
+      "失去家人"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_nev": 80,
+      "npc_catelyn": 85,
+      "npc_robb": 70,
+      "npc_sansa": 70,
+      "npc_bran": 70,
+      "npc_rickon": 70
+    },
+    "skills": {
+      "sword": 7,
+      "leadership": 5,
+      "politics": 4
+    },
+    "faith": "旧神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_bran",
+    "name": "布兰·史塔克",
+    "type": "NpcType.noble",
+    "age": 11,
+    "gender": "male",
+    "familyId": "family_stark",
+    "locationId": "location_winterfell",
+    "personality": [
+      "聪明",
+      "好奇",
+      "善良"
+    ],
+    "goals": [
+      "成为绿先知"
+    ],
+    "fears": [
+      "失去家人"
+    ],
+    "secrets": [
+      "绿先知能力"
+    ],
+    "relations": {
+      "npc_nev": 80,
+      "npc_catelyn": 85,
+      "npc_robb": 70,
+      "npc_sansa": 70,
+      "npc_arya": 70,
+      "npc_rickon": 70
+    },
+    "skills": {
+      "sword": 3,
+      "leadership": 4,
+      "politics": 5
+    },
+    "faith": "旧神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_rickon",
+    "name": "瑞肯·史塔克",
+    "type": "NpcType.noble",
+    "age": 5,
+    "gender": "male",
+    "familyId": "family_stark",
+    "locationId": "location_winterfell",
+    "personality": [
+      "天真",
+      "善良"
+    ],
+    "goals": [],
+    "fears": [],
+    "secrets": [],
+    "relations": {
+      "npc_nev": 80,
+      "npc_catelyn": 85,
+      "npc_robb": 70,
+      "npc_sansa": 70,
+      "npc_arya": 70,
+      "npc_bran": 70
+    },
+    "skills": {
+      "sword": 1,
+      "leadership": 1,
+      "politics": 1
+    },
+    "faith": "旧神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_jon_snow",
+    "name": "琼恩·雪诺",
+    "type": "NpcType.noble",
+    "age": 19,
+    "gender": "male",
+    "familyId": "family_stark",
+    "locationId": "location_winterfell",
+    "personality": [
+      "正直",
+      "勇敢",
+      "忠诚"
+    ],
+    "goals": [
+      "成为守夜人"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [
+      "真实身份（坦格利安）"
+    ],
+    "relations": {
+      "npc_nev": 70,
+      "npc_catelyn": 60,
+      "npc_robb": 70,
+      "npc_sansa": 70,
+      "npc_arya": 70,
+      "npc_bran": 70,
+      "npc_rickon": 70
+    },
+    "skills": {
+      "sword": 9,
+      "leadership": 8,
+      "politics": 6
+    },
+    "faith": "旧神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_roose_bolton",
+    "name": "卢斯·波顿",
+    "type": "NpcType.noble",
+    "age": 55,
+    "gender": "male",
+    "familyId": "family_bolton",
+    "locationId": "location_castle_black",
+    "personality": [
+      "残忍",
+      "冷酷",
+      "聪明"
+    ],
+    "goals": [
+      "夺取北境"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [
+      "与异鬼的关系"
+    ],
+    "relations": {
+      "npc_ramsay_bolton": 50
+    },
+    "skills": {
+      "sword": 7,
+      "leadership": 8,
+      "politics": 9
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_ramsay_bolton",
+    "name": "拉姆斯·波顿",
+    "type": "NpcType.noble",
+    "age": 25,
+    "gender": "male",
+    "familyId": "family_bolton",
+    "locationId": "location_castle_black",
+    "personality": [
+      "残忍",
+      "疯狂",
+      "变态"
+    ],
+    "goals": [
+      "夺取临冬城"
+    ],
+    "fears": [
+      "被抛弃"
+    ],
+    "secrets": [
+      "真实身份"
+    ],
+    "relations": {
+      "npc_roose_bolton": 50
+    },
+    "skills": {
+      "sword": 6,
+      "leadership": 5,
+      "politics": 7
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_geor_mormont",
+    "name": "杰奥·莫尔蒙",
+    "type": "NpcType.noble",
+    "age": 60,
+    "gender": "male",
+    "familyId": "family_mormont",
+    "locationId": "location_the_wall",
+    "personality": [
+      "正直",
+      "严肃",
+      "忠诚"
+    ],
+    "goals": [
+      "保护长城"
+    ],
+    "fears": [
+      "异鬼南下"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_jon_snow": 60
+    },
+    "skills": {
+      "sword": 8,
+      "leadership": 9,
+      "politics": 7
+    },
+    "faith": "旧神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_hoster_tully",
+    "name": "霍斯特·徒利",
+    "type": "NpcType.noble",
+    "age": 55,
+    "gender": "male",
+    "familyId": "family_tully",
+    "locationId": "location_riverrun",
+    "personality": [
+      "正直",
+      "严肃",
+      "忠诚"
+    ],
+    "goals": [
+      "保护家族"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_catelyn": 80,
+      "npc_edmure_tully": 70
+    },
+    "skills": {
+      "sword": 7,
+      "leadership": 8,
+      "politics": 7
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_edmure_tully",
+    "name": "艾德慕·徒利",
+    "type": "NpcType.noble",
+    "age": 30,
+    "gender": "male",
+    "familyId": "family_tully",
+    "locationId": "location_riverrun",
+    "personality": [
+      "勇敢",
+      "聪明",
+      "有魅力"
+    ],
+    "goals": [
+      "成为奔流城领主"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_hoster_tully": 70,
+      "npc_catelyn": 70
+    },
+    "skills": {
+      "sword": 8,
+      "leadership": 7,
+      "politics": 6
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_walder_frey",
+    "name": "瓦德·佛雷",
+    "type": "NpcType.noble",
+    "age": 70,
+    "gender": "male",
+    "familyId": "family_frey",
+    "locationId": "location_twin_rivers",
+    "personality": [
+      "贪婪",
+      "狡猾",
+      "好色"
+    ],
+    "goals": [
+      "家族利益"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {},
+    "skills": {
+      "sword": 5,
+      "leadership": 7,
+      "politics": 9
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_lys_arryn",
+    "name": "卢斯·艾林",
+    "type": "NpcType.noble",
+    "age": 10,
+    "gender": "male",
+    "familyId": "family_arryn",
+    "locationId": "location_the_eyrie",
+    "personality": [
+      "天真",
+      "善良"
+    ],
+    "goals": [],
+    "fears": [],
+    "secrets": [],
+    "relations": {
+      "npc_jon_arryn": 70
+    },
+    "skills": {
+      "sword": 1,
+      "leadership": 1,
+      "politics": 1
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_jon_arryn",
+    "name": "琼恩·艾林",
+    "type": "NpcType.noble",
+    "age": 55,
+    "gender": "male",
+    "familyId": "family_arryn",
+    "locationId": "location_the_eyrie",
+    "personality": [
+      "正直",
+      "严肃",
+      "忠诚"
+    ],
+    "goals": [
+      "维护荣誉"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_lys_arryn": 70
+    },
+    "skills": {
+      "sword": 7,
+      "leadership": 8,
+      "politics": 8
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_tywin_lannister",
+    "name": "泰温·兰尼斯特",
+    "type": "NpcType.noble",
+    "age": 55,
+    "gender": "male",
+    "familyId": "family_lannister",
+    "locationId": "location_casterly_rock",
+    "personality": [
+      "冷酷",
+      "聪明",
+      "野心勃勃"
+    ],
+    "goals": [
+      "家族权力"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_cersei": 60,
+      "npc_jaime": 60,
+      "npc_tyrion": 40
+    },
+    "skills": {
+      "sword": 7,
+      "leadership": 9,
+      "politics": 10
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_cersei",
+    "name": "瑟曦·兰尼斯特",
+    "type": "NpcType.noble",
+    "age": 35,
+    "gender": "female",
+    "familyId": "family_lannister",
+    "locationId": "location_kings_landing",
+    "personality": [
+      "冷酷",
+      "聪明",
+      "野心勃勃"
+    ],
+    "goals": [
+      "王权"
+    ],
+    "fears": [
+      "失去权力"
+    ],
+    "secrets": [
+      "与詹姆的乱伦关系"
+    ],
+    "relations": {
+      "npc_tywin_lannister": 60,
+      "npc_jaime": 90,
+      "npc_tyrion": 30,
+      "npc_robert_baratheon": 40,
+      "npc_joffrey": 80,
+      "npc_tommen": 80,
+      "npc_myrcella": 80
+    },
+    "skills": {
+      "sword": 6,
+      "leadership": 8,
+      "politics": 9
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_jaime",
+    "name": "詹姆·兰尼斯特",
+    "type": "NpcType.noble",
+    "age": 38,
+    "gender": "male",
+    "familyId": "family_lannister",
+    "locationId": "location_kings_landing",
+    "personality": [
+      "勇敢",
+      "聪明",
+      "有魅力"
+    ],
+    "goals": [
+      "荣誉"
+    ],
+    "fears": [
+      "失去瑟曦"
+    ],
+    "secrets": [
+      "与瑟曦的乱伦关系"
+    ],
+    "relations": {
+      "npc_tywin_lannister": 60,
+      "npc_cersei": 90,
+      "npc_tyrion": 50
+    },
+    "skills": {
+      "sword": 10,
+      "leadership": 8,
+      "politics": 7
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_tyrion",
+    "name": "提利昂·兰尼斯特",
+    "type": "NpcType.noble",
+    "age": 30,
+    "gender": "male",
+    "familyId": "family_lannister",
+    "locationId": "location_kings_landing",
+    "personality": [
+      "聪明",
+      "狡猾",
+      "善良"
+    ],
+    "goals": [
+      "证明自己"
+    ],
+    "fears": [
+      "被歧视"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_tywin_lannister": 40,
+      "npc_cersei": 30,
+      "npc_jaime": 50
+    },
+    "skills": {
+      "sword": 4,
+      "leadership": 7,
+      "politics": 10
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_robert_baratheon",
+    "name": "劳勃·拜拉席恩",
+    "type": "NpcType.noble",
+    "age": 40,
+    "gender": "male",
+    "familyId": "family_baratheon",
+    "locationId": "location_kings_landing",
+    "personality": [
+      "勇敢",
+      "豪爽",
+      "好色"
+    ],
+    "goals": [
+      "享受权力"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_cersei": 40,
+      "npc_joffrey": 50,
+      "npc_tommen": 50,
+      "npc_myrcella": 50
+    },
+    "skills": {
+      "sword": 9,
+      "leadership": 8,
+      "politics": 6
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_joffrey",
+    "name": "乔佛瑞·拜拉席恩",
+    "type": "NpcType.noble",
+    "age": 16,
+    "gender": "male",
+    "familyId": "family_baratheon",
+    "locationId": "location_kings_landing",
+    "personality": [
+      "残忍",
+      "冷酷",
+      "疯狂"
+    ],
+    "goals": [
+      "王权"
+    ],
+    "fears": [
+      "被推翻"
+    ],
+    "secrets": [
+      "真实身份（兰尼斯特）"
+    ],
+    "relations": {
+      "npc_robert_baratheon": 50,
+      "npc_cersei": 80,
+      "npc_tommen": 40,
+      "npc_myrcella": 40
+    },
+    "skills": {
+      "sword": 6,
+      "leadership": 5,
+      "politics": 6
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_tommen",
+    "name": "托曼·拜拉席恩",
+    "type": "NpcType.noble",
+    "age": 10,
+    "gender": "male",
+    "familyId": "family_baratheon",
+    "locationId": "location_kings_landing",
+    "personality": [
+      "天真",
+      "善良"
+    ],
+    "goals": [],
+    "fears": [],
+    "secrets": [
+      "真实身份（兰尼斯特）"
+    ],
+    "relations": {
+      "npc_robert_baratheon": 50,
+      "npc_cersei": 80,
+      "npc_joffrey": 40,
+      "npc_myrcella": 60
+    },
+    "skills": {
+      "sword": 1,
+      "leadership": 1,
+      "politics": 1
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_myrcella",
+    "name": "弥赛拉·拜拉席恩",
+    "type": "NpcType.noble",
+    "age": 6,
+    "gender": "female",
+    "familyId": "family_baratheon",
+    "locationId": "location_kings_landing",
+    "personality": [
+      "天真",
+      "善良"
+    ],
+    "goals": [],
+    "fears": [],
+    "secrets": [
+      "真实身份（兰尼斯特）"
+    ],
+    "relations": {
+      "npc_robert_baratheon": 50,
+      "npc_cersei": 80,
+      "npc_joffrey": 40,
+      "npc_tommen": 60
+    },
+    "skills": {
+      "sword": 1,
+      "leadership": 1,
+      "politics": 1
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_rhaegar",
+    "name": "雷加·坦格利安",
+    "type": "NpcType.noble",
+    "age": 35,
+    "gender": "male",
+    "familyId": "family_targaryen",
+    "locationId": "location_exile",
+    "personality": [
+      "浪漫",
+      "聪明",
+      "有魅力"
+    ],
+    "goals": [
+      "龙"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [
+      "与莱安娜的爱情"
+    ],
+    "relations": {
+      "npc_viserys": 60,
+      "npc_daenerys": 60
+    },
+    "skills": {
+      "sword": 9,
+      "leadership": 8,
+      "politics": 7
+    },
+    "faith": "旧神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_viserys",
+    "name": "韦赛里斯·坦格利安",
+    "type": "NpcType.noble",
+    "age": 25,
+    "gender": "male",
+    "familyId": "family_targaryen",
+    "locationId": "location_exile",
+    "personality": [
+      "贪婪",
+      "疯狂",
+      "野心勃勃"
+    ],
+    "goals": [
+      "王权"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_rhaegar": 60,
+      "npc_daenerys": 50
+    },
+    "skills": {
+      "sword": 6,
+      "leadership": 5,
+      "politics": 6
+    },
+    "faith": "旧神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_daenerys",
+    "name": "丹妮莉丝·坦格利安",
+    "type": "NpcType.noble",
+    "age": 16,
+    "gender": "female",
+    "familyId": "family_targaryen",
+    "locationId": "location_exile",
+    "personality": [
+      "坚强",
+      "聪明",
+      "有魅力"
+    ],
+    "goals": [
+      "龙"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [
+      "龙的血脉"
+    ],
+    "relations": {
+      "npc_rhaegar": 60,
+      "npc_viserys": 50
+    },
+    "skills": {
+      "sword": 6,
+      "leadership": 8,
+      "politics": 7
+    },
+    "faith": "旧神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_stannis_baratheon",
+    "name": "史坦尼斯·拜拉席恩",
+    "type": "NpcType.noble",
+    "age": 45,
+    "gender": "male",
+    "familyId": "family_baratheon_storm",
+    "locationId": "location_storms_end",
+    "personality": [
+      "严肃",
+      "固执",
+      "正直"
+    ],
+    "goals": [
+      "王权"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {},
+    "skills": {
+      "sword": 8,
+      "leadership": 8,
+      "politics": 7
+    },
+    "faith": "光之王",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_olenna_tyrell",
+    "name": "奥伦·提利尔",
+    "type": "NpcType.noble",
+    "age": 60,
+    "gender": "female",
+    "familyId": "family_tyrell",
+    "locationId": "location_highgarden",
+    "personality": [
+      "聪明",
+      "狡猾",
+      "善良"
+    ],
+    "goals": [
+      "家族利益"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_margaery": 80,
+      "npc_loras": 80
+    },
+    "skills": {
+      "sword": 5,
+      "leadership": 8,
+      "politics": 10
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_margaery",
+    "name": "玛格丽·提利尔",
+    "type": "NpcType.noble",
+    "age": 18,
+    "gender": "female",
+    "familyId": "family_tyrell",
+    "locationId": "location_highgarden",
+    "personality": [
+      "聪明",
+      "善良",
+      "有魅力"
+    ],
+    "goals": [
+      "王后"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_olenna_tyrell": 80,
+      "npc_loras": 70
+    },
+    "skills": {
+      "sword": 4,
+      "leadership": 7,
+      "politics": 9
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_loras",
+    "name": "洛拉斯·提利尔",
+    "type": "NpcType.noble",
+    "age": 20,
+    "gender": "male",
+    "familyId": "family_tyrell",
+    "locationId": "location_highgarden",
+    "personality": [
+      "勇敢",
+      "聪明",
+      "有魅力"
+    ],
+    "goals": [
+      "荣誉"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_olenna_tyrell": 80,
+      "npc_margaery": 70
+    },
+    "skills": {
+      "sword": 9,
+      "leadership": 7,
+      "politics": 6
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_oberon_martell",
+    "name": "奥柏伦·马泰尔",
+    "type": "NpcType.noble",
+    "age": 40,
+    "gender": "male",
+    "familyId": "family_martell",
+    "locationId": "location_sunspear",
+    "personality": [
+      "浪漫",
+      "聪明",
+      "有魅力"
+    ],
+    "goals": [
+      "家族利益"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {},
+    "skills": {
+      "sword": 9,
+      "leadership": 8,
+      "politics": 8
+    },
+    "faith": "光之王",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_balon_greyjoy",
+    "name": "巴隆·葛雷乔伊",
+    "type": "NpcType.noble",
+    "age": 55,
+    "gender": "male",
+    "familyId": "family_greyjoy",
+    "locationId": "location_pike",
+    "personality": [
+      "冷酷",
+      "野心勃勃",
+      "好战"
+    ],
+    "goals": [
+      "铁群岛独立"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_theon": 60,
+      "npc_yara": 60
+    },
+    "skills": {
+      "sword": 8,
+      "leadership": 8,
+      "politics": 7
+    },
+    "faith": "淹神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_theon",
+    "name": "席恩·葛雷乔伊",
+    "type": "NpcType.noble",
+    "age": 20,
+    "gender": "male",
+    "familyId": "family_greyjoy",
+    "locationId": "location_pike",
+    "personality": [
+      "矛盾",
+      "忠诚",
+      "叛逆"
+    ],
+    "goals": [
+      "证明自己"
+    ],
+    "fears": [
+      "被抛弃"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_balon_greyjoy": 60,
+      "npc_yara": 70
+    },
+    "skills": {
+      "sword": 8,
+      "leadership": 6,
+      "politics": 5
+    },
+    "faith": "淹神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_yara",
+    "name": "亚拉·葛雷乔伊",
+    "type": "NpcType.noble",
+    "age": 18,
+    "gender": "female",
+    "familyId": "family_greyjoy",
+    "locationId": "location_pike",
+    "personality": [
+      "勇敢",
+      "独立",
+      "叛逆"
+    ],
+    "goals": [
+      "家族利益"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_balon_greyjoy": 60,
+      "npc_theon": 70
+    },
+    "skills": {
+      "sword": 7,
+      "leadership": 7,
+      "politics": 6
+    },
+    "faith": "淹神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_drogo",
+    "name": "多拉科·卡奥",
+    "type": "NpcType.wildling",
+    "age": 35,
+    "gender": "male",
+    "familyId": "",
+    "locationId": "location_dothraki_sea",
+    "personality": [
+      "勇敢",
+      "豪爽",
+      "好战"
+    ],
+    "goals": [
+      "征服"
+    ],
+    "fears": [
+      "家族灭亡"
+    ],
+    "secrets": [],
+    "relations": {},
+    "skills": {
+      "sword": 9,
+      "leadership": 9,
+      "politics": 7
+    },
+    "faith": "马神",
+    "isAlive": true,
+    "mood": 0
+  }
+]

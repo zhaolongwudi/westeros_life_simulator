@@ -1,0 +1,1137 @@
+[
+  {
+    "id": "location_winterfell",
+    "name": "临冬城",
+    "type": "LocationType.castle",
+    "region": "北境",
+    "dangerLevel": 3,
+    "population": 5000,
+    "features": [
+      "史塔克家族领地",
+      "鱼梁木",
+      "古老城堡"
+    ],
+    "governorId": "npc_nev",
+    "connectedTo": [
+      "location_white_harbor",
+      "location_barrowtowns"
+    ],
+    "description": "史塔克家族世代居住的城堡，北境之王驻地。"
+  },
+  {
+    "id": "location_castle_black",
+    "name": "恐怖堡",
+    "type": "LocationType.castle",
+    "region": "北境",
+    "dangerLevel": 4,
+    "population": 3000,
+    "features": [
+      "波顿家族领地",
+      "剥皮者"
+    ],
+    "governorId": "npc_roose_bolton",
+    "connectedTo": [
+      "location_winterfell"
+    ],
+    "description": "波顿家族领地，以残忍著称。"
+  },
+  {
+    "id": "location_last_hearth",
+    "name": "最后壁炉城",
+    "type": "LocationType.castle",
+    "region": "北境",
+    "dangerLevel": 3,
+    "population": 2000,
+    "features": [
+      "安柏家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_winterfell"
+    ],
+    "description": "安柏家族领地。"
+  },
+  {
+    "id": "location_karhold",
+    "name": "卡霍城",
+    "type": "LocationType.castle",
+    "region": "北境",
+    "dangerLevel": 3,
+    "population": 1500,
+    "features": [
+      "卡史塔克家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_winterfell"
+    ],
+    "description": "卡史塔克家族领地。"
+  },
+  {
+    "id": "location_bear_island",
+    "name": "熊岛",
+    "type": "LocationType.castle",
+    "region": "北境",
+    "dangerLevel": 3,
+    "population": 2500,
+    "features": [
+      "莫尔蒙家族领地"
+    ],
+    "governorId": "npc_geor_mormont",
+    "connectedTo": [
+      "location_winterfell"
+    ],
+    "description": "莫尔蒙家族领地。"
+  },
+  {
+    "id": "location_white_harbor",
+    "name": "白港",
+    "type": "LocationType.city",
+    "region": "北境",
+    "dangerLevel": 2,
+    "population": 10000,
+    "features": [
+      "港口",
+      "贸易"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_winterfell"
+    ],
+    "description": "北境主要港口城市。"
+  },
+  {
+    "id": "location_barrowtowns",
+    "name": "巴隆镇",
+    "type": "LocationType.village",
+    "region": "北境",
+    "dangerLevel": 3,
+    "population": 500,
+    "features": [
+      "乡村"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_winterfell"
+    ],
+    "description": "北境乡村小镇。"
+  },
+  {
+    "id": "location_riverrun",
+    "name": "奔流城",
+    "type": "LocationType.castle",
+    "region": "河间地",
+    "dangerLevel": 2,
+    "population": 4000,
+    "features": [
+      "徒利家族领地",
+      "河流环绕",
+      "鳟鱼"
+    ],
+    "governorId": "npc_hoster_tully",
+    "connectedTo": [
+      "location_twin_rivers",
+      "location_ravenswood"
+    ],
+    "description": "徒利家族领地，河流环绕。"
+  },
+  {
+    "id": "location_twin_rivers",
+    "name": "孪河城",
+    "type": "LocationType.castle",
+    "region": "河间地",
+    "dangerLevel": 2,
+    "population": 10000,
+    "features": [
+      "佛雷家族领地",
+      "双河交汇",
+      "公牛"
+    ],
+    "governorId": "npc_walder_frey",
+    "connectedTo": [
+      "location_riverrun"
+    ],
+    "description": "佛雷家族领地，双河交汇。"
+  },
+  {
+    "id": "location_ravenswood",
+    "name": "鸦树城",
+    "type": "LocationType.castle",
+    "region": "河间地",
+    "dangerLevel": 3,
+    "population": 2000,
+    "features": [
+      "布莱伍德家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_riverrun"
+    ],
+    "description": "布莱伍德家族领地。"
+  },
+  {
+    "id": "location_stone_hedge",
+    "name": "石篱城",
+    "type": "LocationType.castle",
+    "region": "河间地",
+    "dangerLevel": 3,
+    "population": 1500,
+    "features": [
+      "布雷肯家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_riverrun"
+    ],
+    "description": "布雷肯家族领地。"
+  },
+  {
+    "id": "location_the_neck",
+    "name": "颈泽",
+    "type": "LocationType.wilderness",
+    "region": "河间地",
+    "dangerLevel": 4,
+    "population": 100,
+    "features": [
+      "沼泽地",
+      "狭窄通道"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_riverrun",
+      "location_winterfell"
+    ],
+    "description": "连接北境与河间地的狭窄沼泽通道。"
+  },
+  {
+    "id": "location_the_eyrie",
+    "name": "鹰巢城",
+    "type": "LocationType.castle",
+    "region": "谷地",
+    "dangerLevel": 2,
+    "population": 3000,
+    "features": [
+      "艾林家族领地",
+      "悬崖上的城堡",
+      "游隼"
+    ],
+    "governorId": "npc_lys_arryn",
+    "connectedTo": [
+      "location_fingers"
+    ],
+    "description": "艾林家族领地，悬崖上的城堡。"
+  },
+  {
+    "id": "location_fingers",
+    "name": "符石城",
+    "type": "LocationType.castle",
+    "region": "谷地",
+    "dangerLevel": 2,
+    "population": 2000,
+    "features": [
+      "罗伊斯家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_the_eyrie"
+    ],
+    "description": "罗伊斯家族领地。"
+  },
+  {
+    "id": "location_casterly_rock",
+    "name": "凯岩城",
+    "type": "LocationType.castle",
+    "region": "西境",
+    "dangerLevel": 2,
+    "population": 8000,
+    "features": [
+      "兰尼斯特家族领地",
+      "金色狮子",
+      "黄金"
+    ],
+    "governorId": "npc_tywin_lannister",
+    "connectedTo": [
+      "location_lannisport"
+    ],
+    "description": "兰尼斯特家族领地，黄金之城。"
+  },
+  {
+    "id": "location_lannisport",
+    "name": "兰尼斯港",
+    "type": "LocationType.city",
+    "region": "西境",
+    "dangerLevel": 2,
+    "population": 50000,
+    "features": [
+      "港口",
+      "贸易"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_casterly_rock"
+    ],
+    "description": "西境主要港口城市。"
+  },
+  {
+    "id": "location_crane",
+    "name": "克雷赫城",
+    "type": "LocationType.castle",
+    "region": "西境",
+    "dangerLevel": 2,
+    "population": 2000,
+    "features": [
+      "克雷赫家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_casterly_rock"
+    ],
+    "description": "克雷赫家族领地。"
+  },
+  {
+    "id": "location_stone_city",
+    "name": "石城",
+    "type": "LocationType.castle",
+    "region": "西境",
+    "dangerLevel": 2,
+    "population": 2500,
+    "features": [
+      "马尔布兰家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_casterly_rock"
+    ],
+    "description": "马尔布兰家族领地。"
+  },
+  {
+    "id": "location_kings_landing",
+    "name": "君临城",
+    "type": "LocationType.city",
+    "region": "王领",
+    "dangerLevel": 3,
+    "population": 500000,
+    "features": [
+      "铁王座",
+      "红堡",
+      "黑水河",
+      "拜拉席恩家族领地"
+    ],
+    "governorId": "npc_robert_baratheon",
+    "connectedTo": [
+      "location_dragonstone",
+      "location_highgarden"
+    ],
+    "description": "七国之都，铁王座所在地。"
+  },
+  {
+    "id": "location_dragonstone",
+    "name": "龙石岛",
+    "type": "LocationType.castle",
+    "region": "王领",
+    "dangerLevel": 4,
+    "population": 1000,
+    "features": [
+      "坦格利安家族领地",
+      "龙巢",
+      "火山"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_kings_landing"
+    ],
+    "description": "坦格利安家族领地，龙巢所在地。"
+  },
+  {
+    "id": "location_storms_end",
+    "name": "风息堡",
+    "type": "LocationType.castle",
+    "region": "风暴地",
+    "dangerLevel": 3,
+    "population": 3000,
+    "features": [
+      "拜拉席恩家族领地",
+      "风暴中的城堡",
+      "雄鹿"
+    ],
+    "governorId": "npc_stannis_baratheon",
+    "connectedTo": [
+      "location_kings_landing"
+    ],
+    "description": "拜拉席恩家族领地，风暴中的城堡。"
+  },
+  {
+    "id": "location_tarbeck",
+    "name": "塔斯岛",
+    "type": "LocationType.castle",
+    "region": "风暴地",
+    "dangerLevel": 3,
+    "population": 1500,
+    "features": [
+      "塔斯家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_storms_end"
+    ],
+    "description": "塔斯家族领地。"
+  },
+  {
+    "id": "location_highgarden",
+    "name": "高庭",
+    "type": "LocationType.castle",
+    "region": "河湾地",
+    "dangerLevel": 1,
+    "population": 10000,
+    "features": [
+      "提利尔家族领地",
+      "金色玫瑰",
+      "花园"
+    ],
+    "governorId": "npc_olenna_tyrell",
+    "connectedTo": [
+      "location_old_town",
+      "location_kings_landing"
+    ],
+    "description": "提利尔家族领地，最富庶的领地。"
+  },
+  {
+    "id": "location_old_town",
+    "name": "旧镇",
+    "type": "LocationType.city",
+    "region": "河湾地",
+    "dangerLevel": 1,
+    "population": 3000,
+    "features": [
+      "学城",
+      "大图书馆",
+      "高塔",
+      "海塔尔家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_highgarden"
+    ],
+    "description": "学城所在地，七国学术中心。"
+  },
+  {
+    "id": "location_citadel",
+    "name": "学城",
+    "type": "LocationType.academy",
+    "region": "河湾地",
+    "dangerLevel": 1,
+    "population": 500,
+    "features": [
+      "学士总部",
+      "大图书馆"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_old_town"
+    ],
+    "description": "学士总部，七国最高学术机构。"
+  },
+  {
+    "id": "location_corner",
+    "name": "角陵",
+    "type": "LocationType.castle",
+    "region": "河湾地",
+    "dangerLevel": 1,
+    "population": 2000,
+    "features": [
+      "塔利家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_highgarden"
+    ],
+    "description": "塔利家族领地。"
+  },
+  {
+    "id": "location_redwyne",
+    "name": "青亭岛",
+    "type": "LocationType.castle",
+    "region": "河湾地",
+    "dangerLevel": 1,
+    "population": 2500,
+    "features": [
+      "雷德温家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_highgarden"
+    ],
+    "description": "雷德温家族领地。"
+  },
+  {
+    "id": "location_sunspear",
+    "name": "阳戟城",
+    "type": "LocationType.castle",
+    "region": "多恩",
+    "dangerLevel": 3,
+    "population": 8000,
+    "features": [
+      "马泰尔家族领地",
+      "红色太阳",
+      "沙漠"
+    ],
+    "governorId": "npc_oberon_martell",
+    "connectedTo": [
+      "location_starfall"
+    ],
+    "description": "马泰尔家族领地，多恩首府。"
+  },
+  {
+    "id": "location_starfall",
+    "name": "星坠城",
+    "type": "LocationType.castle",
+    "region": "多恩",
+    "dangerLevel": 3,
+    "population": 2000,
+    "features": [
+      "戴恩家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_sunspear"
+    ],
+    "description": "戴恩家族领地。"
+  },
+  {
+    "id": "location_uller",
+    "name": "狱门堡",
+    "type": "LocationType.castle",
+    "region": "多恩",
+    "dangerLevel": 3,
+    "population": 1500,
+    "features": [
+      "乌勒家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_sunspear"
+    ],
+    "description": "乌勒家族领地。"
+  },
+  {
+    "id": "location_pike",
+    "name": "派克城",
+    "type": "LocationType.castle",
+    "region": "铁群岛",
+    "dangerLevel": 4,
+    "population": 5000,
+    "features": [
+      "葛雷乔伊家族领地",
+      "黑色海怪",
+      "海盗"
+    ],
+    "governorId": "npc_balon_greyjoy",
+    "connectedTo": [
+      "location_ten_towers"
+    ],
+    "description": "葛雷乔伊家族领地，铁群岛首府。"
+  },
+  {
+    "id": "location_ten_towers",
+    "name": "十塔城",
+    "type": "LocationType.castle",
+    "region": "铁群岛",
+    "dangerLevel": 4,
+    "population": 2000,
+    "features": [
+      "哈尔洛家族领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_pike"
+    ],
+    "description": "哈尔洛家族领地。"
+  },
+  {
+    "id": "location_the_wall",
+    "name": "长城",
+    "type": "LocationType.fort",
+    "region": "北境",
+    "dangerLevel": 6,
+    "population": 1000,
+    "features": [
+      "守夜人军团",
+      "700 英尺高",
+      "300 英里长"
+    ],
+    "governorId": "npc_jeor_mormont",
+    "connectedTo": [
+      "location_winterfell"
+    ],
+    "description": "分隔北境与永冬之地的巨墙。"
+  },
+  {
+    "id": "location_eastwatch",
+    "name": "东watch",
+    "type": "LocationType.fort",
+    "region": "北境",
+    "dangerLevel": 5,
+    "population": 100,
+    "features": [
+      "守夜人前哨"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_the_wall"
+    ],
+    "description": "守夜人前哨站。"
+  },
+  {
+    "id": "location_shadow_tower",
+    "name": "影塔",
+    "type": "LocationType.fort",
+    "region": "北境",
+    "dangerLevel": 5,
+    "population": 100,
+    "features": [
+      "守夜人前哨"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_the_wall"
+    ],
+    "description": "守夜人前哨站。"
+  },
+  {
+    "id": "location_whispering_wood",
+    "name": "鬼影森林",
+    "type": "LocationType.wilderness",
+    "region": "北境",
+    "dangerLevel": 5,
+    "population": 0,
+    "features": [
+      "古老森林",
+      "鱼梁木"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_winterfell"
+    ],
+    "description": "古老森林，鱼梁木所在地。"
+  },
+  {
+    "id": "location_first_mens_graveyard",
+    "name": "先民荒冢",
+    "type": "LocationType.wilderness",
+    "region": "北境",
+    "dangerLevel": 5,
+    "population": 0,
+    "features": [
+      "古老墓地",
+      "先民遗迹"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_winterfell"
+    ],
+    "description": "先民遗迹。"
+  },
+  {
+    "id": "location_braavos",
+    "name": "布拉佛斯",
+    "type": "LocationType.city",
+    "region": "厄索斯",
+    "dangerLevel": 3,
+    "population": 1000000,
+    "features": [
+      "铁金库",
+      "无面者",
+      "水舞者"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_pentos"
+    ],
+    "description": "自由贸易城邦之首，铁金库所在地。"
+  },
+  {
+    "id": "location_pentos",
+    "name": "潘托斯",
+    "type": "LocationType.city",
+    "region": "厄索斯",
+    "dangerLevel": 3,
+    "population": 500000,
+    "features": [
+      "商人",
+      "奴隶贸易"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_braavos",
+      "location_volantis"
+    ],
+    "description": "自由贸易城邦，商人聚集地。"
+  },
+  {
+    "id": "location_volantis",
+    "name": "瓦兰提斯",
+    "type": "LocationType.city",
+    "region": "厄索斯",
+    "dangerLevel": 4,
+    "population": 1000000,
+    "features": [
+      "奴隶贸易",
+      "角斗士"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_pentos"
+    ],
+    "description": "自由贸易城邦，奴隶贸易中心。"
+  },
+  {
+    "id": "location_lys",
+    "name": "里斯",
+    "type": "LocationType.city",
+    "region": "厄索斯",
+    "dangerLevel": 4,
+    "population": 300000,
+    "features": [
+      "海盗",
+      "奴隶贸易"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_pentos"
+    ],
+    "description": "自由贸易城邦，海盗聚集地。"
+  },
+  {
+    "id": "location_tyrosh",
+    "name": "泰洛西",
+    "type": "LocationType.city",
+    "region": "厄索斯",
+    "dangerLevel": 4,
+    "population": 200000,
+    "features": [
+      "奴隶贸易",
+      "角斗士"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_pentos"
+    ],
+    "description": "自由贸易城邦。"
+  },
+  {
+    "id": "location_myr",
+    "name": "密尔",
+    "type": "LocationType.city",
+    "region": "厄索斯",
+    "dangerLevel": 3,
+    "population": 100000,
+    "features": [
+      "武器制造"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_pentos"
+    ],
+    "description": "自由贸易城邦，武器制造中心。"
+  },
+  {
+    "id": "location_norvos",
+    "name": "诺佛斯",
+    "type": "LocationType.city",
+    "region": "厄索斯",
+    "dangerLevel": 4,
+    "population": 500000,
+    "features": [
+      "奴隶贸易",
+      "角斗士"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_pentos"
+    ],
+    "description": "自由贸易城邦。"
+  },
+  {
+    "id": "location_qohor",
+    "name": "科霍尔",
+    "type": "LocationType.city",
+    "region": "厄索斯",
+    "dangerLevel": 4,
+    "population": 100000,
+    "features": [
+      "奴隶贸易",
+      "角斗士"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_pentos"
+    ],
+    "description": "自由贸易城邦。"
+  },
+  {
+    "id": "location_loras",
+    "name": "罗拉斯",
+    "type": "LocationType.city",
+    "region": "厄索斯",
+    "dangerLevel": 4,
+    "population": 50000,
+    "features": [
+      "奴隶贸易",
+      "角斗士"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_pentos"
+    ],
+    "description": "自由贸易城邦。"
+  },
+  {
+    "id": "location_astapor",
+    "name": "阿斯塔波",
+    "type": "LocationType.city",
+    "region": "厄索斯",
+    "dangerLevel": 4,
+    "population": 100000,
+    "features": [
+      "无垢者",
+      "奴隶贸易"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_yunkai",
+      "location_meereen"
+    ],
+    "description": "奴隶湾城市，无垢者训练地。"
+  },
+  {
+    "id": "location_yunkai",
+    "name": "渊凯",
+    "type": "LocationType.city",
+    "region": "厄索斯",
+    "dangerLevel": 4,
+    "population": 100000,
+    "features": [
+      "奴隶贸易",
+      "角斗士"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_astapor",
+      "location_meereen"
+    ],
+    "description": "奴隶湾城市。"
+  },
+  {
+    "id": "location_meereen",
+    "name": "弥林",
+    "type": "LocationType.city",
+    "region": "厄索斯",
+    "dangerLevel": 4,
+    "population": 100000,
+    "features": [
+      "奴隶贸易",
+      "角斗士"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_astapor",
+      "location_yunkai"
+    ],
+    "description": "奴隶湾城市。"
+  },
+  {
+    "id": "location_quarth",
+    "name": "魁尔斯",
+    "type": "LocationType.city",
+    "region": "厄索斯",
+    "dangerLevel": 3,
+    "population": 50000,
+    "features": [
+      "玻璃制造",
+      "龙晶"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_pentos"
+    ],
+    "description": "玻璃制造中心，龙晶产地。"
+  },
+  {
+    "id": "location_dothraki_sea",
+    "name": "多斯拉克海",
+    "type": "LocationType.wilderness",
+    "region": "厄索斯",
+    "dangerLevel": 5,
+    "population": 0,
+    "features": [
+      "游牧民族",
+      "马王",
+      "卡拉萨"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_pentos"
+    ],
+    "description": "多斯拉克游牧民族的领地。"
+  },
+  {
+    "id": "location_sossath",
+    "name": "索斯罗斯大陆",
+    "type": "LocationType.unknown",
+    "region": "未知世界",
+    "dangerLevel": 6,
+    "population": 0,
+    "features": [
+      "南方未知大陆"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "南方未知大陆。"
+  },
+  {
+    "id": "location_althos",
+    "name": "乌尔特斯",
+    "type": "LocationType.unknown",
+    "region": "未知世界",
+    "dangerLevel": 6,
+    "population": 0,
+    "features": [
+      "未知"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "未知之地。"
+  },
+  {
+    "id": "location_summer_isles",
+    "name": "盛夏群岛",
+    "type": "LocationType.unknown",
+    "region": "未知世界",
+    "dangerLevel": 3,
+    "population": 0,
+    "features": [
+      "温暖群岛",
+      "香料",
+      "丝绸"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "温暖群岛，香料丝绸产地。"
+  },
+  {
+    "id": "location_ibben",
+    "name": "伊班岛",
+    "type": "LocationType.unknown",
+    "region": "未知世界",
+    "dangerLevel": 5,
+    "population": 0,
+    "features": [
+      "未知"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "未知之地。"
+  },
+  {
+    "id": "location_yarza",
+    "name": "亚夏",
+    "type": "LocationType.unknown",
+    "region": "未知世界",
+    "dangerLevel": 5,
+    "population": 0,
+    "features": [
+      "未知"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "未知之地。"
+  },
+  {
+    "id": "location_bone_mountains",
+    "name": "骸骨山脉",
+    "type": "LocationType.unknown",
+    "region": "未知世界",
+    "dangerLevel": 6,
+    "population": 0,
+    "features": [
+      "未知"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "未知之地。"
+  },
+  {
+    "id": "location_grey_wastes",
+    "name": "灰色荒原",
+    "type": "LocationType.unknown",
+    "region": "未知世界",
+    "dangerLevel": 6,
+    "population": 0,
+    "features": [
+      "未知"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "未知之地。"
+  },
+  {
+    "id": "location_always_winter",
+    "name": "永冬之地",
+    "type": "LocationType.supernatural",
+    "region": "未知世界",
+    "dangerLevel": 6,
+    "population": 0,
+    "features": [
+      "异鬼领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_the_wall"
+    ],
+    "description": "异鬼领地，永冬之地。"
+  },
+  {
+    "id": "location_old_gods",
+    "name": "旧神领域",
+    "type": "LocationType.supernatural",
+    "region": "超自然",
+    "dangerLevel": 5,
+    "population": 0,
+    "features": [
+      "鱼梁木",
+      "绿先知"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "旧神信仰领域。"
+  },
+  {
+    "id": "location_seven_heavens",
+    "name": "七神天堂",
+    "type": "LocationType.supernatural",
+    "region": "超自然",
+    "dangerLevel": 1,
+    "population": 0,
+    "features": [
+      "七神信仰"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "七神信仰领域。"
+  },
+  {
+    "id": "location_drowned_god",
+    "name": "淹神海底宫殿",
+    "type": "LocationType.supernatural",
+    "region": "超自然",
+    "dangerLevel": 5,
+    "population": 0,
+    "features": [
+      "淹神信仰"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "淹神信仰领域。"
+  },
+  {
+    "id": "location_lord_of_light",
+    "name": "光之王圣火",
+    "type": "LocationType.supernatural",
+    "region": "超自然",
+    "dangerLevel": 4,
+    "population": 0,
+    "features": [
+      "光之王信仰"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "光之王信仰领域。"
+  },
+  {
+    "id": "location_many_faced_god",
+    "name": "千面之神殿堂",
+    "type": "LocationType.supernatural",
+    "region": "超自然",
+    "dangerLevel": 5,
+    "population": 0,
+    "features": [
+      "无面者信仰"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "无面者信仰领域。"
+  },
+  {
+    "id": "location_green_seer",
+    "name": "绿先知的鱼梁木网络",
+    "type": "LocationType.supernatural",
+    "region": "超自然",
+    "dangerLevel": 5,
+    "population": 0,
+    "features": [
+      "绿先知",
+      "易形者"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "绿先知领域。"
+  },
+  {
+    "id": "location_white_walker",
+    "name": "异鬼的永冬世界",
+    "type": "LocationType.supernatural",
+    "region": "超自然",
+    "dangerLevel": 6,
+    "population": 0,
+    "features": [
+      "异鬼领地"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "异鬼领地。"
+  },
+  {
+    "id": "location_dragon_dream",
+    "name": "龙之梦境",
+    "type": "LocationType.supernatural",
+    "region": "超自然",
+    "dangerLevel": 5,
+    "population": 0,
+    "features": [
+      "坦格利安家族"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "坦格利安家族梦境领域。"
+  },
+  {
+    "id": "location_wolf_dream",
+    "name": "狼之梦境",
+    "type": "LocationType.supernatural",
+    "region": "超自然",
+    "dangerLevel": 5,
+    "population": 0,
+    "features": [
+      "史塔克家族"
+    ],
+    "governorId": "null",
+    "connectedTo": [],
+    "description": "史塔克家族梦境领域。"
+  },
+  {
+    "id": "location_exile",
+    "name": "流亡之地",
+    "type": "LocationType.supernatural",
+    "region": "厄索斯",
+    "dangerLevel": 5,
+    "population": 0,
+    "features": [
+      "坦格利安家族流亡地"
+    ],
+    "governorId": "null",
+    "connectedTo": [
+      "location_dragonstone"
+    ],
+    "description": "坦格利安家族流亡厄索斯期间的落脚之地。"
+  }
+]
