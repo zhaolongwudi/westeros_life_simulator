@@ -44,9 +44,19 @@ void _expectNoEnglish(String label, String text) {
   }
 }
 
-/// 造一个指定身份的玩家。
-Player _playerWith(PlayerIdentity identity) {
-  return Player.defaultPlayer().copyWith(identity: identity);
+/// 造一个指定身份的玩家（可选指定地点）。
+Player _playerWith(PlayerIdentity identity, {String locationId = 'location_winterfell'}) {
+  return Player.defaultPlayer()
+      .copyWith(identity: identity, locationId: locationId);
+}
+
+/// 从文本中取第一个整数（用于解析收益数字）。
+int _firstInt(String text, String label) {
+  final m = RegExp(r'$label (\d+)').firstMatch(text);
+  if (m == null) {
+    fail('未能从文本解析「$label N」：\n$text');
+  }
+  return int.parse(m.group(1)!);
 }
 
 void main() {
@@ -137,19 +147,27 @@ void main() {
     });
 
     test('商人身份的贸易加成确实生效（分支真的在跑）', () {
+      // 必须在城市/集市才能 trade（北境临冬城是城堡，会提前返回）
       final merchant = GameEngine()
-        ..startNewGame(player: _playerWith(PlayerIdentity.merchant));
+        ..startNewGame(player: _playerWith(
+          PlayerIdentity.merchant,
+          locationId: 'location_kings_landing',
+        ));
       final noble = GameEngine()
-        ..startNewGame(player: _playerWith(PlayerIdentity.noble));
-      // 同一回合序号、同一地点、同一 rng，商人收益应高于非商人
-      final merchantGold = merchant.trade();
-      final nobleGold = noble.trade();
-      final m = int.parse(
-          RegExp(r'净赚 (\d+)').firstMatch(merchantGold)!.group(1)!);
-      final n = int.parse(
-          RegExp(r'净赚 (\d+)').firstMatch(nobleGold)!.group(1)!);
-      expect(m, greaterThan(n));
-      expect(merchantGold.contains('商人的眼光'), isTrue);
+        ..startNewGame(player: _playerWith(
+          PlayerIdentity.noble,
+          locationId: 'location_kings_landing',
+        ));
+      // 同一回合序号、同一地点、同一 rng，商人收益应显著高于非商人
+      final merchantText = merchant.trade();
+      final nobleText = noble.trade();
+      expect(merchantText.contains('净赚'), isTrue,
+          reason: '商人应在君临做成一笔买卖：\n$merchantText');
+      final m = _firstInt(merchantText, '净赚');
+      final n = _firstInt(nobleText, '净赚');
+      // 商人基础 25 + speech*3 + rnd(0..14)；贵族 8 + 同上 → 差值恒为 17
+      expect(m - n, 17);
+      expect(merchantText.contains('商人的眼光'), isTrue);
     });
 
     test('十个身份的工作收入各自可算出（switch 全覆盖）', () {

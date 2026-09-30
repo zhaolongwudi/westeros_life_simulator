@@ -72,10 +72,12 @@ lib/
 │   ├── ai_service.dart            # AiService：AI 叙事/选项生成（Dio，含在场 NPC 多步骤任务模板/家族信息注入，Batch 10-22）
 │   ├── ai_config.dart             # AI Key/模型/BaseURL 持久化
 │   ├── event_service.dart         # 事件触发/效果/存档（注意：与 provider 双实现）
-│   └── save_service.dart          # 存档序列化/导入导出
+│   ├── save_service.dart          # ⭐ 存档序列化/导入导出（Batch 10-26 · M1：写入 schemaVersion / 读档先 migrateSave / 坏档隔离 .corrupted）
+│   └── save_migration.dart        # ⭐ 存档迁移机制（Batch 10-26 · M1）：kSaveSchemaVersion=1 / kSaveMigrations 迁移表 / migrateSave / readSchemaVersion / UnsupportedSaveVersionException
 │
 └── utils/                         # 【工具层】纯函数
-    ├── labels.dart                # 中文标签（身份/物品分类/技能）
+    ├── labels.dart                # 中文标签（身份/物品分类/技能/配偶身世 spouseOriginLabel，Batch 10-27）
+    ├── json_safe.dart             # ⭐ JSON 防御式解析（Batch 10-26 · M1）：safeStr/safeInt/safeBool/safeMap/safeList/safeStrList/safeIntMap/safeBoolMap/safeStringMap/safeObject/safeObjectList/safeEnum/asJsonMap/asInt/asBool
     ├── text_formats.dart          # 文本格式化
     └── narrative_format.dart      # 叙事分段/效果标签/选项编号（Batch 10-12）
 ```
@@ -144,7 +146,11 @@ GameEngine extends GameProviderBase with:
 | AI 叙事生成 | services/ai_service.dart（generateNarrative/_buildPrompt） |
 | AI 提示词注入在场 NPC | ai_service.dart（_buildPrompt 内 onSiteNpcDesc，Batch 10-22 升级为多步骤任务模板：标题/难度/期限） |
 | AI 提示词注入家族信息 | ai_service.dart（_buildPrompt 内 familyDesc：族语/规模/影响力，Batch 10-22） |
-| 存档 | services/save_service.dart |
+| 存档 | services/save_service.dart（Batch 10-26 · M1：metadata 写 schemaVersion / 读档先 migrateSave / 坏档改 .corrupted） |
+| 存档迁移/版本校验 | services/save_migration.dart（migrateSave / readSchemaVersion / kSaveSchemaVersion，Batch 10-26 · M1） |
+| JSON 防御式解析 | utils/json_safe.dart（safeStr/safeInt/safeObject/safeObjectList/safeEnum 等，Batch 10-26 · M1） |
+| 身份/身世中文标签 | utils/labels.dart（identityLabel / spouseOriginLabel，Batch 10-27） |
+| 事件历史上限 | providers/game_state_provider.dart（kHistoryLimit / droppedHistoryCount / historySummaryLine，Batch 10-27 · M2） |
 | 事件触发/选项 | providers/event_provider.dart |
 | 玩家面板 UI | screens/player_panel_screen.dart |
 | NPC 面板 UI | screens/npc_panel_screen.dart（Batch 10-15；进行中任务区块进度条/剩余月数/当前步骤，Batch 10-24） |
@@ -232,6 +238,9 @@ GameEngine extends GameProviderBase with:
 | batch10_22_ai_prompt_inject_test | AI prompt 注入：在场 NPC 任务模板/家族信息/自由民空态（10-22） |
 | batch10_23_task_templates_test | 任务模板扩充 20→32：珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯（10-23） |
 | batch10_24_task_progress_ui_test | NPC 任务进度 UI 化：totalTurns/整体进度/剩余月数/进度条渲染/契约回归（10-24，10 用例） |
+| batch10_25_marriage2_test | 婚姻二轮：离婚/丧偶/配偶谈心/月度事件/婚姻面板（10-25） |
+| m1_save_migration_test | **M1 存档契约**（10-26，22 用例）：schemaVersion 写入 / v0→v1 迁移 / 高版本抛异常 / 防御式 fromJson（坏类型/坏列表元素/空 Map）/ 坏档隔离 .corrupted / 旧档加载 / 保存往返 |
+| m2_identity_history_test | **M2 状态权威与身份正确性**（10-27，16 用例）：身份/身世中文化 / isIdentity 逐身份命中 / 商人贸易加成实证 / history 环形上限 200 + 丢弃计数 + 存档往返 |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
 > （grep `allEvents.length` / `eventsByType(...).length`）。
@@ -249,8 +258,13 @@ GameEngine extends GameProviderBase with:
 - **测试避免对满值做增量断言** → 先构造可增长初始值（坑 20）
 - **局部变量勿与基类 getter 重名** → progress 遮蔽，改名 taskProgress（坑 21）
 - **期限断言注意跨年边界** → 用 _addMonths 推算，勿臆测 +1 年（坑 21）
-- **本地无 Flutter** → 靠 GitHub Actions CI 验证；括号用 python 脚本检查
-- **gitdata_push 多 commit 极慢** → 必须后台跑 + 轮询日志（坑 10）；网络断了可重跑（幂等）
+- **本地无 Flutter** → 靠 GitHub Actions CI 验证；括号用 python 脚本检查（**当前 proot 下 SDK 完全不可执行**，坑 29）
+- **gitdata_push 多 commit 极慢** → 必须后台跑 + 轮询日志（坑 10）；网络断了可重跑（幂等）；单 commit 也要 8-10 分钟（坑 29）
+- **Map.from 浅拷贝** → 嵌套 Map 仍与入参共享，"不改入参"的纯函数须逐层拷贝（坑 29）
+- **try/catch 后不类型提升** → 用 final 局部变量承接，别在 catch 里 return 后用 `!`（坑 29）
+- **审查报告先验证再执行** → 时间推进/身份匹配两条为误判，见坑 30
+- **状态载体加字段** → 6 处清单：构造器初始化列表/字段声明/startNewGame/applyState/toJson/fromJson（坑 30）
+- **列表截断收口唯一入口** → `_appendHistory` 内部截断，fromJson 预截断并记账（坑 30）
 - **HANDOVER.md 已 gitignore** → 只本地更新；README 正常推送
 
 ## 七、文件写入约定（复用 HANDOVER 第二节）
@@ -261,4 +275,4 @@ GameEngine extends GameProviderBase with:
 3. 每次改完先括号检查（python 脚本），再 commit → push → CI → 绿后更新 HANDOVER + README
 
 ---
-*文档版本：v1.3（Batch 10-24 更新）· 最后更新：2026-09-28*
+*文档版本：v1.4（Batch 10-26 M1 + Batch 10-27 M2 更新）· 最后更新：2026-09-30*
