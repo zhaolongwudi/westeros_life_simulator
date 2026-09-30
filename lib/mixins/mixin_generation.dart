@@ -9,6 +9,8 @@ library;
 
 import '../models/marital.dart';
 import '../models/player.dart';
+import '../core/command_registry.dart';
+import '../core/monthly_pipeline.dart';
 import '../providers/game_provider_base.dart';
 import '../utils/labels.dart';
 import 'mixin_life.dart';
@@ -173,5 +175,46 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
       buf.writeln('⚰️ 你的身体每况愈下。若你不幸离世，「$heir」将继承你的家业。');
     }
     return buf.toString().trim();
+  }
+
+  // ==================== M3 · 指令自注册 ====================
+
+  /// 把本领域指令注册进注册表（order 与历史帮助文本顺序一致）。
+  void registerGenerationCommands(CommandRegistry registry) {
+    registry.register(
+      CommandSpec(
+        aliases: const ['家谱', '家族', 'family'],
+        order: 32,
+        helpLine: '家谱 / family       查看家谱与继承人',
+        handler: (args) => CommandResult(text: formatFamilyTree()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['立嗣', '添丁', 'addchild'],
+        order: 33,
+        requiredArgCount: 1,
+        missingArgsHint: '给子女起个名字吧。如「立嗣 罗柏」。',
+        helpLine: '立嗣 / addchild [名字] 为家族添丁（如 立嗣 罗柏）',
+        handler: (args) => CommandResult(text: addChild(args)),
+      ),
+    );
+  }
+  // ==================== M3 · 月度结算管线自注册 ====================
+
+  /// 把本领域（家族传承提示）钩子注册进管线。
+  void registerGenerationMonthlyHooks(MonthlyPipeline pipeline) {
+    pipeline.register(
+      MonthlyHookSpec(
+        id: 'succession',
+        phase: MonthlyPhase.beforeAdvance,
+        order: 5,
+        outputOrder: 4,
+        hook: () => MonthlyHookResult(
+          text: maybeSuccessionStory(),
+          outputOrder: 4,
+        ),
+      ),
+    );
   }
 }

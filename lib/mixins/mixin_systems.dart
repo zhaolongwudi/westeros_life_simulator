@@ -7,6 +7,8 @@ import '../models/family.dart';
 import '../models/location.dart';
 import '../models/player.dart';
 import '../models/system.dart';
+import '../core/command_registry.dart';
+import '../core/monthly_pipeline.dart';
 import '../providers/game_provider_base.dart';
 
 /// 系统混入。挂在 [GameProviderBase] 上。
@@ -178,5 +180,36 @@ mixin GameSystemsMixin on GameProviderBase {
         ],
       _ => ['世界悄然运转，暗流涌动。'],
     };
+  }
+
+  // ==================== M3 · 指令自注册 ====================
+
+  /// 把本领域指令注册进注册表（order 与历史帮助文本顺序一致）。
+  void registerSystemsCommands(CommandRegistry registry) {
+    registry.register(
+      CommandSpec(
+        aliases: const ['系统', 'systems'],
+        order: 4,
+        helpLine: '系统 / systems      查看已接触系统',
+        handler: (args) => CommandResult(text: formatSystemsPanel()),
+      ),
+    );
+  }
+  // ==================== M3 · 月度结算管线自注册 ====================
+
+  /// 把本领域（月度系统演进）钩子注册进管线。
+  void registerSystemsMonthlyHooks(MonthlyPipeline pipeline) {
+    pipeline.register(
+      MonthlyHookSpec(
+        id: 'systems',
+        phase: MonthlyPhase.beforeAdvance,
+        order: 1,
+        outputOrder: 1,
+        hook: () => MonthlyHookResult(
+          text: applyMonthlySystems(seed: progress.turnCount),
+          outputOrder: 1,
+        ),
+      ),
+    );
   }
 }

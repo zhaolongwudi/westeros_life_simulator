@@ -8,6 +8,9 @@
 library;
 
 import '../models/npc.dart';
+import '../core/command_registry.dart';
+import '../core/monthly_pipeline.dart';
+import '../utils/command_alias.dart';
 import '../providers/game_provider_base.dart';
 import 'mixin_life.dart';
 
@@ -327,5 +330,93 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
       buf.writeln('· ${n.name}（$level，$rel$mood$tasks）');
     }
     return buf.toString().trim();
+  }
+
+  /// 在场 NPC 列表文本（Batch 10-28 从 mixin_commands 迁入）。
+  String npcListText() {
+    final list = npcInteractionList();
+    if (list.isEmpty) return '【在场人物】\n你身边没有其他人在场。';
+    return '【在场人物】\n${list.join('\n')}';
+  }
+
+  // ==================== M3 · 指令自注册 ====================
+
+  /// 把本领域指令注册进注册表（order 与历史帮助文本顺序一致）。
+  void registerNpcInteractCommands(CommandRegistry registry) {
+    registry.register(
+      CommandSpec(
+        aliases: const ['在场', 'npc', '人物'],
+        order: 23,
+        helpLine: '在场 / npc         查看当前在场的 NPC 与关系',
+        handler: (args) => CommandResult(text: npcListText()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['互动', '交谈', 'interact'],
+        order: 24,
+        requiredArgCount: 1,
+        missingArgsHint: '和谁互动？如「互动 提利昂」或「互动 npc_tyrion」。输入「在场」看谁在这里。',
+        helpLine: '互动 / interact [名字]  与在场 NPC 深度互动（好感越高内容越深）',
+        handler: (args) => CommandResult(text: npcInteract(normalizeNpcAlias(this, args))),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['示好', '送礼', 'favor'],
+        order: 25,
+        requiredArgCount: 1,
+        missingArgsHint: '向谁示好？如「示好 提利昂」或「送礼 npc_tyrion」。',
+        helpLine: '示好 / favor [名字]   向在场 NPC 示好送礼（每日 3 次）',
+        handler: (args) => CommandResult(text: npcFavor(normalizeNpcAlias(this, args))),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['深聊', '聊天', 'chat'],
+        order: 26,
+        requiredArgCount: 1,
+        missingArgsHint: '和谁深聊？如「深聊 提利昂」。输入「在场」看谁在这里。',
+        helpLine: '深聊 / chat [名字]    与 NPC 深聊（相识以上，每日 3 次，更深入）',
+        handler: (args) => CommandResult(text: npcChat(normalizeNpcAlias(this, args))),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['任务', '委托', 'task'],
+        order: 27,
+        helpLine: '任务 / task [名字]    查看可接任务；带名字则接下委托',
+        handler: (args) => CommandResult(
+          text: args.isEmpty
+              ? formatNpcTaskPanel()
+              : acceptNpcTask(normalizeNpcAlias(this, args)),
+        ),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['关系', '关系面板', 'relations'],
+        order: 31,
+        helpLine: '关系 / relations     查看全部 NPC 关系/心情/任务数',
+        handler: (args) => CommandResult(text: formatNpcRelationPanel()),
+      ),
+    );
+  }
+  // ==================== M3 · 月度结算管线自注册 ====================
+
+  /// 把本领域（NPC 好感度事件链）钩子注册进管线。
+  void registerNpcInteractMonthlyHooks(MonthlyPipeline pipeline) {
+    pipeline.register(
+      MonthlyHookSpec(
+        id: 'npc_story',
+        phase: MonthlyPhase.beforeAdvance,
+        order: 4,
+        outputOrder: 3,
+        hook: () => MonthlyHookResult(
+          text: maybeNpcStoryEvent(seed: progress.turnCount),
+          outputOrder: 3,
+        ),
+      ),
+    );
   }
 }

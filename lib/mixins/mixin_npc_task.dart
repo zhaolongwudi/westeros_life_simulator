@@ -11,6 +11,9 @@ library;
 
 import '../data/npc_task_data.dart';
 import '../models/npc_task.dart';
+import '../core/command_registry.dart';
+import '../core/monthly_pipeline.dart';
+import '../utils/command_alias.dart';
 import '../providers/game_provider_base.dart';
 import 'mixin_life.dart';
 import 'mixin_npc_interact.dart';
@@ -268,5 +271,66 @@ mixin GameNpcTaskMixin
     final cur = curYear * 12 + curMonth;
     final due = dueYear * 12 + dueMonth;
     return cur > due;
+  }
+
+  // ==================== M3 · 指令自注册 ====================
+
+  /// 把本领域指令注册进注册表（order 与历史帮助文本顺序一致）。
+  void registerNpcTaskCommands(CommandRegistry registry) {
+    registry.register(
+      CommandSpec(
+        aliases: const ['任务列表', '任务2', 'tasks2'],
+        order: 28,
+        helpLine: '任务列表 / tasks2    查看多步骤任务（难度/期限/奖励）',
+        handler: (args) => CommandResult(text: formatNpcTaskPanelV2()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['接任务', 'accept'],
+        order: 29,
+        requiredArgCount: 1,
+        missingArgsHint: '接谁的任务？如「接任务 艾德·史塔克」。输入「任务列表」看可接任务。',
+        helpLine: '接任务 / accept [名字] 接下多步骤任务（如 接任务 艾德·史塔克）',
+        handler: (args) => CommandResult(text: acceptNpcTaskV2(normalizeNpcAlias(this, args))),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['进度', '任务进度', 'progress'],
+        order: 30,
+        helpLine: '进度 / progress     查看任务进度（进行中/完成/失败）',
+        handler: (args) => CommandResult(text: formatNpcTaskProgressPanel()),
+      ),
+    );
+  }
+  // ==================== M3 · 月度结算管线自注册 ====================
+
+  /// 把本领域（多步骤任务推进 + 逾期检查）钩子注册进管线。
+  void registerNpcTaskMonthlyHooks(MonthlyPipeline pipeline) {
+    pipeline.register(
+      MonthlyHookSpec(
+        id: 'task_advance',
+        phase: MonthlyPhase.beforeAdvance,
+        order: 8,
+        outputOrder: 7,
+        hook: () => MonthlyHookResult(
+          text: advanceNpcTasks(),
+          outputOrder: 7,
+        ),
+      ),
+    );
+    pipeline.register(
+      MonthlyHookSpec(
+        id: 'task_deadline',
+        phase: MonthlyPhase.beforeAdvance,
+        order: 9,
+        outputOrder: 8,
+        hook: () => MonthlyHookResult(
+          text: checkNpcTaskDeadlines(),
+          outputOrder: 8,
+        ),
+      ),
+    );
   }
 }

@@ -7,6 +7,7 @@ library;
 import 'dart:math';
 
 import '../models/npc.dart';
+import '../core/command_registry.dart';
 import '../providers/game_provider_base.dart';
 
 /// 一封信件（含来信/回信）。
@@ -183,5 +184,30 @@ mixin GameLetterMixin on GameProviderBase {
         ..writeln('  ${l.content}');
     }
     return buf.toString().trim();
+  }
+
+  // ==================== M3 · 指令自注册 ====================
+
+  /// 把本领域指令注册进注册表（order 与历史帮助文本顺序一致）。
+  void registerLetterCommands(CommandRegistry registry) {
+    registry.register(
+      CommandSpec(
+        aliases: const ['信', 'letter'],
+        order: 5,
+        helpLine: '信 / letter         查看信件',
+        handler: (args) => CommandResult(text: formatLettersPanel()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['回信', 'reply'],
+        order: 6,
+        helpLine: '回信 / reply [内容]  回复待回的信',
+        handler: (args) {
+          final reply = replyLetter(replyText: args.isEmpty ? null : args);
+          return CommandResult(text: reply.isEmpty ? '没有待回的信。' : reply);
+        },
+      ),
+    );
   }
 }

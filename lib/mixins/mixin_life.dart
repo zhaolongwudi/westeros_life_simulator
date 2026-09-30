@@ -9,6 +9,9 @@ library;
 import '../data/item_data.dart';
 import '../models/location.dart';
 import '../models/player.dart';
+import '../core/command_registry.dart';
+import '../core/monthly_pipeline.dart';
+import '../utils/command_alias.dart';
 import '../providers/game_provider_base.dart';
 import '../utils/labels.dart';
 
@@ -768,4 +771,181 @@ mixin GameLifeMixin on GameProviderBase {
 
   /// 精力消耗后的成功率乘数（疲惫打折）。
   double energySuccessMultiplier() => isExhausted ? kLowEnergyPenalty : 1.0;
+
+  /// 解析「购买 <物品> <数量>」参数并执行（Batch 10-28 从 mixin_commands 迁入）。
+  String buyFromArgs(String args) {
+    final parts = args.split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    final namePart = parts.first;
+    var quantity = 1;
+    if (parts.length > 1) {
+      quantity = int.tryParse(parts[1]) ?? 1;
+    }
+    final itemId = normalizeItemAlias(namePart);
+    if (!isKnownItemId(itemId)) {
+      return '这里买不到「$namePart」。输入「行情」看看有什么可买。';
+    }
+    return buyItem(itemId, quantity);
+  }
+
+  /// 解析「出售 <物品> <数量>」参数并执行（Batch 10-28 从 mixin_commands 迁入）。
+  String sellFromArgs(String args) {
+    final parts = args.split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    final namePart = parts.first;
+    var quantity = 1;
+    if (parts.length > 1) {
+      quantity = int.tryParse(parts[1]) ?? 1;
+    }
+    final itemId = normalizeItemAlias(namePart);
+    if (!isKnownItemId(itemId)) {
+      return '你没有「$namePart」这种东西。';
+    }
+    return sellItem(itemId, quantity);
+  }
+
+  // ==================== M3 · 指令自注册 ====================
+
+  /// 把本领域指令注册进注册表（order 与历史帮助文本顺序一致）。
+  void registerLifeCommands(CommandRegistry registry) {
+    registry.register(
+      CommandSpec(
+        aliases: const ['背包', 'bag', 'inventory'],
+        order: 2,
+        helpLine: '背包 / bag          查看背包物品',
+        handler: (args) => CommandResult(text: formatInventoryPanel()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['使用', 'use'],
+        order: 3,
+        requiredArgCount: 1,
+        missingArgsHint: '使用什么？如「使用 黑面包」或「使用 item_meat」。',
+        helpLine: '使用 / use [物品]    使用消耗品（如 使用 黑面包）',
+        handler: (args) => CommandResult(text: useItem(normalizeItemAlias(args))),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['巡游', '特产', 'specialty'],
+        order: 13,
+        helpLine: '巡游 / specialty    地区特产巡游：当地收特产，异地高价出售（消耗精力）',
+        handler: (args) => CommandResult(text: tradeSpecialty()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['议价', 'negotiate'],
+        order: 14,
+        helpLine: '议价 / negotiate    商人议价：口才决定买卖折价（每日 1 次）',
+        handler: (args) => CommandResult(text: negotiate()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['商队', '护送', 'convoy'],
+        order: 15,
+        helpLine: '商队 / convoy       商队护送：按战斗值判定报酬与风险（每日 1 次）',
+        handler: (args) => CommandResult(text: convoy()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['购买', '买入', 'buy'],
+        order: 16,
+        requiredArgCount: 1,
+        missingArgsHint: '买什么？如「购买 黑面包」或「买入 item_meat」。输入「行情」看价格。',
+        helpLine: '购买 / buy [物品]    购买物品（如 购买 黑面包 或 买入 长剑）',
+        handler: (args) => CommandResult(text: buyFromArgs(args)),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['出售', '卖出', 'sell'],
+        order: 17,
+        requiredArgCount: 1,
+        missingArgsHint: '卖什么？如「出售 烤肉」或「卖出 item_wine」。',
+        helpLine: '出售 / sell [物品]   出售物品（如 出售 烤肉 或 卖出 item_wine）',
+        handler: (args) => CommandResult(text: sellFromArgs(args)),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['行情', 'market', '价格'],
+        order: 18,
+        helpLine: '行情 / market       查看当前地点物价',
+        handler: (args) => CommandResult(text: formatMarketPanel()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['装备', 'equip'],
+        order: 19,
+        requiredArgCount: 1,
+        missingArgsHint: '装备什么？如「装备 长剑」或「装备 锁子甲」。',
+        helpLine: '装备 / equip [物品]  装备武器/护甲/坐骑（如 装备 长剑）',
+        handler: (args) => CommandResult(text: equip(normalizeItemAlias(args))),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['卸下', 'unequip'],
+        order: 20,
+        requiredArgCount: 1,
+        missingArgsHint: '卸下什么？如「卸下 长剑」。',
+        helpLine: '卸下 / unequip [物品] 卸下装备',
+        handler: (args) => CommandResult(text: unequip(normalizeItemAlias(args))),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['装备栏', '装备面板', 'equipment'],
+        order: 21,
+        helpLine: '装备栏 / equipment   查看当前装备与战斗值',
+        handler: (args) => CommandResult(text: formatEquipmentPanel()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['头衔', 'title'],
+        order: 22,
+        helpLine: '头衔 / title       查看头衔与晋升进度',
+        handler: (args) => CommandResult(text: formatTitlePanel()),
+      ),
+    );
+  }
+  // ==================== M3 · 月度结算管线自注册 ====================
+
+  /// 把本领域（生存结算 + 头衔晋升）钩子注册进管线。
+  ///
+  /// 注意：头衔晋升在旧实现里第 3 个执行，但文案排在任务逾期之后，
+  /// 故 order 与 outputOrder 不同。
+  void registerLifeMonthlyHooks(MonthlyPipeline pipeline) {
+    pipeline.register(
+      MonthlyHookSpec(
+        id: 'life',
+        phase: MonthlyPhase.beforeAdvance,
+        order: 2,
+        outputOrder: 2,
+        hook: () => MonthlyHookResult(
+          text: applyMonthlyLife(seed: progress.turnCount),
+          outputOrder: 2,
+        ),
+      ),
+    );
+    pipeline.register(
+      MonthlyHookSpec(
+        id: 'title',
+        phase: MonthlyPhase.beforeAdvance,
+        order: 3,
+        outputOrder: 9,
+        hook: () {
+          final t = checkTitlePromotion();
+          return MonthlyHookResult(
+            text: t.isEmpty ? '' : '🏆 你获得新头衔：$t！',
+            outputOrder: 9,
+          );
+        },
+      ),
+    );
+  }
 }

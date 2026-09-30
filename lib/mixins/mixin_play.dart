@@ -6,7 +6,10 @@ library;
 import 'dart:math';
 import '../models/location.dart';
 import '../models/player.dart';
+import '../core/command_registry.dart';
+import '../core/monthly_pipeline.dart';
 import '../providers/game_provider_base.dart';
+import '../utils/command_alias.dart';
 import '../utils/labels.dart';
 import 'mixin_generation.dart';
 import 'mixin_life.dart';
@@ -187,69 +190,87 @@ mixin GamePlayMixin
   /// 返回本月的完整叙事（含系统结算与生存结算），供 UI/AI 展示。
   String advanceMonth() {
     if (!isGameActive || isGameOver) return '游戏尚未开始。';
-    final monthText = applyMonthlySystems(seed: progress.turnCount);
-    final lifeText = applyMonthlyLife(seed: progress.turnCount);
-    // 头衔晋升检查（声望积累后自动晋升）
-    final titlePromotion = checkTitlePromotion();
-    // NPC 好感度事件链（关系突破阈值触发专属剧情）
-    final npcStory = maybeNpcStoryEvent(seed: progress.turnCount);
-    // 家族传承提示（年长/濒死时立嗣）
-    final succession = maybeSuccessionStory();
-    // 婚后生育（Batch 10-17：已婚且未满上限时有概率添丁）
-    final familyEvent = maybeFamilyEvent(seed: progress.turnCount);
-    // 婚后月度事件（Batch 10-25：按身世触发的家宅事件）
-    final spouseMonthly = maybeSpouseMonthlyEvent(seed: progress.turnCount);
-    // NPC 多步骤任务：月度推进 + 逾期检查（Batch 10-18）
-    final npcTaskAdvance = advanceNpcTasks();
-    final npcTaskDeadline = checkNpcTaskDeadlines();
-    advanceTime();
-    // 跨年清除离婚标记（Batch 10-25：再婚冷却一年）
-    maybeClearDivorceFlag();
-    // 月度世界事件浮现（30% 概率触发一个可触发事件作为叙事提示）
-    final worldEvent = _maybeWorldEvent(seed: progress.turnCount);
-    // 死亡：尝试世代传承
-    final inheritance = _tryInheritance();
-    final buf = StringBuffer()
-      ..writeln('⏳ 时间推进到 ${progress.year}年${progress.month}月（${progress.season}）');
-    if (monthText.isNotEmpty) {
-      buf.writeln(monthText);
-    }
-    if (lifeText.isNotEmpty) {
-      buf.writeln(lifeText);
-    }
-    if (npcStory.isNotEmpty) {
-      buf.writeln(npcStory);
-    }
-    if (succession.isNotEmpty) {
-      buf.writeln(succession);
-    }
-    if (familyEvent.isNotEmpty) {
-      buf.writeln(familyEvent);
-    }
-    if (spouseMonthly.isNotEmpty) {
-      buf.writeln(spouseMonthly);
-    }
-    if (npcTaskAdvance.isNotEmpty) {
-      buf.writeln(npcTaskAdvance);
-    }
-    if (npcTaskDeadline.isNotEmpty) {
-      buf.writeln(npcTaskDeadline);
-    }
-    if (titlePromotion.isNotEmpty) {
-      buf.writeln('🏆 你获得新头衔：$titlePromotion！');
-    }
-    if (inheritance != null) {
-      buf.writeln(inheritance);
-    }
-    if (worldEvent.isNotEmpty) {
-      buf.writeln(worldEvent);
-    }
+    // 月度结算管线（Batch 10-28 · M3）：各领域钩子按注册顺序执行，
+    // 时钟推进由管线在 before/after 两阶段之间调用。
+    final hookText = monthlyPipeline.runMonth(advanceClock: advanceTime);
+    final buf = StringBuffer()..writeln(
+      '⏳ 时间推进到 ${progress.year}年${progress.month}月（${progress.season}）',
+    );
+    if (hookText.isNotEmpty) buf.write(hookText);
     final loc = currentLocation;
     if (loc != null) {
       buf.writeln('你身处 ${loc.name}（${loc.region}）。');
     }
     return buf.toString().trim();
   }
+
+  // ==================== M3 · 月度结算管线 ====================
+
+  MonthlyPipeline? _monthly;
+
+  /// 月度结算管线（首次访问时构建并缓存）。
+  ///
+  /// 钩子的 phase/order/outputOrder 与 Batch 10-28 之前 [advanceMonth]
+  /// 里的调用顺序、文本顺序逐一对应，保证月度叙事逐字一致。
+  MonthlyPipeline get monthlyPipeline {
+    final cached = _monthly;
+    if (cached != null) return cached;
+    final pipeline = MonthlyPipeline();
+    registerPlayMonthlyHooks(pipeline);
+    registerSystemsMonthlyHooks(pipeline);
+    registerLifeMonthlyHooks(pipeline);
+    registerNpcInteractMonthlyHooks(pipeline);
+    registerGenerationMonthlyHooks(pipeline);
+    registerMarriageMonthlyHooks(pipeline);
+    registerNpcTaskMonthlyHooks(pipeline);
+    _monthly = pipeline;
+    return pipeline;
+  }
+
+  /// 把本领域的月度钩子注册进管线（推进时钟之后的阶段）。
+  ///
+  /// 执行顺序与旧实现逐条对应：跨年清理离婚标记 → 死亡传承 → 世界事件。
+  /// 传承必须排在世界事件之前：当月死亡换嗣时，旧实现里随后的世界事件
+  /// 是用「新家主」掷的，顺序调换会改变结果。
+  void registerPlayMonthlyHooks(MonthlyPipeline pipeline) {
+    pipeline.register(
+      MonthlyHookSpec(
+        id: 'divorce_clear',
+        phase: MonthlyPhase.afterAdvance,
+        order: 10,
+        outputOrder: 0,
+        hook: () {
+          maybeClearDivorceFlag();
+          return const MonthlyHookResult(text: '');
+        },
+      ),
+    );
+    pipeline.register(
+      MonthlyHookSpec(
+        id: 'inheritance',
+        phase: MonthlyPhase.afterAdvance,
+        order: 11,
+        outputOrder: 10,
+        hook: () => MonthlyHookResult(
+          text: _tryInheritance() ?? '',
+          outputOrder: 10,
+        ),
+      ),
+    );
+    pipeline.register(
+      MonthlyHookSpec(
+        id: 'world_event',
+        phase: MonthlyPhase.afterAdvance,
+        order: 12,
+        outputOrder: 11,
+        hook: () => MonthlyHookResult(
+          text: _maybeWorldEvent(seed: progress.turnCount),
+          outputOrder: 11,
+        ),
+      ),
+    );
+  }
+
   /// 玩家死亡后的世代传承尝试。
   ///
   /// - 有继承人：切换为继承人（新玩家），返回传承叙事，游戏继续。
@@ -339,4 +360,70 @@ mixin GamePlayMixin
     }
     return buf.toString().trim();
   }
+
+  // ==================== M3 · 指令自注册 ====================
+
+  /// 把本领域（日常玩法）指令注册进注册表（order 与历史帮助文本顺序一致）。
+  void registerPlayCommands(CommandRegistry registry) {
+    registry.register(
+      CommandSpec(
+        aliases: const ['状态', 'status'],
+        order: 1,
+        helpLine: '状态 / status       查看玩家状态（生命/精力/饱食/背包）',
+        handler: (args) => CommandResult(text: formatPlayerPanel()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['训练', 'train'],
+        order: 9,
+        requiredArgCount: 1,
+        missingArgsHint: '训练什么？可用技能：sword（剑术）/ archery（弓术）/ riding（骑术）/ speech（口才）/ alchemy（炼金）。',
+        helpLine: '训练 / train [技能]  训练技能（sword/archery/riding/speech/alchemy）',
+        handler: (args) => CommandResult(text: train(normalizeSkillAlias(args))),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['工作', 'work'],
+        order: 10,
+        helpLine: '工作 / work         赚取金币（消耗精力）',
+        handler: (args) => CommandResult(text: work()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['狩猎', 'hunt'],
+        order: 11,
+        helpLine: '狩猎 / hunt         野外狩猎（消耗精力）',
+        handler: (args) => CommandResult(text: hunt()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['贸易', 'trade'],
+        order: 12,
+        helpLine: '贸易 / trade        城市贸易（消耗精力）',
+        handler: (args) => CommandResult(text: trade()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['休息', 'rest'],
+        order: 44,
+        helpLine: '休息 / rest         恢复精力/饱食（花 2 金币）',
+        handler: (args) => CommandResult(text: rest()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['过月', 'advance'],
+        order: 45,
+        consumedTurn: true,
+        helpLine: '过月 / advance      推进一个月',
+        handler: (args) => CommandResult(text: advanceMonth(), consumedTurn: true),
+      ),
+    );
+  }
+
 }

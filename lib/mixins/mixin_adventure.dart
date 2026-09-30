@@ -6,6 +6,7 @@ library;
 import 'dart:math';
 import '../data/item_data.dart';
 import '../models/location.dart';
+import '../core/command_registry.dart';
 import '../providers/game_provider_base.dart';
 import 'mixin_life.dart';
 import 'mixin_npc_interact.dart';
@@ -198,5 +199,28 @@ mixin GameAdventureMixin
       }
     }
     return buf.toString().trim();
+  }
+
+  // ==================== M3 · 指令自注册 ====================
+
+  /// 把本领域指令注册进注册表（order 与历史帮助文本顺序一致）。
+  void registerAdventureCommands(CommandRegistry registry) {
+    registry.register(
+      CommandSpec(
+        aliases: const ['旅行', 'travel', '去'],
+        order: 7,
+        helpLine: '旅行 / travel [地点] 查看可去地点或前往',
+        handler: (args) => CommandResult(text: args.isEmpty ? formatTravelPanel() : travel(args)),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['探索', 'explore'],
+        order: 8,
+        consumedTurn: true,
+        helpLine: '探索 / explore      探索当前地点',
+        handler: (args) => CommandResult(text: explore(), consumedTurn: true),
+      ),
+    );
   }
 }

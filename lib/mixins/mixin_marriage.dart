@@ -10,6 +10,8 @@
 library;
 
 import '../models/marital.dart';
+import '../core/command_registry.dart';
+import '../core/monthly_pipeline.dart';
 import '../providers/game_provider_base.dart';
 import '../utils/labels.dart';
 import 'mixin_generation.dart';
@@ -512,5 +514,131 @@ mixin GameMarriageMixin
       }
     }
     return buf.toString().trim();
+  }
+
+  // ==================== M3 · 指令自注册 ====================
+
+  /// 把本领域指令注册进注册表（order 与历史帮助文本顺序一致）。
+  void registerMarriageCommands(CommandRegistry registry) {
+    registry.register(
+      CommandSpec(
+        aliases: const ['求婚', '成婚', 'marry'],
+        order: 34,
+        requiredArgCount: 1,
+        missingArgsHint: '想与什么样的人成婚？如「求婚 平民」或「成婚 贵族」。',
+        helpLine: '求婚 / marry [身世]   成婚（平民/商人/战士/贵族，如 求婚 平民）',
+        handler: (args) => CommandResult(text: marry(args)),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['配偶', '共处', 'spouse'],
+        order: 35,
+        helpLine: '配偶 / spouse       与配偶共处（每日 1 次，恢复精力）',
+        handler: (args) => CommandResult(text: spouseInteract()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['婚姻', '婚姻面板', 'marriage'],
+        order: 36,
+        helpLine: '婚姻 / marriage     查看婚姻面板（配偶/感情/子女培养）',
+        handler: (args) => CommandResult(text: formatMarriagePanel()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['私语', '谈心', 'chatspouse'],
+        order: 37,
+        helpLine: '私语 / chatspouse [话题]  与配偶谈心（每日 2 次，增进感情）',
+        handler: (args) => CommandResult(text: spouseChat(args.isEmpty ? null : args)),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['离婚', 'divorce'],
+        order: 38,
+        helpLine: '离婚 / divorce      解除婚姻（需结婚满一年，耗 30 金币、声望 -10）',
+        handler: (args) => CommandResult(text: divorce()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['丧偶', 'widow'],
+        order: 39,
+        helpLine: '丧偶 / widow        配偶离世（解除婚姻，贵族联姻声望 -5）',
+        handler: (args) => CommandResult(text: spousePassesAway()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['培养', 'rear'],
+        order: 40,
+        requiredArgCount: 2,
+        missingArgsHint: '培养谁、往哪个方向？如「培养 罗柏 sword」。方向：sword/politics/speech/riding。',
+        helpLine: '培养 / rear [子女] [方向] 为子女定培养方向（sword/politics/speech/riding）',
+        handler: (args) {
+          final parts = args.split(RegExp(r'\s+'));
+          return CommandResult(text: rearChild(parts.first, parts[1]));
+        },
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['督导', 'tutor'],
+        order: 41,
+        requiredArgCount: 1,
+        missingArgsHint: '亲自督导哪个子女？如「督导 罗柏」。',
+        helpLine: '督导 / tutor [子女]  亲自督导子女（声望 +3）',
+        handler: (args) => CommandResult(text: tutorChild(args)),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['送学', 'school'],
+        order: 42,
+        requiredArgCount: 1,
+        missingArgsHint: '送哪个子女去学城/骑士团？如「送学 罗柏」。',
+        helpLine: '送学 / school [子女] 送子女去学城/骑士团进修（声望 +5）',
+        handler: (args) => CommandResult(text: sendChildToSchool(args)),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['家族树', '谱系', 'tree'],
+        order: 43,
+        helpLine: '家族树 / tree       查看家族树多代谱系',
+        handler: (args) => CommandResult(text: formatMultiGenTree()),
+      ),
+    );
+  }
+  // ==================== M3 · 月度结算管线自注册 ====================
+
+  /// 把本领域（婚后生育 + 家宅月度事件）钩子注册进管线。
+  void registerMarriageMonthlyHooks(MonthlyPipeline pipeline) {
+    pipeline.register(
+      MonthlyHookSpec(
+        id: 'family_event',
+        phase: MonthlyPhase.beforeAdvance,
+        order: 6,
+        outputOrder: 5,
+        hook: () => MonthlyHookResult(
+          text: maybeFamilyEvent(seed: progress.turnCount),
+          outputOrder: 5,
+        ),
+      ),
+    );
+    pipeline.register(
+      MonthlyHookSpec(
+        id: 'spouse_monthly',
+        phase: MonthlyPhase.beforeAdvance,
+        order: 7,
+        outputOrder: 6,
+        hook: () => MonthlyHookResult(
+          text: maybeSpouseMonthlyEvent(seed: progress.turnCount),
+          outputOrder: 6,
+        ),
+      ),
+    );
   }
 }
