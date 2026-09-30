@@ -232,7 +232,7 @@ GameEngine extends GameProviderBase with:
 | 过月 | advance | advanceMonth | 是 |
 | 帮助 | help | _helpText | 否 |
 
-## 五、测试文件映射（test/ 39 文件）
+## 五、测试文件映射（test/ 49 文件）
 
 | 测试文件 | 覆盖 |
 |----------|------|
