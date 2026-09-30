@@ -1,60 +1,17 @@
 /// 信件混入：NPC 主动来信 + 玩家回信。
 ///
+/// Letter 纯数据类已迁至 `models/letter.dart`（Batch 10-29 · M3b），本文件只留行为。
+///
 /// 世界那边的人在离线时也会惦记你：已结识的 NPC（同地点或有关系记录）
 /// 会偶尔寄来一封信，玩家可以回信增进关系（-100~100）。
 library;
 
 import 'dart:math';
 
-import '../models/npc.dart';
 import '../core/command_registry.dart';
+import '../models/letter.dart';
+import '../models/npc.dart';
 import '../providers/game_provider_base.dart';
-
-/// 一封信件（含来信/回信）。
-class Letter {
-  const Letter({
-    required this.senderId,
-    required this.senderName,
-    required this.content,
-    required this.year,
-    required this.month,
-    required this.isFromNpc,
-    this.replied = false,
-  });
-
-  /// 寄信人 NPC ID。
-  final String senderId;
-
-  /// 寄信人姓名。
-  final String senderName;
-
-  /// 信件内容。
-  final String content;
-
-  /// 信件年份。
-  final int year;
-
-  /// 信件月份。
-  final int month;
-
-  /// 是否来自 NPC（true=来信，false=玩家回信）。
-  final bool isFromNpc;
-
-  /// 是否已回信。
-  final bool replied;
-
-  Letter copyWith({bool? replied}) {
-    return Letter(
-      senderId: senderId,
-      senderName: senderName,
-      content: content,
-      year: year,
-      month: month,
-      isFromNpc: isFromNpc,
-      replied: replied ?? this.replied,
-    );
-  }
-}
 
 /// 信件混入。挂在 [GameProviderBase] 上。
 mixin GameLetterMixin on GameProviderBase {

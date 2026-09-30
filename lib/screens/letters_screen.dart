@@ -2,12 +2,15 @@
 ///
 /// 复用 GameEngine.letters（Batch 4 mixin_letter）数据。
 /// 纯展示 + 回信入口（调用 replyLetter）。
+///
+/// Batch 10-29 · M3b：Letter 数据类已迁至 models/letter.dart，
+/// 本文件不再 import mixin_letter（UI 层不依赖混入层）。
 library;
 
 import 'package:flutter/material.dart';
 
 import '../game_engine.dart';
-import '../mixins/mixin_letter.dart';
+import '../models/letter.dart';
 
 /// 信件面板。
 class LettersScreen extends StatefulWidget {

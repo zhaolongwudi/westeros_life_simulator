@@ -2,32 +2,41 @@
 ///
 /// 直接操作 [GameEngine]（Batch 4 混入层宿主），
 /// 指令分发复用 GameCommandsMixin.resolveCommand。
+///
+/// Batch 10-29 · M3b：本文件 709 → ~250 行。
+/// - 5 个展示 widget 搬到 `widgets/game/`（status/quick/ai_toggle/narrative/input）
+/// - AI 行动编排搬到 `mixins/mixin_ai.dart` 的 `runAiAction`，
+///   本文件只持 loading 态 + 渲染 `AiTurnResult`
+/// 本文件只做「接线」：所有业务逻辑在引擎侧，所有展示在 widgets/ 侧。
 library;
 
 import 'package:flutter/material.dart';
 
 import '../game_engine.dart';
+import '../models/ai_turn.dart';
 import '../models/event.dart';
-import '../services/ai_config.dart';
-import '../services/ai_service.dart';
-import '../utils/labels.dart';
-import '../utils/narrative_format.dart';
+import '../widgets/game/ai_toggle.dart';
+import '../widgets/game/input.dart';
+import '../widgets/game/narrative.dart';
+import '../widgets/game/quick.dart';
+import '../widgets/game/status.dart';
 import 'events_screen.dart';
-import 'family_screen.dart';
 import 'letters_screen.dart';
 import 'map_screen.dart';
 import 'npc_panel_screen.dart';
-import 'player_panel_screen.dart';
 import 'settings_screen.dart';
-import 'systems_screen.dart';
 
-/// 快捷指令按钮配置。
-class _QuickCommand {
-  const _QuickCommand(this.label, this.command);
-
-  final String label;
-  final String command;
-}
+/// 快捷指令（参考 mixin_commands 帮助）。
+const List<QuickCommand> _quickCommands = <QuickCommand>[
+  QuickCommand('状态', '状态'),
+  QuickCommand('工作', '工作'),
+  QuickCommand('训练剑术', '训练 sword'),
+  QuickCommand('狩猎', '狩猎'),
+  QuickCommand('贸易', '贸易'),
+  QuickCommand('探索', '探索'),
+  QuickCommand('旅行', '旅行'),
+  QuickCommand('过月', '过月'),
+];
 
 /// 游戏主界面。
 class GameScreen extends StatefulWidget {
@@ -48,7 +57,7 @@ class _GameScreenState extends State<GameScreen> {
   /// 叙事输出行（最新在底部）。
   final List<String> _lines = <String>[];
 
-  /// 是否 AI 行动模式（true 时输入框提交给 AiService 生成叙事/选项）。
+  /// 是否 AI 行动模式（true 时输入框提交给 AI 回合编排）。
   bool _aiMode = false;
 
   /// 当前 AI 生成中的选项（供用户点选）。
@@ -56,18 +65,6 @@ class _GameScreenState extends State<GameScreen> {
 
   /// AI 是否正在请求中。
   bool _aiLoading = false;
-
-  /// 快捷指令（参考 mixin_commands 帮助）。
-  static const List<_QuickCommand> _quickCommands = <_QuickCommand>[
-    _QuickCommand('状态', '状态'),
-    _QuickCommand('工作', '工作'),
-    _QuickCommand('训练剑术', '训练 sword'),
-    _QuickCommand('狩猎', '狩猎'),
-    _QuickCommand('贸易', '贸易'),
-    _QuickCommand('探索', '探索'),
-    _QuickCommand('旅行', '旅行'),
-    _QuickCommand('过月', '过月'),
-  ];
 
   @override
   void initState() {
@@ -125,14 +122,9 @@ class _GameScreenState extends State<GameScreen> {
     _appendLine(result.text);
   }
 
-  /// 执行一次 AI 行动：调用 AiService 生成叙事与选项。
+  /// 执行一次 AI 行动：编排下沉到引擎（runAiAction），本方法只渲染结果。
   Future<void> _runAiAction(String action) async {
     if (_aiLoading) return;
-    final config = await AiConfig.load();
-    if (!config.isConfigured) {
-      _appendLine('⚠️ 尚未配置 AI API Key。请到「设置 / 存档」→ AI 配置 填写。');
-      return;
-    }
 
     setState(() {
       _aiLoading = true;
@@ -141,38 +133,16 @@ class _GameScreenState extends State<GameScreen> {
     _appendLine('✨ 行动：$action');
     _appendLine('（AI 思考中…）');
 
-    final service = AiService(
-      apiKey: config.apiKey,
-      model: config.model,
-      baseUrl: config.baseUrl,
-    );
-    final context = _engine.worldSnapshot() +
-        '\n\n玩家行动：$action\n\n请根据当前世界状态生成叙事与选项。';
-
-    final response = await service.generateNarrative(
-      player: _engine.player,
-      context: context,
-      availableEvents: _engine.eventTemplates,
-      season: _engine.progress.season,
-      currentYear: _engine.progress.year,
-    );
-
+    final AiTurnResult result = await _engine.runAiAction(action);
     if (!mounted) return;
     setState(() {
       _aiLoading = false;
+      _aiChoices = result.choices;
     });
     // 移除占位行
     _lines.removeWhere((l) => l == '（AI 思考中…）');
-    if (response.isSuccess && response.narrative.isNotEmpty) {
-      _appendLine(response.narrative);
-      if (response.choices.isNotEmpty) {
-        setState(() {
-          _aiChoices = response.choices;
-        });
-        _appendLine('（选择你的下一步）');
-      }
-    } else {
-      _appendLine('⚠️ AI 生成失败：${response.errorMessage ?? '未知错误'}');
+    for (final line in result.lines) {
+      _appendLine(line);
     }
   }
 
@@ -234,14 +204,14 @@ class _GameScreenState extends State<GameScreen> {
         child: Column(
           children: <Widget>[
             // 玩家状态摘要条
-            _StatusBar(engine: _engine),
+            StatusBar(engine: _engine),
             // 快捷指令
-            _QuickCommandBar(
+            QuickCommandBar(
               commands: _quickCommands,
               onTap: _submitCommand,
             ),
             // AI 模式开关
-            _AiModeToggle(
+            AiModeToggle(
               aiMode: _aiMode,
               aiLoading: _aiLoading,
               onToggle: (v) => setState(() {
@@ -251,7 +221,7 @@ class _GameScreenState extends State<GameScreen> {
             ),
             // 叙事输出区
             Expanded(
-              child: _NarrativeView(
+              child: NarrativeView(
                 lines: _lines,
                 scrollController: _scrollController,
                 engine: _engine,
@@ -261,7 +231,7 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ),
             // 指令输入区
-            _CommandInputBar(
+            CommandInputBar(
               controller: _inputController,
               onSubmitted: _submitCommand,
               hintText: _aiMode
@@ -270,439 +240,6 @@ class _GameScreenState extends State<GameScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// 顶部状态摘要条。
-class _StatusBar extends StatelessWidget {
-  const _StatusBar({required this.engine});
-
-  final GameEngine engine;
-
-  @override
-  Widget build(BuildContext context) {
-    final p = engine.player;
-    final loc = engine.currentLocation;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Text(
-              '${p.name} · ${identityLabel(p.identity)} · ${p.age}岁'
-              '${loc != null ? ' · ${loc.name}' : ''}',
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            '❤️${p.health} ⚡${p.energy} 🍖${p.hunger}',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            '${engine.progress.year}年${engine.progress.month}月 ${seasonShortLabel(engine.progress.season)}',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 快捷指令栏。
-class _QuickCommandBar extends StatelessWidget {
-  const _QuickCommandBar({required this.commands, required this.onTap});
-
-  final List<_QuickCommand> commands;
-  final ValueChanged<String> onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
-      child: SizedBox(
-        height: 40,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: commands.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 6),
-          itemBuilder: (context, index) {
-            final cmd = commands[index];
-            return ActionChip(
-              label: Text(cmd.label),
-              onPressed: () => onTap(cmd.command),
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-/// AI 模式开关条。
-class _AiModeToggle extends StatelessWidget {
-  const _AiModeToggle({
-    required this.aiMode,
-    required this.aiLoading,
-    required this.onToggle,
-  });
-
-  final bool aiMode;
-  final bool aiLoading;
-  final ValueChanged<bool> onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      color: aiMode
-          ? theme.colorScheme.primaryContainer.withAlpha(120)
-          : null,
-      child: Row(
-        children: <Widget>[
-          Icon(
-            Icons.auto_awesome,
-            size: 16,
-            color: aiMode ? theme.colorScheme.primary : theme.colorScheme.outline,
-          ),
-          const SizedBox(width: 8),
-          const Text('AI 行动模式'),
-          const Spacer(),
-          if (aiLoading)
-            const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          else
-            Switch(
-              value: aiMode,
-              onChanged: onToggle,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 叙事输出区。
-class _NarrativeView extends StatelessWidget {
-  const _NarrativeView({
-    required this.lines,
-    required this.scrollController,
-    required this.engine,
-    required this.onOpenPanel,
-    required this.aiChoices,
-    required this.onChooseAi,
-  });
-
-  final List<String> lines;
-  final ScrollController scrollController;
-  final GameEngine engine;
-  final ValueChanged<Widget> onOpenPanel;
-  final List<EventChoice> aiChoices;
-  final ValueChanged<EventChoice> onChooseAi;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    // 末尾附加项：AI 选项卡片 + 面板快捷入口
-    final extraCount = (aiChoices.isNotEmpty ? 1 : 0) + 1;
-    return ListView.builder(
-      controller: scrollController,
-      padding: const EdgeInsets.all(12),
-      itemCount: lines.length + extraCount,
-      itemBuilder: (context, index) {
-        // 末尾：AI 选项（如有）
-        if (aiChoices.isNotEmpty && index == lines.length) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Icon(
-                      Icons.alt_route,
-                      size: 16,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 6),
-                    Text('选择你的下一步', style: theme.textTheme.titleSmall),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                for (var i = 0; i < aiChoices.length; i++)
-                  _AiChoiceCard(
-                    ordinal: choiceOrdinal(i),
-                    choice: aiChoices[i],
-                    onTap: () => onChooseAi(aiChoices[i]),
-                  ),
-              ],
-            ),
-          );
-        }
-        // 末尾附：面板快捷入口
-        if (index == lines.length + (aiChoices.isNotEmpty ? 1 : 0)) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: <Widget>[
-                _PanelEntry(
-                  icon: Icons.person_outline,
-                  label: '玩家详情',
-                  color: theme.colorScheme.primary,
-                  onTap: () => onOpenPanel(PlayerPanelScreen(engine: engine)),
-                ),
-                _PanelEntry(
-                  icon: Icons.family_restroom,
-                  label: '家族面板',
-                  color: theme.colorScheme.tertiary,
-                  onTap: () => onOpenPanel(FamilyScreen(engine: engine)),
-                ),
-                _PanelEntry(
-                  icon: Icons.people_alt_outlined,
-                  label: 'NPC 关系',
-                  color: theme.colorScheme.tertiary,
-                  onTap: () => onOpenPanel(NpcPanelScreen(engine: engine)),
-                ),
-                _PanelEntry(
-                  icon: Icons.grid_view_outlined,
-                  label: '系统面板',
-                  color: theme.colorScheme.secondary,
-                  onTap: () => onOpenPanel(SystemsScreen(engine: engine)),
-                ),
-                _PanelEntry(
-                  icon: Icons.map_outlined,
-                  label: '地图',
-                  color: theme.colorScheme.primary,
-                  onTap: () => onOpenPanel(MapScreen(engine: engine)),
-                ),
-              ],
-            ),
-          );
-        }
-
-        final line = lines[index];
-        final isCommand = line.startsWith('> ');
-        // 叙事行：分段渲染（长叙事拆为短段落，逐段展示）
-        final segments = isCommand ? <String>[line] : splitNarrative(line);
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Align(
-            alignment: isCommand ? Alignment.centerRight : Alignment.centerLeft,
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: isCommand ? 260 : 640,
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: isCommand
-                    ? theme.colorScheme.primaryContainer
-                    : theme.colorScheme.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  for (var i = 0; i < segments.length; i++)
-                    Padding(
-                      padding: EdgeInsets.only(top: i == 0 ? 0 : 4),
-                      child: Text(
-                        segments[i],
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontFamily: isCommand ? null : 'monospace',
-                          height: 1.45,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// AI 选项卡片：编号 + 效果预览。
-class _AiChoiceCard extends StatelessWidget {
-  const _AiChoiceCard({
-    required this.ordinal,
-    required this.choice,
-    required this.onTap,
-  });
-
-  final String ordinal;
-  final EventChoice choice;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final labels = effectLabels(choice.effects);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Card(
-        color: theme.colorScheme.secondaryContainer.withAlpha(160),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: theme.colorScheme.secondary.withAlpha(90),
-          ),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                // 编号徽章
-                Container(
-                  width: 28,
-                  height: 28,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    ordinal,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.onPrimary,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        choice.text,
-                        style: theme.textTheme.titleSmall,
-                      ),
-                      if (choice.narrative.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          choice.narrative,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 6),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 4,
-                        children: <Widget>[
-                          for (final label in labels)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.surfaceContainerHigh,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                label,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 面板快捷入口按钮。
-class _PanelEntry extends StatelessWidget {
-  const _PanelEntry({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ActionChip(
-      avatar: Icon(icon, size: 18, color: color),
-      label: Text(label),
-      onPressed: onTap,
-    );
-  }
-}
-
-/// 指令输入栏。
-class _CommandInputBar extends StatelessWidget {
-  const _CommandInputBar({
-    required this.controller,
-    required this.onSubmitted,
-    this.hintText = '输入指令（如 工作 / 训练 sword / 过月）',
-  });
-
-  final TextEditingController controller;
-  final ValueChanged<String> onSubmitted;
-  final String hintText;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                hintText: hintText,
-                border: const OutlineInputBorder(),
-                isDense: true,
-              ),
-              textInputAction: TextInputAction.send,
-              onSubmitted: onSubmitted,
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton.filled(
-            icon: const Icon(Icons.send),
-            tooltip: '发送',
-            onPressed: () => onSubmitted(controller.text),
-          ),
-        ],
       ),
     );
   }
