@@ -66,9 +66,10 @@ void main() {
         service: _mockService(_MockKind.badRequest),
       );
       expect(result.isSuccess, false);
-      expect(result.lines.length, 1);
-      expect(result.lines.single, contains('⚠️ AI 生成失败'));
-      expect(result.lines.single, contains('400'));
+      expect(result.lines.length, 2);
+      expect(result.lines.first, contains('⚠️ AI 生成失败'));
+      expect(result.lines.first, contains('400'));
+      expect(result.lines.last, AiTurnResult.degradedLine);
       expect(result.choices, isEmpty);
     });
   });

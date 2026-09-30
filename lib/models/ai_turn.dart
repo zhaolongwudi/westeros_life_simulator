@@ -22,6 +22,10 @@ class AiTurnResult {
   /// 尚未开始游戏时的提示文案。
   static const String notStartedLine = '游戏尚未开始。';
 
+  /// AI 请求失败后的降级提示（附在失败行之后，引导用户切回本地指令模式）。
+  static const String degradedLine =
+      '🔁 AI 暂时不可用，可继续使用本地指令（帮助/训练/工作/旅行…）游玩。';
+
   /// 待展示的叙事行（按顺序；失败时为 1 行错误提示）。
   final List<String> lines;
 

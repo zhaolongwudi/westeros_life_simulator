@@ -65,7 +65,10 @@ mixin GameAiMixin
 
     if (!response.isSuccess || response.narrative.isEmpty) {
       return AiTurnResult(
-        lines: <String>['⚠️ AI 生成失败：${response.errorMessage ?? '未知错误'}'],
+        lines: <String>[
+          '⚠️ AI 生成失败：${response.errorMessage ?? '未知错误'}',
+          AiTurnResult.degradedLine,
+        ],
         choices: const <EventChoice>[],
       );
     }
