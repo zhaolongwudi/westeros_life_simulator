@@ -99,12 +99,14 @@ class GameStateProvider extends ChangeNotifier {
     GameEvent? currentEvent,
     bool isGameActive = false,
     bool isGameOver = false,
+    int droppedHistoryCount = 0,
   })  : _player = player ?? Player.defaultPlayer(),
         _progress = progress ?? GameProgress.defaultProgress(),
         _history = history ?? <GameEvent>[],
         _currentEvent = currentEvent,
         _isGameActive = isGameActive,
-        _isGameOver = isGameOver;
+        _isGameOver = isGameOver,
+        _droppedHistoryCount = droppedHistoryCount < 0 ? 0 : droppedHistoryCount;
 
   Player _player;
   GameProgress _progress;
@@ -112,6 +114,29 @@ class GameStateProvider extends ChangeNotifier {
   GameEvent? _currentEvent;
   bool _isGameActive = false;
   bool _isGameOver = false;
+
+  /// 事件历史上限（Batch 10-27 · M2）。
+  ///
+  /// 旧实现无上限：history 只在 [applyChoice] 里无限追加，每回合又全量
+  /// 序列化进存档，几百回合后存档体积与写盘延迟线性膨胀。截断为最近
+  /// [kHistoryLimit] 条；被挤出的条数记在 [droppedHistoryCount]，
+  /// 由 [historySummaryLine] 生成一行摘要（不丢"发生过什么类型的事"）。
+  static const int kHistoryLimit = 200;
+
+  /// 已被截断丢弃的事件条数（可跨存档持久化，见 toJson/fromJson）。
+  int _droppedHistoryCount = 0;
+
+  /// 累计被截断丢弃的事件条数。
+  int get droppedHistoryCount => _droppedHistoryCount;
+
+  /// 截断提示行（无丢弃时返回空串）。
+  ///
+  /// 供 UI/AI 在历史开头展示，避免玩家以为"这些事没发生过"。
+  String historySummaryLine() {
+    if (_droppedHistoryCount == 0) return '';
+    return '📜 早期记录已归档（$kHistoryLimit 条上限），'
+        '此前 $droppedHistoryCount 条事件不再逐条留存。';
+  }
 
   /// 当前玩家。
   Player get player => _player;
@@ -131,11 +156,24 @@ class GameStateProvider extends ChangeNotifier {
   /// 游戏是否结束。
   bool get isGameOver => _isGameOver;
 
+  /// 追加一条事件到历史并执行环形截断（Batch 10-27 · M2）。
+  ///
+  /// 保留最近 [kHistoryLimit] 条，超出部分从头部丢弃并累加计数。
+  /// 唯一写 `_history` 的入口，保证任何路径（含 fromJson 回填）都不越界。
+  void _appendHistory(GameEvent event) {
+    _history.add(event);
+    while (_history.length > kHistoryLimit) {
+      _history.removeAt(0);
+      _droppedHistoryCount++;
+    }
+  }
+
   /// 开始新游戏。
   void startNewGame({Player? player}) {
     _player = player ?? Player.defaultPlayer();
     _progress = GameProgress.defaultProgress();
     _history = <GameEvent>[];
+    _droppedHistoryCount = 0;
     _currentEvent = null;
     _isGameActive = true;
     _isGameOver = false;
@@ -163,9 +201,10 @@ class GameStateProvider extends ChangeNotifier {
     // 应用效果
     _player = applyEffects(_player, choice.effects);
 
-    // 记录历史
-    if (_currentEvent != null) {
-      _history.add(_currentEvent!);
+    // 记录历史（经 _appendHistory 执行环形截断）
+    final pending = _currentEvent;
+    if (pending != null) {
+      _appendHistory(pending);
     }
     _currentEvent = null;
 
@@ -281,6 +320,7 @@ class GameStateProvider extends ChangeNotifier {
     _currentEvent = other._currentEvent;
     _isGameActive = other._isGameActive;
     _isGameOver = other._isGameOver;
+    _droppedHistoryCount = other._droppedHistoryCount;
     notifyListeners();
   }
 
@@ -293,6 +333,7 @@ class GameStateProvider extends ChangeNotifier {
       'currentEvent': _currentEvent?.toJson(),
       'isGameActive': _isGameActive,
       'isGameOver': _isGameOver,
+      'droppedHistoryCount': _droppedHistoryCount,
     };
   }
 
@@ -301,14 +342,21 @@ class GameStateProvider extends ChangeNotifier {
   /// Batch 10-26 · M1-T02。player/progress 整块缺失时退化为默认玩家与
   /// 默认进度，保证半残存档仍能进游戏而不是崩在加载页。
   factory GameStateProvider.fromJson(Map<String, dynamic> json) {
+    final parsed = safeObjectList(json, 'history', GameEvent.fromJson);
+    // 旧存档/外部存档可能带超长 history：同样按上限截断，
+    // 被挤出的条数累加到 droppedHistoryCount，避免读档即越界。
+    final overflow =
+        parsed.length > kHistoryLimit ? parsed.length - kHistoryLimit : 0;
     return GameStateProvider(
       player: safeObject(json['player'], Player.fromJson) ?? Player.defaultPlayer(),
       progress: safeObject(json['progress'], GameProgress.fromJson) ??
           GameProgress.defaultProgress(),
-      history: safeObjectList(json, 'history', GameEvent.fromJson),
+      history: overflow > 0 ? parsed.sublist(overflow) : parsed,
       currentEvent: safeObject(json['currentEvent'], GameEvent.fromJson),
       isGameActive: safeBool(json, 'isGameActive'),
       isGameOver: safeBool(json, 'isGameOver'),
+      droppedHistoryCount:
+          safeInt(json, 'droppedHistoryCount') + overflow,
     );
   }
 }

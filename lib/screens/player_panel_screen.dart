@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../data/item_data.dart';
 import '../game_engine.dart';
+import '../utils/labels.dart';
 
 /// 玩家详情面板。
 class PlayerPanelScreen extends StatelessWidget {
@@ -37,7 +38,7 @@ class PlayerPanelScreen extends StatelessWidget {
               ),
               title: Text(p.name, style: Theme.of(context).textTheme.titleLarge),
               subtitle: Text(
-                '${p.identity.name} · ${p.age}岁 · ${p.gender == 'male' ? '男' : '女'}',
+                '${identityLabel(p.identity)} · ${p.age}岁 · ${p.gender == 'male' ? '男' : '女'}',
               ),
             ),
           ),
@@ -187,7 +188,7 @@ class PlayerPanelScreen extends StatelessWidget {
                     if (e.isMarried && p.spouse != null) ...[
                       Text(
                         '配偶：${p.spouse!.name}'
-                        '（${p.spouse!.origin.name}，'
+                        '（${spouseOriginLabel(p.spouse!.origin)}，'
                         '结缡 ${e.progress.year - p.spouse!.marriedYear} 年）',
                       ),
                       Text(

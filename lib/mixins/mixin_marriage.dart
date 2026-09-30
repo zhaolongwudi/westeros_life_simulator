@@ -11,6 +11,7 @@ library;
 
 import '../models/marital.dart';
 import '../providers/game_provider_base.dart';
+import '../utils/labels.dart';
 import 'mixin_generation.dart';
 import 'mixin_life.dart';
 
@@ -81,7 +82,7 @@ mixin GameMarriageMixin
       ),
     );
     final dowryText = origin.dowry > 0 ? '，嫁妆 $origin.dowry 金币' : '';
-    return '💒 你与「$spouseName」成婚（${origin.name}），婚礼花去 $cost 金币$dowryText。'
+    return '💒 你与「$spouseName」成婚（${spouseOriginLabel(origin)}），婚礼花去 $cost 金币$dowryText。'
         '声望 ${origin.reputationBonus > 0 ? '+' : ''}${origin.reputationBonus}。从此不再孤身一人。';
   }
 
@@ -197,10 +198,10 @@ mixin GameMarriageMixin
     final p = player;
     final buf = StringBuffer()
       ..writeln('【家族树 · $houseName】\n『当前』')
-      ..writeln('· 家主：${p.name}（${p.identity.name}，${p.age}岁）');
+      ..writeln('· 家主：${p.name}（${identityLabel(p.identity)}，${p.age}岁）');
     if (isMarried) {
       final s = p.spouse!;
-      buf.writeln('· 配偶：${s.name}（${s.origin.name}，结缡 ${progress.year - s.marriedYear} 年）');
+      buf.writeln('· 配偶：${s.name}（${spouseOriginLabel(s.origin)}，结缡 ${progress.year - s.marriedYear} 年）');
     }
     if (p.children.isNotEmpty) {
       buf.writeln('· 子女：');
@@ -488,7 +489,7 @@ mixin GameMarriageMixin
     }
     final s = p.spouse!;
     final years = progress.year - s.marriedYear;
-    buf.writeln('· 配偶：${s.name}（${s.origin.name}，结缡 ${years <= 0 ? '元年' : '$years 年'}）');
+    buf.writeln('· 配偶：${s.name}（${spouseOriginLabel(s.origin)}，结缡 ${years <= 0 ? '元年' : '$years 年'}）');
     buf.writeln('· 感情：${s.affection}/100（${affectionLabel(s.affection)}）');
     if (s.familyId.isNotEmpty) {
       final fam = familyById(s.familyId);

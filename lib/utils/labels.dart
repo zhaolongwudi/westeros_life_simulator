@@ -5,6 +5,7 @@
 library;
 
 import '../models/event.dart';
+import '../models/marital.dart';
 import '../models/player.dart';
 
 /// 身份中文标签。
@@ -59,5 +60,18 @@ String eventTypeLabel(EventType type) {
     EventType.daily => '日常',
     EventType.adventure => '冒险',
     EventType.supernatural => '超自然',
+  };
+}
+
+/// 配偶身世中文标签（Batch 10-27）。
+///
+/// 此前 mixin_marriage / ai_service / 两个 screen 直接用 `origin.name`
+/// 输出英文枚举名（noble/commoner/merchant/warrior），中文叙事里突兀。
+String spouseOriginLabel(SpouseOrigin origin) {
+  return switch (origin) {
+    SpouseOrigin.noble => '贵族',
+    SpouseOrigin.commoner => '平民',
+    SpouseOrigin.merchant => '商人',
+    SpouseOrigin.warrior => '战士',
   };
 }

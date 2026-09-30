@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 
 import '../game_engine.dart';
 import '../models/marital.dart';
+import '../utils/labels.dart';
 
 /// 家族树面板。
 class FamilyTreeScreen extends StatelessWidget {
@@ -208,7 +209,7 @@ class _CurrentNode extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${p.identity.name} · ${p.age}岁'
+                        '${identityLabel(p.identity)} · ${p.age}岁'
                         '${p.title.isEmpty ? '' : ' · ${p.title}'}',
                         style: theme.textTheme.bodyMedium,
                       ),
@@ -223,7 +224,7 @@ class _CurrentNode extends StatelessWidget {
               _InfoLine(
                 icon: Icons.favorite_outline,
                 text: '配偶：${p.spouse!.name}'
-                    '（${p.spouse!.origin.name}，'
+                    '（${spouseOriginLabel(p.spouse!.origin)}，'
                     '结缡 ${engine.progress.year - p.spouse!.marriedYear} 年）',
               ),
             // 子女

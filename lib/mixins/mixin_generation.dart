@@ -10,6 +10,7 @@ library;
 import '../models/marital.dart';
 import '../models/player.dart';
 import '../providers/game_provider_base.dart';
+import '../utils/labels.dart';
 import 'mixin_life.dart';
 
 /// 家族继承混入。挂在 [GameProviderBase] 上，依赖 [GameLifeMixin]
@@ -65,7 +66,7 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
     final p = player;
     final buf = StringBuffer()
       ..writeln('【家谱】${houseName}家')
-      ..writeln('· 家主：${p.name}（${p.identity.name}，${p.age}岁）');
+      ..writeln('· 家主：${p.name}（${identityLabel(p.identity)}，${p.age}岁）');
     buf.writeln('· 婚姻：${flagOf('isMarried') ? '已婚' : '未婚'}');
     if (p.children.isEmpty) {
       buf.writeln('· 子女：尚无子嗣');
@@ -104,7 +105,7 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
         generation: currentGen,
         name: p.name,
         reignYears: '${p.age}岁继位',
-        title: p.title.isEmpty ? p.identity.name : p.title,
+        title: p.title.isEmpty ? identityLabel(p.identity) : p.title,
         achievement: p.reputation >= 70 ? '声望 ${p.reputation}' : '',
       ),
     );

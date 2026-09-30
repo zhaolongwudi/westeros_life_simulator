@@ -7,6 +7,7 @@ import 'dart:math';
 import '../models/location.dart';
 import '../models/player.dart';
 import '../providers/game_provider_base.dart';
+import '../utils/labels.dart';
 import 'mixin_generation.dart';
 import 'mixin_life.dart';
 import 'mixin_marriage.dart';
@@ -113,7 +114,7 @@ mixin GamePlayMixin
     final swordBonus = skillLevel('sword') ~/ 2;
     final total = base + speechBonus + swordBonus + rnd.nextInt(5);
     gainGold(total);
-    return '你忙碌了一天，挣得 $total 金币。（${player.identity.name}，'
+    return '你忙碌了一天，挣得 $total 金币。（${identityLabel(player.identity)}，'
         '技能加成 ${speechBonus + swordBonus}）';
   }
 
@@ -323,7 +324,7 @@ mixin GamePlayMixin
     final loc = currentLocation;
     final buf = StringBuffer()
       ..writeln('【玩家状态】')
-      ..writeln('· ${p.name}（${p.identity.name}），${p.age}岁，${p.gender == 'male' ? '男' : '女'}')
+      ..writeln('· ${p.name}（${identityLabel(p.identity)}），${p.age}岁，${p.gender == 'male' ? '男' : '女'}')
       ..writeln('· 家族：${fam?.name ?? '无'}（${fam?.motto ?? ''}）')
       ..writeln('· 地点：${loc?.name ?? p.locationId}（${loc?.region ?? ''}）')
       ..writeln('· 金币：${p.gold}｜声望：${p.reputation}')

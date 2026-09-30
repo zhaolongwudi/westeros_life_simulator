@@ -10,6 +10,7 @@ import '../data/item_data.dart';
 import '../models/location.dart';
 import '../models/player.dart';
 import '../providers/game_provider_base.dart';
+import '../utils/labels.dart';
 
 /// 生存状态混入。挂在 [GameProviderBase] 上。
 ///
@@ -703,7 +704,7 @@ mixin GameLifeMixin on GameProviderBase {
     if (next.isNotEmpty) {
       buf.writeln('· 距下次晋升还差 ${next.first - p.reputation} 点声望（${next.first}）。');
     } else {
-      buf.writeln('· 声望已达 ${p.identity.name} 的巅峰。');
+      buf.writeln('· 声望已达 ${identityLabel(p.identity)} 的巅峰。');
     }
     return buf.toString().trim();
   }

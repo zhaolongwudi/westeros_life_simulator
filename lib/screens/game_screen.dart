@@ -293,7 +293,7 @@ class _StatusBar extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: Text(
-              '${p.name} · ${p.identity.name} · ${p.age}岁'
+              '${p.name} · ${identityLabel(p.identity)} · ${p.age}岁'
               '${loc != null ? ' · ${loc.name}' : ''}',
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.titleSmall,

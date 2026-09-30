@@ -179,7 +179,7 @@ class AiService {
     // Batch 10-19：注入婚姻状态/子女培养/进行中任务
     final marriageDesc = player.spouse == null
         ? '（未婚）'
-        : '配偶 ${player.spouse!.name}（${player.spouse!.origin.name}，'
+        : '配偶 ${player.spouse!.name}（${spouseOriginLabel(player.spouse!.origin)}，'
             '结婚 ${currentYear <= 0 ? "?" : currentYear - player.spouse!.marriedYear} 年）';
     final childDesc = player.children.isEmpty
         ? '（无子女）'
