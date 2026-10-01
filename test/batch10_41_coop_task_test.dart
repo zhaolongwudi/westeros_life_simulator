@@ -20,7 +20,7 @@ void main() {
       final coop = allNpcTaskTemplates.where((t) => t.isCoop).toList();
       expect(coop.length, 8);
       final solo = allNpcTaskTemplates.where((t) => !t.isCoop).toList();
-      expect(solo.length, 44);
+      expect(solo.length, 46);
       for (final t in coop) {
         expect(t.coNpcId, isNotNull);
         expect(t.coNpcId, isNotEmpty);

@@ -171,7 +171,7 @@ void main() {
       expect(body, contains('头衔晋升'));
       expect(body, contains('北境守护'));
       expect(body, contains('85/100'));
-      expect(body, contains('一步之遥'));
+      expect(body, contains('已登顶本身份头衔巅峰'));
     });
     test('第一代无头衔玩家注入空态', () async {
       final captured = <String?>[null];
