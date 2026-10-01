@@ -129,12 +129,17 @@ void main() {
         'npc_nev',
         taskId: 'task_nev_cat_winter_store',
       );
-      // 直接把期限拨到过去触发逾期
+      // 直接把期限拨到过去触发逾期（copyWith 不暴露期限字段，直接构造新实例）
       final task = engine.activeTasks.first;
       engine.updatePlayer(
         engine.player.copyWith(
           activeTasks: [
-            task.copyWith(
+            NpcTaskProgress(
+              taskId: task.taskId,
+              npcId: task.npcId,
+              title: task.title,
+              stepIndex: task.stepIndex,
+              stepProgress: task.stepProgress,
               deadlineYear: 282,
               deadlineMonth: 1,
             ),
@@ -162,7 +167,12 @@ void main() {
       engine.updatePlayer(
         engine.player.copyWith(
           activeTasks: [
-            task.copyWith(
+            NpcTaskProgress(
+              taskId: task.taskId,
+              npcId: task.npcId,
+              title: task.title,
+              stepIndex: task.stepIndex,
+              stepProgress: task.stepProgress,
               deadlineYear: 282,
               deadlineMonth: 1,
             ),

@@ -235,10 +235,11 @@ mixin GameNpcTaskMixin
       }
     }
     if (hit == null) return '你目前没有进行中的任务叫「$keyword」。';
-    final template = npcTaskTemplateById(hit.taskId);
-    final who = npcById(hit.npcId)?.name ?? '委托人';
+    final chosen = hit;
+    final template = npcTaskTemplateById(chosen.taskId);
+    final who = npcById(chosen.npcId)?.name ?? '委托人';
     final updated = player.activeTasks
-        .map((t) => t.taskId == hit.taskId && t.isActive
+        .map((t) => t.taskId == chosen.taskId && t.isActive
             ? t.copyWith(abandoned: true)
             : t)
         .toList();
