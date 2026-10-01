@@ -31,7 +31,7 @@ lib/
 │   ├── item_data.dart             # 34 物品
 │   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节）
 │   ├── balance_data.dart           # ⭐ 数值配置集中（初始值/生存消耗/每日上限/头衔阶梯/活动经济/婚姻与世代阈值，Batch 10-30 · M4a；无 import 依赖的叶子模块）
-│   └── npc_task_data.dart         # NPC 多步骤任务模板（44 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯/奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈，Batch 10-18 起逐步扩充，10-39 扩至 44）
+│   └── npc_task_data.dart         # NPC 多步骤任务模板（48 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯/奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈，Batch 10-18 起逐步扩充，10-39 扩至 44，10-41 协作任务扩至 48；协作任务含 coNpcId）
 │
 ├── models/                        # 【模型层】不可变实体（copyWith + toJson/fromJson）
 │   ├── player.dart                # Player（含 health/energy/hunger/title/house/children/spouse/childRearing/generationRecords/activeTasks）
@@ -59,7 +59,7 @@ lib/
 │   ├── mixin_npc_interact.dart    # NPC 深度交互：关系等级/互动/示好/事件链 + 任务链/深聊/关系面板
 │   ├── mixin_generation.dart      # ⭐ 家族继承与多世代：立嗣/家谱/死亡传承（Batch 10-14；advanceGeneration 写谱系记录，Batch 10-17）
 │   ├── mixin_marriage.dart        # ⭐ 婚姻系统：求婚/配偶互动/婚后每月事件/子女培养/督导送学/多代家族树（Batch 10-17，245 行）
-│   ├── mixin_npc_task.dart        # ⭐ NPC 任务链二轮：多步骤任务/期限系统/奖励差异化（Batch 10-18，221 行）
+│   ├── mixin_npc_task.dart        # ⭐ NPC 任务链二轮：多步骤任务/期限系统/奖励差异化（Batch 10-18，221 行）+ 进度 UI 化（10-24）+ 限时奖惩（10-40）+ 多 NPC 协作任务 coNpcId（10-41）
 │   ├── mixin_commands.dart        # ⭐ 指令分发器（Batch 10-28 · M3a：401→100 行，只「拉齐 10 个领域自注册 + 按别名分发 + 帮助/未知指令」；**新增指令请去对应领域 mixin 的 registerXxxCommands**，不要再改这里）
 │   └── mixin_ai.dart              # AI 回合混入（applyAiChoice）
 │
@@ -166,6 +166,7 @@ GameEngine extends GameProviderBase with:
 | NPC 多步骤任务列表 | mixin_npc_task.dart（availableTasksOf/formatNpcTaskPanelV2，Batch 10-18） |
 | NPC 接任务 | mixin_npc_task.dart（acceptNpcTaskV2，Batch 10-18） |
 | NPC 任务推进/期限 | mixin_npc_task.dart（advanceNpcTasks/checkNpcTaskDeadlines，探索+过月挂载，Batch 10-18；按时完成关系加成 + 逾期扣声望关系惩罚，Batch 10-40） |
+| **多 NPC 协作任务** | mixin_npc_task.dart（availableTasksOf 协作过滤/coNpcNotAvailableReason 拒绝原因/acceptNpcTaskV2 双关系接取/advanceNpcTasks 双关系结算，Batch 10-41） |
 | NPC 任务整体进度/剩余月数 | mixin_npc_task.dart（npcTaskOverallRatio/npcTaskRemainingMonths/npcTaskCurrentStepDesc，Batch 10-24） |
 | NPC 任务进度面板 | mixin_npc_task.dart（formatNpcTaskProgressPanel，Batch 10-18） |
 | 效果应用（事件/AI 共用） | providers/game_state_provider.dart（applyEffects） |
@@ -240,7 +241,7 @@ GameEngine extends GameProviderBase with:
 | 过月 | advance | advanceMonth | 是 |
 | 帮助 | help | _helpText | 否 |
 
-## 五、测试文件映射（test/ 57 文件）
+## 五、测试文件映射（test/ 58 文件）
 
 | 测试文件 | 覆盖 |
 |----------|------|
@@ -274,6 +275,7 @@ GameEngine extends GameProviderBase with:
 | batch10_23_task_templates_test | 任务模板扩充 20→32：珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯（10-23） |
 | batch10_39_task_templates_test | 任务模板扩充 32→44：奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈（10-39，瑞肯在场全流程） |
 | batch10_40_task_penalty_test | 限时任务奖励/惩罚差异化：按时完成关系加成 / 逾期扣声望关系 / 反馈逾期月数（10-40） |
+| batch10_41_coop_task_test | 多 NPC 协作任务：协作标记/可接过滤（双方在场+关系达标）/接取拒绝/完成双关系奖励/面板标注（10-41，11 用例） |
 | batch10_24_task_progress_ui_test | NPC 任务进度 UI 化：totalTurns/整体进度/剩余月数/进度条渲染/契约回归（10-24，10 用例） |
 | batch10_25_marriage2_test | 婚姻二轮：离婚/丧偶/配偶谈心/月度事件/婚姻面板（10-25） |
 | m1_save_migration_test | **M1 存档契约**（10-26，22 用例）：schemaVersion 写入 / v0→v1 迁移 / 高版本抛异常 / 防御式 fromJson（坏类型/坏列表元素/空 Map）/ 坏档隔离 .corrupted / 旧档加载 / 保存往返 |
@@ -334,4 +336,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v2.4（新增 test/regression/ 跨批次回归套件映射 + M6b 回归防线速查）· 最后更新：2026-10-01*
+*文档版本：v2.5（新增 batch10_41_coop_task_test 映射 + 多 NPC 协作任务速查）· 最后更新：2026-10-01*
