@@ -813,6 +813,87 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
     rewardReputation: 5,
     rewardRelation: 6,
   ),
+
+  // ==================== 协作任务扩充（Batch 10-44 · 覆盖君临/高庭/派克城） ====================
+  // 协作任务 = 由 2 位 NPC 共同发布（coNpcId 标记同伴），接任务需两方都在场且关系 ≥ 相识。
+  // 既有 4 个（临冬城）后新增 4 个：覆盖君临（瑟曦×詹姆、提利昂×瑟曦）、
+  // 高庭（奥莲娜×玛格丽）、派克城（巴隆×雅拉）。
+
+  // 瑟曦 × 詹姆（君临）：揪出宫中的叛徒
+  NpcTaskTemplate(
+    id: 'task_cersei_jaime_traitor',
+    npcId: 'npc_cersei',
+    coNpcId: 'npc_jaime',
+    title: '揪出宫中的叛徒',
+    type: NpcTaskType.investigate,
+    difficulty: 4,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '听瑟曦列举近日机密泄露的疑点', turnsRequired: 1),
+      NpcTaskStep(description: '在御前会议与侍从之间暗中查访，锁定嫌疑', turnsRequired: 2),
+      NpcTaskStep(description: '与詹姆设局试探，令叛徒自投罗网', turnsRequired: 2),
+    ],
+    rewardGold: 110,
+    rewardReputation: 9,
+    rewardRelation: 9,
+  ),
+
+  // 提利昂 × 瑟曦（君临）：散布王后的流言
+  NpcTaskTemplate(
+    id: 'task_tyrion_cersei_rumor',
+    npcId: 'npc_tyrion',
+    coNpcId: 'npc_cersei',
+    title: '散布王后的流言',
+    type: NpcTaskType.diplomacy,
+    difficulty: 3,
+    deadlineMonths: 4,
+    steps: [
+      NpcTaskStep(description: '听提利昂说明要散布的流言内容与目标', turnsRequired: 1),
+      NpcTaskStep(description: '在酒馆与集市巧妙传话，不露痕迹', turnsRequired: 2),
+      NpcTaskStep(description: '向瑟曦回报流言引起的反响', turnsRequired: 1),
+    ],
+    rewardGold: 85,
+    rewardReputation: 7,
+    rewardRelation: 8,
+  ),
+
+  // 奥莲娜 × 玛格丽（高庭）：为玛格丽物色夫婿
+  NpcTaskTemplate(
+    id: 'task_olenna_margaery_match',
+    npcId: 'npc_olenna_tyrell',
+    coNpcId: 'npc_margaery',
+    title: '为玛格丽物色夫婿',
+    type: NpcTaskType.diplomacy,
+    difficulty: 3,
+    deadlineMonths: 6,
+    steps: [
+      NpcTaskStep(description: '与奥莲娜一同整理各家族适龄继承人的资料', turnsRequired: 1),
+      NpcTaskStep(description: '前往河湾地贵族间打探各家联姻意向', turnsRequired: 2),
+      NpcTaskStep(description: '将婚配人选带回，与玛格丽一起权衡', turnsRequired: 2),
+    ],
+    rewardGold: 90,
+    rewardReputation: 8,
+    rewardRelation: 9,
+  ),
+
+  // 巴隆 × 雅拉（派克城）：清剿铁群岛海盗
+  NpcTaskTemplate(
+    id: 'task_balon_yara_pirate',
+    npcId: 'npc_balon_greyjoy',
+    coNpcId: 'npc_yara',
+    title: '清剿铁群岛海盗',
+    type: NpcTaskType.hunt,
+    difficulty: 4,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '与巴隆、雅拉一同研判海盗袭扰的航线', turnsRequired: 1),
+      NpcTaskStep(description: '驾长船出海，追踪海盗巢穴', turnsRequired: 2),
+      NpcTaskStep(description: '突袭海盗据点，带战利品回派克城', turnsRequired: 2),
+    ],
+    rewardGold: 120,
+    rewardReputation: 10,
+    rewardRelation: 10,
+  ),
 ];
 
 /// 按 ID 查找任务模板。
