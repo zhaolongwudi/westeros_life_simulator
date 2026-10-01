@@ -71,7 +71,7 @@ lib/
 │   ├── player_panel_screen.dart   # 玩家详情（含家谱区块，Batch 10-14）
 │   ├── npc_panel_screen.dart      # NPC 关系面板（Batch 10-15 新增）
 │   ├── family_screen.dart         # 家族面板
-│   ├── family_tree_screen.dart    # 家族树可视化（Batch 10-20 新增）
+│   ├── family_tree_screen.dart    # 家族树可视化（Batch 10-20 新增；历代家主详情弹层 Batch 10-46；谱系继承连线 Batch 10-49）
 │   ├── map_screen.dart            # 地图
 │   ├── events_screen.dart         # 事件面板
 │   ├── letters_screen.dart        # 信件面板（Batch 10-29 · M3b 起只 import models/letter.dart，不再 import mixin_letter）
@@ -164,6 +164,7 @@ GameEngine extends GameProviderBase with:
 | 子女培养 | mixin_marriage.dart（rearChild/tutorChild/sendChildToSchool，Batch 10-17） |
 | 多代家族树 | mixin_marriage.dart（formatMultiGenTree，Batch 10-17） |
 | **历代家主详情弹层** | screens/family_tree_screen.dart（`_GenerationNode` 点击 InkWell → `_showAncestorDetail` 底部弹层：世代徽章/姓名/头衔/在位/成就/传承寄语 + 关闭按钮，Batch 10-46） |
+| **谱系继承连线** | screens/family_tree_screen.dart（`_InheritanceLink`：历代家主节点间继承箭头连线——非末代「继承」/末代「传至当代」，Batch 10-49） |
 | NPC 多步骤任务列表 | mixin_npc_task.dart（availableTasksOf/formatNpcTaskPanelV2，Batch 10-18） |
 | NPC 接任务 | mixin_npc_task.dart（acceptNpcTaskV2，Batch 10-18） |
 | NPC 任务推进/期限 | mixin_npc_task.dart（advanceNpcTasks/checkNpcTaskDeadlines，探索+过月挂载，Batch 10-18；按时完成关系加成 + 逾期扣声望关系惩罚，Batch 10-40） |
@@ -247,7 +248,7 @@ GameEngine extends GameProviderBase with:
 | 过月 | advance | advanceMonth | 是 |
 | 帮助 | help | _helpText | 否 |
 
-## 五、测试文件映射（test/ 58 文件）
+## 五、测试文件映射（test/ 66 文件 + regression/ 5 文件 = 71 文件）
 
 | 测试文件 | 覆盖 |
 |----------|------|
@@ -289,6 +290,7 @@ GameEngine extends GameProviderBase with:
 | batch10_46_family_tree_detail_test | **历代家主详情弹层**（10-46，4 用例）：点击谱系节点弹出详情（世代徽章/头衔/在位/成就/传承寄语）/ 成就为空「暂无显著功绩」/ 关闭按钮收起/ 无谱系无入口 |
 | batch10_47_task_expand_test | **NPC 任务模板扩充**（10-47，5 用例）：总量 54 / 协作 8 / solo 46 / 新模板存在且指向真实 NPC（泰温·凯岩城·调查西境矿脉 / 艾莉亚·临冬城·猎杀袭击商队的狼群）/ ID·标题唯一 / 泰温不在场仅模板可见性（断言「不在这里」）/ 艾莉亚指定 taskId 全流程完成结算 |
 | batch10_48_ai_title_trend_test | **AI 注入头衔晋升趋势**（10-48，4 用例）：有下一档注入「距下一档「伯爵」还差 5 声望」+ 阶梯总览 / 已登顶「已登顶本身份头衔巅峰」/ 无头衔兜底 / 与 balance_data 单一真相对齐（nextTierReputation） |
+| batch10_49_family_link_test | **谱系继承连线画布**（10-49，3 用例）：单任历史 1 传至当代 / 两任历史 1 继承 + 1 传至当代 / 无谱系无连线 |
 | batch10_24_task_progress_ui_test | NPC 任务进度 UI 化：totalTurns/整体进度/剩余月数/进度条渲染/契约回归（10-24，10 用例） |
 | batch10_25_marriage2_test | 婚姻二轮：离婚/丧偶/配偶谈心/月度事件/婚姻面板（10-25） |
 | m1_save_migration_test | **M1 存档契约**（10-26，22 用例）：schemaVersion 写入 / v0→v1 迁移 / 高版本抛异常 / 防御式 fromJson（坏类型/坏列表元素/空 Map）/ 坏档隔离 .corrupted / 旧档加载 / 保存往返 |
@@ -349,4 +351,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v3.0（新增 batch10_47/48 任务模板扩充与头衔晋升趋势速查与测试映射）· 最后更新：2026-10-02*
+*文档版本：v3.1（新增 batch10_49 谱系继承连线速查与测试映射）· 最后更新：2026-10-02*
