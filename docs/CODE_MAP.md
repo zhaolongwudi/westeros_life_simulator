@@ -163,6 +163,7 @@ GameEngine extends GameProviderBase with:
 | 婚后每月事件 | mixin_marriage.dart（maybeFamilyEvent，挂 advanceMonth，Batch 10-17） |
 | 子女培养 | mixin_marriage.dart（rearChild/tutorChild/sendChildToSchool，Batch 10-17） |
 | 多代家族树 | mixin_marriage.dart（formatMultiGenTree，Batch 10-17） |
+| **历代家主详情弹层** | screens/family_tree_screen.dart（`_GenerationNode` 点击 InkWell → `_showAncestorDetail` 底部弹层：世代徽章/姓名/头衔/在位/成就/传承寄语 + 关闭按钮，Batch 10-46） |
 | NPC 多步骤任务列表 | mixin_npc_task.dart（availableTasksOf/formatNpcTaskPanelV2，Batch 10-18） |
 | NPC 接任务 | mixin_npc_task.dart（acceptNpcTaskV2，Batch 10-18） |
 | NPC 任务推进/期限 | mixin_npc_task.dart（advanceNpcTasks/checkNpcTaskDeadlines，探索+过月挂载，Batch 10-18；按时完成关系加成 + 逾期扣声望关系惩罚，Batch 10-40） |
@@ -284,6 +285,7 @@ GameEngine extends GameProviderBase with:
 | batch10_43_ai_prompt_equip_test | **AI prompt 注入装备战力**（10-43，6 用例）：combatPowerOf 纯函数（默认 10/装备 15/消耗品不计/与引擎算法一致）+ prompt 注入（装备明细名称分类价值/战斗值行/无装备兜底） |
 | batch10_44_coop_expand_test | **多 NPC 协作任务扩充**（10-44，9 用例）：4 新协作模板数据校验（存在/指向真实 NPC/同地点/非同一人）+ 君临协作可接过滤（双方关系达标出现/同伴不足隐藏）+ 接取标注协作 + 完成双关系奖励 + 面板标注 + ID 唯一 |
 | batch10_45_ai_world_event_test | **AI 注入本月世界局势**（10-45，4 用例）：top2 注入（名称+描述，第 3 条不出现在世界局势段落）/ 空态兜底 / 相关度最高事件排第一（冰封湖面双命中）/ 既有注入不回归 |
+| batch10_46_family_tree_detail_test | **历代家主详情弹层**（10-46，4 用例）：点击谱系节点弹出详情（世代徽章/头衔/在位/成就/传承寄语）/ 成就为空「暂无显著功绩」/ 关闭按钮收起/ 无谱系无入口 |
 | batch10_24_task_progress_ui_test | NPC 任务进度 UI 化：totalTurns/整体进度/剩余月数/进度条渲染/契约回归（10-24，10 用例） |
 | batch10_25_marriage2_test | 婚姻二轮：离婚/丧偶/配偶谈心/月度事件/婚姻面板（10-25） |
 | m1_save_migration_test | **M1 存档契约**（10-26，22 用例）：schemaVersion 写入 / v0→v1 迁移 / 高版本抛异常 / 防御式 fromJson（坏类型/坏列表元素/空 Map）/ 坏档隔离 .corrupted / 旧档加载 / 保存往返 |
@@ -344,4 +346,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v2.8（新增 batch10_44/batch10_45 测试映射 + 协作扩充 52 + AI 注入世界局势速查）· 最后更新：2026-10-01*
+*文档版本：v2.9（新增 batch10_46 家族树详情弹层速查与测试映射）· 最后更新：2026-10-01*
