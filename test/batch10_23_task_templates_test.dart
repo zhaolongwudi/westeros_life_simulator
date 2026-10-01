@@ -19,11 +19,11 @@ import 'package:westeros_life_simulator/game_engine.dart';
 void main() {
   group('Batch 10-23 模板总量', () {
     test('任务模板总数从 20 扩到 32（Batch 10-39 再扩至 44，Batch 10-41 再扩至 48）', () {
-      expect(allNpcTaskTemplates.length, 52);
+      expect(allNpcTaskTemplates.length, 54);
     });
     test('新 NPC 各有 2 个模板', () {
       expect(npcTaskTemplatesOf('npc_sansa').length, 3);
-      expect(npcTaskTemplatesOf('npc_arya').length, 2);
+      expect(npcTaskTemplatesOf('npc_arya').length, 3);
       expect(npcTaskTemplatesOf('npc_bran').length, 3);
       expect(npcTaskTemplatesOf('npc_jaime').length, 2);
       expect(npcTaskTemplatesOf('npc_robert_baratheon').length, 2);

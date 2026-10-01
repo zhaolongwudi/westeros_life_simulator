@@ -894,6 +894,39 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
     rewardReputation: 10,
     rewardRelation: 10,
   ),
+  // ==================== Batch 10-47 扩充：泰温 + 艾莉亚 solo 模板 ====================
+  NpcTaskTemplate(
+    id: 'task_tywin_mine',
+    npcId: 'npc_tywin_lannister',
+    title: '调查西境矿脉枯竭的谣言',
+    type: NpcTaskType.investigate,
+    difficulty: 4,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '走访西境各矿场，查清金矿出产实情', turnsRequired: 2),
+      NpcTaskStep(description: '追查谣言源头是矿工还是敌对领主', turnsRequired: 1),
+      NpcTaskStep(description: '将调查结论呈报泰温', turnsRequired: 1),
+    ],
+    rewardGold: 85,
+    rewardReputation: 6,
+    rewardRelation: 8,
+  ),
+  NpcTaskTemplate(
+    id: 'task_arya_wolfpack',
+    npcId: 'npc_arya',
+    title: '猎杀袭击商队的狼群',
+    type: NpcTaskType.hunt,
+    difficulty: 3,
+    deadlineMonths: 4,
+    steps: [
+      NpcTaskStep(description: '循着商队遇袭的痕迹追踪狼群', turnsRequired: 1),
+      NpcTaskStep(description: '在狼穴设伏，射杀狼群头领', turnsRequired: 2),
+      NpcTaskStep(description: '带狼首回临冬城向艾莉亚复命', turnsRequired: 1),
+    ],
+    rewardGold: 55,
+    rewardReputation: 5,
+    rewardRelation: 8,
+  ),
 ];
 
 /// 按 ID 查找任务模板。

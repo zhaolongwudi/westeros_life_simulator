@@ -11,6 +11,7 @@ import '../data/npc_data.dart';
 import '../data/npc_task_data.dart';
 import '../data/family_data.dart';
 import '../data/item_data.dart';
+import '../data/balance_data.dart';
 import '../models/event.dart';
 import '../models/family.dart';
 import '../models/player.dart';
@@ -237,10 +238,32 @@ class AiService {
               : '家户';
       familyDesc = '${pf.name}家族（族语「${pf.motto}」，$scaleLabel，影响力 ${pf.influence}）';
     }
-    final titleProgressDesc = player.title.isEmpty
-        ? '（暂无头衔）'
-        : '当前头衔 ${player.title}，声望 ${player.reputation}/100'
-            '${player.reputation >= 90 ? '，已接近王国之巅' : player.reputation >= 70 ? '，距更高头衔一步之遥' : '，声望仍可继续攀升'}';
+    // Batch 10-48：注入头衔晋升趋势——用 balance_data 单一真相量化「下一档头衔 + 所需声望」，
+    // 取代旧的距离描述（90/70 魔法数字），让 AI 叙事能围绕玩家的头衔目标展开。
+    final String titleProgressDesc;
+    if (player.title.isEmpty) {
+      titleProgressDesc = '（暂无头衔）';
+    } else {
+      final ladder = BalanceData.ladderOf(player.identity.name);
+      final nextRep = BalanceData.nextTierReputation(
+        player.identity.name,
+        player.reputation,
+      );
+      // 取下一档头衔名（避免依赖 collection 扩展，用 for 循环）。
+      String nextTitle = '';
+      for (final tier in ladder) {
+        if (tier.reputation == nextRep) {
+          nextTitle = tier.title;
+          break;
+        }
+      }
+      final ladderDesc = ladder
+          .map((t) => '${t.title}(${t.reputation})')
+          .join(' → ');
+      titleProgressDesc = nextRep == 0
+          ? '当前头衔 ${player.title}，声望 ${player.reputation}/100，已登顶本身份头衔巅峰（阶梯：$ladderDesc）'
+          : '当前头衔 ${player.title}，声望 ${player.reputation}/100，距下一档「$nextTitle」还差 ${nextRep - player.reputation} 声望（阶梯：$ladderDesc）';
+    }
     final equipmentDesc = player.flags.entries
         .where((e) => e.key.startsWith('equipped.') && e.value)
         .map((e) {

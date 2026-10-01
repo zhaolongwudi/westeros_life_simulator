@@ -16,7 +16,7 @@ import 'package:westeros_life_simulator/game_engine.dart';
 void main() {
   group('Batch 10-41 协作任务模型', () {
     test('isCoop 标记协作任务，单人任务为 false', () {
-      expect(allNpcTaskTemplates.length, 52);
+      expect(allNpcTaskTemplates.length, 54);
       final coop = allNpcTaskTemplates.where((t) => t.isCoop).toList();
       expect(coop.length, 8);
       final solo = allNpcTaskTemplates.where((t) => !t.isCoop).toList();
