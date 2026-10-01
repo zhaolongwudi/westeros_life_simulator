@@ -174,6 +174,7 @@ GameEngine extends GameProviderBase with:
 | 效果应用（事件/AI 共用） | providers/game_state_provider.dart（applyEffects） |
 | 游戏结束/血脉断绝 | providers/game_state_provider.dart（endGame）+ mixin_play.dart（_tryInheritance） |
 | AI 叙事生成 | services/ai_service.dart（generateNarrative/_buildPrompt） |
+| **AI 注入装备战力** | services/ai_service.dart（`combatPowerOf` 纯函数 + `已装备` 明细 + `战斗值` 行，Batch 10-43） |
 | **AI 事件预算筛选** | services/event_prompt_filter.dart（selectEventsForPrompt，Batch 10-33 · M4c-2：地点/季节/数值/标记相关度评分，72→12 token 约降 83%） |
 | **AI 回合编排（读配置→拼上下文→请求→装配）** | **mixins/mixin_ai.dart（runAiAction，Batch 10-29 · M3b；返回 `AiTurnResult`）** |
 | AI 回合结果对象 | models/ai_turn.dart（AiTurnResult：lines/choices/isSuccess + notConfiguredLine/notStartedLine/**degradedLine**（AI 失败降级提示，Batch 10-34 · M5a）） |
@@ -279,6 +280,7 @@ GameEngine extends GameProviderBase with:
 | batch10_40_task_penalty_test | 限时任务奖励/惩罚差异化：按时完成关系加成 / 逾期扣声望关系 / 反馈逾期月数（10-40） |
 | batch10_41_coop_task_test | 多 NPC 协作任务：协作标记/可接过滤（双方在场+关系达标）/接取拒绝/完成双关系奖励/面板标注（10-41，11 用例） |
 | batch10_42_task_abandon_test | 任务放弃与失败反馈：abandoned 序列化往返/旧档缺字段防御/放弃单人 -2/协作双 -2/面板已放弃/协作逾期双扣/单人逾期类型描述/指令注册（10-42，9 用例） |
+| batch10_43_ai_prompt_equip_test | **AI prompt 注入装备战力**（10-43，6 用例）：combatPowerOf 纯函数（默认 10/装备 15/消耗品不计/与引擎算法一致）+ prompt 注入（装备明细名称分类价值/战斗值行/无装备兜底） |
 | batch10_24_task_progress_ui_test | NPC 任务进度 UI 化：totalTurns/整体进度/剩余月数/进度条渲染/契约回归（10-24，10 用例） |
 | batch10_25_marriage2_test | 婚姻二轮：离婚/丧偶/配偶谈心/月度事件/婚姻面板（10-25） |
 | m1_save_migration_test | **M1 存档契约**（10-26，22 用例）：schemaVersion 写入 / v0→v1 迁移 / 高版本抛异常 / 防御式 fromJson（坏类型/坏列表元素/空 Map）/ 坏档隔离 .corrupted / 旧档加载 / 保存往返 |
@@ -339,4 +341,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v2.6（新增 batch10_42_task_abandon_test 映射 + 放弃任务/逾期失败增强速查）· 最后更新：2026-10-01*
+*文档版本：v2.7（新增 batch10_43_ai_prompt_equip_test 映射 + AI 注入装备战力速查）· 最后更新：2026-10-01*
