@@ -160,6 +160,14 @@ class AiService {
     final eventsDesc = selectedEvents
         .map((e) => '- ${e.name}: ${e.description}')
         .join('\n');
+    // Batch 10-45：注入本月世界局势——从相关度最高的预算内事件取前 2 条，
+    // 让 AI 叙事围绕当前世界大事展开（复用事件预算筛选器的相关度排序）。
+    final worldNews = selectedEvents.take(2).toList();
+    final worldNewsDesc = worldNews.isEmpty
+        ? '（本月暂无重大传闻）'
+        : worldNews
+            .map((e) => '· ${e.name}——${e.description}')
+            .join('\n');
     final relationDesc = player.relations.entries
         .map((e) => '${e.key}: ${e.value}')
         .join('、');
@@ -280,6 +288,8 @@ class AiService {
 - 状态：${flagDesc.isEmpty ? '（无特殊状态）' : flagDesc}
 当前情境：
 ${context}
+本月世界局势：
+${worldNewsDesc}
 可用事件：
 ${eventsDesc}
 叙事引导（身份）：
