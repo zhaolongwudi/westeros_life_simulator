@@ -10,6 +10,7 @@ import '../data/narrative_templates.dart';
 import '../data/npc_data.dart';
 import '../data/npc_task_data.dart';
 import '../data/family_data.dart';
+import '../data/item_data.dart';
 import '../models/event.dart';
 import '../models/family.dart';
 import '../models/player.dart';
@@ -234,8 +235,14 @@ class AiService {
             '${player.reputation >= 90 ? '，已接近王国之巅' : player.reputation >= 70 ? '，距更高头衔一步之遥' : '，声望仍可继续攀升'}';
     final equipmentDesc = player.flags.entries
         .where((e) => e.key.startsWith('equipped.') && e.value)
-        .map((e) => e.key.substring(9))
+        .map((e) {
+      final item = itemById(e.key.substring(9));
+      if (item == null) return e.key.substring(9);
+      return '${item.name}（${itemCategoryLabel(item.category)}，价值 ${item.value}）';
+    })
         .join('、');
+    // Batch 10-43：注入装备战力（与 mixin_life.combatPower 同算法：技能×2 + 力量/2 + 装备加成）
+    final combatDesc = combatPowerOf(player);
     // Batch 10-9：差异化叙事引导（身份 / 区域 / 季节）
     final idGuide = identityNarrativeGuide(player.identity);
     String region = '';
@@ -266,6 +273,7 @@ class AiService {
 - 在场 NPC：${onSiteNpcDesc.isEmpty ? '（无）' : onSiteNpcDesc}
 - 背包：$inventoryDesc
 - 已装备：${equipmentDesc.isEmpty ? '（无）' : equipmentDesc}
+- 战斗值：$combatDesc
 - 婚姻：$marriageDesc
 - 子女：$childDesc
 - 进行中任务：$taskDesc
@@ -304,6 +312,31 @@ $seasonGuide
   ]
 }
 ''';
+  }
+
+  /// 装备战力（与 mixin_life.combatPower 同算法，Batch 10-43）。
+  ///
+  /// 技能（sword×2 + archery） + 力量/2 + 装备加成（武器价值/20、护甲价值/30、坐骑 +2）。
+  /// 服务于 AI prompt 注入，避免与混入层实现的算法分叉。
+  static int combatPowerOf(Player player) {
+    var power = (player.skills['sword'] ?? 0) * 2 + (player.skills['archery'] ?? 0);
+    power += (player.attributes['strength'] ?? 0) ~/ 2;
+    for (final e in player.flags.entries) {
+      if (!(e.key.startsWith('equipped.') && e.value)) continue;
+      final item = itemById(e.key.substring(9));
+      if (item == null) continue;
+      switch (item.category) {
+        case ItemCategory.weapon:
+          power += item.value ~/ 20;
+        case ItemCategory.armor:
+          power += item.value ~/ 30;
+        case ItemCategory.mount:
+          power += 2;
+        default:
+          break;
+      }
+    }
+    return power;
   }
 
   /// 解析 AI 响应。
