@@ -31,7 +31,7 @@ lib/
 │   ├── item_data.dart             # 34 物品
 │   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节）
 │   ├── balance_data.dart           # ⭐ 数值配置集中（初始值/生存消耗/每日上限/头衔阶梯/活动经济/婚姻与世代阈值，Batch 10-30 · M4a；无 import 依赖的叶子模块）
-│   └── npc_task_data.dart         # NPC 多步骤任务模板（48 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯/奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈，Batch 10-18 起逐步扩充，10-39 扩至 44，10-41 协作任务扩至 48；协作任务含 coNpcId）
+│   └── npc_task_data.dart         # NPC 多步骤任务模板（52 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯/奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈，Batch 10-18 起逐步扩充，10-39 扩至 44，10-41 协作任务扩至 48，10-44 协作任务扩至 52（君临×2/高庭/派克城）；协作任务含 coNpcId）
 │
 ├── models/                        # 【模型层】不可变实体（copyWith + toJson/fromJson）
 │   ├── player.dart                # Player（含 health/energy/hunger/title/house/children/spouse/childRearing/generationRecords/activeTasks）
@@ -166,7 +166,7 @@ GameEngine extends GameProviderBase with:
 | NPC 多步骤任务列表 | mixin_npc_task.dart（availableTasksOf/formatNpcTaskPanelV2，Batch 10-18） |
 | NPC 接任务 | mixin_npc_task.dart（acceptNpcTaskV2，Batch 10-18） |
 | NPC 任务推进/期限 | mixin_npc_task.dart（advanceNpcTasks/checkNpcTaskDeadlines，探索+过月挂载，Batch 10-18；按时完成关系加成 + 逾期扣声望关系惩罚，Batch 10-40） |
-| **多 NPC 协作任务** | mixin_npc_task.dart（availableTasksOf 协作过滤/coNpcNotAvailableReason 拒绝原因/acceptNpcTaskV2 双关系接取/advanceNpcTasks 双关系结算，Batch 10-41） |
+| **多 NPC 协作任务** | mixin_npc_task.dart（availableTasksOf 协作过滤/coNpcNotAvailableReason 拒绝原因/acceptNpcTaskV2 双关系接取/advanceNpcTasks 双关系结算，Batch 10-41；**Batch 10-44 扩充至 8 个协作模板**：新增君临×2（瑟曦×詹姆彻查御林铁卫的叛徒/提利昂×瑟曦追查王后身边的奸细）+ 高庭（奥莲娜×玛格丽为玛格丽操办玫瑰舞会）+ 派克城（巴隆×雅拉清剿铁群岛海盗）） |
 | **放弃任务** | mixin_npc_task.dart（abandonNpcTask 按标题匹配置 abandoned/发布方关系 -2 协作同伴也 -2 无声望惩罚；指令「放弃/quit」order 47，Batch 10-42） |
 | **逾期失败增强** | mixin_npc_task.dart（checkNpcTaskDeadlines 协作逾期同伴 -3 + _deadlineFailHint 五类任务类型差异化失败描述，Batch 10-42） |
 | NPC 任务整体进度/剩余月数 | mixin_npc_task.dart（npcTaskOverallRatio/npcTaskRemainingMonths/npcTaskCurrentStepDesc，Batch 10-24） |
@@ -176,6 +176,7 @@ GameEngine extends GameProviderBase with:
 | AI 叙事生成 | services/ai_service.dart（generateNarrative/_buildPrompt） |
 | **AI 注入装备战力** | services/ai_service.dart（`combatPowerOf` 纯函数 + `已装备` 明细 + `战斗值` 行，Batch 10-43） |
 | **AI 事件预算筛选** | services/event_prompt_filter.dart（selectEventsForPrompt，Batch 10-33 · M4c-2：地点/季节/数值/标记相关度评分，72→12 token 约降 83%） |
+| **AI 注入本月世界局势** | services/ai_service.dart（`_buildPrompt` 内 `worldNewsDesc`：从预算筛选后事件取 top2 作「本月世界局势」段落 + 空态兜底「（本月暂无重大传闻）」，Batch 10-45） |
 | **AI 回合编排（读配置→拼上下文→请求→装配）** | **mixins/mixin_ai.dart（runAiAction，Batch 10-29 · M3b；返回 `AiTurnResult`）** |
 | AI 回合结果对象 | models/ai_turn.dart（AiTurnResult：lines/choices/isSuccess + notConfiguredLine/notStartedLine/**degradedLine**（AI 失败降级提示，Batch 10-34 · M5a）） |
 | AI 选项效果落盘 + 推进 | mixin_ai.dart（applyAiChoice） |
@@ -281,6 +282,8 @@ GameEngine extends GameProviderBase with:
 | batch10_41_coop_task_test | 多 NPC 协作任务：协作标记/可接过滤（双方在场+关系达标）/接取拒绝/完成双关系奖励/面板标注（10-41，11 用例） |
 | batch10_42_task_abandon_test | 任务放弃与失败反馈：abandoned 序列化往返/旧档缺字段防御/放弃单人 -2/协作双 -2/面板已放弃/协作逾期双扣/单人逾期类型描述/指令注册（10-42，9 用例） |
 | batch10_43_ai_prompt_equip_test | **AI prompt 注入装备战力**（10-43，6 用例）：combatPowerOf 纯函数（默认 10/装备 15/消耗品不计/与引擎算法一致）+ prompt 注入（装备明细名称分类价值/战斗值行/无装备兜底） |
+| batch10_44_coop_expand_test | **多 NPC 协作任务扩充**（10-44，9 用例）：4 新协作模板数据校验（存在/指向真实 NPC/同地点/非同一人）+ 君临协作可接过滤（双方关系达标出现/同伴不足隐藏）+ 接取标注协作 + 完成双关系奖励 + 面板标注 + ID 唯一 |
+| batch10_45_ai_world_event_test | **AI 注入本月世界局势**（10-45，4 用例）：top2 注入（名称+描述，第 3 条不出现在世界局势段落）/ 空态兜底 / 相关度最高事件排第一（冰封湖面双命中）/ 既有注入不回归 |
 | batch10_24_task_progress_ui_test | NPC 任务进度 UI 化：totalTurns/整体进度/剩余月数/进度条渲染/契约回归（10-24，10 用例） |
 | batch10_25_marriage2_test | 婚姻二轮：离婚/丧偶/配偶谈心/月度事件/婚姻面板（10-25） |
 | m1_save_migration_test | **M1 存档契约**（10-26，22 用例）：schemaVersion 写入 / v0→v1 迁移 / 高版本抛异常 / 防御式 fromJson（坏类型/坏列表元素/空 Map）/ 坏档隔离 .corrupted / 旧档加载 / 保存往返 |
@@ -341,4 +344,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v2.7（新增 batch10_43_ai_prompt_equip_test 映射 + AI 注入装备战力速查）· 最后更新：2026-10-01*
+*文档版本：v2.8（新增 batch10_44/batch10_45 测试映射 + 协作扩充 52 + AI 注入世界局势速查）· 最后更新：2026-10-01*
