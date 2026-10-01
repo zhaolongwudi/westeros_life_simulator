@@ -105,6 +105,13 @@ mixin GameNpcTaskMixin
           break;
         }
       }
+      // 指定 taskId 但不在可接列表：可能是协作任务被同伴条件过滤，给出明确原因
+      if (template == null) {
+        final byId = npcTaskTemplateById(taskId);
+        if (byId != null && byId.npcId == npc.id && byId.isCoop) {
+          return coNpcNotAvailableReason(byId) ?? '这个任务已经有人在做了。';
+        }
+      }
     }
     if (template == null) return '没有找到这个任务。';
     final chosen = template;
