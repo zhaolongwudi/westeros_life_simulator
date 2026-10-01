@@ -118,6 +118,7 @@ class NpcTaskProgress {
     this.stepProgress = 0,
     this.completed = false,
     this.failed = false,
+    this.abandoned = false,
   });
 
   /// 任务模板 ID。
@@ -147,11 +148,15 @@ class NpcTaskProgress {
   /// 是否已失败（逾期）。
   final bool failed;
 
+  /// 是否已主动放弃（玩家放弃任务）。
+  final bool abandoned;
+
   NpcTaskProgress copyWith({
     int? stepIndex,
     int? stepProgress,
     bool? completed,
     bool? failed,
+    bool? abandoned,
   }) {
     return NpcTaskProgress(
       taskId: taskId,
@@ -163,11 +168,12 @@ class NpcTaskProgress {
       deadlineMonth: deadlineMonth,
       completed: completed ?? this.completed,
       failed: failed ?? this.failed,
+      abandoned: abandoned ?? this.abandoned,
     );
   }
 
-  /// 是否进行中（未完成未失败）。
-  bool get isActive => !completed && !failed;
+  /// 是否进行中（未完成未失败未放弃）。
+  bool get isActive => !completed && !failed && !abandoned;
 
   Map<String, dynamic> toJson() {
     return {
@@ -180,6 +186,7 @@ class NpcTaskProgress {
       'deadlineMonth': deadlineMonth,
       'completed': completed,
       'failed': failed,
+      'abandoned': abandoned,
     };
   }
 
@@ -194,6 +201,7 @@ class NpcTaskProgress {
       deadlineMonth: safeInt(json, 'deadlineMonth'),
       completed: safeBool(json, 'completed'),
       failed: safeBool(json, 'failed'),
+      abandoned: safeBool(json, 'abandoned'),
     );
   }
 }

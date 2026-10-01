@@ -14,12 +14,12 @@ import 'package:westeros_life_simulator/game_engine.dart';
 
 void main() {
   group('M6b 注册表完整性（引擎级）', () {
-    test('46 条指令全部注册且 order 连续 1..46', () {
+    test('47 条指令全部注册且 order 连续 1..47', () {
       final engine = GameEngine()..startNewGame();
       final reg = engine.commandRegistry;
-      expect(reg.specCount, 46);
+      expect(reg.specCount, 47);
       final orders = reg.orderedSpecs.map((s) => s.order).toList();
-      expect(orders, equals(List<int>.generate(46, (i) => i + 1)));
+      expect(orders, equals(List<int>.generate(47, (i) => i + 1)));
     });
 
     test('所有别名唯一（无撞车），英文别名与中文主名并存', () {

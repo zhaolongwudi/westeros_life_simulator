@@ -2,7 +2,7 @@
 ///
 /// 覆盖：
 /// 1. 注册表完整性（每条指令有 handler、别名无重复、order 唯一）；
-/// 2. 帮助文本与 Batch 10-28 之前逐字一致（46 行，顺序不变）；
+/// 2. 帮助文本与 Batch 10-28 之前逐字一致（46 行，顺序不变；Batch 10-42 追加放弃指令为第 47 行）；
 /// 3. 参数校验与别名分发等价（缺参提示、英文别名）；
 /// 4. 月度管线：阶段顺序、文本顺序、id 唯一、钩子可扩展；
 /// 5. 自注册演示：外部代码只调 register 即可挂新指令（无需改分发器）。
@@ -108,7 +108,7 @@ void main() {
       final reg = engine.commandRegistry;
       expect(reg.duplicateAliases, isEmpty,
           reason: '存在重复注册的别名：${reg.duplicateAliases}');
-      expect(reg.specCount, 46);
+      expect(reg.specCount, 47);
       final helpLines = reg.helpText().split('\n').where((l) {
         return l.trim().isNotEmpty &&
             !l.startsWith(kHelpHeader) &&
@@ -118,12 +118,12 @@ void main() {
           reason: '每条注册指令都必须在帮助文本里出现且只出现一次');
     });
 
-    test('order 唯一且连续（1..46）', () {
+    test('order 唯一且连续（1..47）', () {
       final engine = GameEngine()..startNewGame();
       final orders = engine.commandRegistry.orderedSpecs
           .map((s) => s.order)
           .toList();
-      expect(orders, equals(List<int>.generate(46, (i) => i + 1)));
+      expect(orders, equals(List<int>.generate(47, (i) => i + 1)));
     });
 
     test('每条指令都有非空帮助行与可执行 handler', () {

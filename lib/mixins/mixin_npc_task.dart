@@ -219,6 +219,37 @@ mixin GameNpcTaskMixin
     return buf.toString().trim();
   }
 
+  /// 主动放弃一个进行中任务。
+  ///
+  /// 按任务标题匹配进行中任务；放弃后关系 -2（协作任务双方各 -2），
+  /// 无声望惩罚。返回叙事文本；无进行中任务/找不到返回说明。
+  String abandonNpcTask(String keyword) {
+    final kw = keyword.trim();
+    if (kw.isEmpty) return '放弃哪个任务？如「放弃 筹备冬季粮仓」。';
+    NpcTaskProgress? hit;
+    for (final t in player.activeTasks) {
+      if (!t.isActive) continue;
+      if (t.title.contains(kw) || kw.contains(t.title)) {
+        hit = t;
+        break;
+      }
+    }
+    if (hit == null) return '你目前没有进行中的任务叫「$keyword」。';
+    final template = npcTaskTemplateById(hit.taskId);
+    final who = npcById(hit.npcId)?.name ?? '委托人';
+    final updated = player.activeTasks
+        .map((t) => t.taskId == hit.taskId && t.isActive
+            ? t.copyWith(abandoned: true)
+            : t)
+        .toList();
+    updatePlayer(player.copyWith(activeTasks: updated));
+    adjustRelation(hit.npcId, -2);
+    final coopText = template != null && template.isCoop
+        ? '，${npcById(template.coNpcId!)?.name ?? '同伴'}也失望不已（关系 -2）'
+        : '';
+    return '🗑️ 你放弃了「${hit.title}」。$who 有些失望（关系 -2）$coopText。';
+  }
+
   /// 月度期限检查：逾期任务标记失败并施加惩罚。
   ///
   /// 惩罚：声望 -2×难度，关系 -5；文案含逾期月数与损失。
@@ -246,10 +277,21 @@ mixin GameNpcTaskMixin
         final relPenalty = 5;
         adjustReputation(-repPenalty);
         adjustRelation(task.npcId, -relPenalty);
+        // 协作任务：同伴也失望，关系各 -3
+        final coopNpc =
+            template != null && template.isCoop ? npcById(template.coNpcId!) : null;
+        if (coopNpc != null) {
+          adjustRelation(coopNpc.id, -3);
+        }
         updated.add(task.copyWith(failed: true));
         final who = npcById(task.npcId)?.name ?? '委托人';
+        final coopText = coopNpc != null
+            ? '，${coopNpc.name}也对你失望不已（关系 -3）'
+            : '';
+        final typeHint = _deadlineFailHint(template?.type);
         buf.writeln('⏰ 你逾期 ${-diff} 个月仍未完成「${task.title}」，委托失败。'
-            '$who 对你失望不已：声望 -$repPenalty，关系 -$relPenalty。');
+            '$who 对你失望不已：声望 -$repPenalty，关系 -$relPenalty。'
+            '$coopText$typeHint');
         anyFail = true;
       } else {
         updated.add(task);
@@ -272,9 +314,11 @@ mixin GameNpcTaskMixin
       final template = npcTaskTemplateById(t.taskId);
       final status = t.completed
           ? '✅ 已完成'
-          : t.failed
-              ? '❌ 已失败'
-              : '⏳ 进行中（${t.stepIndex}/${template?.steps.length ?? '?'} 步）';
+          : t.abandoned
+              ? '🗑️ 已放弃'
+              : t.failed
+                  ? '❌ 已失败'
+                  : '⏳ 进行中（${t.stepIndex}/${template?.steps.length ?? '?'} 步）';
       final deadline = '期限 ${t.deadlineYear}年${t.deadlineMonth}月';
       final left = t.isActive ? npcTaskRemainingMonths(t) : null;
       final leftText = (left == null || left < 0) ? '' : '（剩余 $left 个月）';
@@ -344,6 +388,18 @@ mixin GameNpcTaskMixin
     return cur > due;
   }
 
+  /// 逾期失败按任务类型的差异化描述（追加在委托失败文案后）。
+  String _deadlineFailHint(NpcTaskType? type) {
+    return switch (type) {
+      NpcTaskType.escort => '（你失信于人，北境再难有人敢托你护送）',
+      NpcTaskType.delivery => '（信笺误期，或许已误了大事）',
+      NpcTaskType.hunt => '（猎物早已远遁，猎场再难寻）',
+      NpcTaskType.investigate => '（线索随时间的推移而湮灭）',
+      NpcTaskType.diplomacy => '（诸侯早已改换门庭，游说成了空谈）',
+      null => '',
+    };
+  }
+
   // ==================== M3 · 指令自注册 ====================
 
   /// 把本领域指令注册进注册表（order 与历史帮助文本顺序一致）。
@@ -372,6 +428,16 @@ mixin GameNpcTaskMixin
         order: 30,
         helpLine: '进度 / progress     查看任务进度（进行中/完成/失败）',
         handler: (args) => CommandResult(text: formatNpcTaskProgressPanel()),
+      ),
+    );
+    registry.register(
+      CommandSpec(
+        aliases: const ['放弃', 'quit'],
+        order: 47,
+        requiredArgCount: 1,
+        missingArgsHint: '放弃哪个任务？如「放弃 筹备冬季粮仓」。',
+        helpLine: '放弃 / quit [任务名] 主动放弃一个进行中任务（关系 -2）',
+        handler: (args) => CommandResult(text: abandonNpcTask(args)),
       ),
     );
   }
