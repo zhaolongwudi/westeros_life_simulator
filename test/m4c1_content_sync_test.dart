@@ -118,6 +118,17 @@ void main() {
       for (final t in json) {
         expect((t['title'] as String?)?.isNotEmpty, isTrue, reason: '${t['id']} title 为空');
       }
+      // 协作任务 coNpcId 与 Dart 对齐
+      final coopDart = allNpcTaskTemplates
+          .where((t) => t.isCoop)
+          .map((t) => t.id)
+          .toSet();
+      for (final t in json) {
+        final co = t['coNpcId'] as String?;
+        if (coopDart.contains(t['id'])) {
+          expect(co, isNotNull, reason: '${t['id']} 协作任务 JSON 缺 coNpcId');
+        }
+      }
     });
 
     test('跨域引用完整：npc.familyId -> families / task.npcId -> npcs', () {
@@ -133,6 +144,11 @@ void main() {
         final nid = t['npcId'] as String?;
         if (nid != null && nid.isNotEmpty) {
           expect(npcIds.contains(nid), isTrue, reason: '${t['id']} npcId $nid 不存在');
+        }
+        final co = t['coNpcId'] as String?;
+        if (co != null && co.isNotEmpty) {
+          expect(npcIds.contains(co), isTrue, reason: '${t['id']} coNpcId $co 不存在');
+          expect(co == nid, isFalse, reason: '${t['id']} coNpcId 与 npcId 相同');
         }
       }
     });

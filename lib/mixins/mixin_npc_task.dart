@@ -27,14 +27,37 @@ mixin GameNpcTaskMixin
       List.unmodifiable(player.activeTasks);
 
   /// 某 NPC 的可接任务模板（未接且未完成的）。
+  ///
+  /// 协作任务要求两方 NPC 都在场且双方关系都达标；任一方不满足则不出现。
   List<NpcTaskTemplate> availableTasksOf(String npcId) {
     final taken = player.activeTasks
         .where((t) => t.npcId == npcId && t.isActive)
         .map((t) => t.taskId)
         .toSet();
-    return npcTaskTemplatesOf(npcId)
-        .where((t) => !taken.contains(t.id))
-        .toList();
+    return npcTaskTemplatesOf(npcId).where((t) {
+      if (taken.contains(t.id)) return false;
+      if (!t.isCoop) return true;
+      final co = t.coNpcId!;
+      final coNpc = npcById(co);
+      if (coNpc == null || !coNpc.isAlive) return false;
+      if (coNpc.locationId != player.locationId) return false;
+      return npcRelation(co) >= 20;
+    }).toList();
+  }
+
+  /// 协作任务：另一位 NPC（发布方 NPC 不在场时返回说明）。
+  String? coNpcNotAvailableReason(NpcTaskTemplate template) {
+    if (!template.isCoop) return null;
+    final co = template.coNpcId!;
+    final coNpc = npcById(co);
+    if (coNpc == null || !coNpc.isAlive) return '${template.title}的同伴已经不在了。';
+    if (coNpc.locationId != player.locationId) {
+      return '${template.title}需要${coNpc.name}在场一起商议，他不在你身边。';
+    }
+    if (npcRelation(co) < 20) {
+      return '${template.title}需要${coNpc.name}也信得过你，但你们还不够熟。';
+    }
+    return null;
   }
 
   /// 任务面板：列出在场 NPC 的可接多步骤任务。
@@ -47,7 +70,8 @@ mixin GameNpcTaskMixin
       any = true;
       buf.writeln('· ${n.name}：');
       for (final t in tasks) {
-        buf.writeln('  - ${t.title}（${t.typeLabel}，难度 ${t.difficulty}，'
+        final coop = t.isCoop ? '（🤝 与${npcById(t.coNpcId!)?.name ?? '同伴'}协作）' : '';
+        buf.writeln('  - ${t.title}${coop}（${t.typeLabel}，难度 ${t.difficulty}，'
             '期限 ${t.deadlineMonths} 月，${t.steps.length} 步，奖励 ${t.finalGoldReward} 金）');
       }
     }
@@ -83,6 +107,14 @@ mixin GameNpcTaskMixin
       }
     }
     if (template == null) return '没有找到这个任务。';
+    // 协作任务：双方在场 + 双方关系达标 + 不重复接
+    if (template.isCoop) {
+      final reason = coNpcNotAvailableReason(template);
+      if (reason != null) return reason;
+      final coopTaken = player.activeTasks
+          .any((t) => t.taskId == template.id && t.isActive);
+      if (coopTaken) return '这个任务已经有人在做了。';
+    }
     // 生成任务实例：期限 = 当前时间 + deadlineMonths
     final deadline = _addMonths(progress.year, progress.month, template.deadlineMonths);
     final taskProgress = NpcTaskProgress(
@@ -97,9 +129,13 @@ mixin GameNpcTaskMixin
     final tasks = List<NpcTaskProgress>.from(player.activeTasks)..add(taskProgress);
     updatePlayer(player.copyWith(activeTasks: tasks));
     adjustRelation(npc.id, 2);
+    final coopText = template.isCoop
+        ? '（与${npcById(template.coNpcId!)?.name ?? '同伴'}协作，'
+            '${npcById(template.coNpcId!)?.name ?? '同伴'}关系 +2）'
+        : '';
     final firstStep = template.steps.first.description;
     return '📜 你接下${npc.name}的委托：「${template.title}」。'
-        '第一步：$firstStep。期限 ${deadline.$1}年${deadline.$2}月。关系 +2。';
+        '第一步：$firstStep。期限 ${deadline.$1}年${deadline.$2}月。关系 +2。$coopText';
   }
 
   /// 推进所有进行中任务（探索/过月时调用）。
@@ -137,6 +173,11 @@ mixin GameNpcTaskMixin
           gainGold(gold);
           adjustReputation(template.rewardReputation);
           adjustRelation(task.npcId, template.rewardRelation);
+          // 协作任务：同伴也获得关系奖励（奖励减半取整）
+          final coopNpc = template.isCoop ? npcById(template.coNpcId!) : null;
+          if (coopNpc != null) {
+            adjustRelation(coopNpc.id, (template.rewardRelation / 2).floor());
+          }
           final left = npcTaskRemainingMonths(task);
           // 按时完成（剩余月数 ≥ 0 且 ≥ 期限一半）→ 额外关系加成
           final bonus = left >= (template.deadlineMonths / 2).ceil()
@@ -150,7 +191,8 @@ mixin GameNpcTaskMixin
           buf.writeln('✅ 你完成了${npcById(task.npcId)?.name ?? '委托人'}的委托：'
               '「${template.title}」。获得 $gold 金币，'
               '声望 +${template.rewardReputation}，关系 +${template.rewardRelation}'
-              '${bonus > 0 ? '（按时完成，关系额外 +$bonus）' : ''}。');
+              '${bonus > 0 ? '（按时完成，关系额外 +$bonus）' : ''}'
+              '${coopNpc != null ? '，${coopNpc.name}关系 +${(template.rewardRelation / 2).floor()}' : ''}。');
         } else {
           // 进入下一步
           next = task.copyWith(

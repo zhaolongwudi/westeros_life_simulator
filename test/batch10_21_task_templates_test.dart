@@ -5,7 +5,7 @@
 /// 2. 罗柏·史塔克（临冬城）：召集北境封臣 / 追猎偷羊的狼群
 /// 3. 玛格丽·提利尔（高庭）：筹办高庭的晚宴 / 争取王领贵族的支持
 /// 4. 泰温·兰尼斯特（凯岩城）：护送金库账册至君临 / 调查西境领主的私通
-/// 5. 模板总量 12 → 20（Batch 10-23 再扩至 32，Batch 10-39 再扩至 44，此处断言已同步），每位 NPC 各 2 个
+/// 5. 模板总量 12 → 20（Batch 10-23 再扩至 32，Batch 10-39 再扩至 44，Batch 10-41 协作任务扩至 48，此处断言已同步），每位 NPC 各 2 个
 /// 6. 接任务 → 逐步推进完成 → 结算奖励（凯特琳全流程）
 library;
 
@@ -15,12 +15,12 @@ import 'package:westeros_life_simulator/game_engine.dart';
 
 void main() {
   group('Batch 10-21 模板总量', () {
-    test('任务模板总数从 12 扩到 20（Batch 10-23 再扩至 32，Batch 10-39 再扩至 44）', () {
-      expect(allNpcTaskTemplates.length, 44);
+    test('任务模板总数从 12 扩到 20（Batch 10-23 再扩至 32，Batch 10-39 再扩至 44，Batch 10-41 再扩至 48）', () {
+      expect(allNpcTaskTemplates.length, 48);
     });
     test('新 NPC 各有 2 个模板', () {
       expect(npcTaskTemplatesOf('npc_catelyn').length, 2);
-      expect(npcTaskTemplatesOf('npc_robb').length, 2);
+      expect(npcTaskTemplatesOf('npc_robb').length, 3);
       expect(npcTaskTemplatesOf('npc_margaery').length, 2);
       expect(npcTaskTemplatesOf('npc_tywin_lannister').length, 2);
     });

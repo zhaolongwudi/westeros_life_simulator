@@ -7,7 +7,7 @@
 /// 4. 瑞肯·史塔克（临冬城）：陪瑞肯玩捉迷藏 / 找回走失的毛毛狗
 /// 5. 洛拉斯·提利尔（高庭）：筹备高庭的比武大会 / 送出玫瑰信物
 /// 6. 卓戈·多斯拉克（多斯拉克海）：驯服一匹野马驹 / 参加多斯拉克掠袭
-/// 7. 模板总量 32 → 44，每位 NPC 各 2 个
+/// 7. 模板总量 32 → 44（Batch 10-41 协作任务扩至 48），每位 NPC 各 2 个
 /// 8. 接任务 → 逐步推进完成 → 结算奖励（瑞肯全流程；不在场的奥柏伦/巴隆/雅拉/
 ///    洛拉斯/卓戈仅验证模板可见性，与 batch10_21/23 一致）
 library;
@@ -18,8 +18,8 @@ import 'package:westeros_life_simulator/game_engine.dart';
 
 void main() {
   group('Batch 10-39 模板总量', () {
-    test('任务模板总数从 32 扩到 44', () {
-      expect(allNpcTaskTemplates.length, 44);
+    test('任务模板总数从 32 扩到 44（Batch 10-41 再扩至 48）', () {
+      expect(allNpcTaskTemplates.length, 48);
     });
     test('新 NPC 各有 2 个模板', () {
       expect(npcTaskTemplatesOf('npc_oberon_martell').length, 2);

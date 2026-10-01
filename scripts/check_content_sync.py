@@ -111,6 +111,11 @@ def check(quiet=False):
         nid = task.get("npcId", "")
         if nid and nid not in npc_ids:
             errors.append(f"[FAIL] tasks.json {task['id']}: npcId {nid} 不存在于 npcs.json")
+        co = task.get("coNpcId", "")
+        if co and co not in npc_ids:
+            errors.append(f"[FAIL] tasks.json {task['id']}: coNpcId {co} 不存在于 npcs.json")
+        if co and co == nid:
+            errors.append(f"[FAIL] tasks.json {task['id']}: coNpcId 与 npcId 相同")
 
     # 3. 关键文本字段非空（events 用 name，tasks 用 title，其余用 name）
     required_name = {"families", "locations", "npcs", "systems", "items", "events"}

@@ -328,6 +328,9 @@ def extract_npc_tasks(text):
             'rewardReputation': _to_int(args.get('rewardReputation', '0')),
             'rewardRelation': _to_int(args.get('rewardRelation', '0')),
         })
+        co = _clean(args.get('coNpcId', ''))
+        if co:
+            out[-1]['coNpcId'] = co
     return out
 
 

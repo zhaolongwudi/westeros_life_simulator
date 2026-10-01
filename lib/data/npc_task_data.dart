@@ -731,6 +731,88 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
     rewardReputation: 5,
     rewardRelation: 8,
   ),
+
+  // ==================== 协作任务（Batch 10-41 · 多 NPC 协作） ====================
+  // 协作任务 = 由 2 位 NPC 共同发布（coNpcId 标记同伴），接任务需两方都在场且关系 ≥ 相识，
+  // 完成后发布方与同伴都获得关系奖励（同伴减半）。
+  // 以下 4 个协作任务全部位于临冬城（8 位在场 NPC 便于接取测试），
+  // 且刻意避开 44 个既有模板（无 id 冲突）。
+
+  // 艾德 × 凯特琳（临冬城）：筹备冬季粮仓
+  NpcTaskTemplate(
+    id: 'task_nev_cat_winter_store',
+    npcId: 'npc_nev',
+    coNpcId: 'npc_catelyn',
+    title: '筹备冬季粮仓',
+    type: NpcTaskType.delivery,
+    difficulty: 3,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '与凯特琳清点粮仓现有存粮，列出缺口', turnsRequired: 1),
+      NpcTaskStep(description: '前往白港采购冬麦与腌肉', turnsRequired: 2),
+      NpcTaskStep(description: '押运粮队回到临冬城，交予艾德', turnsRequired: 2),
+    ],
+    rewardGold: 75,
+    rewardReputation: 7,
+    rewardRelation: 8,
+  ),
+
+  // 罗柏 × 琼恩（临冬城）：长城换防信使
+  NpcTaskTemplate(
+    id: 'task_robb_jon_wall',
+    npcId: 'npc_robb',
+    coNpcId: 'npc_jon_snow',
+    title: '替长城换防送信',
+    type: NpcTaskType.delivery,
+    difficulty: 4,
+    deadlineMonths: 6,
+    steps: [
+      NpcTaskStep(description: '从罗柏处取走换防军令与物资清单', turnsRequired: 1),
+      NpcTaskStep(description: '穿越颈泽，把军令送到黑城堡琼恩手上', turnsRequired: 3),
+      NpcTaskStep(description: '带回琼恩的回执与守夜人名单', turnsRequired: 2),
+    ],
+    rewardGold: 95,
+    rewardReputation: 8,
+    rewardRelation: 9,
+  ),
+
+  // 珊莎 × 艾莉亚（临冬城）：找回失窃的传家佩剑
+  NpcTaskTemplate(
+    id: 'task_sansa_arya_sword',
+    npcId: 'npc_sansa',
+    coNpcId: 'npc_arya',
+    title: '找回失窃的传家佩剑',
+    type: NpcTaskType.investigate,
+    difficulty: 3,
+    deadlineMonths: 4,
+    steps: [
+      NpcTaskStep(description: '与珊莎、艾莉亚核对佩剑失窃的时间与现场', turnsRequired: 1),
+      NpcTaskStep(description: '走访铁匠铺与市集，追查销赃线索', turnsRequired: 2),
+      NpcTaskStep(description: '夺回佩剑，物归原主', turnsRequired: 1),
+    ],
+    rewardGold: 70,
+    rewardReputation: 6,
+    rewardRelation: 7,
+  ),
+
+  // 布兰 × 瑞肯（临冬城）：神木林守夜人失踪调查
+  NpcTaskTemplate(
+    id: 'task_bran_rickon_watch',
+    npcId: 'npc_bran',
+    coNpcId: 'npc_rickon',
+    title: '调查守夜人失踪案',
+    type: NpcTaskType.investigate,
+    difficulty: 2,
+    deadlineMonths: 3,
+    steps: [
+      NpcTaskStep(description: '听布兰讲述失踪守夜人的最后行踪', turnsRequired: 1),
+      NpcTaskStep(description: '沿神木林小径搜寻，找到遗落的黑斗篷', turnsRequired: 1),
+      NpcTaskStep(description: '把发现带回，与布兰、瑞肯一同推断', turnsRequired: 1),
+    ],
+    rewardGold: 55,
+    rewardReputation: 5,
+    rewardRelation: 6,
+  ),
 ];
 
 /// 按 ID 查找任务模板。

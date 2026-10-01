@@ -48,6 +48,7 @@ class NpcTaskTemplate {
     required this.rewardGold,
     required this.rewardReputation,
     required this.rewardRelation,
+    this.coNpcId,
   });
 
   /// 任务唯一 ID。
@@ -79,6 +80,12 @@ class NpcTaskTemplate {
 
   /// 好感奖励。
   final int rewardRelation;
+
+  /// 协作 NPC 的 ID（非空 = 多 NPC 协作任务；空 = 单人任务）。
+  final String? coNpcId;
+
+  /// 是否多 NPC 协作任务。
+  bool get isCoop => coNpcId != null && coNpcId!.isNotEmpty;
 
   /// 难度系数（1+0.25×(难度-1)，四舍五入取整倍率）。
   int get difficultyMultiplier => 1 + (difficulty - 1);
