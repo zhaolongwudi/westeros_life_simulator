@@ -53,6 +53,11 @@ class FamilyTreeScreen extends StatelessWidget {
                 record: p.generationRecords[i],
                 isLast: i == p.generationRecords.length - 1,
               ),
+              // Batch 10-49：谱系继承连线——每任家主之间画一条传承连线
+              // （非末代 → 连接下一任；末代 → 指向当前世代）
+              _InheritanceLink(
+                isLast: i == p.generationRecords.length - 1,
+              ),
             ],
             const SizedBox(height: 16),
           ],
@@ -191,6 +196,46 @@ class _GenerationNode extends StatelessWidget {
                     ],
                   ),
                 ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 谱系继承连线（Batch 10-49）。
+///
+/// 相邻两任家主之间的传承箭头：非末代显示「继承」（指向下一任），
+/// 末代显示「传至当代」（指向当前世代），让「谁传位给谁」一目了然。
+class _InheritanceLink extends StatelessWidget {
+  const _InheritanceLink({required this.isLast});
+
+  /// 是否为谱系最后一条（末代）。
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    return Padding(
+      padding: const EdgeInsets.only(left: 6, bottom: 4),
+      child: Row(
+        children: <Widget>[
+          Icon(Icons.south, size: 18, color: primary),
+          const SizedBox(width: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              isLast ? '传至当代' : '继承',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: primary,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
