@@ -90,7 +90,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-/// 历代家主节点（时间轴条目）。
+/// 历代家主节点（时间轴条目，可点击查看详情，Batch 10-46）。
 class _GenerationNode extends StatelessWidget {
   const _GenerationNode({required this.record, required this.isLast});
 
@@ -126,51 +126,219 @@ class _GenerationNode extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          // 节点卡片
+          // 节点卡片（点击弹出详情）
           Expanded(
             child: Card(
               margin: const EdgeInsets.only(bottom: 12),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Text(
-                          '第 ${record.generation} 代',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Spacer(),
-                        if (record.achievement.isNotEmpty)
-                          Chip(
-                            label: Text(
-                              record.achievement,
-                              style: const TextStyle(fontSize: 11),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => _showAncestorDetail(context, record),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Text(
+                            '第 ${record.generation} 代',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
                             ),
-                            visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
                           ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      record.name,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                          const Spacer(),
+                          if (record.achievement.isNotEmpty)
+                            Chip(
+                              label: Text(
+                                record.achievement,
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(horizontal: 6),
+                            ),
+                        ],
                       ),
-                    ),
-                    Text(
-                      '${record.title}${record.reignYears.isEmpty ? '' : ' · ${record.reignYears}'}',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        record.name,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '${record.title}${record.reignYears.isEmpty ? '' : ' · ${record.reignYears}'}',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          Icon(
+                            Icons.touch_app_outlined,
+                            size: 14,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '查看详情',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 弹出历代家主详情（底部弹层，Batch 10-46）。
+///
+/// 展示：世代/姓名/头衔/在位/成就（无则提示）/传承寄语。
+void _showAncestorDetail(BuildContext context, GenerationRecord record) {
+  final theme = Theme.of(context);
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: theme.colorScheme.surface,
+    builder: (sheetContext) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            // 标题行：世代徽章 + 姓名
+            Row(
+              children: <Widget>[
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: theme.colorScheme.primaryContainer,
+                  child: Text(
+                    '${record.generation}',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        record.name,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '第 ${record.generation} 代家主',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
+            // 头衔
+            _DetailLine(
+              icon: Icons.workspace_premium_outlined,
+              label: '头衔',
+              value: record.title.isEmpty ? '无名之辈' : record.title,
+            ),
+            // 在位
+            _DetailLine(
+              icon: Icons.schedule_outlined,
+              label: '在位',
+              value: record.reignYears.isEmpty ? '未记载' : record.reignYears,
+            ),
+            // 成就
+            _DetailLine(
+              icon: Icons.emoji_events_outlined,
+              label: '成就',
+              value: record.achievement.isEmpty
+                  ? '暂无显著功绩'
+                  : record.achievement,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '${record.name} 的名字已刻入家族史册。愿后人不负先人。',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontStyle: FontStyle.italic,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => Navigator.of(sheetContext).pop(),
+                child: const Text('关闭'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// 详情行（图标 + 标签 + 值）。
+class _DetailLine extends StatelessWidget {
+  const _DetailLine({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Icon(icon, size: 18, color: theme.colorScheme.primary),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 44,
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(value, style: theme.textTheme.bodyMedium),
           ),
         ],
       ),
