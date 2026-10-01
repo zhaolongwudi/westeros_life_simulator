@@ -1110,7 +1110,7 @@
   {
     "id": "task_cersei_jaime_traitor",
     "npcId": "npc_cersei",
-    "title": "揪出宫中的叛徒",
+    "title": "彻查御林铁卫的叛徒",
     "type": "NpcTaskType.investigate",
     "difficulty": 4,
     "deadlineMonths": 5,
@@ -1136,7 +1136,7 @@
   {
     "id": "task_tyrion_cersei_rumor",
     "npcId": "npc_tyrion",
-    "title": "散布王后的流言",
+    "title": "追查王后身边的奸细",
     "type": "NpcTaskType.diplomacy",
     "difficulty": 3,
     "deadlineMonths": 4,
@@ -1162,7 +1162,7 @@
   {
     "id": "task_olenna_margaery_match",
     "npcId": "npc_olenna_tyrell",
-    "title": "为玛格丽物色夫婿",
+    "title": "为玛格丽操办玫瑰舞会",
     "type": "NpcTaskType.diplomacy",
     "difficulty": 3,
     "deadlineMonths": 6,

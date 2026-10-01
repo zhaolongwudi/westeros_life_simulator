@@ -72,7 +72,7 @@ void main() {
         ),
       );
       final tasks = engine.availableTasksOf('npc_cersei');
-      expect(tasks.map((t) => t.title), contains('揪出宫中的叛徒'));
+      expect(tasks.map((t) => t.title), contains('彻查御林铁卫的叛徒'));
     });
 
     test('同伴关系不足时协作任务不出现', () {
@@ -84,7 +84,7 @@ void main() {
         ),
       );
       final tasks = engine.availableTasksOf('npc_cersei');
-      expect(tasks.map((t) => t.title), isNot(contains('揪出宫中的叛徒')));
+      expect(tasks.map((t) => t.title), isNot(contains('彻查御林铁卫的叛徒')));
     });
 
     test('接取协作任务：双方关系达标成功后标注协作', () {
@@ -153,7 +153,7 @@ void main() {
         ),
       );
       final panel = engine.formatNpcTaskPanelV2();
-      expect(panel, contains('揪出宫中的叛徒'));
+      expect(panel, contains('彻查御林铁卫的叛徒'));
       expect(panel, contains('詹姆'));
     });
   });

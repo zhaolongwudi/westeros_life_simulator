@@ -819,12 +819,12 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
   // 既有 4 个（临冬城）后新增 4 个：覆盖君临（瑟曦×詹姆、提利昂×瑟曦）、
   // 高庭（奥莲娜×玛格丽）、派克城（巴隆×雅拉）。
 
-  // 瑟曦 × 詹姆（君临）：揪出宫中的叛徒
+  // 瑟曦 × 詹姆（君临）：彻查御林铁卫的叛徒
   NpcTaskTemplate(
     id: 'task_cersei_jaime_traitor',
     npcId: 'npc_cersei',
     coNpcId: 'npc_jaime',
-    title: '揪出宫中的叛徒',
+    title: '彻查御林铁卫的叛徒',
     type: NpcTaskType.investigate,
     difficulty: 4,
     deadlineMonths: 5,
@@ -838,12 +838,12 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
     rewardRelation: 9,
   ),
 
-  // 提利昂 × 瑟曦（君临）：散布王后的流言
+  // 提利昂 × 瑟曦（君临）：追查王后身边的奸细
   NpcTaskTemplate(
     id: 'task_tyrion_cersei_rumor',
     npcId: 'npc_tyrion',
     coNpcId: 'npc_cersei',
-    title: '散布王后的流言',
+    title: '追查王后身边的奸细',
     type: NpcTaskType.diplomacy,
     difficulty: 3,
     deadlineMonths: 4,
@@ -857,12 +857,12 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
     rewardRelation: 8,
   ),
 
-  // 奥莲娜 × 玛格丽（高庭）：为玛格丽物色夫婿
+  // 奥莲娜 × 玛格丽（高庭）：为玛格丽操办玫瑰舞会
   NpcTaskTemplate(
     id: 'task_olenna_margaery_match',
     npcId: 'npc_olenna_tyrell',
     coNpcId: 'npc_margaery',
-    title: '为玛格丽物色夫婿',
+    title: '为玛格丽操办玫瑰舞会',
     type: NpcTaskType.diplomacy,
     difficulty: 3,
     deadlineMonths: 6,

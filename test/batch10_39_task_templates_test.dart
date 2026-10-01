@@ -23,7 +23,8 @@ void main() {
     });
     test('新 NPC 各有 2 个模板', () {
       expect(npcTaskTemplatesOf('npc_oberon_martell').length, 2);
-      expect(npcTaskTemplatesOf('npc_balon_greyjoy').length, 2);
+      // 巴隆另有协作任务（清剿铁群岛海盗，npcId=巴隆）→ 2 solo + 1 coop = 3
+      expect(npcTaskTemplatesOf('npc_balon_greyjoy').length, 3);
       expect(npcTaskTemplatesOf('npc_yara').length, 2);
       expect(npcTaskTemplatesOf('npc_rickon').length, 2);
       expect(npcTaskTemplatesOf('npc_loras').length, 2);
