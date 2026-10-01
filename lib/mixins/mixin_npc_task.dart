@@ -245,9 +245,12 @@ mixin GameNpcTaskMixin
         .toList();
     updatePlayer(player.copyWith(activeTasks: updated));
     adjustRelation(hit.npcId, -2);
-    final coopText = template != null && template.isCoop
-        ? '，${npcById(template.coNpcId!)?.name ?? '同伴'}也失望不已（关系 -2）'
-        : '';
+    var coopText = '';
+    if (template != null && template.isCoop) {
+      final coId = template.coNpcId!;
+      adjustRelation(coId, -2);
+      coopText = '，${npcById(coId)?.name ?? '同伴'}也失望不已（关系 -2）';
+    }
     return '🗑️ 你放弃了「${hit.title}」。$who 有些失望（关系 -2）$coopText。';
   }
 
