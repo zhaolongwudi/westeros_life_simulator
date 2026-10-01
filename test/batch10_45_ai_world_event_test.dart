@@ -87,8 +87,11 @@ void main() {
       expect(body, contains('本月世界局势：'));
       expect(body, contains('· 北境烽烟——北境边境战事再起，各方领主秣马厉兵。'));
       expect(body, contains('· 饥荒蔓延——河湾地歉收，粮价飞涨。'));
-      // 第 3 条不注入（只取前 2）
-      expect(body, isNot(contains('龙影重现')));
+      // 第 3 条只出现在「可用事件」（全量注入），不在「世界局势」（取前 2）
+      final newsStart = body.indexOf('本月世界局势：');
+      final eventsStart = body.indexOf('可用事件：');
+      final newsSection = body.substring(newsStart, eventsStart);
+      expect(newsSection, isNot(contains('龙影重现')));
       // 可用事件仍全量注入
       expect(body, contains('- 北境烽烟: 北境边境战事再起，各方领主秣马厉兵。'));
       expect(body, contains('- 龙影重现: 东方天际出现龙的影子，人心浮动。'));
