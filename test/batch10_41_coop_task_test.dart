@@ -12,7 +12,6 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:westeros_life_simulator/data/npc_task_data.dart';
 import 'package:westeros_life_simulator/game_engine.dart';
-import 'package:westeros_life_simulator/models/npc_task.dart';
 
 void main() {
   group('Batch 10-41 协作任务模型', () {

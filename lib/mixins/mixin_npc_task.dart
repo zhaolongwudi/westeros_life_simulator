@@ -107,20 +107,21 @@ mixin GameNpcTaskMixin
       }
     }
     if (template == null) return '没有找到这个任务。';
+    final chosen = template;
     // 协作任务：双方在场 + 双方关系达标 + 不重复接
-    if (template.isCoop) {
-      final reason = coNpcNotAvailableReason(template);
+    if (chosen.isCoop) {
+      final reason = coNpcNotAvailableReason(chosen);
       if (reason != null) return reason;
       final coopTaken = player.activeTasks
-          .any((t) => t.taskId == template.id && t.isActive);
+          .any((t) => t.taskId == chosen.id && t.isActive);
       if (coopTaken) return '这个任务已经有人在做了。';
     }
     // 生成任务实例：期限 = 当前时间 + deadlineMonths
-    final deadline = _addMonths(progress.year, progress.month, template.deadlineMonths);
+    final deadline = _addMonths(progress.year, progress.month, chosen.deadlineMonths);
     final taskProgress = NpcTaskProgress(
-      taskId: template.id,
+      taskId: chosen.id,
       npcId: npc.id,
-      title: template.title,
+      title: chosen.title,
       stepIndex: 0,
       stepProgress: 0,
       deadlineYear: deadline.$1,
@@ -129,12 +130,12 @@ mixin GameNpcTaskMixin
     final tasks = List<NpcTaskProgress>.from(player.activeTasks)..add(taskProgress);
     updatePlayer(player.copyWith(activeTasks: tasks));
     adjustRelation(npc.id, 2);
-    final coopText = template.isCoop
-        ? '（与${npcById(template.coNpcId!)?.name ?? '同伴'}协作，'
-            '${npcById(template.coNpcId!)?.name ?? '同伴'}关系 +2）'
+    final coopText = chosen.isCoop
+        ? '（与${npcById(chosen.coNpcId!)?.name ?? '同伴'}协作，'
+            '${npcById(chosen.coNpcId!)?.name ?? '同伴'}关系 +2）'
         : '';
-    final firstStep = template.steps.first.description;
-    return '📜 你接下${npc.name}的委托：「${template.title}」。'
+    final firstStep = chosen.steps.first.description;
+    return '📜 你接下${npc.name}的委托：「${chosen.title}」。'
         '第一步：$firstStep。期限 ${deadline.$1}年${deadline.$2}月。关系 +2。$coopText';
   }
 
