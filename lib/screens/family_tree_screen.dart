@@ -126,7 +126,13 @@ class _LineageOverview extends StatelessWidget {
     for (var i = 0; i < records.length; i++) {
       final r = records[i];
       final isLast = i == records.length - 1;
-      children.add(_LineageNode(record: r));
+      children.add(
+        _LineageNode(
+          record: r,
+          label: '第${r.generation}代',
+          name: r.name,
+        ),
+      );
       if (isLast) {
         children.add(const _LineageArrow(icon: Icons.arrow_forward, label: '当代'));
       } else {
@@ -152,16 +158,11 @@ class _LineageOverview extends StatelessWidget {
 /// 横版谱系节点：世代徽章 + 姓名（末位为「当代」徽章）。
 class _LineageNode extends StatelessWidget {
   const _LineageNode({
+    this.record,
     required this.label,
     required this.name,
     this.isCurrent = false,
-  }) : record = null;
-
-  const _LineageNode.record({required GenerationRecord record})
-      : label = '第${record.generation}代',
-        name = record.name,
-        isCurrent = false,
-        record = record;
+  });
 
   final GenerationRecord? record;
   final String label;
