@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
   actions: write
 
 jobs:
@@ -151,3 +151,25 @@ jobs:
           RUN_ID: ${{ github.run_id }}
         run: |
           python3 scripts/build_and_mail_apk.py --send --apk "${{ env.RENAMED_APK }}" --run-id "$RUN_ID"
+
+      - name: Auto-update README download center
+        # 构建成功后自动刷新 README「下载中心」区块（最新 SHA/run 链接/nightly.link 外链）。
+        # 自动 commit 带 [skip ci] 防递归触发 CI；内容无变化时脚本跳过写入。
+        # checkout 默认在 detached HEAD，先切回 main 再改文件再 push。
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          git checkout main
+          python3 scripts/update_readme.py --download
+          if [ -n "$(git status --porcelain README.md)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add README.md
+            git commit -m "docs(readme): auto-update download center (run ${{ github.run_id }}) [skip ci]"
+            git push origin main
+            echo "README download center updated & pushed"
+          else
+            echo "README readme unchanged, skip"
+          fi

@@ -89,19 +89,20 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 
 ---
 
-## 📦 安装 APK
+<!-- DL-CENTER:BEGIN -->
+## 📥 下载中心
 
-APK 构建产物通过 **GitHub Actions Artifacts** 提供，下载步骤：
+**最新构建**：`WesterosLige-nightly-55d75989` · 2026-10-02 03:05 UTC · ✅ 构建成功（自动更新）
 
-1. 打开 **Build APK 工作流页面**：
-   <https://github.com/zhaolongwudi/westeros_life_simulator/actions/workflows/build_apk.yml>
-2. 找到**最近一次成功的运行**（绿色 ✓）
-3. 展开运行页面底部的 **Artifacts（产物）** 区块
-4. 下载 **`WesterosLige-nightly`**（zip 压缩包，内含 `WesterosLige-nightly-<版本号>.apk`，约 25MB）
-5. 解压后直接安装（minSdk 23，Android 6.0+ 均可）
+| 通道 | 地址 |
+|---|---|
+| 🐙 GitHub 官方 | [Actions 运行页](https://github.com/zhaolongwudi/westeros_life_simulator/actions/runs/36955464334) → Artifacts → `WesterosLige-nightly`（zip 内含 APK，约 25MB，保留 90 天） |
+| ⚡ nightly.link 加速（推荐） | [点此直接下载 zip](https://nightly.link/zhaolongwudi/westeros_life_simulator/actions/runs/36955464334/WesterosLige-nightly.zip)（Cloudflare 缓存，速度快） |
 
-> 💡 该工作流为**手动触发**：如果页面上暂无运行记录，点击右上角 **Run workflow** 手动构建一次，约 5~10 分钟跑完后即可在 Artifacts 中下载。
-> ✉️ 也支持构建完成后**自动直发到你的邮箱**：仓库 Settings → Secrets and variables → Actions 中配置 `SMTP_USER` / `SMTP_AUTH_CODE` / `SMTP_TO` 即可（参考 `scripts/.mail_env.example`）。
+> 💡 GitHub 官方直连下载较慢/经常失败，推荐走 **nightly.link** 外联加速通道。
+> 🔄 本区块在每次 APK 构建成功后自动刷新，无需手动维护。
+> 📱 安装要求：Android 6.0+（minSdk 23）。
+<!-- DL-CENTER:END -->
 
 ---
 
@@ -115,26 +116,17 @@ APK 构建产物通过 **GitHub Actions Artifacts** 提供，下载步骤：
 
 ---
 
+<!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
-**2026-10-02 · NPC 任务模板扩充 + APK 构建发信脚本（Batch 10-53）**
+**2026-10-02 · feat(apk-mail): 对齐 wpk-update-notifier 的 SMTP Secrets 模式（SMTP_USER/SMTP_AUTH_CODE/SMTP_TO）+ 新增 --send 独立发信模式，build_apk.yml 构建成功后自动发邮件（未配 secrets 跳过）**（`96813ab`）
 
-- 🎯 **NPC 任务模板 54 → 58**——卢斯·波顿、拉姆斯·波顿、席恩·葛雷乔伊、霍斯特·徒利各新增 1 个 solo 任务（清点黑城堡军需账册 / 追捕脱逃的俘虏 / 试探父亲的联姻意向 / 护送家书至鹰巢城）；协作仍 8，solo 46 → 50
-- 🧪 **7 条新测试**——任务模板总量 / 协作数 / solo 数 / 新模板指向真实 NPC / ID·标题唯一 / 可接列表 / 不在场「不在这里」提示；同步 6 个旧测试断言
-- ✅ **790 条测试全绿**（run `36953164968`）
-- 📦 **APK 构建 + 直发邮箱**——新增 `build_apk.yml`（手动触发，现场生成 android 平台 + minSdk 23 + artifact 上传保留 90 天）+ `scripts/build_and_mail_apk.py`（触发构建 → 等 CI → 下载 APK → SMTP 附件直发 → 失败降级 nightly.link 链接发邮箱）
+**2026-10-02 · fix(build-apk): find 不再剪枝 build/ 目录（APK 产在 build/ 下被 -prune 剪掉致 BUILD_EXIT_CODE=1）**（`55d7598`）
 
-**2026-10-02 · AI 注入地区风土人情（Batch 10-52）**
+**2026-10-02 · fix(build-apk): flutter create 后删除模板 test/widget_test.dart（引用 MyApp 致 analyze creation_with_non_type 红）**（`133c4b9`）
 
-- 🗺️ **12 区域宏观风土人情**——北境、河间地、谷地、西境、河湾地、王领、风暴地、多恩、铁群岛、厄索斯、超自然、未知世界各一段宏观叙事，与玩家视角区域引导互补
-- 🌐 **「时节 × 地域」双轴**——与季节世界动向段落叠加，AI 叙事让整个世界随季节与地域同时活起来
-- 🧪 **7 条新测试**，✅ **783 条测试全绿**（run `36951329714`，一次通过零 CI 红）
-
-**2026-10-02 · 双批次：AI 注入季节世界动向 + 家族树横版继承关系图（Batch 10-50/51）**
-
-- 🌦️ **AI 注入季节世界动向**——五季（春潮涌动 / 盛夏正酣 / 秋色渐浓 / 严冬笼罩 / 凛冬无期）各一段**整个维斯特洛**的宏观时令变化，AI 围绕「季节驱动世界」展开叙事
-- 🏛️ **家族树横版继承关系图**——历代家主迷你卡片（世代徽章 + 姓名）横向串联至当代徽章，箭头指示「谁传位给谁」，竖排看详情、横排看全局
-- 🧪 **10 条新测试**，✅ **776 条测试全绿**（run `36946025151`）
+> 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
+<!-- CHANGELOG:END -->
 
 ---
 
