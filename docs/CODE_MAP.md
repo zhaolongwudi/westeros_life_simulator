@@ -182,6 +182,7 @@ GameEngine extends GameProviderBase with:
 | **AI 注入本月世界局势** | services/ai_service.dart（`_buildPrompt` 内 `worldNewsDesc`：从预算筛选后事件取 top2 作「本月世界局势」段落 + 空态兜底「（本月暂无重大传闻）」，Batch 10-45） |
 | **AI 注入头衔晋升趋势** | services/ai_service.dart（`_buildPrompt` 内 `titleProgressDesc`：balance_data 单一真相量化「距下一档「伯爵」还差 5 声望」+ 阶梯总览「爵士(40) → 伯爵(60) → 大领主(80)」/ 已登顶兜底，Batch 10-48） |
 | **AI 注入季节世界动向** | services/ai_service.dart（`_buildPrompt` 内 `seasonTrendDesc`：五季世界宏观动向段落，与玩家视角季节引导互补，Batch 10-50） |
+| **AI 注入地区风土人情** | services/ai_service.dart（`_buildPrompt` 内 `regionTrendDesc`：regionWorldTrend 区域宏观风土人情段落——季节世界动向之后、可用事件之前，与季节世界动向形成「时节 × 地域」双轴，Batch 10-52） |
 | **AI 回合编排（读配置→拼上下文→请求→装配）** | **mixins/mixin_ai.dart（runAiAction，Batch 10-29 · M3b；返回 `AiTurnResult`）** |
 | AI 回合结果对象 | models/ai_turn.dart（AiTurnResult：lines/choices/isSuccess + notConfiguredLine/notStartedLine/**degradedLine**（AI 失败降级提示，Batch 10-34 · M5a）） |
 | AI 选项效果落盘 + 推进 | mixin_ai.dart（applyAiChoice） |
@@ -295,6 +296,7 @@ GameEngine extends GameProviderBase with:
 | batch10_49_family_link_test | **谱系继承连线画布**（10-49，3 用例）：单任历史 1 传至当代 / 两任历史 1 继承 + 1 传至当代 / 无谱系无连线 |
 | batch10_50_ai_season_trend_test | **AI 注入季节世界动向**（10-50，7 用例）：五季（spring/summer/autumn/winter/longwinter）各注入对应世界动向段落 / 未知季节兜底 / 既有注入（世界局势/可用事件/季节引导）不回归 |
 | batch10_51_family_overview_test | **横版继承关系图（谱系概览）**（10-51，3 用例）：单任历史 1 箭头指向当代 / 两任历史 2 箭头（共 3 节点）/ 无谱系无概览 |
+| batch10_52_region_trend_test | **AI 注入地区风土人情**（10-52，7 用例）：区域注入抽查（北境/西境/王领/多恩/河湾地）/ 未知区域兜底 / 既有注入（世界局势/季节动向/区域引导）不回归 |
 | batch10_24_task_progress_ui_test | NPC 任务进度 UI 化：totalTurns/整体进度/剩余月数/进度条渲染/契约回归（10-24，10 用例） |
 | batch10_25_marriage2_test | 婚姻二轮：离婚/丧偶/配偶谈心/月度事件/婚姻面板（10-25） |
 | m1_save_migration_test | **M1 存档契约**（10-26，22 用例）：schemaVersion 写入 / v0→v1 迁移 / 高版本抛异常 / 防御式 fromJson（坏类型/坏列表元素/空 Map）/ 坏档隔离 .corrupted / 旧档加载 / 保存往返 |
@@ -355,4 +357,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v3.2（新增 batch10_50/51 季节世界动向注入与横版继承关系图速查及测试映射）· 最后更新：2026-10-02*
+*文档版本：v3.3（新增 batch10_52 地区风土人情注入速查及测试映射）· 最后更新：2026-10-02*
