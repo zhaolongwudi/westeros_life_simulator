@@ -371,7 +371,7 @@ GameEngine extends GameProviderBase with:
   - 配置：`scripts/.mail_env`（复制 `.mail_env.example` 填 SMTP_HOST/PORT/USER/PASS/MAIL_TO 等，已 gitignore）
   - **SMTP Secrets 模式（对齐 wpk-update-notifier 仓库）**：CI 里走 GitHub 仓库级 Secrets（Settings → Secrets and variables → Actions 配置 `SMTP_USER` / `SMTP_AUTH_CODE` / `SMTP_TO`，SMTP_HOST=smtp.qq.com、SMTP_PORT=465 为代码默认值），build_apk.yml 的 `Send APK to email` 步骤以 env 注入；未配置 Secrets 时脚本自动跳过发信（exit 0）。脚本 `load_env()` 支持 `SMTP_AUTH_CODE` 别名映射到 `SMTP_PASS`、`MAIL_TO` 缺省回退 `SMTP_USER`；`--send --apk <path> --run-id <id>` 独立发信模式（CI 用）
   - 用法：`python3 scripts/build_and_mail_apk.py`（完整流程）/ `--check` 校验配置 / `--trigger` 只触发 / `--mail-latest` 取最近一次成功 run 的 APK 发邮箱 / `--send` 独立发信
-  - **nightly.link 已废弃（2026-10-02 实锤）**：本仓库为 private，第三方服务无法读取私有仓库 artifacts（`No artifacts found for run ...`），外联通道不可用；下载走 **Release 直链**（`releases/latest/download/WesterosLige.apk`，需登录 GitHub），详情见第九节
+  - **nightly.link 已废弃（2026-10-02 二次实锤，仓库已转 public 仍 404）**：实测对 public 仓库全部 run 均 404（artifact 真实存在、API 可读 25MB，但 nightly.link 服务无法访问），外联加速通道不可用；下载走 **Release 直链**（`releases/latest/download/WesterosLige.apk`，**免登录**，实测未登录 302→200），详情见第九节
 
 ## 九、README 首页自动更新（2026-10-02 新增）
 用户需求：首页做「下载中心」小分块（GitHub 官方 + nightly.link 双通道下载地址）；每次构建/推送自动刷新下载区块与最近更新（只保留 3 条）；排版生动美观配图标。
@@ -384,10 +384,11 @@ GameEngine extends GameProviderBase with:
   - `build_apk.yml`：构建成功 → `Publish Release`（tag `apk-<sha8>` + 固定名 asset `WesterosLige.apk`，**GitHub /releases/latest 原生指向最新，无 apk-latest 别名**）→ `Cleanup old releases`（保留最近 3 个 `apk-` 前缀）→ `Send APK to email` → `Auto-update README download center`（`git checkout main` 解决 detached HEAD → `git pull --rebase origin main || true` → 跑 `--download` → 有变化则 commit `docs(readme): auto-update download center (run <id>) [skip ci]` → `git push origin main || true` 容错）
   - `ci.yml`：analyze/test 全绿 → `Auto-update README changelog`（同样 `git checkout main` → `--changelog` → commit `docs(readme): auto-update changelog [skip ci]` → push）
   - **防递归**：自动 commit 均带 `[skip ci]`，不会再次触发 CI；两个 workflow 均开 `permissions: contents: write` 且 checkout `fetch-depth: 0`
-- **下载链接现状（2026-10-02 实锤）**：
-  - **nightly.link 已废弃**：本仓库为 **private**，第三方服务无法读取私有仓库 artifacts（`No artifacts found`），任何外联加速通道均不可用
-  - **Release 直链为主**：`https://github.com/zhaolongwudi/westeros_life_simulator/releases/latest/download/WesterosLige.apk`（**需登录 GitHub**，未登录访问 release/asset 一律 404；带 token 200 且 54.85MB 完好）
-  - **只保留最近 3 次**：Cleanup 步骤按 created_at 倒序删多余 `apk-` release
-- **已知验证**：run `36958877137` ✅（手动触发 CI 验证 changelog 链路，analyze/test 全绿 + auto-update 幂等跳过）；run `37007321396` ✅（release-publish 全步骤 success）；run `37004310167` ❌（auto-update push 非快进被拒 → 已加 pull --rebase 容错）
+- **下载链接现状（2026-10-02 二次实锤，仓库已转 public）**：
+  - **仓库已 public**：匿名 API `private: False`、匿名 release 直链最终 200——旧「需登录 GitHub/私有仓库 404」表述已作废；README 下载中心改「免登录」直链
+  - **nightly.link 仍不可用**：实测对 public 仓库全部 run（CI/Build success/Build failure）均 404（artifact 真实存在、API 可读 25MB，但 nightly.link 服务无法访问）——不恢复该通道，README/脚本删除 nightly.link 行
+  - **Release 直链为主**：`https://github.com/zhaolongwudi/westeros_life_simulator/releases/latest/download/WesterosLige.apk`（**免登录可下载**，实测未登录 302→200；每次构建自动指向最新正式版 v0.0.x）
+  - **只保留最近 3 次**：Cleanup 步骤按 created_at 倒序删多余 `v0.0.x` release（v 版本序列，旧 apk-<sha8> 一并清理）
+- **已知验证**：run `36958877137` ✅（手动触发 CI 验证 changelog 链路，analyze/test 全绿 + auto-update 幂等跳过）；run `37007321396` ✅（release-publish 全步骤 success）；run `37004310167` ❌（auto-update push 非快进被拒 → 已加 pull --rebase 容错）；run `37048376650` ✅（head fcbd46f，fix readme 收尾闭环，analyze-test 全绿）
 ---
-*文档版本：v3.6（下载中心改 Release 直链、废弃 nightly.link、新增 Release 自动发布/清理机制速查）· 最后更新：2026-10-02*
+*文档版本：v3.7（仓库转 public：下载中心改免登录直链、废弃「私有仓库 404」表述、nightly.link 二次实锤仍 404 不恢复）· 最后更新：2026-10-02*
