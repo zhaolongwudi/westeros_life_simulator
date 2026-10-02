@@ -287,6 +287,10 @@ class AiService {
       }
     }
     final regionGuide = regionNarrativeGuide(region);
+    // Batch 10-52：注入地区风土人情——当前所在区域的宏观气质与常态底色，
+    // 与玩家视角的区域引导互补，让 AI 围绕「区域驱动世界」展开叙事，
+    // 与季节世界动向形成「时节 × 地域」双轴。
+    final regionTrendDesc = regionWorldTrend(region);
     final seasonGuide = seasonNarrativeGuide(season);
     return '''
 当前玩家状态：
@@ -318,6 +322,8 @@ ${context}
 ${worldNewsDesc}
 季节世界动向：
 ${seasonTrendDesc}
+地区风土人情：
+${regionTrendDesc}
 可用事件：
 ${eventsDesc}
 叙事引导（身份）：
