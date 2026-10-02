@@ -71,7 +71,7 @@ lib/
 │   ├── player_panel_screen.dart   # 玩家详情（含家谱区块，Batch 10-14）
 │   ├── npc_panel_screen.dart      # NPC 关系面板（Batch 10-15 新增）
 │   ├── family_screen.dart         # 家族面板
-│   ├── family_tree_screen.dart    # 家族树可视化（Batch 10-20 新增；历代家主详情弹层 Batch 10-46；谱系继承连线 Batch 10-49）
+│   ├── family_tree_screen.dart    # 家族树可视化（Batch 10-20 新增；历代家主详情弹层 Batch 10-46；谱系继承连线 Batch 10-49；横版继承关系图 Batch 10-51）
 │   ├── map_screen.dart            # 地图
 │   ├── events_screen.dart         # 事件面板
 │   ├── letters_screen.dart        # 信件面板（Batch 10-29 · M3b 起只 import models/letter.dart，不再 import mixin_letter）
@@ -165,6 +165,7 @@ GameEngine extends GameProviderBase with:
 | 多代家族树 | mixin_marriage.dart（formatMultiGenTree，Batch 10-17） |
 | **历代家主详情弹层** | screens/family_tree_screen.dart（`_GenerationNode` 点击 InkWell → `_showAncestorDetail` 底部弹层：世代徽章/姓名/头衔/在位/成就/传承寄语 + 关闭按钮，Batch 10-46） |
 | **谱系继承连线** | screens/family_tree_screen.dart（`_InheritanceLink`：历代家主节点间继承箭头连线——非末代「继承」/末代「传至当代」，Batch 10-49） |
+| **横版继承关系图（谱系概览）** | screens/family_tree_screen.dart（`_LineageOverview`/`_LineageNode`/`_LineageArrow`：「继承谱系」历代家主迷你卡片横向串联至当代徽章，Batch 10-51） |
 | NPC 多步骤任务列表 | mixin_npc_task.dart（availableTasksOf/formatNpcTaskPanelV2，Batch 10-18） |
 | NPC 接任务 | mixin_npc_task.dart（acceptNpcTaskV2，Batch 10-18） |
 | NPC 任务推进/期限 | mixin_npc_task.dart（advanceNpcTasks/checkNpcTaskDeadlines，探索+过月挂载，Batch 10-18；按时完成关系加成 + 逾期扣声望关系惩罚，Batch 10-40） |
@@ -180,6 +181,7 @@ GameEngine extends GameProviderBase with:
 | **AI 事件预算筛选** | services/event_prompt_filter.dart（selectEventsForPrompt，Batch 10-33 · M4c-2：地点/季节/数值/标记相关度评分，72→12 token 约降 83%） |
 | **AI 注入本月世界局势** | services/ai_service.dart（`_buildPrompt` 内 `worldNewsDesc`：从预算筛选后事件取 top2 作「本月世界局势」段落 + 空态兜底「（本月暂无重大传闻）」，Batch 10-45） |
 | **AI 注入头衔晋升趋势** | services/ai_service.dart（`_buildPrompt` 内 `titleProgressDesc`：balance_data 单一真相量化「距下一档「伯爵」还差 5 声望」+ 阶梯总览「爵士(40) → 伯爵(60) → 大领主(80)」/ 已登顶兜底，Batch 10-48） |
+| **AI 注入季节世界动向** | services/ai_service.dart（`_buildPrompt` 内 `seasonTrendDesc`：五季世界宏观动向段落，与玩家视角季节引导互补，Batch 10-50） |
 | **AI 回合编排（读配置→拼上下文→请求→装配）** | **mixins/mixin_ai.dart（runAiAction，Batch 10-29 · M3b；返回 `AiTurnResult`）** |
 | AI 回合结果对象 | models/ai_turn.dart（AiTurnResult：lines/choices/isSuccess + notConfiguredLine/notStartedLine/**degradedLine**（AI 失败降级提示，Batch 10-34 · M5a）） |
 | AI 选项效果落盘 + 推进 | mixin_ai.dart（applyAiChoice） |
@@ -291,6 +293,8 @@ GameEngine extends GameProviderBase with:
 | batch10_47_task_expand_test | **NPC 任务模板扩充**（10-47，5 用例）：总量 54 / 协作 8 / solo 46 / 新模板存在且指向真实 NPC（泰温·凯岩城·调查西境矿脉 / 艾莉亚·临冬城·猎杀袭击商队的狼群）/ ID·标题唯一 / 泰温不在场仅模板可见性（断言「不在这里」）/ 艾莉亚指定 taskId 全流程完成结算 |
 | batch10_48_ai_title_trend_test | **AI 注入头衔晋升趋势**（10-48，4 用例）：有下一档注入「距下一档「伯爵」还差 5 声望」+ 阶梯总览 / 已登顶「已登顶本身份头衔巅峰」/ 无头衔兜底 / 与 balance_data 单一真相对齐（nextTierReputation） |
 | batch10_49_family_link_test | **谱系继承连线画布**（10-49，3 用例）：单任历史 1 传至当代 / 两任历史 1 继承 + 1 传至当代 / 无谱系无连线 |
+| batch10_50_ai_season_trend_test | **AI 注入季节世界动向**（10-50，7 用例）：五季（spring/summer/autumn/winter/longwinter）各注入对应世界动向段落 / 未知季节兜底 / 既有注入（世界局势/可用事件/季节引导）不回归 |
+| batch10_51_family_overview_test | **横版继承关系图（谱系概览）**（10-51，3 用例）：单任历史 1 箭头指向当代 / 两任历史 2 箭头（共 3 节点）/ 无谱系无概览 |
 | batch10_24_task_progress_ui_test | NPC 任务进度 UI 化：totalTurns/整体进度/剩余月数/进度条渲染/契约回归（10-24，10 用例） |
 | batch10_25_marriage2_test | 婚姻二轮：离婚/丧偶/配偶谈心/月度事件/婚姻面板（10-25） |
 | m1_save_migration_test | **M1 存档契约**（10-26，22 用例）：schemaVersion 写入 / v0→v1 迁移 / 高版本抛异常 / 防御式 fromJson（坏类型/坏列表元素/空 Map）/ 坏档隔离 .corrupted / 旧档加载 / 保存往返 |
@@ -351,4 +355,4 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v3.1（新增 batch10_49 谱系继承连线速查与测试映射）· 最后更新：2026-10-02*
+*文档版本：v3.2（新增 batch10_50/51 季节世界动向注入与横版继承关系图速查及测试映射）· 最后更新：2026-10-02*
