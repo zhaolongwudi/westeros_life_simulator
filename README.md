@@ -92,16 +92,13 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- DL-CENTER:BEGIN -->
 ## 📥 下载中心
 
-**最新构建**：`WesterosLige v0.0.2` · 2026-10-02 14:19 UTC · ✅ 自动发布正式版
+**最新构建**：`WesterosLige v0.0.2` · 2026-10-02 14:43 UTC · ✅ 自动发布正式版
 
 | 通道 | 地址 |
 |---|---|
-| 🚀 Release 直链 | [releases/latest/download/WesterosLige.apk](https://github.com/zhaolongwudi/westeros_life_simulator/releases/latest/download/WesterosLige.apk)（需登录 GitHub；每次构建自动指向最新正式版 `v0.0.2`） |
+| 🚀 Release 直链 | [releases/latest/download/WesterosLige.apk](https://github.com/zhaolongwudi/westeros_life_simulator/releases/latest/download/WesterosLige.apk)（免登录，每次构建自动指向最新正式版 `v0.0.2`） |
 | 🐙 GitHub 官方 | [Releases 页面](https://github.com/zhaolongwudi/westeros_life_simulator/releases) → 最新版 → Assets → `WesterosLige.apk`（保留最近 3 次） |
-| ⚡ GitHub Actions | [Build APK 工作流](https://github.com/zhaolongwudi/westeros_life_simulator/actions/workflows/build_apk.yml) → 最近成功 run → Artifacts → `WesterosLige-nightly`（zip 保留 90 天） |
 
-> ℹ️ **本仓库为私有仓库**：GitHub 对未登录访问私有仓库的 release/asset 一律返回 404（隐藏存在性），
-> 因此**任何外联加速服务（如 nightly.link）都无法读取**；下载请先登录你的 GitHub 账号，直链即可用。
 > 🔄 每次构建自动发布正式版 Release（版本号 0.0.1 → 0.0.2 → 0.0.3…自动递增），仅保留最近 3 次。
 > 📱 安装要求：Android 6.0+（minSdk 23）。
 > ✉️ 构建完成后可自动直发到你的邮箱：仓库 Settings → Secrets and variables → Actions 配置 `SMTP_USER` / `SMTP_AUTH_CODE` / `SMTP_TO`（参考 `scripts/.mail_env.example`）。
