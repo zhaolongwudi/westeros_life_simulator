@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 
 import '../game_engine.dart';
 import '../models/event.dart';
+import '../theme/westeros_theme.dart';
 import '../utils/labels.dart';
+import '../widgets/theme/ornate.dart';
 
 /// 事件面板。
 class EventsScreen extends StatelessWidget {
@@ -38,34 +40,36 @@ class EventsScreen extends StatelessWidget {
             ],
           ),
         ),
-        body: TabBarView(
-          children: <Widget>[
-            // 可触发事件
-            available.isEmpty
-                ? const Center(child: Text('当前没有可触发的事件。'))
-                : ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: available.length,
-                    itemBuilder: (context, index) {
-                      final ev = available[index];
-                      return _EventCard(event: ev, playerEngine: e);
-                    },
-                  ),
-            // 全部事件库
-            ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: allEvents.length,
-              itemBuilder: (context, index) {
-                final ev = allEvents[index];
-                final isAvailable = available.contains(ev);
-                return _EventCard(
-                  event: ev,
-                  playerEngine: e,
-                  showAvailableBadge: isAvailable,
-                );
-              },
-            ),
-          ],
+        body: ParchmentBackground(
+          child: TabBarView(
+            children: <Widget>[
+              // 可触发事件
+              available.isEmpty
+                  ? const Center(child: Text('当前没有可触发的事件。'))
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: available.length,
+                      itemBuilder: (context, index) {
+                        final ev = available[index];
+                        return _EventCard(event: ev, playerEngine: e);
+                      },
+                    ),
+              // 全部事件库
+              ListView.builder(
+                padding: const EdgeInsets.all(12),
+                itemCount: allEvents.length,
+                itemBuilder: (context, index) {
+                  final ev = allEvents[index];
+                  final isAvailable = available.contains(ev);
+                  return _EventCard(
+                    event: ev,
+                    playerEngine: e,
+                    showAvailableBadge: isAvailable,
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -91,79 +95,133 @@ class _EventCard extends StatelessWidget {
     final choices = playerEngine.eventProvider
         .getAvailableChoices(event, playerEngine.player);
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      child: ExpansionTile(
-        leading: Icon(
-          Icons.event_note_outlined,
-          color: showAvailableBadge ? theme.colorScheme.primary : null,
+      decoration: BoxDecoration(
+        color: WesterosColors.barkHigh,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: WesterosColors.outlineGold.withValues(alpha: 0.5),
         ),
-        title: Row(
-          children: <Widget>[
-            Expanded(
-              child: Text(
-                event.name,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      child: Theme(
+        data: theme.copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          leading: Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: showAvailableBadge
+                  ? WesterosColors.gold.withValues(alpha: 0.2)
+                  : WesterosColors.barkMid,
+              border: Border.all(
+                color: showAvailableBadge
+                    ? WesterosColors.gold.withValues(alpha: 0.6)
+                    : WesterosColors.outlineGold.withValues(alpha: 0.4),
               ),
             ),
-            if (showAvailableBadge)
-              Chip(
-                label: const Text('可触发'),
-                visualDensity: VisualDensity.compact,
-                backgroundColor: theme.colorScheme.primaryContainer,
-              ),
-          ],
-        ),
-        subtitle: Text('$typeLabel · ${event.tags.join('、')}'),
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(event.description),
-                const SizedBox(height: 8),
-                Text(
-                  '触发条件：${event.triggerConditions.entries.map((e) => '${e.key}=${e.value}').join('，')}',
-                  style: theme.textTheme.bodySmall,
-                ),
-                if (event.isOneTime)
-                  Text('一次性事件', style: theme.textTheme.bodySmall),
-                const SizedBox(height: 8),
-                const Text('选项：', style: TextStyle(fontWeight: FontWeight.bold)),
-                for (final choice in event.choices)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Icon(
-                          choices.contains(choice)
-                              ? Icons.check_circle_outline
-                              : Icons.circle_outlined,
-                          size: 16,
-                          color: choices.contains(choice)
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.outline,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            choice.text,
-                            style: TextStyle(
-                              fontWeight: choices.contains(choice)
-                                  ? FontWeight.normal
-                                  : FontWeight.w300,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
+            child: Icon(
+              Icons.event_note_outlined,
+              size: 18,
+              color: showAvailableBadge ? WesterosColors.goldBright : WesterosColors.inkDim,
             ),
           ),
-        ],
+          title: Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  event.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: showAvailableBadge ? WesterosColors.goldBright : WesterosColors.parchment,
+                  ),
+                ),
+              ),
+              if (showAvailableBadge)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: WesterosColors.gold.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: WesterosColors.gold.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: const Text(
+                    '可触发',
+                    style: TextStyle(
+                      color: WesterosColors.goldBright,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          subtitle: Text(
+            '$typeLabel · ${event.tags.join('、')}',
+            style: const TextStyle(color: WesterosColors.inkDim),
+          ),
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    event.description,
+                    style: const TextStyle(color: WesterosColors.parchment),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '触发条件：${event.triggerConditions.entries.map((e) => '${e.key}=${e.value}').join('，')}',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  if (event.isOneTime)
+                    Text('一次性事件', style: theme.textTheme.bodySmall),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '选项：',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: WesterosColors.goldBright),
+                  ),
+                  for (final choice in event.choices)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Icon(
+                            choices.contains(choice)
+                                ? Icons.check_circle_outline
+                                : Icons.circle_outlined,
+                            size: 16,
+                            color: choices.contains(choice)
+                                ? WesterosColors.goldBright
+                                : WesterosColors.inkDim,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              choice.text,
+                              style: TextStyle(
+                                fontWeight: choices.contains(choice)
+                                    ? FontWeight.normal
+                                    : FontWeight.w300,
+                                color: choices.contains(choice)
+                                    ? WesterosColors.parchment
+                                    : WesterosColors.inkDim,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

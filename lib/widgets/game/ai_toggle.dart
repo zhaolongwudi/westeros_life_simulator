@@ -1,7 +1,11 @@
 /// 主界面 AI 行动模式开关 widget（Batch 10-29 · M3b 从 game_screen 拆出）。
+///
+/// Batch 10-60 UI 重造：龙火主题开关条。
 library;
 
 import 'package:flutter/material.dart';
+
+import '../../theme/westeros_theme.dart';
 
 /// AI 模式开关条。
 class AiModeToggle extends StatelessWidget {
@@ -20,18 +24,44 @@ class AiModeToggle extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      color: aiMode
-          ? theme.colorScheme.primaryContainer.withAlpha(120)
-          : null,
+      decoration: BoxDecoration(
+        color: aiMode
+            ? WesterosColors.bloodRed.withValues(alpha: 0.18)
+            : null,
+        border: Border(
+          bottom: BorderSide(
+            color: aiMode
+                ? WesterosColors.bloodRed.withValues(alpha: 0.5)
+                : WesterosColors.outlineGold.withValues(alpha: 0.35),
+          ),
+        ),
+      ),
       child: Row(
         children: <Widget>[
           Icon(
-            Icons.auto_awesome,
-            size: 16,
-            color: aiMode ? theme.colorScheme.primary : theme.colorScheme.outline,
+            Icons.local_fire_department_outlined,
+            size: 18,
+            color: aiMode
+                ? WesterosColors.bloodRed.withValues(alpha: 0.9)
+                : theme.colorScheme.outline,
           ),
           const SizedBox(width: 8),
-          const Text('AI 行动模式'),
+          Text(
+            'AI 行动模式',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: aiMode ? WesterosColors.goldBright : null,
+              fontWeight: aiMode ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          if (aiMode) ...[
+            const SizedBox(width: 6),
+            Text(
+              '（描述你的行动）',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: WesterosColors.inkDim,
+              ),
+            ),
+          ],
           const Spacer(),
           if (aiLoading)
             const SizedBox(

@@ -1,12 +1,15 @@
 /// 主界面叙事输出区 widget（Batch 10-29 · M3b 从 game_screen 拆出）。
 ///
 /// 含 AI 选项卡片与面板快捷入口；纯展示，交互一律通过回调上抛。
+///
+/// Batch 10-60 UI 重造：羊皮纸叙事面板 + 金色选项卡片。
 library;
 
 import 'package:flutter/material.dart';
 
 import '../../game_engine.dart';
 import '../../models/event.dart';
+import '../../theme/westeros_theme.dart';
 import '../../utils/narrative_format.dart';
 import '../../screens/family_screen.dart';
 import '../../screens/map_screen.dart';
@@ -129,9 +132,14 @@ class NarrativeView extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: isCommand
-                    ? theme.colorScheme.primaryContainer
-                    : theme.colorScheme.surfaceContainerHigh,
+                    ? WesterosColors.goldDark.withValues(alpha: 0.22)
+                    : WesterosColors.barkHigh,
                 borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isCommand
+                      ? WesterosColors.gold.withValues(alpha: 0.4)
+                      : WesterosColors.outlineGold.withValues(alpha: 0.25),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,6 +152,9 @@ class NarrativeView extends StatelessWidget {
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontFamily: isCommand ? null : 'monospace',
                           height: 1.45,
+                          color: isCommand
+                              ? WesterosColors.goldBright
+                              : WesterosColors.parchment,
                         ),
                       ),
                     ),
@@ -175,12 +186,13 @@ class AiChoiceCard extends StatelessWidget {
     final labels = effectLabels(choice.effects);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Card(
-        color: theme.colorScheme.secondaryContainer.withAlpha(160),
+      child: Material(
+        color: WesterosColors.barkHigh,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-            color: theme.colorScheme.secondary.withAlpha(90),
+            color: WesterosColors.gold.withValues(alpha: 0.55),
+            width: 1.2,
           ),
         ),
         child: InkWell(
@@ -191,19 +203,33 @@ class AiChoiceCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                // 编号徽章
+                // 金色编号徽章
                 Container(
-                  width: 28,
-                  height: 28,
+                  width: 30,
+                  height: 30,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: <Color>[
+                        WesterosColors.goldDark,
+                        WesterosColors.gold,
+                      ],
+                    ),
                     shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: WesterosColors.gold.withValues(alpha: 0.3),
+                        blurRadius: 6,
+                      ),
+                    ],
                   ),
                   child: Text(
                     ordinal,
                     style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.onPrimary,
+                      color: WesterosColors.barkDeep,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -214,7 +240,9 @@ class AiChoiceCard extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         choice.text,
-                        style: theme.textTheme.titleSmall,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: WesterosColors.goldBright,
+                        ),
                       ),
                       if (choice.narrative.isNotEmpty) ...[
                         const SizedBox(height: 4),
@@ -237,13 +265,18 @@ class AiChoiceCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.surfaceContainerHigh,
+                                color: WesterosColors.goldDark
+                                    .withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: WesterosColors.outlineGold
+                                      .withValues(alpha: 0.5),
+                                ),
                               ),
                               child: Text(
                                 label,
                                 style: theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.primary,
+                                  color: WesterosColors.goldBright,
                                 ),
                               ),
                             ),
@@ -280,6 +313,11 @@ class PanelEntry extends StatelessWidget {
     return ActionChip(
       avatar: Icon(icon, size: 18, color: color),
       label: Text(label),
+      backgroundColor: WesterosColors.barkMid,
+      side: BorderSide(
+        color: WesterosColors.outlineGold.withValues(alpha: 0.6),
+      ),
+      labelStyle: const TextStyle(color: WesterosColors.parchment),
       onPressed: onTap,
     );
   }

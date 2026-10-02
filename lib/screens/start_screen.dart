@@ -12,7 +12,9 @@ import '../game_engine.dart';
 import '../models/location.dart';
 import '../models/player.dart';
 import '../providers/game_state_provider.dart';
+import '../theme/westeros_theme.dart';
 import '../utils/labels.dart';
+import '../widgets/theme/ornate.dart';
 import 'game_screen.dart';
 
 /// 开局配置。
@@ -207,17 +209,20 @@ class _StartScreenState extends State<StartScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('开始新人生')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: <Widget>[
-          // 姓名 + 性别
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+      body: ParchmentBackground(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: <Widget>[
+            // ── 开篇饰头 ──
+            const _StartHero(),
+            const SizedBox(height: 16),
+            // 姓名 + 性别
+            GildedCard(
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const Text('姓名'),
+                  const OrnateHeader(icon: Icons.badge_outlined, title: '姓名'),
                   Row(
                     children: <Widget>[
                       Expanded(
@@ -225,8 +230,7 @@ class _StartScreenState extends State<StartScreen> {
                           controller: _nameController,
                           decoration: const InputDecoration(
                             hintText: '输入姓名（留空随机）',
-                            border: OutlineInputBorder(),
-                            isDense: true,
+                            prefixIcon: Icon(Icons.edit_outlined, size: 18),
                           ),
                         ),
                       ),
@@ -237,8 +241,9 @@ class _StartScreenState extends State<StartScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 12),
+                  const OrnateHeader(icon: Icons.wc_outlined, title: '性别'),
                   const SizedBox(height: 8),
-                  const Text('性别'),
                   SegmentedButton<String>(
                     segments: const <ButtonSegment<String>>[
                       ButtonSegment<String>(value: 'male', label: Text('男')),
@@ -251,15 +256,14 @@ class _StartScreenState extends State<StartScreen> {
                 ],
               ),
             ),
-          ),
-          // 身份
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+            const SizedBox(height: 12),
+            // 身份
+            GildedCard(
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const Text('身份'),
+                  const OrnateHeader(icon: Icons.emoji_people_outlined, title: '身份'),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 6,
@@ -275,15 +279,14 @@ class _StartScreenState extends State<StartScreen> {
                 ],
               ),
             ),
-          ),
-          // 家族
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+            const SizedBox(height: 12),
+            // 家族
+            GildedCard(
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const Text('家族'),
+                  const OrnateHeader(icon: Icons.shield_outlined, title: '家族'),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 6,
@@ -308,15 +311,14 @@ class _StartScreenState extends State<StartScreen> {
                 ],
               ),
             ),
-          ),
-          // 出生地
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+            const SizedBox(height: 12),
+            // 出生地
+            GildedCard(
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const Text('出生地'),
+                  const OrnateHeader(icon: Icons.place_outlined, title: '出生地'),
                   const SizedBox(height: 4),
                   Text(
                     _locationLabel(),
@@ -352,15 +354,14 @@ class _StartScreenState extends State<StartScreen> {
                 ],
               ),
             ),
-          ),
-          // 时代
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+            const SizedBox(height: 12),
+            // 时代
+            GildedCard(
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const Text('时代'),
+                  const OrnateHeader(icon: Icons.hourglass_empty, title: '时代'),
                   const SizedBox(height: 8),
                   for (final entry in kEras.entries)
                     RadioListTile<String>(
@@ -375,15 +376,14 @@ class _StartScreenState extends State<StartScreen> {
                 ],
               ),
             ),
-          ),
-          // 季节
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+            const SizedBox(height: 12),
+            // 季节
+            GildedCard(
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const Text('出生季节'),
+                  const OrnateHeader(icon: Icons.cloud_outlined, title: '出生季节'),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 6,
@@ -399,19 +399,38 @@ class _StartScreenState extends State<StartScreen> {
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          // 开始按钮
-          FilledButton.icon(
-            icon: const Icon(Icons.play_arrow),
-            label: Text('开始游戏（${_nameController.text.trim().isEmpty ? '随机姓名' : _nameController.text.trim()}）'),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(48),
+            const SizedBox(height: 16),
+            // 开始按钮
+            FilledButton.icon(
+              icon: const Icon(Icons.play_arrow),
+              label: Text('开始游戏（${_nameController.text.trim().isEmpty ? '随机姓名' : _nameController.text.trim()}）'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+                backgroundColor: WesterosColors.gold,
+                foregroundColor: WesterosColors.barkDeep,
+                textStyle: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: const BorderSide(color: WesterosColors.goldBright, width: 1.2),
+                ),
+              ),
+              onPressed: _startGame,
             ),
-            onPressed: _startGame,
-          ),
-          const SizedBox(height: 8),
-        ],
+            const SizedBox(height: 8),
+            // 底部装饰
+            const Center(
+              child: Text(
+                '❖ 铁与火 · 冰与土之歌 ❖',
+                style: TextStyle(color: WesterosColors.inkDim, fontSize: 12, letterSpacing: 2),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
@@ -437,5 +456,55 @@ class _StartScreenState extends State<StartScreen> {
   /// 指定区域的地点。
   List<Location> _locationsIn(String region) {
     return allLocations.where((l) => l.region == region).toList();
+  }
+}
+
+/// 开篇饰头：铁王座主题头图 + 副标题。
+class _StartHero extends StatelessWidget {
+  const _StartHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return GildedCard(
+      highlight: true,
+      padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
+      child: Column(
+        children: <Widget>[
+          // 双剑交叉 + 王冠
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(Icons.flag_outlined, size: 22, color: WesterosColors.steel),
+              SizedBox(width: 14),
+              Icon(Icons.crown_outlined, size: 34, color: WesterosColors.goldBright),
+              SizedBox(width: 14),
+              Icon(Icons.local_fire_department_outlined, size: 22, color: WesterosColors.bloodRed),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '维斯特洛人生模拟器',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontFamily: 'serif',
+                  color: WesterosColors.goldBright,
+                  letterSpacing: 2,
+                ),
+          ),
+          const SizedBox(height: 6),
+          const WesterosDivider(),
+          const SizedBox(height: 8),
+          const Text(
+            '凛冬将至，写下你的人生篇章',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: WesterosColors.inkDim,
+              fontSize: 13,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

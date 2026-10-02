@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'screens/start_screen.dart';
+import 'theme/westeros_theme.dart';
 
 class WesterosApp extends StatelessWidget {
   const WesterosApp({super.key});
@@ -9,10 +10,7 @@ class WesterosApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'WesterosLige',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-        useMaterial3: true,
-      ),
+      theme: westerosTheme(),
       home: const StartScreen(),
     );
   }
