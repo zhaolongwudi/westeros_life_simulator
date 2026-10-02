@@ -121,11 +121,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-02 · feat(release-publish): 版本号 0.0.1 起步每次构建 +1（version.txt 自动递增）；Release tag 改 v<版本>（v0.0.1/v0.0.2/…）；保留最近 3 个 v 版本并清理旧 apk-<sha8> release；README 下载中心显示版本号；邮箱直发带版本号 APK**（`4136523`）
+
 **2026-10-02 · fix(release-publish): 简化 Publish 去掉 apk-latest 别名（GitHub /releases/latest 原生指向最新）；README 下载中心如实说明私有仓库需登录下载、外联服务不可用**（`1360337`）
 
 **2026-10-02 · fix(release-publish): apk-latest 别名 release 也上传同一 asset（否则 /releases/latest/download 直链 404）；auto-update 步骤 push 前先 pull --rebase 且 push 失败容错（|| true）不拖垮 job**（`f1c7e4a`）
-
-**2026-10-02 · feat(release-publish): 构建后自动发布正式版 Release（apk-<sha8> 独立 tag + apk-latest 固定指针，直链 releases/latest/download/WesterosLige.apk 点开即下）+ 清理只留最近 3 个版本；README 下载中心废弃 nightly.link（私有仓库 404）改 Release 直链为主；新增 set_smtp_secrets.py 一键配置 SMTP Secrets**（`26a98e6`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
