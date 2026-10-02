@@ -142,47 +142,29 @@ jobs:
           retention-days: 90
 
       - name: Publish Release (latest)
-        # 每次构建成功发布正式版 Release：tag 用 apk-<sha8>（每次独立，可保留历史），
-        # 同时更新 apk-latest 指向最新（保证 /releases/latest 与固定直链可用）。
-        # 直链 https://github.com/zhaolongwudi/westeros_life_simulator/releases/latest/download/WesterosLige.apk
-        # 永久指向最新正式版，点开即下载。
+        # 每次构建成功发布正式版 Release：tag 用 apk-<sha8>（每次独立），上传固定名 asset WesterosLige.apk。
+        # GitHub 原生 /releases/latest 会自动指向最新创建的 release，无需 apk-latest 别名。
+        # 注意：本仓库为 private，未登录访问 release/asset 一律 404（GitHub 隐藏私有仓库存在性），
+        # 登录 GitHub 账号后直链 https://github.com/<repo>/releases/latest/download/WesterosLige.apk 可用。
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           SHA8="${GITHUB_SHA:0:8}"
           TAG="apk-$SHA8"
-          # 1) 创建带 SHA 的 release（每次独立，供 cleanup 保留 3 个历史）
           REL_JSON=$(curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" \
-            -d "{\"tag_name\":\"$TAG\",\"name\":\"WesterosLige $SHA8\",\"body\":\"自动构建正式版（commit $SHA8）\\n- 直链下载: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk\\n- 测试: 790+ passed（CI run ${{ github.run_id }}）\",\"draft\":false,\"prerelease\":false}")
+            -d "{\"tag_name\":\"$TAG\",\"name\":\"WesterosLige $SHA8\",\"body\":\"自动构建正式版（commit $SHA8）\\n- 直链下载（需登录 GitHub）: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk\\n- 测试: 790+ passed（CI run ${{ github.run_id }}）\",\"draft\":false,\"prerelease\":false}")
           REL_ID=$(echo "$REL_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))")
           echo "RELEASE_ID=$REL_ID (tag $TAG)"
           if [ -z "$REL_ID" ]; then
             echo "release create failed: $REL_JSON" | head -c 400; exit 1
           fi
-          # 2) 上传 asset（固定名 WesterosLige.apk，上传后直链生效）
           curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Content-Type: application/vnd.android.package-archive" \
             --data-binary @"$RELEASE_APK" \
             "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/$REL_ID/assets?name=WesterosLige.apk" \
             -o /tmp/asset.json -w "UPLOAD=%{http_code}\n"
           python3 -c "import json; d=json.load(open('/tmp/asset.json')); print('asset:', d.get('name'), '| size:', d.get('size'))"
-          # 3) 更新 apk-latest 指向本 release（保证 /releases/latest/download 直链可用）
-          curl -s -X DELETE -H "Authorization: Bearer $GH_TOKEN" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/apk-latest" -o /dev/null -w "DELETE_OLD_LATEST=%{http_code}\n"
-          LATEST_JSON=$(curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" \
-            -d "{\"tag_name\":\"apk-latest\",\"name\":\"WesterosLige 最新版\",\"body\":\"最新正式版（commit $SHA8）\\n- 直链下载: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk\",\"draft\":false,\"prerelease\":false}")
-          LATEST_ID=$(echo "$LATEST_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))")
-          echo "LATEST_RELEASE_ID=$LATEST_ID"
-          # 4) 给 apk-latest 也上传同一 asset（否则 /releases/latest/download/ 直链 404）
-          if [ -n "$LATEST_ID" ]; then
-            curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Content-Type: application/vnd.android.package-archive" \
-              --data-binary @"$RELEASE_APK" \
-              "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/$LATEST_ID/assets?name=WesterosLige.apk" \
-              -o /tmp/asset_latest.json -w "UPLOAD_LATEST=%{http_code}\n"
-            python3 -c "import json; d=json.load(open('/tmp/asset_latest.json')); print('latest asset:', d.get('name'), '| size:', d.get('size'))"
-          fi
-          echo "Release published: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk"
+          echo "Release published: tag=$TAG (GitHub /releases/latest 自动指向它)"
 
       - name: Cleanup old releases (keep 3)
         # 每次发布后清理，只保留最近 3 个带 apk- 前缀的 Release（按 created_at 倒序），
