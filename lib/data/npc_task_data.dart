@@ -1047,6 +1047,109 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
     rewardReputation: 6,
     rewardRelation: 8,
   ),
+  // ==================== Batch 10-55 扩充：未覆盖 NPC solo ====================
+  // 杰奥·莫尔蒙 solo（黑城堡）
+  NpcTaskTemplate(
+    id: 'task_geor_wildling_scout',
+    npcId: 'npc_geor_mormont',
+    title: '清剿长城外的野人侦察',
+    type: NpcTaskType.hunt,
+    difficulty: 4,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '随杰奥出黑城堡，查看野人侦察留下的痕迹', turnsRequired: 1),
+      NpcTaskStep(description: '沿鬼影森林追踪并击退野人斥候', turnsRequired: 2),
+      NpcTaskStep(description: '带回斥候兵器，向杰奥报捷', turnsRequired: 1),
+    ],
+    rewardGold: 90,
+    rewardReputation: 7,
+    rewardRelation: 8,
+  ),
+  // 艾德慕·徒利 solo（奔流城）
+  NpcTaskTemplate(
+    id: 'task_edmure_levy',
+    npcId: 'npc_edmure_tully',
+    title: '征募河间地民兵',
+    type: NpcTaskType.diplomacy,
+    difficulty: 3,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '随艾德慕走访奔流城周边的村庄', turnsRequired: 1),
+      NpcTaskStep(description: '说服各村长老出丁入伍，编成民兵团', turnsRequired: 2),
+      NpcTaskStep(description: '带队回奔流城，向艾德慕交令', turnsRequired: 1),
+    ],
+    rewardGold: 75,
+    rewardReputation: 6,
+    rewardRelation: 7,
+  ),
+  // 瓦德·佛雷 solo（孪河城）
+  NpcTaskTemplate(
+    id: 'task_walder_toll',
+    npcId: 'npc_walder_frey',
+    title: '护送过桥税银至奔流城',
+    type: NpcTaskType.escort,
+    difficulty: 3,
+    deadlineMonths: 4,
+    steps: [
+      NpcTaskStep(description: '在孪河城清点收上来的过桥税银', turnsRequired: 1),
+      NpcTaskStep(description: '押运税银穿越河间地，避开劫匪', turnsRequired: 2),
+      NpcTaskStep(description: '把税银交到奔流城账房，取回执', turnsRequired: 1),
+    ],
+    rewardGold: 80,
+    rewardReputation: 5,
+    rewardRelation: 7,
+  ),
+  // 莱莎·艾林 solo（鹰巢城）
+  NpcTaskTemplate(
+    id: 'task_lys_hawk',
+    npcId: 'npc_lys_arryn',
+    title: '寻觅稀有的白色猎隼',
+    type: NpcTaskType.hunt,
+    difficulty: 3,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '听莱莎描述想要的白隼模样', turnsRequired: 1),
+      NpcTaskStep(description: '在月门山崖间搜寻白隼巢穴', turnsRequired: 2),
+      NpcTaskStep(description: '带回雏隼，献予莱莎', turnsRequired: 1),
+    ],
+    rewardGold: 70,
+    rewardReputation: 5,
+    rewardRelation: 7,
+  ),
+  // 乔佛瑞 solo（君临）
+  NpcTaskTemplate(
+    id: 'task_joffrey_tourney',
+    npcId: 'npc_joffrey',
+    title: '筹备御前比武大会',
+    type: NpcTaskType.diplomacy,
+    difficulty: 4,
+    deadlineMonths: 6,
+    steps: [
+      NpcTaskStep(description: '听乔佛瑞罗列比武大会的排场要求', turnsRequired: 1),
+      NpcTaskStep(description: '向各大家族递送比武请柬，敲定名单', turnsRequired: 2),
+      NpcTaskStep(description: '回君临复命，协助布置竞技场', turnsRequired: 1),
+    ],
+    rewardGold: 95,
+    rewardReputation: 6,
+    rewardRelation: 8,
+  ),
+  // 托曼 solo（君临）
+  NpcTaskTemplate(
+    id: 'task_tommen_books',
+    npcId: 'npc_tommen',
+    title: '收集七大王国的史书',
+    type: NpcTaskType.delivery,
+    difficulty: 2,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '在君临书坊挑选托曼点名的史书', turnsRequired: 1),
+      NpcTaskStep(description: '到旧镇学城抄录缺失的卷章', turnsRequired: 2),
+      NpcTaskStep(description: '把整套史书送到托曼书房', turnsRequired: 1),
+    ],
+    rewardGold: 55,
+    rewardReputation: 4,
+    rewardRelation: 7,
+  ),
 ];
 
 /// 按 ID 查找任务模板。

@@ -13,11 +13,11 @@ import 'package:westeros_life_simulator/game_engine.dart';
 void main() {
   group('Batch 10-53 模板总量', () {
     test('任务模板总数 54 → 58，协作仍 8，solo 50', () {
-      expect(allNpcTaskTemplates.length, 61);
+      expect(allNpcTaskTemplates.length, 67);
       final coop = allNpcTaskTemplates.where((t) => t.isCoop).toList();
       expect(coop.length, 9);
       final solo = allNpcTaskTemplates.where((t) => !t.isCoop).toList();
-      expect(solo.length, 52);
+      expect(solo.length, 58);
     });
     test('新模板存在且指向真实 NPC', () {
       expect(npcTaskTemplateById('task_roose_ledger'), isNotNull);
