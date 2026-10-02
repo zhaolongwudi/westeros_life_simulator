@@ -169,10 +169,19 @@ jobs:
           # 3) 更新 apk-latest 指向本 release（保证 /releases/latest/download 直链可用）
           curl -s -X DELETE -H "Authorization: Bearer $GH_TOKEN" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/apk-latest" -o /dev/null -w "DELETE_OLD_LATEST=%{http_code}\n"
-          curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+          LATEST_JSON=$(curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" \
-            -d "{\"tag_name\":\"apk-latest\",\"name\":\"WesterosLige 最新版\",\"body\":\"最新正式版（commit $SHA8）\\n- 直链下载: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk\",\"draft\":false,\"prerelease\":false}" \
-            -o /dev/null -w "CREATE_LATEST=%{http_code}\n"
+            -d "{\"tag_name\":\"apk-latest\",\"name\":\"WesterosLige 最新版\",\"body\":\"最新正式版（commit $SHA8）\\n- 直链下载: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk\",\"draft\":false,\"prerelease\":false}")
+          LATEST_ID=$(echo "$LATEST_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))")
+          echo "LATEST_RELEASE_ID=$LATEST_ID"
+          # 4) 给 apk-latest 也上传同一 asset（否则 /releases/latest/download/ 直链 404）
+          if [ -n "$LATEST_ID" ]; then
+            curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Content-Type: application/vnd.android.package-archive" \
+              --data-binary @"$RELEASE_APK" \
+              "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/$LATEST_ID/assets?name=WesterosLige.apk" \
+              -o /tmp/asset_latest.json -w "UPLOAD_LATEST=%{http_code}\n"
+            python3 -c "import json; d=json.load(open('/tmp/asset_latest.json')); print('latest asset:', d.get('name'), '| size:', d.get('size'))"
+          fi
           echo "Release published: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk"
 
       - name: Cleanup old releases (keep 3)
@@ -224,22 +233,24 @@ jobs:
           python3 scripts/build_and_mail_apk.py --send --apk "${{ env.RENAMED_APK }}" --run-id "$RUN_ID"
 
       - name: Auto-update README download center
-        # 构建成功后自动刷新 README「下载中心」区块（最新 SHA/run 链接/nightly.link 外链）。
+        # 构建成功后自动刷新 README「下载中心」区块（Release 直链 + 最新 SHA）。
         # 自动 commit 带 [skip ci] 防递归触发 CI；内容无变化时脚本跳过写入。
-        # checkout 默认在 detached HEAD，先切回 main 再改文件再 push。
+        # checkout 默认在 detached HEAD，先切回 main 再改文件再 push；
+        # push 前先 rebase（远端可能有其他 auto-update commit），失败容错不拖垮 job。
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_RUN_ID: ${{ github.run_id }}
           GITHUB_SHA: ${{ github.sha }}
         run: |
           git checkout main
+          git pull --rebase origin main || true
           python3 scripts/update_readme.py --download
           if [ -n "$(git status --porcelain README.md)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add README.md
             git commit -m "docs(readme): auto-update download center (run ${{ github.run_id }}) [skip ci]"
-            git push origin main
+            git push origin main || true
             echo "README download center updated & pushed"
           else
             echo "README readme unchanged, skip"

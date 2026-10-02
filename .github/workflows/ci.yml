@@ -50,18 +50,20 @@ jobs:
       - name: Auto-update README changelog
         # 测试通过后自动刷新 README「最近更新」区块（最近 3 条功能/修复 commit）。
         # 自动 commit 带 [skip ci] 防递归触发本 workflow；内容无变化时脚本跳过写入。
-        # checkout 默认在 detached HEAD，先切回 main 再改文件再 push。
+        # checkout 默认在 detached HEAD，先切回 main 再改文件再 push；
+        # push 前先 rebase（远端可能有其他 auto-update commit），失败容错不拖垮 job。
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           git checkout main
+          git pull --rebase origin main || true
           python3 scripts/update_readme.py --changelog
           if [ -n "$(git status --porcelain README.md)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add README.md
             git commit -m "docs(readme): auto-update changelog [skip ci]"
-            git push origin main
+            git push origin main || true
             echo "README changelog updated & pushed"
           else
             echo "README changelog unchanged, skip"
