@@ -115,19 +115,9 @@ class _FamilyCard extends StatelessWidget {
       FamilyScale.minor => '小家族',
       FamilyScale.household => '家户',
     };
-    return Container(
-      decoration: BoxDecoration(
-        color: highlight
-            ? WesterosColors.goldDark.withValues(alpha: 0.14)
-            : WesterosColors.barkHigh,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: highlight
-              ? WesterosColors.gold.withValues(alpha: 0.7)
-              : WesterosColors.outlineGold.withValues(alpha: 0.45),
-          width: highlight ? 1.4 : 1,
-        ),
-      ),
+    return GildedCard(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.zero,
       child: Theme(
         data: theme.copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(

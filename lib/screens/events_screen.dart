@@ -95,15 +95,9 @@ class _EventCard extends StatelessWidget {
     final choices = playerEngine.eventProvider
         .getAvailableChoices(event, playerEngine.player);
 
-    return Container(
+    return GildedCard(
       margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: WesterosColors.barkHigh,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: WesterosColors.outlineGold.withValues(alpha: 0.5),
-        ),
-      ),
+      padding: EdgeInsets.zero,
       child: Theme(
         data: theme.copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(

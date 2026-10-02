@@ -73,19 +73,10 @@ class _LocationTile extends StatelessWidget {
       LocationType.supernatural => '超自然',
       LocationType.unknown => '未知',
     };
-    return Container(
+    return GildedCard(
       margin: const EdgeInsets.only(bottom: 6),
-      decoration: BoxDecoration(
-        color: isCurrent
-            ? WesterosColors.goldDark.withValues(alpha: 0.16)
-            : WesterosColors.barkHigh.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isCurrent
-              ? WesterosColors.gold.withValues(alpha: 0.65)
-              : WesterosColors.outlineGold.withValues(alpha: 0.35),
-        ),
-      ),
+      highlight: isCurrent,
+      padding: EdgeInsets.zero,
       child: ListTile(
         leading: Icon(
           isCurrent ? Icons.place : Icons.place_outlined,

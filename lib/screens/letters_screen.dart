@@ -158,17 +158,21 @@ class _LetterCard extends StatelessWidget {
         ? WesterosColors.gold.withValues(alpha: 0.5)
         : WesterosColors.outlineGold.withValues(alpha: 0.4);
 
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: bg,
+      elevation: 1,
+      color: bg,
+      shadowColor: Colors.black.withValues(alpha: 0.4),
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
+        side: BorderSide(color: borderColor),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
           Row(
             children: <Widget>[
               Expanded(
@@ -208,6 +212,7 @@ class _LetterCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

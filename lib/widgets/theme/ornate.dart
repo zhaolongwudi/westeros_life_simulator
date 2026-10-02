@@ -288,49 +288,25 @@ class GildedCard extends StatelessWidget {
       width: highlight ? 1.4 : 1,
     );
     final content = Padding(padding: padding, child: child);
-    if (onTap == null) {
-      return Container(
-        margin: margin,
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: radius,
-          border: border,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.35),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: content,
-      );
-    }
-    return Container(
+    // 统一「Card 外层（Material 祖先，天然解决 ListTile ink 断言 + find.byType(Card) 兼容）」：
+    final outer = Card(
       margin: margin,
-      decoration: BoxDecoration(
-        color: bg,
+      elevation: 2,
+      color: bg,
+      shadowColor: Colors.black.withValues(alpha: 0.5),
+      shape: RoundedRectangleBorder(
         borderRadius: radius,
-        border: border,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        side: border,
       ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: radius,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          borderRadius: radius,
-          onTap: onTap,
-          child: content,
-        ),
-      ),
+      clipBehavior: Clip.antiAlias,
+      child: onTap == null
+          ? content
+          : InkWell(
+              onTap: onTap,
+              child: content,
+            ),
     );
+    return outer;
   }
 }
 

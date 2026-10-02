@@ -64,7 +64,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('维斯特洛人生模拟器'), findsOneWidget);
-      expect(find.text('金币'), findsOneWidget);
+      // StatusBar 的 StatPill 是 compact 模式（不显示 label，只图标+数值）
       expect(find.text('AI 行动模式'), findsOneWidget);
       expect(find.textContaining('输入指令'), findsOneWidget);
       expect(find.byTooltip('导航'), findsOneWidget);
