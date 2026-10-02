@@ -138,3 +138,16 @@ jobs:
           name: WesterosLige-nightly
           path: ${{ env.RENAMED_APK }}
           retention-days: 90
+
+      - name: Send APK to email
+        # 对齐 wpk-update-notifier：SMTP 凭据走仓库 Secrets（SMTP_USER/SMTP_AUTH_CODE/SMTP_TO）。
+        # 未配置 Secrets 时脚本自动跳过发信（exit 0），不影响构建结果。
+        env:
+          SMTP_HOST: smtp.qq.com
+          SMTP_PORT: '465'
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_AUTH_CODE: ${{ secrets.SMTP_AUTH_CODE }}
+          SMTP_TO: ${{ secrets.SMTP_TO }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          python3 scripts/build_and_mail_apk.py --send --apk "${{ env.RENAMED_APK }}" --run-id "$RUN_ID"

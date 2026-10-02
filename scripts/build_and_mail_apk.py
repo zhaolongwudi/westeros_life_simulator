@@ -12,17 +12,20 @@
   SMTP_PORT=465
   SMTP_SSL=true            # true=SSL(465) / false=STARTTLS(587)
   SMTP_USER=xxx@qq.com
-  SMTP_PASS=授权码或密码
+  SMTP_PASS=授权码或密码（或 SMTP_AUTH_CODE，参考 wpk-update-notifier 仓库）
   MAIL_FROM=xxx@qq.com
   MAIL_TO=收件人邮箱（可多个，逗号分隔）
   REPO=zhaolongwudi/westeros_life_simulator   # 可省略，默认此值
   GITHUB_TOKEN=            # 可省略：默认从 git remote 提取
+说明：与 wpk-update-notifier 仓库对齐，SMTP 凭据优先走环境变量
+（GitHub Secrets 注入 SMTP_USER/SMTP_AUTH_CODE/SMTP_TO），本地文件仅作兜底。
 
 用法：
-  python3 scripts/build_and_mail_apk.py            # 完整流程
+  python3 scripts/build_and_mail_apk.py            # 完整流程（触发→等→下载→发信）
   python3 scripts/build_and_mail_apk.py --check    # 只校验配置与依赖
   python3 scripts/build_and_mail_apk.py --trigger  # 只触发构建（随后可 --mail-latest）
   python3 scripts/build_and_mail_apk.py --mail-latest  # 取最近一次成功 run 的 artifact 发邮箱
+  python3 scripts/build_and_mail_apk.py --send --apk <path> --run-id <id>  # 仅发信（CI 构建成功后调用）
 """
 
 import argparse
@@ -69,9 +72,12 @@ def load_env():
                 env[k.strip()] = v.strip().strip('"').strip("'")
             break
     for k in ("SMTP_HOST", "SMTP_PORT", "SMTP_SSL", "SMTP_USER", "SMTP_PASS",
-              "MAIL_FROM", "MAIL_TO", "REPO", "GITHUB_TOKEN"):
+              "SMTP_AUTH_CODE", "MAIL_FROM", "MAIL_TO", "REPO", "GITHUB_TOKEN"):
         if k in os.environ and os.environ[k]:
             env[k] = os.environ[k]
+    # 对齐 wpk-update-notifier：SMTP_AUTH_CODE 与 SMTP_PASS 二选一
+    if not env.get("SMTP_PASS") and env.get("SMTP_AUTH_CODE"):
+        env["SMTP_PASS"] = env["SMTP_AUTH_CODE"]
     return env
 
 
@@ -202,7 +208,7 @@ def send_mail(env, subject, body, attach=None):
     user = env["SMTP_USER"]
     pwd = env["SMTP_PASS"]
     from_addr = env.get("MAIL_FROM", user)
-    to_list = [x.strip() for x in env["MAIL_TO"].split(",") if x.strip()]
+    to_list = [x.strip() for x in (env.get("MAIL_TO") or user).split(",") if x.strip()]
 
     msg = MIMEMultipart()
     msg["From"] = from_addr
@@ -262,9 +268,24 @@ def main():
     ap.add_argument("--check", action="store_true", help="只校验配置")
     ap.add_argument("--trigger", action="store_true", help="只触发构建")
     ap.add_argument("--mail-latest", action="store_true", help="取最近一次成功 run 的 APK 发邮箱")
+    ap.add_argument("--send", action="store_true", help="仅发信（CI 构建完成后调：--apk <path> --run-id <id> [--failed]）")
+    ap.add_argument("--apk", help="APK 文件路径（--send 用）")
+    ap.add_argument("--run-id", help="GitHub Actions run id（--send 用，附带 nightly.link 链接）")
+    ap.add_argument("--failed", action="store_true", help="标记构建失败（只发降级链接）")
     args = ap.parse_args()
 
     env = load_env()
+
+    if args.send:
+        if not (env.get("SMTP_USER") and env.get("SMTP_PASS") and (env.get("MAIL_TO") or env.get("SMTP_USER"))):
+            log("未配置 SMTP 凭据（SMTP_USER/SMTP_PASS 或 SMTP_AUTH_CODE），跳过发信")
+            sys.exit(0)
+        apk_path = Path(args.apk) if args.apk and Path(args.apk).exists() else None
+        build_ok = not args.failed
+        ok = do_mail(env, apk_path=apk_path, run_id=args.run_id,
+                     build_ok=build_ok, version=(args.apk and Path(args.apk).stem or ""))
+        sys.exit(0 if ok else 1)
+
     if args.check:
         sys.exit(0 if check_env(env) else 1)
 
