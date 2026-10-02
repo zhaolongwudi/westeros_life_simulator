@@ -295,6 +295,10 @@ class AiService {
     // （农事/集市/物产/行当），让 AI 围绕「此时此地人们靠什么活着」展开，
     // 与季节世界动向、地区风土人情形成「时节 × 地域 × 生计」三轴。
     final farmTrendDesc = seasonFarmTrend(season, region);
+    // Batch 10-58：注入本地集市行情——当前季节 × 当前区域的集市行情风向
+    // （什么好卖/什么贵/什么滞销/物价起伏），让 AI 围绕「此时此地买卖什么划算」
+    // 展开叙事，与季节世界动向/地区风土人情/时节农事形成「时节 × 地域 × 生计 × 集市」四轴。
+    final marketTrendDesc = localMarketTrend(season, region);
     final seasonGuide = seasonNarrativeGuide(season);
     return '''
 当前玩家状态：
@@ -330,6 +334,8 @@ ${seasonTrendDesc}
 ${regionTrendDesc}
 时节农事：
 ${farmTrendDesc}
+本地集市行情：
+${marketTrendDesc}
 可用事件：
 ${eventsDesc}
 叙事引导（身份）：
