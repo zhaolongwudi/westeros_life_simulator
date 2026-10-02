@@ -72,6 +72,14 @@ class FamilyTreeScreen extends StatelessWidget {
             ],
             const SizedBox(height: 16),
           ],
+          // Batch 10-57：当代支脉横版图——当代家主 + 配偶 + 子女的血脉快照，
+          // 与历代谱系概览衔接：祖先链看传承，当代支脉看「此刻的血亲」。
+          if (p.spouse != null || p.children.isNotEmpty) ...[
+            const _SectionHeader(icon: Icons.family_restroom, title: '当代支脉'),
+            const SizedBox(height: 8),
+            _CurrentFamilyOverview(engine: e),
+            const SizedBox(height: 16),
+          ],
           // 当前世代
           const _SectionHeader(icon: Icons.account_tree_outlined, title: '当前世代'),
           const SizedBox(height: 8),
@@ -162,12 +170,16 @@ class _LineageNode extends StatelessWidget {
     required this.label,
     required this.name,
     this.isCurrent = false,
+    this.badge,
   });
 
   final GenerationRecord? record;
   final String label;
   final String name;
   final bool isCurrent;
+
+  /// 徽章覆盖文字（如「偶」「子」）；为空时按既有规则取世代数字 /「当」。
+  final String? badge;
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +208,10 @@ class _LineageNode extends StatelessWidget {
                 ? theme.colorScheme.onPrimary
                 : primary,
             child: Text(
-              isCurrent ? '当' : label.replaceAll('第', '').replaceAll('代', ''),
+              badge ??
+                  (isCurrent
+                      ? '当'
+                      : label.replaceAll('第', '').replaceAll('代', '')),
               style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
             ),
           ),
@@ -240,6 +255,56 @@ class _LineageArrow extends StatelessWidget {
               style: theme.textTheme.labelSmall?.copyWith(color: primary),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// 当代支脉横版图（Batch 10-57）：当代家主 + 配偶 + 子女的血脉快照。
+///
+/// 与历代谱系概览衔接：继承链看「谁传给了谁」，此处看「此刻的家人」——
+/// 当代家主居中，配偶与子女分列两侧，箭头向外指示亲缘方向。
+/// 纯 UI 增强，不改模型/引擎。
+class _CurrentFamilyOverview extends StatelessWidget {
+  const _CurrentFamilyOverview({required this.engine});
+
+  final GameEngine engine;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = engine.player;
+    // 配偶节点（无则跳过）
+    final spouseNode = p.spouse == null
+        ? null
+        : _LineageNode(label: '配偶', name: p.spouse!.name, badge: '偶');
+    // 当代家主（始终位于中心）
+    final currentNode = _LineageNode(
+      label: '当代',
+      name: p.name,
+      isCurrent: true,
+    );
+    // 子女节点（每名子女一个节点，徽章「子」）
+    final childNodes = p.children
+        .map((c) => _LineageNode(label: '子女', name: c, badge: '子'))
+        .toList();
+
+    final children = <Widget>[];
+    if (spouseNode != null) {
+      children
+        ..add(spouseNode)
+        ..add(const _LineageArrow(icon: Icons.arrow_forward, label: ''));
+    }
+    children.add(currentNode);
+    for (final c in childNodes) {
+      children
+        ..add(const _LineageArrow(icon: Icons.arrow_forward, label: ''))
+        ..add(c);
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: children,
       ),
     );
   }

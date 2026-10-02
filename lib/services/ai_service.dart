@@ -291,6 +291,10 @@ class AiService {
     // 与玩家视角的区域引导互补，让 AI 围绕「区域驱动世界」展开叙事，
     // 与季节世界动向形成「时节 × 地域」双轴。
     final regionTrendDesc = regionWorldTrend(region);
+    // Batch 10-56：注入时节农事——当前季节 × 当前区域的生计实事
+    // （农事/集市/物产/行当），让 AI 围绕「此时此地人们靠什么活着」展开，
+    // 与季节世界动向、地区风土人情形成「时节 × 地域 × 生计」三轴。
+    final farmTrendDesc = seasonFarmTrend(season, region);
     final seasonGuide = seasonNarrativeGuide(season);
     return '''
 当前玩家状态：
@@ -324,6 +328,8 @@ ${worldNewsDesc}
 ${seasonTrendDesc}
 地区风土人情：
 ${regionTrendDesc}
+时节农事：
+${farmTrendDesc}
 可用事件：
 ${eventsDesc}
 叙事引导（身份）：
