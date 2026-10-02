@@ -92,12 +92,12 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- DL-CENTER:BEGIN -->
 ## 📥 下载中心
 
-**最新构建**：`WesterosLige-nightly-55d75989` · 2026-10-02 03:05 UTC · ✅ 构建成功（自动更新）
+**最新构建**：`WesterosLige-nightly-44313a86` · 2026-10-02 03:25 UTC · ✅ 构建成功（自动更新）
 
 | 通道 | 地址 |
 |---|---|
-| 🐙 GitHub 官方 | [Actions 运行页](https://github.com/zhaolongwudi/westeros_life_simulator/actions/runs/36955464334) → Artifacts → `WesterosLige-nightly`（zip 内含 APK，约 25MB，保留 90 天） |
-| ⚡ nightly.link 加速（推荐） | [点此直接下载 zip](https://nightly.link/zhaolongwudi/westeros_life_simulator/actions/runs/36955464334/WesterosLige-nightly.zip)（Cloudflare 缓存，速度快） |
+| 🐙 GitHub 官方 | [Actions 运行页](https://github.com/zhaolongwudi/westeros_life_simulator/actions/runs/36959560790) → Artifacts → `WesterosLige-nightly`（zip 内含 APK，约 25MB，保留 90 天） |
+| ⚡ nightly.link 加速（推荐） | [点此直接下载 zip](https://nightly.link/zhaolongwudi/westeros_life_simulator/actions/runs/36959560790/WesterosLige-nightly.zip)（Cloudflare 缓存，速度快） |
 
 > 💡 GitHub 官方直连下载较慢/经常失败，推荐走 **nightly.link** 外联加速通道。
 > 🔄 本区块在每次 APK 构建成功后自动刷新，无需手动维护。
