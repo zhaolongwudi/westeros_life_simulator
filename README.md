@@ -92,11 +92,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- DL-CENTER:BEGIN -->
 ## 📥 下载中心
 
-**最新构建**：`WesterosLige v0.0.1` · 2026-10-02 13:22 UTC · ✅ 自动发布正式版
+**最新构建**：`WesterosLige v0.0.2` · 2026-10-02 14:19 UTC · ✅ 自动发布正式版
 
 | 通道 | 地址 |
 |---|---|
-| 🚀 Release 直链 | [releases/latest/download/WesterosLige.apk](https://github.com/zhaolongwudi/westeros_life_simulator/releases/latest/download/WesterosLige.apk)（需登录 GitHub；每次构建自动指向最新正式版 `v0.0.1`） |
+| 🚀 Release 直链 | [releases/latest/download/WesterosLige.apk](https://github.com/zhaolongwudi/westeros_life_simulator/releases/latest/download/WesterosLige.apk)（需登录 GitHub；每次构建自动指向最新正式版 `v0.0.2`） |
 | 🐙 GitHub 官方 | [Releases 页面](https://github.com/zhaolongwudi/westeros_life_simulator/releases) → 最新版 → Assets → `WesterosLige.apk`（保留最近 3 次） |
 | ⚡ GitHub Actions | [Build APK 工作流](https://github.com/zhaolongwudi/westeros_life_simulator/actions/workflows/build_apk.yml) → 最近成功 run → Artifacts → `WesterosLige-nightly`（zip 保留 90 天） |
 
