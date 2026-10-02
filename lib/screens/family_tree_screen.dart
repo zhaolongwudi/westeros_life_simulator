@@ -44,6 +44,17 @@ class FamilyTreeScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 16),
+          // Batch 10-51：横版继承关系图（谱系概览）——历代家主迷你卡片横向串联至当代，
+          // 整条继承链一眼望尽；与竖排时间轴互补（竖排看详情、横排看全局）。
+          if (p.generationRecords.isNotEmpty) ...[
+            const _SectionHeader(icon: Icons.timeline, title: '继承谱系'),
+            const SizedBox(height: 8),
+            _LineageOverview(
+              records: p.generationRecords,
+              currentName: p.name,
+            ),
+            const SizedBox(height: 16),
+          ],
           // 历代谱系（时间轴样式）
           if (p.generationRecords.isNotEmpty) ...[
             const _SectionHeader(icon: Icons.history, title: '历代家主'),
@@ -91,6 +102,144 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(width: 8),
         Text(title, style: Theme.of(context).textTheme.titleMedium),
       ],
+    );
+  }
+}
+
+/// 横版继承关系图（谱系概览，Batch 10-51）。
+///
+/// 历代家主迷你卡片横向串联至当代：每任家主一个世代徽章 + 姓名，
+/// 卡片之间用横向箭头连接，末代箭头指向「当代」徽章。
+/// 与竖排时间轴互补——竖排看详情、横排看全局。
+class _LineageOverview extends StatelessWidget {
+  const _LineageOverview({
+    required this.records,
+    required this.currentName,
+  });
+
+  final List<GenerationRecord> records;
+  final String currentName;
+
+  @override
+  Widget build(BuildContext context) {
+    final children = <Widget>[];
+    for (var i = 0; i < records.length; i++) {
+      final r = records[i];
+      final isLast = i == records.length - 1;
+      children.add(_LineageNode(record: r));
+      if (isLast) {
+        children.add(const _LineageArrow(icon: Icons.arrow_forward, label: '当代'));
+      } else {
+        children.add(const _LineageArrow(icon: Icons.arrow_forward, label: ''));
+      }
+    }
+    children.add(
+      _LineageNode(
+        label: '当代',
+        name: currentName,
+        isCurrent: true,
+      ),
+    );
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: children,
+      ),
+    );
+  }
+}
+
+/// 横版谱系节点：世代徽章 + 姓名（末位为「当代」徽章）。
+class _LineageNode extends StatelessWidget {
+  const _LineageNode({
+    required this.label,
+    required this.name,
+    this.isCurrent = false,
+  }) : record = null;
+
+  const _LineageNode.record({required GenerationRecord record})
+      : label = '第${record.generation}代',
+        name = record.name,
+        isCurrent = false,
+        record = record;
+
+  final GenerationRecord? record;
+  final String label;
+  final String name;
+  final bool isCurrent;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final bg = isCurrent ? theme.colorScheme.primaryContainer : null;
+    final fg = isCurrent ? theme.colorScheme.onPrimaryContainer : null;
+    return Container(
+      width: 72,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isCurrent ? primary : theme.colorScheme.outlineVariant,
+          width: isCurrent ? 2 : 1,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          CircleAvatar(
+            radius: 14,
+            backgroundColor: isCurrent ? primary : primary.withValues(alpha: 0.12),
+            foregroundColor: isCurrent
+                ? theme.colorScheme.onPrimary
+                : primary,
+            child: Text(
+              isCurrent ? '当' : label.replaceAll('第', '').replaceAll('代', ''),
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: fg,
+              fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 横版谱系箭头。
+class _LineageArrow extends StatelessWidget {
+  const _LineageArrow({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(icon, size: 18, color: primary),
+          if (label.isNotEmpty)
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(color: primary),
+            ),
+        ],
+      ),
     );
   }
 }
