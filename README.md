@@ -121,11 +121,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-02 · fix(release-publish): Publish 幂等容错（tag 已存在则复用并跳过重复 asset 上传）；version.txt 推进 0.0.1→0.0.2（上一轮递增 commit push 丢失，防止重复发布 v0.0.1）**（`898c771`）
+
+**2026-10-02 · fix(release-publish): auto-update push 加 rebase 重试（两个 auto-update 链路并发 push 竞争导致非快进被拒）**（`2fc4a66`）
+
 **2026-10-02 · feat(release-publish): 版本号 0.0.1 起步每次构建 +1（version.txt 自动递增）；Release tag 改 v<版本>（v0.0.1/v0.0.2/…）；保留最近 3 个 v 版本并清理旧 apk-<sha8> release；README 下载中心显示版本号；邮箱直发带版本号 APK**（`4136523`）
-
-**2026-10-02 · fix(release-publish): 简化 Publish 去掉 apk-latest 别名（GitHub /releases/latest 原生指向最新）；README 下载中心如实说明私有仓库需登录下载、外联服务不可用**（`1360337`）
-
-**2026-10-02 · fix(release-publish): apk-latest 别名 release 也上传同一 asset（否则 /releases/latest/download 直链 404）；auto-update 步骤 push 前先 pull --rebase 且 push 失败容错（|| true）不拖垮 job**（`f1c7e4a`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
