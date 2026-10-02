@@ -251,7 +251,17 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add README.md version.txt
             git commit -m "docs(readme): auto-update download center (run ${{ github.run_id }}) v$VERSION [skip ci]"
-            git push origin main || true
+            # push 前再 rebase：两个 auto-update 链路（本步骤 + ci.yml changelog）会并发 push，
+            # 远端可能在 commit 后被对方抢先 push → 非快进被拒；重试一次更稳。
+            for i in 1 2; do
+              git pull --rebase origin main || true
+              if git push origin main 2>&1; then
+                echo "push OK (attempt $i)"
+                break
+              fi
+              echo "push failed (attempt $i), retrying..."
+              sleep 3
+            done
             echo "README download center updated & pushed (v$VERSION → v$NEW_VERSION)"
           else
             echo "README readme unchanged, skip"
