@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 
 import '../game_engine.dart';
 import '../models/location.dart';
+import '../theme/westeros_theme.dart';
+import '../widgets/theme/ornate.dart';
 
 /// 地图界面。
 class MapScreen extends StatelessWidget {
@@ -30,24 +32,20 @@ class MapScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('地图')),
-      body: ListView(
-        padding: const EdgeInsets.all(12),
-        children: <Widget>[
-          for (final region in regions) ...[
-            Padding(
-              padding: const EdgeInsets.only(top: 8, bottom: 4),
-              child: Text(
-                region,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-            for (final loc in byRegion[region]!)
-              _LocationTile(
-                location: loc,
-                isCurrent: loc.id == playerLocId,
-              ),
+      body: ParchmentBackground(
+        child: ListView(
+          padding: const EdgeInsets.all(12),
+          children: <Widget>[
+            for (final region in regions) ...[
+              OrnateHeader(icon: Icons.map_outlined, title: region),
+              for (final loc in byRegion[region]!)
+                _LocationTile(
+                  location: loc,
+                  isCurrent: loc.id == playerLocId,
+                ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -76,23 +74,44 @@ class _LocationTile extends StatelessWidget {
       LocationType.supernatural => '超自然',
       LocationType.unknown => '未知',
     };
-    return ListTile(
-      leading: Icon(
-        isCurrent ? Icons.place : Icons.place_outlined,
-        color: isCurrent ? theme.colorScheme.primary : null,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      decoration: BoxDecoration(
+        color: isCurrent
+            ? WesterosColors.goldDark.withValues(alpha: 0.16)
+            : WesterosColors.barkHigh.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isCurrent
+              ? WesterosColors.gold.withValues(alpha: 0.65)
+              : WesterosColors.outlineGold.withValues(alpha: 0.35),
+        ),
       ),
-      title: Text(location.name),
-      subtitle: Text(
-        '$typeLabel · 危险度 ${location.dangerLevel}'
-        '${isCurrent ? ' · 你在这里' : ''}',
+      child: ListTile(
+        leading: Icon(
+          isCurrent ? Icons.place : Icons.place_outlined,
+          color: isCurrent ? WesterosColors.goldBright : WesterosColors.inkDim,
+        ),
+        title: Text(
+          location.name,
+          style: TextStyle(
+            color: isCurrent ? WesterosColors.goldBright : WesterosColors.parchment,
+            fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+        subtitle: Text(
+          '$typeLabel · 危险度 ${location.dangerLevel}'
+          '${isCurrent ? ' · 你在这里' : ''}',
+          style: const TextStyle(color: WesterosColors.inkDim),
+        ),
+        trailing: const Icon(Icons.chevron_right, color: WesterosColors.goldBright),
+        onTap: () {
+          showModalBottomSheet<void>(
+            context: context,
+            builder: (context) => _LocationDetail(location: location),
+          );
+        },
       ),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () {
-        showModalBottomSheet<void>(
-          context: context,
-          builder: (context) => _LocationDetail(location: location),
-        );
-      },
     );
   }
 }
