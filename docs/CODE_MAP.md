@@ -31,7 +31,7 @@ lib/
 │   ├── item_data.dart             # 34 物品
 │   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节；seasonWorldTrend 季节世界动向 Batch 10-50；regionWorldTrend 地区风土人情 Batch 10-52；seasonFarmTrend 时节农事 Batch 10-56；localMarketTrend 本地集市行情 Batch 10-58）
 │   ├── balance_data.dart           # ⭐ 数值配置集中（初始值/生存消耗/每日上限/头衔阶梯/活动经济/婚姻与世代阈值，Batch 10-30 · M4a；无 import 依赖的叶子模块）
-│   └── npc_task_data.dart         # NPC 多步骤任务模板（67 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯/奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈/卢斯·波顿/拉姆斯·波顿/席恩/霍斯特/约恩·罗伊斯/布蕾妮·塔斯/杰奥·莫尔蒙/艾德慕·徒利/瓦德·佛雷/莱莎·艾林/乔佛瑞/托曼，Batch 10-18 起逐步扩充，10-39 扩至 44，10-41 协作任务扩至 48，10-44 协作任务扩至 52（君临×2/高庭/派克城），10-47 扩至 54（泰温+艾莉亚各 +1 solo），10-53 扩至 58（卢斯·波顿/拉姆斯·波顿/席恩/霍斯特各 +1 solo），10-54 扩至 61（约恩·罗伊斯/布蕾妮·塔斯各 +1 solo + 约恩×琼恩·艾林协作），10-55 扩至 67（杰奥/艾德慕/瓦德/莱莎/乔佛瑞/托曼各 +1 solo）；协作任务含 coNpcId）
+│   └── npc_task_data.dart         # NPC 多步骤任务模板（72 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯/奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈/卢斯·波顿/拉姆斯·波顿/席恩/霍斯特/约恩·罗伊斯/布蕾妮·塔斯/杰奥·莫尔蒙/艾德慕·徒利/瓦德·佛雷/莱莎·艾林/乔佛瑞/托曼/琼恩·艾林/弥赛拉/雷加/韦赛里斯，Batch 10-18 起逐步扩充，10-39 扩至 44，10-41 协作任务扩至 48，10-44 协作任务扩至 52（君临×2/高庭/派克城），10-47 扩至 54（泰温+艾莉亚各 +1 solo），10-53 扩至 58（卢斯·波顿/拉姆斯·波顿/席恩/霍斯特各 +1 solo），10-54 扩至 61（约恩·罗伊斯/布蕾妮·塔斯各 +1 solo + 约恩×琼恩·艾林协作），10-55 扩至 67（杰奥/艾德慕/瓦德/莱莎/乔佛瑞/托曼各 +1 solo），10-61 扩至 71（琼恩·艾林/弥赛拉/雷加/韦赛里斯各 +1 solo），10-62 扩至 72（琼恩·艾林×莱莎·艾林谷地协作）；协作任务含 coNpcId）
 │
 ├── models/                        # 【模型层】不可变实体（copyWith + toJson/fromJson）
 │   ├── player.dart                # Player（含 health/energy/hunger/title/house/children/spouse/childRearing/generationRecords/activeTasks）
@@ -308,6 +308,7 @@ GameEngine extends GameProviderBase with:
 | batch10_53_task_expand_test | **NPC 任务模板扩充**（10-53，7 用例）：总量 58 / 协作仍 8 / solo 50 / 4 新模板存在且指向真实 NPC（卢斯·波顿·黑城堡 / 拉姆斯·波顿·黑城堡 / 席恩·派克城 / 霍斯特·奔流城）/ ID·标题唯一 / 4 位 NPC 可接列表含新模板 + 不在场接取提示「不在这里」 |
 | batch10_54_npc_royce_tarth_test | **新增 NPC 实体 + 任务模板扩充**（10-54，8 用例）：2 新 NPC 实体字段完整（约恩·罗伊斯·谷地·鹰巢城 / 布蕾妮·塔斯·风暴地·塔斯岛）/ 3 新模板指向真实 NPC（solo ×2 + 约恩×琼恩·艾林协作）/ 协作对同地点 / 约恩协作可接过滤 + 接取标注 / 布蕾妮不在场提示 |
 | batch10_55_uncovered_npc_tasks_test | **未覆盖 NPC solo 扩充**（10-55，9 用例）：6 新 solo 模板存在且指向真实 NPC（杰奥·莫尔蒙/艾德慕·徒利/瓦德·佛雷/莱莎·艾林/乔佛瑞/托曼）/ 均 non-coop / ID·标题唯一 / 6 位 NPC 可接列表含新模板 + 不在场提示 |
+| batch10_61_62_task_expand_test | **剩余 NPC 任务补齐 + 谷地协作**（10-61/62，8 用例）：模板总量 67→72 / solo 62 / 协作 10 / 4 新 solo（琼恩·艾林/弥赛拉/雷加/韦赛里斯）存在且指向真实 NPC / 新协作（琼恩·艾林×莱莎·艾林）双方同地点（鹰巢城）/ ID·标题唯一 / 4 位 NPC 可接列表含新模板 + 不在场提示 |
 | batch10_48_ai_title_trend_test | **AI 注入头衔晋升趋势**（10-48，4 用例）：有下一档注入「距下一档「伯爵」还差 5 声望」+ 阶梯总览 / 已登顶「已登顶本身份头衔巅峰」/ 无头衔兜底 / 与 balance_data 单一真相对齐（nextTierReputation） |
 | batch10_49_family_link_test | **谱系继承连线画布**（10-49，3 用例）：单任历史 1 传至当代 / 两任历史 1 继承 + 1 传至当代 / 无谱系无连线 |
 | batch10_50_ai_season_trend_test | **AI 注入季节世界动向**（10-50，7 用例）：五季（spring/summer/autumn/winter/longwinter）各注入对应世界动向段落 / 未知季节兜底 / 既有注入（世界局势/可用事件/季节引导）不回归 |
@@ -377,7 +378,7 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v5.2（Batch 10-60 UI 重造：新增 theme/westeros_theme.dart 主题基建 + widgets/theme/ornate.dart 公共组件库，10 screens + 7 game widgets 金饰化）· 最后更新：2026-10-03*
+*文档版本：v5.3（Batch 10-61/62 剩余 NPC 任务补齐 + 谷地协作：新增 theme/westeros_theme.dart 主题基建 + widgets/theme/ornate.dart 公共组件库，10 screens + 7 game widgets 金饰化）· 最后更新：2026-10-03*
 
 ## 八、构建 APK 与直发邮箱（临时任务脚本，2026-10-02 新增）
 
@@ -410,4 +411,4 @@ GameEngine extends GameProviderBase with:
   - **只保留最近 3 次**：Cleanup 步骤按 created_at 倒序删多余 `v0.0.x` release（v 版本序列，旧 apk-<sha8> 一并清理）
 - **已知验证**：run `36958877137` ✅（手动触发 CI 验证 changelog 链路，analyze/test 全绿 + auto-update 幂等跳过）；run `37007321396` ✅（release-publish 全步骤 success）；run `37004310167` ❌（auto-update push 非快进被拒 → 已加 pull --rebase 容错）；run `37048376650` ✅（head fcbd46f，fix readme 收尾闭环，analyze-test 全绿）
 ---
-*文档版本：v5.2（Batch 10-60 UI 重造：主题基建 + 公共装饰组件，10 screens + 7 game widgets 金饰化）· 最后更新：2026-10-03*
+*文档版本：v5.3（Batch 10-61/62 剩余 NPC 任务补齐 + 谷地协作：主题基建 + 公共装饰组件，10 screens + 7 game widgets 金饰化）· 最后更新：2026-10-03*
