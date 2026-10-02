@@ -121,11 +121,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-02 · fix(release-publish): apk-latest 别名 release 也上传同一 asset（否则 /releases/latest/download 直链 404）；auto-update 步骤 push 前先 pull --rebase 且 push 失败容错（|| true）不拖垮 job**（`f1c7e4a`）
+
+**2026-10-02 · feat(release-publish): 构建后自动发布正式版 Release（apk-<sha8> 独立 tag + apk-latest 固定指针，直链 releases/latest/download/WesterosLige.apk 点开即下）+ 清理只留最近 3 个版本；README 下载中心废弃 nightly.link（私有仓库 404）改 Release 直链为主；新增 set_smtp_secrets.py 一键配置 SMTP Secrets**（`26a98e6`）
+
 **2026-10-02 · feat(apk-mail): 对齐 wpk-update-notifier 的 SMTP Secrets 模式（SMTP_USER/SMTP_AUTH_CODE/SMTP_TO）+ 新增 --send 独立发信模式，build_apk.yml 构建成功后自动发邮件（未配 secrets 跳过）**（`96813ab`）
-
-**2026-10-02 · fix(build-apk): find 不再剪枝 build/ 目录（APK 产在 build/ 下被 -prune 剪掉致 BUILD_EXIT_CODE=1）**（`55d7598`）
-
-**2026-10-02 · fix(build-apk): flutter create 后删除模板 test/widget_test.dart（引用 MyApp 致 analyze creation_with_non_type 红）**（`133c4b9`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
