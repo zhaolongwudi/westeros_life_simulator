@@ -169,6 +169,9 @@ class AiService {
         : worldNews
             .map((e) => '· ${e.name}——${e.description}')
             .join('\n');
+    // Batch 10-50：注入季节世界动向——当前季节下整个维斯特洛的宏观变化，
+    // 与玩家视角的叙事引导互补，让 AI 围绕「季节驱动世界」展开叙事。
+    final seasonTrendDesc = seasonWorldTrend(season);
     final relationDesc = player.relations.entries
         .map((e) => '${e.key}: ${e.value}')
         .join('、');
@@ -313,6 +316,8 @@ class AiService {
 ${context}
 本月世界局势：
 ${worldNewsDesc}
+季节世界动向：
+${seasonTrendDesc}
 可用事件：
 ${eventsDesc}
 叙事引导（身份）：
