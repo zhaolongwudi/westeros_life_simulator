@@ -79,6 +79,8 @@ lib/
 │   └── settings_screen.dart       # 设置/存档
 │
 ├── widgets/                       # 【UI 组件层】Batch 10-29 · M3b 新增（从 game_screen 逐字拆出）
+│   ├── theme/
+│   │   └── ornate.dart            # ⭐ 公共装饰组件库 452 行（Batch 10-60 新增）：ParchmentBackground（纯绘制羊皮纸纹理）/ GildedCard（金边卡片，Card 实现，兼容 find.byType(Card)）/ OrnateHeader（金线+菱形饰章标题）/ StatPill（状态胶囊）/ WesterosDivider / WesterosScaffold / SectionDivider
 │   └── game/
 │       ├── status.dart            # ⭐ StatusBar（顶部状态条：姓名/身份/年龄/地点/生命精力饱食/年月季节）
 │       ├── quick.dart             # ⭐ QuickCommand + QuickCommandBar（快捷指令 chip 条）
@@ -89,6 +91,9 @@ lib/
 │       └── input.dart             # ⭐ CommandInputBar（指令输入栏 + 发送按钮）
 │
 │   （改主界面 UI 的正确姿势：**改 widgets/game/ 下的组件**，不要把展示逻辑塞回 game_screen）
+│
+├── theme/                         # 【主题基建】Batch 10-60 新增（UI 重造）
+│   └── westeros_theme.dart        # ⭐ 「铁与火 · 羊皮纸与黄金」主题：bark* 五层深棕 + 兰尼斯特金 gold* + 史塔克钢 + 坦格利安血红 + 羊皮纸米色，serif 标题字体族；金边卡片/AppBar 底部金线/金色进度条等 17 类 ThemeData 覆盖；色板常量可被测试断言
 │
 ├── services/                      # 【服务层】外部/IO
 │   ├── ai_service.dart            # AiService：AI 叙事/选项生成（Dio，含在场 NPC 多步骤任务模板/家族信息注入，Batch 10-22；事件注入走 event_prompt_filter 预算化，Batch 10-33；时节农事注入 Batch 10-56；本地集市行情注入 Batch 10-58；**多 Key 轮换重试 Batch 10-59**）
@@ -166,6 +171,7 @@ GameEngine extends GameProviderBase with:
 | 多代家族树 | mixin_marriage.dart（formatMultiGenTree，Batch 10-17） |
 | **历代家主详情弹层** | screens/family_tree_screen.dart（`_GenerationNode` 点击 InkWell → `_showAncestorDetail` 底部弹层：世代徽章/姓名/头衔/在位/成就/传承寄语 + 关闭按钮，Batch 10-46） |
 | **谱系继承连线** | screens/family_tree_screen.dart（`_InheritanceLink`：历代家主节点间继承箭头连线——非末代「继承」/末代「传至当代」，Batch 10-49） |
+| **金饰化主题基建 / 公共装饰组件** | theme/westeros_theme.dart（「铁与火 · 羊皮纸与黄金」17 类主题，Batch 10-60）· widgets/theme/ornate.dart（ParchmentBackground/GildedCard/OrnateHeader/StatPill/WesterosDivider/WesterosScaffold/SectionDivider，Batch 10-60） |
 | **横版继承关系图（谱系概览）** | screens/family_tree_screen.dart（`_LineageOverview`/`_LineageNode`/`_LineageArrow`：「继承谱系」历代家主迷你卡片横向串联至当代徽章，Batch 10-51） |
 | **当代支脉横版图** | screens/family_tree_screen.dart（`_CurrentFamilyOverview`：当代家主 + 配偶（偶徽章）+ 子女（子徽章）横向血脉快照，箭头指示亲缘方向；有配偶或子女时显示；`_LineageNode` 增 `badge` 参数，Batch 10-57） |
 | NPC 多步骤任务列表 | mixin_npc_task.dart（availableTasksOf/formatNpcTaskPanelV2，Batch 10-18） |
@@ -193,7 +199,7 @@ GameEngine extends GameProviderBase with:
 | **AI 回合编排（读配置→拼上下文→请求→装配）** | **mixins/mixin_ai.dart（runAiAction，Batch 10-29 · M3b；返回 `AiTurnResult`）** |
 | AI 回合结果对象 | models/ai_turn.dart（AiTurnResult：lines/choices/isSuccess + notConfiguredLine/notStartedLine/**degradedLine**（AI 失败降级提示，Batch 10-34 · M5a）） |
 | AI 选项效果落盘 + 推进 | mixin_ai.dart（applyAiChoice） |
-| 主界面状态条/快捷条/AI开关/叙事区/输入栏 | widgets/game/status.dart · quick.dart · ai_toggle.dart · narrative.dart · input.dart（Batch 10-29 · M3b） |
+| 主界面状态条/快捷条/AI开关/叙事区/输入栏 | widgets/game/status.dart · quick.dart · ai_toggle.dart · narrative.dart · input.dart（Batch 10-29 · M3b；Batch 10-60 金饰化） |
 | **导航宫格（9 入口 + 窄屏/宽屏自适应）** | widgets/game/nav_grid.dart（NavGrid/NavGridEntry，Batch 10-35 · M5b）+ game_screen.dart（_openNavGrid 弹出） |
 | **响应式断点 / 宽屏限宽帧** | widgets/game/responsive.dart（Breakpoints kTablet=600/kDesktop=900 / AdaptiveFrame，Batch 10-36 · M5c）；game_screen 限宽 700、player_panel/family_tree 限宽 900 |
 | 信件数据模型 | models/letter.dart（Letter，Batch 10-29 · M3b 从 mixin_letter 迁出） |
@@ -371,7 +377,7 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v5.1（Batch 10-59-fix1 多 Key 每次请求自动轮换）· 最后更新：2026-10-03*
+*文档版本：v5.2（Batch 10-60 UI 重造：新增 theme/westeros_theme.dart 主题基建 + widgets/theme/ornate.dart 公共组件库，10 screens + 7 game widgets 金饰化）· 最后更新：2026-10-03*
 
 ## 八、构建 APK 与直发邮箱（临时任务脚本，2026-10-02 新增）
 
@@ -404,4 +410,4 @@ GameEngine extends GameProviderBase with:
   - **只保留最近 3 次**：Cleanup 步骤按 created_at 倒序删多余 `v0.0.x` release（v 版本序列，旧 apk-<sha8> 一并清理）
 - **已知验证**：run `36958877137` ✅（手动触发 CI 验证 changelog 链路，analyze/test 全绿 + auto-update 幂等跳过）；run `37007321396` ✅（release-publish 全步骤 success）；run `37004310167` ❌（auto-update push 非快进被拒 → 已加 pull --rebase 容错）；run `37048376650` ✅（head fcbd46f，fix readme 收尾闭环，analyze-test 全绿）
 ---
-*文档版本：v3.7（仓库转 public：下载中心改免登录直链、废弃「私有仓库 404」表述、nightly.link 二次实锤仍 404 不恢复）· 最后更新：2026-10-02*
+*文档版本：v5.2（Batch 10-60 UI 重造：主题基建 + 公共装饰组件，10 screens + 7 game widgets 金饰化）· 最后更新：2026-10-03*
