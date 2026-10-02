@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-02 · feat(batch10-59-fix1): 多 Key 每次请求自动轮换，失败不重试同一 Key**（`c3a642b`）
+
 **2026-10-02 · fix(batch10-59): AiConfig.load 空值回落 provider 默认 + DioException 保留 429 状态码**（`0e75c1b`）
 
 **2026-10-02 · fix(batch10-59): 修复 CI analyze 编译错误**（`cb6c5d0`）
-
-**2026-10-02 · feat(batch10-59): AI 多 Key 轮换 + 多提供商模型选择**（`7cddaa4`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
