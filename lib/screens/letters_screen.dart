@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 
 import '../game_engine.dart';
 import '../models/letter.dart';
+import '../theme/westeros_theme.dart';
+import '../widgets/theme/ornate.dart';
 
 /// 信件面板。
 class LettersScreen extends StatefulWidget {
@@ -51,60 +53,85 @@ class _LettersScreenState extends State<LettersScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('信件')),
-      body: Column(
-        children: <Widget>[
-          // 回信输入区（有待回信时显示）
-          if (pending.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.all(12),
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    '待回信：${pending.length} 封（最近：${pending.first.senderName}）',
-                    style: Theme.of(context).textTheme.titleSmall,
+      body: ParchmentBackground(
+        child: Column(
+          children: <Widget>[
+            // 回信输入区（有待回信时显示）
+            if (pending.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: WesterosColors.barkMid,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: WesterosColors.outlineGold.withValues(alpha: 0.5),
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: TextField(
-                          controller: _replyController,
-                          decoration: const InputDecoration(
-                            hintText: '输入回信内容（留空用默认）',
-                            border: OutlineInputBorder(),
-                            isDense: true,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        const Icon(
+                          Icons.mail_outlined,
+                          size: 18,
+                          color: WesterosColors.goldBright,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '待回信：${pending.length} 封（最近：${pending.first.senderName}）',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                color: WesterosColors.goldBright,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: TextField(
+                            controller: _replyController,
+                            decoration: const InputDecoration(
+                              hintText: '输入回信内容（留空用默认）',
+                              prefixIcon: Icon(Icons.edit_note_outlined, size: 18),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton.filled(
-                        icon: const Icon(Icons.send),
-                        tooltip: '回信',
-                        onPressed: _reply,
-                      ),
-                    ],
-                  ),
-                ],
+                        const SizedBox(width: 8),
+                        IconButton.filled(
+                          icon: const Icon(Icons.send),
+                          tooltip: '回信',
+                          style: IconButton.styleFrom(
+                            backgroundColor: WesterosColors.gold,
+                            foregroundColor: WesterosColors.barkDeep,
+                          ),
+                          onPressed: _reply,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
+            const WesterosDivider(thickness: 1),
+            // 信件列表
+            Expanded(
+              child: letters.isEmpty
+                  ? const Center(child: Text('你的渡鸦还没有带回任何信件。'))
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: letters.length,
+                      itemBuilder: (context, index) {
+                        // 倒序（最新在上）
+                        final letter = letters[letters.length - 1 - index];
+                        return _LetterCard(letter: letter);
+                      },
+                    ),
             ),
-          const Divider(height: 1),
-          // 信件列表
-          Expanded(
-            child: letters.isEmpty
-                ? const Center(child: Text('你的渡鸦还没有带回任何信件。'))
-                : ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: letters.length,
-                    itemBuilder: (context, index) {
-                      // 倒序（最新在上）
-                      final letter = letters[letters.length - 1 - index];
-                      return _LetterCard(letter: letter);
-                    },
-                  ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -123,35 +150,64 @@ class _LetterCard extends StatelessWidget {
     final tag = !isNpc
         ? '✉️ 回信'
         : (letter.replied ? '📖 已回' : '📩 待回');
-    final color = isNpc
-        ? (letter.replied
-            ? theme.colorScheme.surfaceContainerHigh
-            : theme.colorScheme.primaryContainer)
-        : theme.colorScheme.secondaryContainer;
+    final isPending = isNpc && !letter.replied;
+    final bg = isPending
+        ? WesterosColors.goldDark.withValues(alpha: 0.14)
+        : WesterosColors.barkHigh;
+    final borderColor = isPending
+        ? WesterosColors.gold.withValues(alpha: 0.5)
+        : WesterosColors.outlineGold.withValues(alpha: 0.4);
 
-    return Card(
-      color: color,
+    return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    '${letter.senderName}（${letter.year}年${letter.month}月）',
-                    style: theme.textTheme.titleSmall,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  '${letter.senderName}（${letter.year}年${letter.month}月）',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: isPending ? WesterosColors.goldBright : WesterosColors.parchment,
+                    fontWeight: isPending ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
-                Text(tag, style: theme.textTheme.bodySmall),
-              ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: WesterosColors.barkMid.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: WesterosColors.outlineGold.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Text(
+                  tag,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: isPending ? WesterosColors.goldBright : WesterosColors.inkDim,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            letter.content,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: WesterosColors.parchment,
+              height: 1.55,
             ),
-            const SizedBox(height: 6),
-            Text(letter.content, style: theme.textTheme.bodyMedium),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
