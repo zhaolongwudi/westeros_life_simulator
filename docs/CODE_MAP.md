@@ -91,9 +91,10 @@ lib/
 │   （改主界面 UI 的正确姿势：**改 widgets/game/ 下的组件**，不要把展示逻辑塞回 game_screen）
 │
 ├── services/                      # 【服务层】外部/IO
-│   ├── ai_service.dart            # AiService：AI 叙事/选项生成（Dio，含在场 NPC 多步骤任务模板/家族信息注入，Batch 10-22；事件注入走 event_prompt_filter 预算化，Batch 10-33；时节农事注入 Batch 10-56）
+│   ├── ai_service.dart            # AiService：AI 叙事/选项生成（Dio，含在场 NPC 多步骤任务模板/家族信息注入，Batch 10-22；事件注入走 event_prompt_filter 预算化，Batch 10-33；时节农事注入 Batch 10-56；本地集市行情注入 Batch 10-58；**多 Key 轮换重试 Batch 10-59**）
 │   ├── event_prompt_filter.dart   # ⭐ 事件 prompt 预算筛选器（Batch 10-33 · M4c-2）：selectEventsForPrompt 按相关度评分（地点+3/季节+2/数值/标记+1）截取预算 12，全量 72→12 token 约降 83%；预算常量在 balance_data.dart
-│   ├── ai_config.dart             # AI Key/模型/BaseURL 持久化
+│   ├── ai_config.dart             # AI 配置：多 Key 池（JSON 数组 `ai_api_keys`）/模型/BaseURL/提供商（Batch 10-59 重写；双向同步旧单 key 键 `ai_api_key`；resolvedModel/resolvedBaseUrl 空值回落 provider 默认）
+│   ├── ai_provider_defaults.dart  # ⭐ AI 提供商预设（Batch 10-59 新增）：sensenova/atria/deepseek 3 家，含默认模型/模型候选/baseUrl（chatBaseUrl 自动拼 /v1）；providerDefaultsOf 单一真相对齐
 │   ├── event_service.dart         # 事件触发/效果/存档（注意：与 provider 双实现）
 │   ├── save_service.dart          # ⭐ 存档序列化/导入导出（Batch 10-26 · M1：写入 schemaVersion / 读档先 migrateSave / 坏档隔离 .corrupted）
 │   └── save_migration.dart        # ⭐ 存档迁移机制（Batch 10-26 · M1）：kSaveSchemaVersion=1 / kSaveMigrations 迁移表 / migrateSave / readSchemaVersion / UnsupportedSaveVersionException
@@ -186,6 +187,9 @@ GameEngine extends GameProviderBase with:
 | **AI 注入地区风土人情** | services/ai_service.dart（`_buildPrompt` 内 `regionTrendDesc`：regionWorldTrend 区域宏观风土人情段落——季节世界动向之后、可用事件之前，与季节世界动向形成「时节 × 地域」双轴，Batch 10-52） |
 | **AI 注入时节农事** | services/ai_service.dart（`_buildPrompt` 内 `farmTrendDesc`：seasonFarmTrend(season, region) 按「季节 × 区域」返回生计实事段落——地区风土人情之后、可用事件之前，与季节世界动向/地区风土人情形成「时节 × 地域 × 生计」三轴，Batch 10-56） |
 | **AI 注入本地集市行情** | services/ai_service.dart（`_buildPrompt` 内 `marketTrendDesc`：localMarketTrend(season, region) 按「季节 × 区域」返回集市行情风向段落——时节农事之后、可用事件之前，与季节世界动向/地区风土人情/时节农事形成「时节 × 地域 × 生计 × 集市」四轴，Batch 10-58） |
+| **AI 多 Key 轮换** | services/ai_service.dart（`generateNarrative` 双层循环：429/网络/5xx 自动换下一个 key，每 key 内指数退避 maxRetries；round-robin 静态偏移均匀分摊；空池返回「未配置 API Key」，Batch 10-59） |
+| **AI 提供商预设** | data/ai_provider_defaults.dart（sensenova/atria/deepseek 3 家：默认模型/模型候选/baseUrl，`providerDefaultsOf` 单一真相对齐，Batch 10-59）+ services/ai_config.dart（`resolvedModel`/`resolvedBaseUrl` 空值回落 provider 默认） |
+| **AI 配置存储（多 Key + 提供商）** | services/ai_config.dart（`apiKeys` JSON 数组持久化 `ai_api_keys` + `provider` 字段 + 双向同步旧单 key 键 `ai_api_key` + 兼容旧构造参数 `apiKey:`，Batch 10-59） |
 | **AI 回合编排（读配置→拼上下文→请求→装配）** | **mixins/mixin_ai.dart（runAiAction，Batch 10-29 · M3b；返回 `AiTurnResult`）** |
 | AI 回合结果对象 | models/ai_turn.dart（AiTurnResult：lines/choices/isSuccess + notConfiguredLine/notStartedLine/**degradedLine**（AI 失败降级提示，Batch 10-34 · M5a）） |
 | AI 选项效果落盘 + 推进 | mixin_ai.dart（applyAiChoice） |
@@ -306,6 +310,7 @@ GameEngine extends GameProviderBase with:
 | batch10_56_farm_trend_test | **AI 注入时节农事**（10-56，8 用例）：季节×区域注入抽查（北境冬/西境夏/王领秋/河湾地春/多恩永冬）/ 未知区域兜底 / 已知区域未知季节兜底 / 既有注入（世界局势/季节动向/地区风土人情/区域引导）不回归 |
 | batch10_58_market_trend_test | **AI 注入本地集市行情**（10-58，8 用例）：季节×区域注入抽查（北境冬/西境夏/王领秋/河湾地春/多恩永冬）/ 未知区域兜底 / 已知区域未知季节兜底 / 既有注入（世界局势/季节动向/地区风土人情/时节农事/区域引导）不回归 |
 | batch10_57_family_branches_test | **当代支脉横版图**（10-57，4 用例）：已婚有子女（偶→当→子徽章）/ 未婚有子女（无偶徽章）/ 已婚无子女（无子徽章）/ 未婚无子女（不显示区块） |
+| batch10_59_ai_multi_key_test | **AI 多 Key 轮换 + 多模型选择**（10-59，10 用例）：首 key 429 自动换第二个成功 / 全部 key 失败返回最后错误 / 单 key 向后兼容（apiKey 入参进入池）/ round-robin 连续两次起始不同 / 3 提供商预设（默认模型+chatBaseUrl）/ 未知提供商回落第一 / resolved 按提供商回落 + 显式优先 / 多 key 持久化往返 / 旧单 key（ai_api_key）迁移 / 保存时旧键同步写入 |
 | batch10_24_task_progress_ui_test | NPC 任务进度 UI 化：totalTurns/整体进度/剩余月数/进度条渲染/契约回归（10-24，10 用例） |
 | batch10_25_marriage2_test | 婚姻二轮：离婚/丧偶/配偶谈心/月度事件/婚姻面板（10-25） |
 | m1_save_migration_test | **M1 存档契约**（10-26，22 用例）：schemaVersion 写入 / v0→v1 迁移 / 高版本抛异常 / 防御式 fromJson（坏类型/坏列表元素/空 Map）/ 坏档隔离 .corrupted / 旧档加载 / 保存往返 |
@@ -366,7 +371,7 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v4.0（新增 batch10_58 AI 本地集市行情注入）· 最后更新：2026-10-03*
+*文档版本：v5.0（新增 batch10_59 AI 多 Key 轮换 + 多提供商模型选择）· 最后更新：2026-10-03*
 
 ## 八、构建 APK 与直发邮箱（临时任务脚本，2026-10-02 新增）
 
