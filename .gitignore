@@ -23,3 +23,6 @@ __pycache__/
 *.pyc
 *.pem
 docs/HANDOVER.md
+
+# Email config (secrets)
+.mail_env
