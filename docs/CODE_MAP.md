@@ -187,7 +187,7 @@ GameEngine extends GameProviderBase with:
 | **AI 注入地区风土人情** | services/ai_service.dart（`_buildPrompt` 内 `regionTrendDesc`：regionWorldTrend 区域宏观风土人情段落——季节世界动向之后、可用事件之前，与季节世界动向形成「时节 × 地域」双轴，Batch 10-52） |
 | **AI 注入时节农事** | services/ai_service.dart（`_buildPrompt` 内 `farmTrendDesc`：seasonFarmTrend(season, region) 按「季节 × 区域」返回生计实事段落——地区风土人情之后、可用事件之前，与季节世界动向/地区风土人情形成「时节 × 地域 × 生计」三轴，Batch 10-56） |
 | **AI 注入本地集市行情** | services/ai_service.dart（`_buildPrompt` 内 `marketTrendDesc`：localMarketTrend(season, region) 按「季节 × 区域」返回集市行情风向段落——时节农事之后、可用事件之前，与季节世界动向/地区风土人情/时节农事形成「时节 × 地域 × 生计 × 集市」四轴，Batch 10-58） |
-| **AI 多 Key 轮换** | services/ai_service.dart（`generateNarrative` 双层循环：429/网络/5xx 自动换下一个 key，每 key 内指数退避 maxRetries；round-robin 静态偏移均匀分摊；空池返回「未配置 API Key」，Batch 10-59） |
+| **AI 多 Key 轮换** | services/ai_service.dart（`generateNarrative`：**多 Key 每次请求自动轮换下一个 Key**（round-robin 起始偏移 + 每次 +1），失败 429/网络/5xx 也直接换下一个不重试同一 Key（避免触发 TPM/RPM 限流）；单 Key 保留指数退避重试；空池返回「未配置 API Key」，Batch 10-59 + fix1） |
 | **AI 提供商预设** | data/ai_provider_defaults.dart（sensenova/atria/deepseek 3 家：默认模型/模型候选/baseUrl，`providerDefaultsOf` 单一真相对齐，Batch 10-59）+ services/ai_config.dart（`resolvedModel`/`resolvedBaseUrl` 空值回落 provider 默认） |
 | **AI 配置存储（多 Key + 提供商）** | services/ai_config.dart（`apiKeys` JSON 数组持久化 `ai_api_keys` + `provider` 字段 + 双向同步旧单 key 键 `ai_api_key` + 兼容旧构造参数 `apiKey:`，Batch 10-59） |
 | **AI 回合编排（读配置→拼上下文→请求→装配）** | **mixins/mixin_ai.dart（runAiAction，Batch 10-29 · M3b；返回 `AiTurnResult`）** |
@@ -310,7 +310,7 @@ GameEngine extends GameProviderBase with:
 | batch10_56_farm_trend_test | **AI 注入时节农事**（10-56，8 用例）：季节×区域注入抽查（北境冬/西境夏/王领秋/河湾地春/多恩永冬）/ 未知区域兜底 / 已知区域未知季节兜底 / 既有注入（世界局势/季节动向/地区风土人情/区域引导）不回归 |
 | batch10_58_market_trend_test | **AI 注入本地集市行情**（10-58，8 用例）：季节×区域注入抽查（北境冬/西境夏/王领秋/河湾地春/多恩永冬）/ 未知区域兜底 / 已知区域未知季节兜底 / 既有注入（世界局势/季节动向/地区风土人情/时节农事/区域引导）不回归 |
 | batch10_57_family_branches_test | **当代支脉横版图**（10-57，4 用例）：已婚有子女（偶→当→子徽章）/ 未婚有子女（无偶徽章）/ 已婚无子女（无子徽章）/ 未婚无子女（不显示区块） |
-| batch10_59_ai_multi_key_test | **AI 多 Key 轮换 + 多模型选择**（10-59，10 用例）：首 key 429 自动换第二个成功 / 全部 key 失败返回最后错误 / 单 key 向后兼容（apiKey 入参进入池）/ round-robin 连续两次起始不同 / 3 提供商预设（默认模型+chatBaseUrl）/ 未知提供商回落第一 / resolved 按提供商回落 + 显式优先 / 多 key 持久化往返 / 旧单 key（ai_api_key）迁移 / 保存时旧键同步写入 |
+| batch10_59_ai_multi_key_test | **AI 多 Key 轮换 + 多模型选择**（10-59 + fix1，12 用例）：首 key 429 自动换第二个成功 / 全部 key 失败返回最后错误 / 单 key 向后兼容（apiKey 入参进入池）/ round-robin 连续两次起始不同 / **多 key 每次请求自动轮换（成功也不重复打同一 key）** / **多 key 失败直接换下一个不重试同一 key** / 3 提供商预设（默认模型+chatBaseUrl）/ 未知提供商回落第一 / resolved 按提供商回落 + 显式优先 / 多 key 持久化往返 / 旧单 key（ai_api_key）迁移 / 保存时旧键同步写入 |
 | batch10_24_task_progress_ui_test | NPC 任务进度 UI 化：totalTurns/整体进度/剩余月数/进度条渲染/契约回归（10-24，10 用例） |
 | batch10_25_marriage2_test | 婚姻二轮：离婚/丧偶/配偶谈心/月度事件/婚姻面板（10-25） |
 | m1_save_migration_test | **M1 存档契约**（10-26，22 用例）：schemaVersion 写入 / v0→v1 迁移 / 高版本抛异常 / 防御式 fromJson（坏类型/坏列表元素/空 Map）/ 坏档隔离 .corrupted / 旧档加载 / 保存往返 |
@@ -371,7 +371,7 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v5.0（新增 batch10_59 AI 多 Key 轮换 + 多提供商模型选择）· 最后更新：2026-10-03*
+*文档版本：v5.1（Batch 10-59-fix1 多 Key 每次请求自动轮换）· 最后更新：2026-10-03*
 
 ## 八、构建 APK 与直发邮箱（临时任务脚本，2026-10-02 新增）
 
