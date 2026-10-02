@@ -86,12 +86,13 @@ jobs:
         id: build
         run: |
           flutter build apk --release 2>&1 | tee build_output.log
-          APK_PATH=$(find . -path ./build -prune -o -name "app-release.apk" -type f -print 2>/dev/null | head -1)
+          # 注意：不能用 -path ./build -prune（APK 恰好产在 build/ 下会被剪掉）
+          APK_PATH=$(find . -name "app-release.apk" -type f 2>/dev/null | head -1)
           if [ -z "$APK_PATH" ]; then
             echo "Flutter build didn't produce APK, trying Gradle directly..."
             cd android && ./gradlew assembleRelease 2>&1 | tee -a ../build_output.log
             cd ..
-            APK_PATH=$(find . -path ./build -prune -o -name "app-release.apk" -type f -print 2>/dev/null | head -1)
+            APK_PATH=$(find . -name "app-release.apk" -type f 2>/dev/null | head -1)
           fi
           if [ -n "$APK_PATH" ]; then
             echo "BUILD_EXIT_CODE=0" > build_result.txt
