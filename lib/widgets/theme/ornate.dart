@@ -283,7 +283,7 @@ class GildedCard extends StatelessWidget {
             ? WesterosColors.goldDark.withValues(alpha: 0.16)
             : WesterosColors.barkHigh);
     final radius = BorderRadius.circular(14);
-    final border = Border.all(
+    final side = BorderSide(
       color: borderColor,
       width: highlight ? 1.4 : 1,
     );
@@ -296,7 +296,7 @@ class GildedCard extends StatelessWidget {
       shadowColor: Colors.black.withValues(alpha: 0.5),
       shape: RoundedRectangleBorder(
         borderRadius: radius,
-        side: border,
+        side: side,
       ),
       clipBehavior: Clip.antiAlias,
       child: onTap == null
