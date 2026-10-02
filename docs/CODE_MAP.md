@@ -31,7 +31,7 @@ lib/
 │   ├── item_data.dart             # 34 物品
 │   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节）
 │   ├── balance_data.dart           # ⭐ 数值配置集中（初始值/生存消耗/每日上限/头衔阶梯/活动经济/婚姻与世代阈值，Batch 10-30 · M4a；无 import 依赖的叶子模块）
-│   └── npc_task_data.dart         # NPC 多步骤任务模板（54 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯/奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈，Batch 10-18 起逐步扩充，10-39 扩至 44，10-41 协作任务扩至 48，10-44 协作任务扩至 52（君临×2/高庭/派克城），10-47 扩至 54（泰温+艾莉亚各 +1 solo）；协作任务含 coNpcId）
+│   └── npc_task_data.dart         # NPC 多步骤任务模板（58 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯/奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈，Batch 10-18 起逐步扩充，10-39 扩至 44，10-41 协作任务扩至 48，10-44 协作任务扩至 52（君临×2/高庭/派克城），10-47 扩至 54（泰温+艾莉亚各 +1 solo），10-53 扩至 58（卢斯·波顿/拉姆斯·波顿/席恩/霍斯特各 +1 solo）；协作任务含 coNpcId）
 │
 ├── models/                        # 【模型层】不可变实体（copyWith + toJson/fromJson）
 │   ├── player.dart                # Player（含 health/energy/hunger/title/house/children/spouse/childRearing/generationRecords/activeTasks）
@@ -292,6 +292,7 @@ GameEngine extends GameProviderBase with:
 | batch10_45_ai_world_event_test | **AI 注入本月世界局势**（10-45，4 用例）：top2 注入（名称+描述，第 3 条不出现在世界局势段落）/ 空态兜底 / 相关度最高事件排第一（冰封湖面双命中）/ 既有注入不回归 |
 | batch10_46_family_tree_detail_test | **历代家主详情弹层**（10-46，4 用例）：点击谱系节点弹出详情（世代徽章/头衔/在位/成就/传承寄语）/ 成就为空「暂无显著功绩」/ 关闭按钮收起/ 无谱系无入口 |
 | batch10_47_task_expand_test | **NPC 任务模板扩充**（10-47，5 用例）：总量 54 / 协作 8 / solo 46 / 新模板存在且指向真实 NPC（泰温·凯岩城·调查西境矿脉 / 艾莉亚·临冬城·猎杀袭击商队的狼群）/ ID·标题唯一 / 泰温不在场仅模板可见性（断言「不在这里」）/ 艾莉亚指定 taskId 全流程完成结算 |
+| batch10_53_task_expand_test | **NPC 任务模板扩充**（10-53，7 用例）：总量 58 / 协作仍 8 / solo 50 / 4 新模板存在且指向真实 NPC（卢斯·波顿·黑城堡 / 拉姆斯·波顿·黑城堡 / 席恩·派克城 / 霍斯特·奔流城）/ ID·标题唯一 / 4 位 NPC 可接列表含新模板 + 不在场接取提示「不在这里」 |
 | batch10_48_ai_title_trend_test | **AI 注入头衔晋升趋势**（10-48，4 用例）：有下一档注入「距下一档「伯爵」还差 5 声望」+ 阶梯总览 / 已登顶「已登顶本身份头衔巅峰」/ 无头衔兜底 / 与 balance_data 单一真相对齐（nextTierReputation） |
 | batch10_49_family_link_test | **谱系继承连线画布**（10-49，3 用例）：单任历史 1 传至当代 / 两任历史 1 继承 + 1 传至当代 / 无谱系无连线 |
 | batch10_50_ai_season_trend_test | **AI 注入季节世界动向**（10-50，7 用例）：五季（spring/summer/autumn/winter/longwinter）各注入对应世界动向段落 / 未知季节兜底 / 既有注入（世界局势/可用事件/季节引导）不回归 |
@@ -357,4 +358,16 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v3.3（新增 batch10_52 地区风土人情注入速查及测试映射）· 最后更新：2026-10-02*
+*文档版本：v3.4（新增 batch10_53 任务模板扩充 58 + 构建/发信脚本速查）· 最后更新：2026-10-02*
+
+## 八、构建 APK 与直发邮箱（临时任务脚本，2026-10-02 新增）
+
+用户临时需求：构建出的 APK 直接发到邮箱（附件优先，失败降级 nightly.link 链接发邮箱）。
+
+- **触发方式**：GitHub Actions 手动触发 workflow `Build APK`（`.github/workflows/build_apk.yml`）
+- **流程**：`flutter create --platforms=android` 现场生成 android/ 平台目录（仓库无 android/）→ minSdk 修正到 23（flutter_secure_storage 9.x 要求）→ pub get → analyze → test → build apk release → 重命名 `WesterosLige-nightly-<sha8>.apk` → upload-artifact（名 `WesterosLige-nightly`，保留 90 天，nightly.link 可用）
+- **本地一键脚本**：`scripts/build_and_mail_apk.py`
+  - 触发构建 → 轮询 CI → 成功下载 APK → SMTP 附件直发邮箱 → 失败降级 nightly.link 链接发邮箱
+  - 配置：`scripts/.mail_env`（复制 `.mail_env.example` 填 SMTP_HOST/PORT/USER/PASS/MAIL_TO 等，已 gitignore）
+  - 用法：`python3 scripts/build_and_mail_apk.py`（完整流程）/ `--check` 校验配置 / `--trigger` 只触发 / `--mail-latest` 取最近一次成功 run 的 APK 发邮箱
+  - nightly.link 下载通道：`https://nightly.link/zhaolongwudi/westeros_life_simulator/actions/runs/<run_id>/WesterosLige-nightly.zip`（走 Cloudflare 缓存，比 GitHub 直连快；注意 GitHub Release/artifact 直连用户基本下不动）
