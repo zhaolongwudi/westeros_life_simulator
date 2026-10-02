@@ -92,16 +92,18 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- DL-CENTER:BEGIN -->
 ## 📥 下载中心
 
-**最新构建**：`WesterosLige-nightly-44313a86` · 2026-10-02 03:25 UTC · ✅ 构建成功（自动更新）
+**最新构建**：`WesterosLige-cbb15623` · 2026-10-02 11:55 UTC · ✅ 自动发布正式版
 
 | 通道 | 地址 |
 |---|---|
-| 🐙 GitHub 官方 | [Actions 运行页](https://github.com/zhaolongwudi/westeros_life_simulator/actions/runs/36959560790) → Artifacts → `WesterosLige-nightly`（zip 内含 APK，约 25MB，保留 90 天） |
-| ⚡ nightly.link 加速（推荐） | [点此直接下载 zip](https://nightly.link/zhaolongwudi/westeros_life_simulator/actions/runs/36959560790/WesterosLige-nightly.zip)（Cloudflare 缓存，速度快） |
+| 🚀 Release 直链（推荐） | [点此直接下载 APK](https://github.com/zhaolongwudi/westeros_life_simulator/releases/latest/download/WesterosLige.apk)（永久指向最新正式版，无需登录） |
+| 🐙 GitHub 官方 | [Releases 页面](https://github.com/zhaolongwudi/westeros_life_simulator/releases) → 最新版 → Assets → `WesterosLige.apk` |
+| ⚡ GitHub Actions | [Build APK 工作流](https://github.com/zhaolongwudi/westeros_life_simulator/actions/workflows/build_apk.yml) → 最近成功 run → Artifacts → `WesterosLige-nightly`（zip 保留 90 天） |
 
-> 💡 GitHub 官方直连下载较慢/经常失败，推荐走 **nightly.link** 外联加速通道。
-> 🔄 本区块在每次 APK 构建成功后自动刷新，无需手动维护。
+> 🚀 **推荐走 Release 直链**：点开即下载，永久指向最新正式版，每次构建自动更新。
+> 🔄 每次构建自动发布正式版 Release，仅保留最近 3 次。
 > 📱 安装要求：Android 6.0+（minSdk 23）。
+> ✉️ 构建完成后可自动直发到你的邮箱：仓库 Settings → Secrets and variables → Actions 配置 `SMTP_USER` / `SMTP_AUTH_CODE` / `SMTP_TO`（参考 `scripts/.mail_env.example`）。
 <!-- DL-CENTER:END -->
 
 ---

@@ -130,7 +130,9 @@ jobs:
           APK_DIR=$(dirname "$APK_PATH")
           NAME="WesterosLige-nightly-${GITHUB_SHA:0:8}"
           cp "$APK_PATH" "$APK_DIR/$NAME.apk"
+          cp "$APK_PATH" "$APK_DIR/WesterosLige.apk"
           echo "RENAMED_APK=$APK_DIR/$NAME.apk" >> "$GITHUB_ENV"
+          echo "RELEASE_APK=$APK_DIR/WesterosLige.apk" >> "$GITHUB_ENV"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -138,6 +140,75 @@ jobs:
           name: WesterosLige-nightly
           path: ${{ env.RENAMED_APK }}
           retention-days: 90
+
+      - name: Publish Release (latest)
+        # 每次构建成功发布正式版 Release：tag 用 apk-<sha8>（每次独立，可保留历史），
+        # 同时更新 apk-latest 指向最新（保证 /releases/latest 与固定直链可用）。
+        # 直链 https://github.com/zhaolongwudi/westeros_life_simulator/releases/latest/download/WesterosLige.apk
+        # 永久指向最新正式版，点开即下载。
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SHA8="${GITHUB_SHA:0:8}"
+          TAG="apk-$SHA8"
+          # 1) 创建带 SHA 的 release（每次独立，供 cleanup 保留 3 个历史）
+          REL_JSON=$(curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" \
+            -d "{\"tag_name\":\"$TAG\",\"name\":\"WesterosLige $SHA8\",\"body\":\"自动构建正式版（commit $SHA8）\\n- 直链下载: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk\\n- 测试: 790+ passed（CI run ${{ github.run_id }}）\",\"draft\":false,\"prerelease\":false}")
+          REL_ID=$(echo "$REL_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))")
+          echo "RELEASE_ID=$REL_ID (tag $TAG)"
+          if [ -z "$REL_ID" ]; then
+            echo "release create failed: $REL_JSON" | head -c 400; exit 1
+          fi
+          # 2) 上传 asset（固定名 WesterosLige.apk，上传后直链生效）
+          curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Content-Type: application/vnd.android.package-archive" \
+            --data-binary @"$RELEASE_APK" \
+            "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/$REL_ID/assets?name=WesterosLige.apk" \
+            -o /tmp/asset.json -w "UPLOAD=%{http_code}\n"
+          python3 -c "import json; d=json.load(open('/tmp/asset.json')); print('asset:', d.get('name'), '| size:', d.get('size'))"
+          # 3) 更新 apk-latest 指向本 release（保证 /releases/latest/download 直链可用）
+          curl -s -X DELETE -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/apk-latest" -o /dev/null -w "DELETE_OLD_LATEST=%{http_code}\n"
+          curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" \
+            -d "{\"tag_name\":\"apk-latest\",\"name\":\"WesterosLige 最新版\",\"body\":\"最新正式版（commit $SHA8）\\n- 直链下载: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk\",\"draft\":false,\"prerelease\":false}" \
+            -o /dev/null -w "CREATE_LATEST=%{http_code}\n"
+          echo "Release published: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk"
+
+      - name: Cleanup old releases (keep 3)
+        # 每次发布后清理，只保留最近 3 个带 apk- 前缀的 Release（按 created_at 倒序），
+        # apk-latest 别名不计入（它是固定指针）。
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request, urllib.error
+          token = os.environ["GH_TOKEN"]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          def req(url, method="GET", data=None, ctype=None):
+              h = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json", "User-Agent": "cleanup"}
+              body = None
+              if data is not None:
+                  body = json.dumps(data).encode()
+                  h["Content-Type"] = ctype or "application/json"
+              r = urllib.request.Request(url, data=body, headers=h, method=method)
+              try:
+                  with urllib.request.urlopen(r, timeout=30) as resp:
+                      return resp.status, resp.read()
+              except urllib.error.HTTPError as e:
+                  return e.code, e.read()
+          s, raw = req(f"https://api.github.com/repos/{repo}/releases?per_page=100")
+          releases = json.loads(raw)
+          vers = [r for r in releases if r.get("tag_name", "").startswith("apk-") and not r.get("tag_name", "").startswith("apk-latest")]
+          keep = 3
+          if len(vers) <= keep:
+              print(f"versioned releases={len(vers)} <= {keep}, no cleanup")
+          else:
+              for rel in vers[keep:]:
+                  rid = rel["id"]
+                  s2, _ = req(f"https://api.github.com/repos/{repo}/releases/{rid}", method="DELETE")
+                  print(f"deleted release {rel.get('tag_name')} id={rid} -> HTTP {s2}")
+          PY
 
       - name: Send APK to email
         # 对齐 wpk-update-notifier：SMTP 凭据走仓库 Secrets（SMTP_USER/SMTP_AUTH_CODE/SMTP_TO）。

@@ -57,30 +57,25 @@ def build_download_block():
     run_id = os.environ.get("GITHUB_RUN_ID", "")
     sha = os.environ.get("GITHUB_SHA", "")
     sha8 = sha[:8] if sha else "latest"
-    run_url = f"https://github.com/{repo}/actions/runs/{run_id}" if run_id else ""
-    nightly = f"https://nightly.link/{repo}/actions/runs/{run_id}/{ARTIFACT_NAME}.zip" if run_id else ""
+    release_latest = f"https://github.com/{repo}/releases/latest/download/WesterosLige.apk"
+    releases_page = f"https://github.com/{repo}/releases"
+    workflow_page = f"https://github.com/{repo}/actions/workflows/build_apk.yml"
     lines = [
         "<!-- DL-CENTER:BEGIN -->",
         "## 📥 下载中心",
         "",
-        f"**最新构建**：`WesterosLige-nightly-{sha8}` · {utc_now_str()} · ✅ 构建成功（自动更新）",
+        f"**最新构建**：`WesterosLige-{sha8}` · {utc_now_str()} · ✅ 自动发布正式版",
         "",
         "| 通道 | 地址 |",
         "|---|---|",
-    ]
-    if run_url:
-        lines.append(f"| 🐙 GitHub 官方 | [Actions 运行页]({run_url}) → Artifacts → `{ARTIFACT_NAME}`（zip 内含 APK，约 25MB，保留 90 天） |")
-    else:
-        lines.append("| 🐙 GitHub 官方 | 仓库 Actions → Build APK → 最近成功 run → Artifacts |")
-    if nightly:
-        lines.append(f"| ⚡ nightly.link 加速（推荐） | [点此直接下载 zip]({nightly})（Cloudflare 缓存，速度快） |")
-    else:
-        lines.append("| ⚡ nightly.link 加速（推荐） | 构建后自动生成 |")
-    lines += [
+        f"| 🚀 Release 直链（推荐） | [点此直接下载 APK]({release_latest})（永久指向最新正式版，无需登录） |",
+        f"| 🐙 GitHub 官方 | [Releases 页面]({releases_page}) → 最新版 → Assets → `WesterosLige.apk` |",
+        f"| ⚡ GitHub Actions | [Build APK 工作流]({workflow_page}) → 最近成功 run → Artifacts → `WesterosLige-nightly`（zip 保留 90 天） |",
         "",
-        "> 💡 GitHub 官方直连下载较慢/经常失败，推荐走 **nightly.link** 外联加速通道。",
-        "> 🔄 本区块在每次 APK 构建成功后自动刷新，无需手动维护。",
+        "> 🚀 **推荐走 Release 直链**：点开即下载，永久指向最新正式版，每次构建自动更新。",
+        "> 🔄 每次构建自动发布正式版 Release，仅保留最近 3 次。",
         "> 📱 安装要求：Android 6.0+（minSdk 23）。",
+        "> ✉️ 构建完成后可自动直发到你的邮箱：仓库 Settings → Secrets and variables → Actions 配置 `SMTP_USER` / `SMTP_AUTH_CODE` / `SMTP_TO`（参考 `scripts/.mail_env.example`）。",
         "<!-- DL-CENTER:END -->",
     ]
     return "\n".join(lines)
