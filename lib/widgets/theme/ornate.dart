@@ -283,7 +283,10 @@ class GildedCard extends StatelessWidget {
             ? WesterosColors.goldDark.withValues(alpha: 0.16)
             : WesterosColors.barkHigh);
     final radius = BorderRadius.circular(14);
-    final side = BorderSide(color: borderColor, width: highlight ? 1.4 : 1);
+    final border = Border.all(
+      color: borderColor,
+      width: highlight ? 1.4 : 1,
+    );
     final content = Padding(padding: padding, child: child);
     if (onTap == null) {
       return Container(
@@ -291,7 +294,7 @@ class GildedCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           borderRadius: radius,
-          border: side,
+          border: border,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.35),
@@ -308,7 +311,7 @@ class GildedCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: radius,
-        border: side,
+        border: border,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.35),
