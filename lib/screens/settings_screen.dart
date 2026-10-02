@@ -11,7 +11,9 @@ import '../providers/game_state_provider.dart';
 import '../data/ai_provider_defaults.dart';
 import '../services/ai_config.dart';
 import '../services/save_service.dart';
+import '../theme/westeros_theme.dart';
 import '../utils/text_formats.dart';
+import '../widgets/theme/ornate.dart';
 
 /// 设置/存档界面。
 class SettingsScreen extends StatefulWidget {
@@ -360,119 +362,223 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('设置 / 存档')),
-      body: ListView(
-        padding: const EdgeInsets.all(12),
-        children: <Widget>[
-          // 当前玩家信息
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.person_outline),
-              title: Text(_engine.player.name),
-              subtitle: Text(
-                '${_engine.progress.year}年${_engine.progress.month}月 · '
-                '回合 ${_engine.progress.turnCount} · '
-                '${_engine.player.gold} 金币',
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          // 操作按钮
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: <Widget>[
-              FilledButton.icon(
-                icon: const Icon(Icons.save_outlined),
-                label: const Text('保存'),
-                onPressed: _saveGame,
-              ),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.upload_file_outlined),
-                label: const Text('导出'),
-                onPressed: _exportSave,
-              ),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.download_outlined),
-                label: const Text('导入'),
-                onPressed: _importSave,
-              ),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.refresh),
-                label: const Text('新游戏'),
-                onPressed: _newGame,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // AI 配置卡片
-          Card(
-            child: ListTile(
-              leading: Icon(
-                Icons.auto_awesome,
-                color: (_aiConfig?.isConfigured ?? false)
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.outline,
-              ),
-              title: const Text('AI 配置'),
-              subtitle: Text(
-                (_aiConfig?.isConfigured ?? false)
-                    ? '已配置 ${_aiConfig!.apiKeys.length} 个 Key · ${providerDefaultsOf(_aiConfig!.provider).label} · ${_aiConfig!.resolvedModel}'
-                    : '未配置 API Key（AI 行动模式不可用）',
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                tooltip: '编辑',
-                onPressed: _editAiConfig,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // 存档列表
-          Text('存档列表（${_saves.length}）', style: theme.textTheme.titleMedium),
-          const SizedBox(height: 8),
-          if (_loading)
-            const Center(child: Padding(
-              padding: EdgeInsets.all(16),
-              child: CircularProgressIndicator(),
-            ))
-          else if (_saves.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: Text('暂无存档')),
-            )
-          else
-            for (final save in _saves)
-              Card(
-                margin: const EdgeInsets.only(bottom: 8),
-                child: ListTile(
-                  leading: const Icon(Icons.archive_outlined),
-                  title: Text(
-                    '${save.playerName} · ${save.year}年${save.month}月',
-                  ),
-                  subtitle: Text(
-                    '回合 ${save.turnCount} · ${formatDateTime(save.saveTime)}',
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      IconButton(
-                        icon: const Icon(Icons.play_arrow),
-                        tooltip: '加载',
-                        onPressed: () => _loadGame(save.saveId),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        tooltip: '删除',
-                        onPressed: () => _deleteSave(save.saveId),
-                      ),
-                    ],
+      body: ParchmentBackground(
+        child: ListView(
+          padding: const EdgeInsets.all(12),
+          children: <Widget>[
+            // 当前玩家信息
+            GildedCard(
+              child: ListTile(
+                leading: const Icon(
+                  Icons.person_outline,
+                  color: WesterosColors.goldBright,
+                ),
+                title: Text(
+                  _engine.player.name,
+                  style: const TextStyle(
+                    color: WesterosColors.parchment,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+                subtitle: Text(
+                  '${_engine.progress.year}年${_engine.progress.month}月 · '
+                  '回合 ${_engine.progress.turnCount} · '
+                  '${_engine.player.gold} 金币',
+                  style: const TextStyle(color: WesterosColors.inkDim),
+                ),
               ),
-        ],
+            ),
+            const SizedBox(height: 8),
+            // 操作按钮
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: <Widget>[
+                _GoldButton(
+                  icon: Icons.save_outlined,
+                  label: '保存',
+                  filled: true,
+                  onPressed: _saveGame,
+                ),
+                _GoldButton(
+                  icon: Icons.upload_file_outlined,
+                  label: '导出',
+                  onPressed: _exportSave,
+                ),
+                _GoldButton(
+                  icon: Icons.download_outlined,
+                  label: '导入',
+                  onPressed: _importSave,
+                ),
+                _GoldButton(
+                  icon: Icons.refresh,
+                  label: '新游戏',
+                  onPressed: _newGame,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // AI 配置卡片
+            GildedCard(
+              child: ListTile(
+                leading: Icon(
+                  Icons.auto_awesome,
+                  color: (_aiConfig?.isConfigured ?? false)
+                      ? WesterosColors.goldBright
+                      : WesterosColors.inkDim,
+                ),
+                title: const Text(
+                  'AI 配置',
+                  style: TextStyle(
+                    color: WesterosColors.parchment,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Text(
+                  (_aiConfig?.isConfigured ?? false)
+                      ? '已配置 ${_aiConfig!.apiKeys.length} 个 Key · ${providerDefaultsOf(_aiConfig!.provider).label} · ${_aiConfig!.resolvedModel}'
+                      : '未配置 API Key（AI 行动模式不可用）',
+                  style: const TextStyle(color: WesterosColors.inkDim),
+                ),
+                trailing: IconButton(
+                  icon: const Icon(
+                    Icons.edit_outlined,
+                    color: WesterosColors.goldBright,
+                  ),
+                  tooltip: '编辑',
+                  onPressed: _editAiConfig,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // 存档列表
+            const OrnateHeader(
+              icon: Icons.archive_outlined,
+              title: '存档列表',
+            ),
+            const SizedBox(height: 8),
+            if (_loading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator(
+                    color: WesterosColors.gold,
+                  ),
+                ),
+              )
+            else if (_saves.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(
+                  child: Text(
+                    '暂无存档',
+                    style: TextStyle(color: WesterosColors.inkDim),
+                  ),
+                ),
+              )
+            else
+              for (final save in _saves)
+                GildedCard(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ListTile(
+                    leading: const Icon(
+                      Icons.archive_outlined,
+                      color: WesterosColors.goldBright,
+                    ),
+                    title: Text(
+                      '${save.playerName} · ${save.year}年${save.month}月',
+                      style: const TextStyle(color: WesterosColors.parchment),
+                    ),
+                    subtitle: Text(
+                      '回合 ${save.turnCount} · ${formatDateTime(save.saveTime)}',
+                      style: const TextStyle(color: WesterosColors.inkDim),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        IconButton(
+                          icon: const Icon(
+                            Icons.play_arrow,
+                            color: WesterosColors.goldBright,
+                          ),
+                          tooltip: '加载',
+                          onPressed: () => _loadGame(save.saveId),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: WesterosColors.bloodRed,
+                          ),
+                          tooltip: '删除',
+                          onPressed: () => _deleteSave(save.saveId),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 金色饰边操作按钮（保存/导出/导入/新游戏）。
+class _GoldButton extends StatelessWidget {
+  const _GoldButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+    this.filled = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    final foreground = filled ? WesterosColors.barkDeep : WesterosColors.goldBright;
+    final child = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(icon, size: 18, color: foreground),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: TextStyle(
+            color: foreground,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          gradient: filled
+              ? const LinearGradient(
+                  colors: <Color>[
+                    WesterosColors.goldDark,
+                    WesterosColors.gold,
+                  ],
+                )
+              : null,
+          color: filled ? null : WesterosColors.barkMid.withValues(alpha: 0.8),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: filled
+                ? WesterosColors.goldBright
+                : WesterosColors.outlineGold.withValues(alpha: 0.7),
+            width: filled ? 1 : 1.2,
+          ),
+        ),
+        child: child,
       ),
     );
   }

@@ -10,8 +10,10 @@ import 'package:flutter/material.dart';
 
 import '../game_engine.dart';
 import '../models/marital.dart';
+import '../theme/westeros_theme.dart';
 import '../utils/labels.dart';
 import '../widgets/game/responsive.dart';
+import '../widgets/theme/ornate.dart';
 
 /// 家族树面板。
 class FamilyTreeScreen extends StatelessWidget {
@@ -29,65 +31,104 @@ class FamilyTreeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('家族树')),
       body: SafeArea(
-        child: AdaptiveFrame(
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-        children: <Widget>[
-          // 标题：家族 + 世代
-          Text(
-            '${e.houseName}家 · 第 ${e.generationNumber()} 代',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '血脉绵延，代代相传。',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 16),
-          // Batch 10-51：横版继承关系图（谱系概览）——历代家主迷你卡片横向串联至当代，
-          // 整条继承链一眼望尽；与竖排时间轴互补（竖排看详情、横排看全局）。
-          if (p.generationRecords.isNotEmpty) ...[
-            const _SectionHeader(icon: Icons.timeline, title: '继承谱系'),
-            const SizedBox(height: 8),
-            _LineageOverview(
-              records: p.generationRecords,
-              currentName: p.name,
+        child: ParchmentBackground(
+          child: AdaptiveFrame(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: <Widget>[
+                // 标题：家族 + 世代
+                Row(
+                  children: <Widget>[
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: <Color>[
+                            WesterosColors.goldDark,
+                            WesterosColors.gold,
+                          ],
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.account_tree_outlined,
+                        size: 19,
+                        color: WesterosColors.barkDeep,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        '${e.houseName}家 · 第 ${e.generationNumber()} 代',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(
+                              color: WesterosColors.goldBright,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  '血脉绵延，代代相传。',
+                  style: TextStyle(color: WesterosColors.inkDim),
+                ),
+                const SizedBox(height: 16),
+                // Batch 10-51：横版继承关系图（谱系概览）——历代家主迷你卡片横向串联至当代，
+                // 整条继承链一眼望尽；与竖排时间轴互补（竖排看详情、横排看全局）。
+                if (p.generationRecords.isNotEmpty) ...[
+                  const _SectionHeader(icon: Icons.timeline, title: '继承谱系'),
+                  const SizedBox(height: 8),
+                  _LineageOverview(
+                    records: p.generationRecords,
+                    currentName: p.name,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                // 历代谱系（时间轴样式）
+                if (p.generationRecords.isNotEmpty) ...[
+                  const _SectionHeader(icon: Icons.history, title: '历代家主'),
+                  const SizedBox(height: 8),
+                  for (var i = 0; i < p.generationRecords.length; i++) ...[
+                    _GenerationNode(
+                      record: p.generationRecords[i],
+                      isLast: i == p.generationRecords.length - 1,
+                    ),
+                    // Batch 10-49：谱系继承连线——每任家主之间画一条传承连线
+                    // （非末代 → 连接下一任；末代 → 指向当前世代）
+                    _InheritanceLink(
+                      isLast: i == p.generationRecords.length - 1,
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                ],
+                // Batch 10-57：当代支脉横版图——当代家主 + 配偶 + 子女的血脉快照，
+                // 与历代谱系概览衔接：祖先链看传承，当代支脉看「此刻的血亲」。
+                if (p.spouse != null || p.children.isNotEmpty) ...[
+                  const _SectionHeader(
+                    icon: Icons.family_restroom,
+                    title: '当代支脉',
+                  ),
+                  const SizedBox(height: 8),
+                  _CurrentFamilyOverview(engine: e),
+                  const SizedBox(height: 16),
+                ],
+                // 当前世代
+                const _SectionHeader(
+                  icon: Icons.account_tree_outlined,
+                  title: '当前世代',
+                ),
+                const SizedBox(height: 8),
+                _CurrentNode(
+                  engine: e,
+                  isAfterInheritance: p.generationRecords.isNotEmpty,
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-          ],
-          // 历代谱系（时间轴样式）
-          if (p.generationRecords.isNotEmpty) ...[
-            const _SectionHeader(icon: Icons.history, title: '历代家主'),
-            const SizedBox(height: 8),
-            for (var i = 0; i < p.generationRecords.length; i++) ...[
-              _GenerationNode(
-                record: p.generationRecords[i],
-                isLast: i == p.generationRecords.length - 1,
-              ),
-              // Batch 10-49：谱系继承连线——每任家主之间画一条传承连线
-              // （非末代 → 连接下一任；末代 → 指向当前世代）
-              _InheritanceLink(
-                isLast: i == p.generationRecords.length - 1,
-              ),
-            ],
-            const SizedBox(height: 16),
-          ],
-          // Batch 10-57：当代支脉横版图——当代家主 + 配偶 + 子女的血脉快照，
-          // 与历代谱系概览衔接：祖先链看传承，当代支脉看「此刻的血亲」。
-          if (p.spouse != null || p.children.isNotEmpty) ...[
-            const _SectionHeader(icon: Icons.family_restroom, title: '当代支脉'),
-            const SizedBox(height: 8),
-            _CurrentFamilyOverview(engine: e),
-            const SizedBox(height: 16),
-          ],
-          // 当前世代
-          const _SectionHeader(icon: Icons.account_tree_outlined, title: '当前世代'),
-          const SizedBox(height: 8),
-          _CurrentNode(
-            engine: e,
-            isAfterInheritance: p.generationRecords.isNotEmpty,
-          ),
-        ],
           ),
         ),
       ),
@@ -104,13 +145,7 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
-        const SizedBox(width: 8),
-        Text(title, style: Theme.of(context).textTheme.titleMedium),
-      ],
-    );
+    return OrnateHeader(icon: icon, title: title);
   }
 }
 
@@ -183,36 +218,70 @@ class _LineageNode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-    final bg = isCurrent ? theme.colorScheme.primaryContainer : null;
-    final fg = isCurrent ? theme.colorScheme.onPrimaryContainer : null;
+    final isCur = isCurrent;
+    final bg = isCur
+        ? WesterosColors.goldDark.withValues(alpha: 0.2)
+        : WesterosColors.barkHigh;
+    final border = isCur ? WesterosColors.gold : WesterosColors.outlineGold;
+    final width = isCur ? 2 : 1;
     return Container(
       width: 72,
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isCurrent ? primary : theme.colorScheme.outlineVariant,
-          width: isCurrent ? 2 : 1,
-        ),
+        border: Border.all(color: border, width: width.toDouble()),
+        boxShadow: isCur
+            ? [
+                BoxShadow(
+                  color: WesterosColors.gold.withValues(alpha: 0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 0),
+                ),
+              ]
+            : null,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          CircleAvatar(
-            radius: 14,
-            backgroundColor: isCurrent ? primary : primary.withValues(alpha: 0.12),
-            foregroundColor: isCurrent
-                ? theme.colorScheme.onPrimary
-                : primary,
-            child: Text(
-              badge ??
-                  (isCurrent
-                      ? '当'
-                      : label.replaceAll('第', '').replaceAll('代', '')),
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: isCur
+                  ? const LinearGradient(
+                      colors: <Color>[
+                        WesterosColors.goldDark,
+                        WesterosColors.goldBright,
+                      ],
+                    )
+                  : const LinearGradient(
+                      colors: <Color>[
+                        WesterosColors.barkMid,
+                        WesterosColors.barkHigh,
+                      ],
+                    ),
+              border: Border.all(
+                color: isCur
+                    ? WesterosColors.goldBright
+                    : WesterosColors.outlineGold.withValues(alpha: 0.6),
+              ),
+            ),
+            child: Center(
+              child: Text(
+                badge ??
+                    (isCurrent
+                        ? '当'
+                        : label.replaceAll('第', '').replaceAll('代', '')),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: isCur
+                      ? WesterosColors.barkDeep
+                      : WesterosColors.goldBright,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 6),
@@ -221,8 +290,11 @@ class _LineageNode extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: fg,
+            style: TextStyle(
+              fontSize: 12,
+              color: isCur
+                  ? WesterosColors.goldBright
+                  : WesterosColors.parchment,
               fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -241,18 +313,19 @@ class _LineageArrow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Icon(icon, size: 18, color: primary),
+          Icon(icon, size: 18, color: WesterosColors.goldBright),
           if (label.isNotEmpty)
             Text(
               label,
-              style: theme.textTheme.labelSmall?.copyWith(color: primary),
+              style: const TextStyle(
+                fontSize: 11,
+                color: WesterosColors.goldBright,
+              ),
             ),
         ],
       ),
@@ -319,7 +392,6 @@ class _GenerationNode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -335,12 +407,23 @@ class _GenerationNode extends StatelessWidget {
                   margin: const EdgeInsets.only(top: 14),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: theme.colorScheme.primary,
+                    gradient: const LinearGradient(
+                      colors: <Color>[
+                        WesterosColors.goldDark,
+                        WesterosColors.gold,
+                      ],
+                    ),
+                    border: Border.all(
+                      color: WesterosColors.goldBright.withValues(alpha: 0.6),
+                    ),
                   ),
                 ),
                 if (!isLast)
                   Expanded(
-                    child: Container(width: 2, color: theme.colorScheme.outlineVariant),
+                    child: Container(
+                      width: 2,
+                      color: WesterosColors.outlineGold.withValues(alpha: 0.5),
+                    ),
                   ),
               ],
             ),
@@ -348,69 +431,84 @@ class _GenerationNode extends StatelessWidget {
           const SizedBox(width: 8),
           // 节点卡片（点击弹出详情）
           Expanded(
-            child: Card(
+            child: GildedCard(
               margin: const EdgeInsets.only(bottom: 12),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: () => _showAncestorDetail(context, record),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.all(12),
+              onTap: () => _showAncestorDetail(context, record),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
                     children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Text(
-                            '第 ${record.generation} 代',
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                          if (record.achievement.isNotEmpty)
-                            Chip(
-                              label: Text(
-                                record.achievement,
-                                style: const TextStyle(fontSize: 11),
-                              ),
-                              visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.symmetric(horizontal: 6),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
                       Text(
-                        record.name,
-                        style: theme.textTheme.titleMedium?.copyWith(
+                        '第 ${record.generation} 代',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: WesterosColors.goldBright,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
-                        '${record.title}${record.reignYears.isEmpty ? '' : ' · ${record.reignYears}'}',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          Icon(
-                            Icons.touch_app_outlined,
-                            size: 14,
-                            color: theme.colorScheme.primary,
+                      const Spacer(),
+                      if (record.achievement.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '查看详情',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.primary,
+                          decoration: BoxDecoration(
+                            color: WesterosColors.goldDark
+                                .withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: WesterosColors.outlineGold
+                                  .withValues(alpha: 0.5),
                             ),
                           ),
-                        ],
+                          child: Text(
+                            record.achievement,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: WesterosColors.goldBright,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    record.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: WesterosColors.parchment,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '${record.title}${record.reignYears.isEmpty ? '' : ' · ${record.reignYears}'}',
+                    style: const TextStyle(
+                      color: WesterosColors.inkDim,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      const Icon(
+                        Icons.touch_app_outlined,
+                        size: 14,
+                        color: WesterosColors.goldBright,
+                      ),
+                      const SizedBox(width: 4),
+                      const Text(
+                        '查看详情',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: WesterosColors.goldBright,
+                        ),
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
             ),
           ),
@@ -432,24 +530,26 @@ class _InheritanceLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
     return Padding(
       padding: const EdgeInsets.only(left: 6, bottom: 4),
       child: Row(
         children: <Widget>[
-          Icon(Icons.south, size: 18, color: primary),
+          const Icon(Icons.south, size: 18, color: WesterosColors.goldBright),
           const SizedBox(width: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.08),
+              color: WesterosColors.goldDark.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: WesterosColors.outlineGold.withValues(alpha: 0.5),
+              ),
             ),
             child: Text(
               isLast ? '传至当代' : '继承',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: primary,
+              style: const TextStyle(
+                fontSize: 12,
+                color: WesterosColors.goldBright,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -464,102 +564,142 @@ class _InheritanceLink extends StatelessWidget {
 ///
 /// 展示：世代/姓名/头衔/在位/成就（无则提示）/传承寄语。
 void _showAncestorDetail(BuildContext context, GenerationRecord record) {
-  final theme = Theme.of(context);
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: theme.colorScheme.surface,
+    backgroundColor: WesterosColors.barkBase,
     builder: (sheetContext) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // 标题行：世代徽章 + 姓名
-            Row(
-              children: <Widget>[
-                CircleAvatar(
-                  radius: 22,
-                  backgroundColor: theme.colorScheme.primaryContainer,
-                  child: Text(
-                    '${record.generation}',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.bold,
+      child: ParchmentBackground(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              // 标题行：世代徽章 + 姓名
+              Row(
+                children: <Widget>[
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        colors: <Color>[
+                          WesterosColors.goldDark,
+                          WesterosColors.gold,
+                        ],
+                      ),
+                      border: Border.all(
+                        color: WesterosColors.goldBright.withValues(alpha: 0.6),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        record.name,
-                        style: theme.textTheme.titleLarge?.copyWith(
+                    child: Center(
+                      child: Text(
+                        '${record.generation}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: WesterosColors.barkDeep,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
-                        '第 ${record.generation} 代家主',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          record.name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: WesterosColors.parchment,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                        Text(
+                          '第 ${record.generation} 代家主',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: WesterosColors.goldBright,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const WesterosDivider(thickness: 1),
+              const SizedBox(height: 12),
+              // 头衔
+              _DetailLine(
+                icon: Icons.workspace_premium_outlined,
+                label: '头衔',
+                value: record.title.isEmpty ? '无名之辈' : record.title,
+              ),
+              // 在位
+              _DetailLine(
+                icon: Icons.schedule_outlined,
+                label: '在位',
+                value: record.reignYears.isEmpty ? '未记载' : record.reignYears,
+              ),
+              // 成就
+              _DetailLine(
+                icon: Icons.emoji_events_outlined,
+                label: '成就',
+                value: record.achievement.isEmpty
+                    ? '暂无显著功绩'
+                    : record.achievement,
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: WesterosColors.goldDark.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: WesterosColors.outlineGold.withValues(alpha: 0.5),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
-            // 头衔
-            _DetailLine(
-              icon: Icons.workspace_premium_outlined,
-              label: '头衔',
-              value: record.title.isEmpty ? '无名之辈' : record.title,
-            ),
-            // 在位
-            _DetailLine(
-              icon: Icons.schedule_outlined,
-              label: '在位',
-              value: record.reignYears.isEmpty ? '未记载' : record.reignYears,
-            ),
-            // 成就
-            _DetailLine(
-              icon: Icons.emoji_events_outlined,
-              label: '成就',
-              value: record.achievement.isEmpty
-                  ? '暂无显著功绩'
-                  : record.achievement,
-            ),
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                '${record.name} 的名字已刻入家族史册。愿后人不负先人。',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontStyle: FontStyle.italic,
-                  color: theme.colorScheme.onSurfaceVariant,
+                child: Text(
+                  '${record.name} 的名字已刻入家族史册。愿后人不负先人。',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontStyle: FontStyle.italic,
+                    color: WesterosColors.inkDim,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () => Navigator.of(sheetContext).pop(),
-                child: const Text('关闭'),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: <Color>[
+                        WesterosColors.goldDark,
+                        WesterosColors.gold,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: TextButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    child: const Text(
+                      '关闭',
+                      style: TextStyle(
+                        color: WesterosColors.barkDeep,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     ),
@@ -580,25 +720,27 @@ class _DetailLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(icon, size: 18, color: theme.colorScheme.primary),
+          Icon(icon, size: 18, color: WesterosColors.goldBright),
           const SizedBox(width: 10),
           SizedBox(
             width: 44,
             child: Text(
               label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+              style: const TextStyle(
+                color: WesterosColors.inkDim,
               ),
             ),
           ),
           Expanded(
-            child: Text(value, style: theme.textTheme.bodyMedium),
+            child: Text(
+              value,
+              style: const TextStyle(color: WesterosColors.parchment),
+            ),
           ),
         ],
       ),
@@ -615,90 +757,121 @@ class _CurrentNode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final p = engine.player;
-    return Card(
-      color: theme.colorScheme.primaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // 家主
-            Row(
-              children: <Widget>[
-                CircleAvatar(
-                  child: Text(p.name.isEmpty ? '?' : p.name.substring(0, 1)),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        '家主：${p.name}',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        '${identityLabel(p.identity)} · ${p.age}岁'
-                        '${p.title.isEmpty ? '' : ' · ${p.title}'}',
-                        style: theme.textTheme.bodyMedium,
-                      ),
+    return GildedCard(
+      highlight: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          // 家主
+          Row(
+            children: <Widget>[
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: <Color>[
+                      WesterosColors.goldDark,
+                      WesterosColors.gold,
                     ],
                   ),
-                ),
-              ],
-            ),
-            const Divider(height: 20),
-            // 配偶
-            if (engine.isMarried && p.spouse != null)
-              _InfoLine(
-                icon: Icons.favorite_outline,
-                text: '配偶：${p.spouse!.name}'
-                    '（${spouseOriginLabel(p.spouse!.origin)}，'
-                    '结缡 ${engine.progress.year - p.spouse!.marriedYear} 年）',
-              ),
-            // 子女
-            if (p.children.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Text('子女：', style: theme.textTheme.labelLarge),
-              for (final c in p.children)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8, top: 2),
-                  child: _InfoLine(
-                    icon: Icons.child_care_outlined,
-                    text: _childRearingText(engine, c),
-                    small: true,
+                  border: Border.all(
+                    color: WesterosColors.goldBright.withValues(alpha: 0.6),
                   ),
                 ),
-            ] else
-              const _InfoLine(
-                icon: Icons.child_care_outlined,
-                text: '子女：尚无子嗣',
-                small: true,
+                child: Center(
+                  child: Text(
+                    p.name.isEmpty ? '?' : p.name.substring(0, 1),
+                    style: const TextStyle(
+                      color: WesterosColors.barkDeep,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                    ),
+                  ),
+                ),
               ),
-            // 继承人
-            if (engine.heirName != null) ...[
-              const SizedBox(height: 6),
-              _InfoLine(
-                icon: Icons.workspace_premium_outlined,
-                text: '继承人：${engine.heirName}',
-              ),
-            ],
-            // 多世代传承提示
-            if (isAfterInheritance) ...[
-              const SizedBox(height: 6),
-              Text(
-                '👑 你已接过先祖的传承，肩负起 ${engine.houseName} 家的未来。',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontStyle: FontStyle.italic,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      '家主：${p.name}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: WesterosColors.parchment,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '${identityLabel(p.identity)} · ${p.age}岁'
+                      '${p.title.isEmpty ? '' : ' · ${p.title}'}',
+                      style: const TextStyle(color: WesterosColors.inkDim),
+                    ),
+                  ],
                 ),
               ),
             ],
+          ),
+          const WesterosDivider(thickness: 1),
+          const SizedBox(height: 8),
+          // 配偶
+          if (engine.isMarried && p.spouse != null)
+            _InfoLine(
+              icon: Icons.favorite_outline,
+              text: '配偶：${p.spouse!.name}'
+                  '（${spouseOriginLabel(p.spouse!.origin)}，'
+                  '结缡 ${engine.progress.year - p.spouse!.marriedYear} 年）',
+            ),
+          // 子女
+          if (p.children.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            const Text(
+              '子女：',
+              style: TextStyle(
+                fontSize: 14,
+                color: WesterosColors.goldBright,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            for (final c in p.children)
+              Padding(
+                padding: const EdgeInsets.only(left: 8, top: 2),
+                child: _InfoLine(
+                  icon: Icons.child_care_outlined,
+                  text: _childRearingText(engine, c),
+                  small: true,
+                ),
+              ),
+          ] else
+            const _InfoLine(
+              icon: Icons.child_care_outlined,
+              text: '子女：尚无子嗣',
+              small: true,
+            ),
+          // 继承人
+          if (engine.heirName != null) ...[
+            const SizedBox(height: 6),
+            _InfoLine(
+              icon: Icons.workspace_premium_outlined,
+              text: '继承人：${engine.heirName}',
+            ),
           ],
-        ),
+          // 多世代传承提示
+          if (isAfterInheritance) ...[
+            const SizedBox(height: 6),
+            Text(
+              '👑 你已接过先祖的传承，肩负起 ${engine.houseName} 家的未来。',
+              style: const TextStyle(
+                fontSize: 13,
+                fontStyle: FontStyle.italic,
+                color: WesterosColors.inkDim,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -723,12 +896,19 @@ class _InfoLine extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(icon, size: small ? 16 : 18, color: Colors.grey),
+          Icon(
+            icon,
+            size: small ? 16 : 18,
+            color: WesterosColors.goldBright.withValues(alpha: 0.85),
+          ),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(fontSize: small ? 13 : 14),
+              style: TextStyle(
+                fontSize: small ? 13 : 14,
+                color: WesterosColors.parchment.withValues(alpha: 0.95),
+              ),
             ),
           ),
         ],
