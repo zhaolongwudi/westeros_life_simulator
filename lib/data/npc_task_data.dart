@@ -927,6 +927,73 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
     rewardReputation: 5,
     rewardRelation: 8,
   ),
+
+  // ==================== Batch 10-53 扩充：卢斯·波顿/拉姆斯·波顿/席恩/霍斯特 solo 模板 ====================
+  // 4 位此前无任务模板的 NPC 各 +1 solo（模板总量 54 → 58，协作仍 8，solo 46 → 50）。
+  NpcTaskTemplate(
+    id: 'task_roose_ledger',
+    npcId: 'npc_roose_bolton',
+    title: '清点黑城堡的军需账册',
+    type: NpcTaskType.investigate,
+    difficulty: 3,
+    deadlineMonths: 4,
+    steps: [
+      NpcTaskStep(description: '取来黑城堡近年的军需账册，逐页比对', turnsRequired: 1),
+      NpcTaskStep(description: '查出征用物资与库存的出入', turnsRequired: 2),
+      NpcTaskStep(description: '把账册与疑点呈给卢斯·波顿', turnsRequired: 1),
+    ],
+    rewardGold: 70,
+    rewardReputation: 5,
+    rewardRelation: 7,
+  ),
+  NpcTaskTemplate(
+    id: 'task_ramsay_escapee',
+    npcId: 'npc_ramsay_bolton',
+    title: '追捕脱逃的俘虏',
+    type: NpcTaskType.hunt,
+    difficulty: 4,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '循脚印与血迹摸清俘虏逃窜方向', turnsRequired: 1),
+      NpcTaskStep(description: '在冻原上围堵，将俘虏押回', turnsRequired: 2),
+      NpcTaskStep(description: '把俘虏交到拉姆斯手上', turnsRequired: 1),
+    ],
+    rewardGold: 85,
+    rewardReputation: 4,
+    rewardRelation: 8,
+  ),
+  NpcTaskTemplate(
+    id: 'task_theon_father',
+    npcId: 'npc_theon',
+    title: '试探父亲的联姻意向',
+    type: NpcTaskType.diplomacy,
+    difficulty: 2,
+    deadlineMonths: 4,
+    steps: [
+      NpcTaskStep(description: '在派克城酒馆打探巴隆近年与各家联姻的传闻', turnsRequired: 1),
+      NpcTaskStep(description: '旁敲侧击探明巴隆对临冬城的态度', turnsRequired: 1),
+      NpcTaskStep(description: '把打听到的意向回报席恩', turnsRequired: 1),
+    ],
+    rewardGold: 50,
+    rewardReputation: 4,
+    rewardRelation: 6,
+  ),
+  NpcTaskTemplate(
+    id: 'task_hoster_message',
+    npcId: 'npc_hoster_tully',
+    title: '护送家书至鹰巢城',
+    type: NpcTaskType.delivery,
+    difficulty: 3,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '在奔流城取走霍斯特写给艾林家主的家书', turnsRequired: 1),
+      NpcTaskStep(description: '沿血门上行，把信送到鹰巢城', turnsRequired: 2),
+      NpcTaskStep(description: '带回收信人的回执', turnsRequired: 1),
+    ],
+    rewardGold: 60,
+    rewardReputation: 5,
+    rewardRelation: 7,
+  ),
 ];
 
 /// 按 ID 查找任务模板。

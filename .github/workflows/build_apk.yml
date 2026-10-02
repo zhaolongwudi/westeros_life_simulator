@@ -1,0 +1,133 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: '版本名（可选，默认取 pubspec version）'
+        required: false
+        default: ''
+
+concurrency:
+  group: build-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.47.2'
+          cache: true
+
+      - name: Generate platform folders
+        # 本项目仓库不含 android/ 目录（纯 Dart 起步），CI 现场生成，保证构建可复现。
+        run: flutter create --platforms=android --org com.westeros . --project-name westeros_life_simulator
+
+      - name: Ensure minSdk >= 23 (flutter_secure_storage 9.x requirement)
+        # flutter create 模板默认 minSdk=flutter.minSdkVersion(21)，flutter_secure_storage 9.x 要求 >=23
+        # 生成后立即修正，保证后续 build apk 不因 minSdk 不足失败。
+        run: |
+          GRADLE="android/app/build.gradle"
+          if grep -q "minSdkVersion 21" "$GRADLE"; then
+            sed -i 's/minSdkVersion 21/minSdkVersion 23/' "$GRADLE"
+            echo "minSdk bumped to 23"
+          else
+            echo "minSdk not 21 (or already set), current:"
+            grep -n "minSdk" "$GRADLE" || true
+          fi
+          # 打印关键配置供排查
+          grep -nE "namespace|applicationId|minSdk|targetSdk|compileSdk" "$GRADLE" | head -10
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        run: flutter test
+
+      - name: Build APK
+        id: build
+        run: |
+          flutter build apk --release 2>&1 | tee build_output.log
+          APK_PATH=$(find . -path ./build -prune -o -name "app-release.apk" -type f -print 2>/dev/null | head -1)
+          if [ -z "$APK_PATH" ]; then
+            echo "Flutter build didn't produce APK, trying Gradle directly..."
+            cd android && ./gradlew assembleRelease 2>&1 | tee -a ../build_output.log
+            cd ..
+            APK_PATH=$(find . -path ./build -prune -o -name "app-release.apk" -type f -print 2>/dev/null | head -1)
+          fi
+          if [ -n "$APK_PATH" ]; then
+            echo "BUILD_EXIT_CODE=0" > build_result.txt
+            echo "APK_PATH=$APK_PATH" >> build_result.txt
+          else
+            echo "BUILD_EXIT_CODE=1" > build_result.txt
+          fi
+        timeout-minutes: 20
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            build_output.log
+            build_result.txt
+          retention-days: 14
+
+      - name: Check build result
+        id: apk
+        run: |
+          EXIT_CODE=$(grep BUILD_EXIT_CODE build_result.txt | cut -d= -f2)
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "Build failed with exit code: $EXIT_CODE"
+            tail -100 build_output.log
+            exit 1
+          fi
+          APK_PATH=$(grep APK_PATH build_result.txt | cut -d= -f2)
+          echo "APK_PATH=$APK_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Rename APK
+        run: |
+          APK_PATH="${{ steps.apk.outputs.APK_PATH }}"
+          APK_DIR=$(dirname "$APK_PATH")
+          NAME="WesterosLige-nightly-${GITHUB_SHA:0:8}"
+          cp "$APK_PATH" "$APK_DIR/$NAME.apk"
+          echo "RENAMED_APK=$APK_DIR/$NAME.apk" >> "$GITHUB_ENV"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: WesterosLige-nightly
+          path: ${{ env.RENAMED_APK }}
+          retention-days: 90
