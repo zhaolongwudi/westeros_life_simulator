@@ -44,7 +44,7 @@ class AiResponse {
 class AiService {
   AiService({
     String? apiKey,
-    this.apiKeys = const <String>[],
+    List<String> apiKeys = const <String>[],
     this.baseUrl = 'https://token.sensenova.cn/v1',
     this.model = 'sensenova-6.8-flash-lite',
     Dio? dio,

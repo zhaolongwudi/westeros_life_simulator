@@ -212,7 +212,7 @@ void main() {
 
   group('Batch 10-59 配置持久化', () {
     test('多 key 保存往返', () async {
-      SharedPreferences.setMockInitialValues(<String, dynamic>{});
+      SharedPreferences.setMockInitialValues(<String, Object>{});
       const cfg = AiConfig(
         apiKeys: <String>['key1', 'key2', 'key3'],
         model: 'model-x',
@@ -228,7 +228,7 @@ void main() {
     });
 
     test('旧版单 key（ai_api_key）迁移兼容', () async {
-      SharedPreferences.setMockInitialValues(<String, dynamic>{
+      SharedPreferences.setMockInitialValues(<String, Object>{
         'ai_api_key': 'legacy',
         'ai_model': 'old-model',
         'ai_base_url': '',
@@ -241,7 +241,7 @@ void main() {
     });
 
     test('保存时旧单 key 键同步写入', () async {
-      SharedPreferences.setMockInitialValues(<String, dynamic>{});
+      SharedPreferences.setMockInitialValues(<String, Object>{});
       const cfg = AiConfig(apiKeys: <String>['k1']);
       await cfg.save();
       final prefs = await SharedPreferences.getInstance();

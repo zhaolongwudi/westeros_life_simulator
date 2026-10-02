@@ -42,7 +42,7 @@ class AiConfig {
 
   /// 是否已配置至少一个 API Key。
   bool get isConfigured {
-    if (_legacyApiKey != null && _legacyApiKey!.isNotEmpty) return true;
+    if (_legacyApiKey != null && _legacyApiKey.isNotEmpty) return true;
     return apiKeys.isNotEmpty && apiKeys.any((k) => k.isNotEmpty);
   }
 
@@ -106,9 +106,9 @@ class AiConfig {
     // 兼容旧单 key：构造入参的 apiKey 并入池首位，避免 save→load 丢失。
     final all = <String>[...apiKeys];
     if (_legacyApiKey != null &&
-        _legacyApiKey!.isNotEmpty &&
+        _legacyApiKey.isNotEmpty &&
         !all.contains(_legacyApiKey)) {
-      all.insert(0, _legacyApiKey!);
+      all.insert(0, _legacyApiKey);
     }
     final nonEmpty = all.where((k) => k.trim().isNotEmpty).toList();
     await prefs.setString('ai_api_keys', jsonEncode(nonEmpty));
