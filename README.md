@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-02 · feat(batch10-55): 未覆盖 NPC solo 任务模板扩充 61→67（杰奥/艾德慕/瓦德/莱莎/乔佛瑞/托曼 各 +1 solo）**（`8889704`）
+
+**2026-10-02 · feat(batch10-54): 新增 NPC 实体约恩·罗伊斯/布蕾妮·塔斯 + 任务模板 58→61（solo 50→52，coop 8→9：约恩×琼恩·艾林谷地协作）**（`6b536d1`）
+
 **2026-10-02 · fix(readme): 下载中心改免登录直链 + 删除已废弃的 GitHub Actions 通道行与私有仓库 404 警告（实测 release 直链未登录 302→200 可下载；nightly.link 仍 404 不恢复）**（`fcbd46f`）
-
-**2026-10-02 · fix(release-publish): Publish 幂等容错（tag 已存在则复用并跳过重复 asset 上传）；version.txt 推进 0.0.1→0.0.2（上一轮递增 commit push 丢失，防止重复发布 v0.0.1）**（`898c771`）
-
-**2026-10-02 · fix(release-publish): auto-update push 加 rebase 重试（两个 auto-update 链路并发 push 竞争导致非快进被拒）**（`2fc4a66`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
