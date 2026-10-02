@@ -52,7 +52,7 @@ def utc_now_str():
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
 
-def build_download_block():
+def build_download_block(version=""):
     repo = os.environ.get("GITHUB_REPOSITORY", "zhaolongwudi/westeros_life_simulator")
     run_id = os.environ.get("GITHUB_RUN_ID", "")
     sha = os.environ.get("GITHUB_SHA", "")
@@ -60,21 +60,22 @@ def build_download_block():
     release_latest = f"https://github.com/{repo}/releases/latest/download/WesterosLige.apk"
     releases_page = f"https://github.com/{repo}/releases"
     workflow_page = f"https://github.com/{repo}/actions/workflows/build_apk.yml"
+    tag_display = f"v{version}" if version else sha8
     lines = [
         "<!-- DL-CENTER:BEGIN -->",
         "## 📥 下载中心",
         "",
-        f"**最新构建**：`WesterosLige-{sha8}` · {utc_now_str()} · ✅ 自动发布正式版",
+        f"**最新构建**：`WesterosLige {tag_display}` · {utc_now_str()} · ✅ 自动发布正式版",
         "",
         "| 通道 | 地址 |",
         "|---|---|",
-        f"| 🚀 Release 直链 | [releases/latest/download/WesterosLige.apk]({release_latest})（需登录 GitHub；每次构建自动指向最新正式版） |",
+        f"| 🚀 Release 直链 | [releases/latest/download/WesterosLige.apk]({release_latest})（需登录 GitHub；每次构建自动指向最新正式版 `v{version}`） |",
         f"| 🐙 GitHub 官方 | [Releases 页面]({releases_page}) → 最新版 → Assets → `WesterosLige.apk`（保留最近 3 次） |",
         f"| ⚡ GitHub Actions | [Build APK 工作流]({workflow_page}) → 最近成功 run → Artifacts → `WesterosLige-nightly`（zip 保留 90 天） |",
         "",
         "> ℹ️ **本仓库为私有仓库**：GitHub 对未登录访问私有仓库的 release/asset 一律返回 404（隐藏存在性），",
         "> 因此**任何外联加速服务（如 nightly.link）都无法读取**；下载请先登录你的 GitHub 账号，直链即可用。",
-        "> 🔄 每次构建自动发布正式版 Release，仅保留最近 3 次。",
+        "> 🔄 每次构建自动发布正式版 Release（版本号 0.0.1 → 0.0.2 → 0.0.3…自动递增），仅保留最近 3 次。",
         "> 📱 安装要求：Android 6.0+（minSdk 23）。",
         "> ✉️ 构建完成后可自动直发到你的邮箱：仓库 Settings → Secrets and variables → Actions 配置 `SMTP_USER` / `SMTP_AUTH_CODE` / `SMTP_TO`（参考 `scripts/.mail_env.example`）。",
         "<!-- DL-CENTER:END -->",
@@ -142,18 +143,16 @@ def main():
     ap = argparse.ArgumentParser(description="自动更新 README 下载中心与最近更新")
     ap.add_argument("--download", action="store_true", help="刷新下载中心区块")
     ap.add_argument("--changelog", action="store_true", help="刷新最近更新区块")
+    ap.add_argument("--version", default="", help="当前构建版本号（如 0.0.1，显示在下载中心）")
     args = ap.parse_args()
-
     ok = True
     if args.download:
-        ok = do_update("DL-CENTER", build_download_block) and ok
+        ok = do_update("DL-CENTER", lambda: build_download_block(args.version)) and ok
     if args.changelog:
         ok = do_update("CHANGELOG", build_changelog_block) and ok
     if not args.download and not args.changelog:
         ap.print_help()
         sys.exit(1)
     sys.exit(0 if ok else 1)
-
-
 if __name__ == "__main__":
     main()

@@ -85,7 +85,10 @@ jobs:
       - name: Build APK
         id: build
         run: |
-          flutter build apk --release 2>&1 | tee build_output.log
+          VERSION=$(cat version.txt)
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Building version $VERSION"
+          flutter build apk --release --build-name="$VERSION" --build-number="$(echo "$VERSION" | awk -F. '{print $3}')" 2>&1 | tee build_output.log
           # 注意：不能用 -path ./build -prune（APK 恰好产在 build/ 下会被剪掉）
           APK_PATH=$(find . -name "app-release.apk" -type f 2>/dev/null | head -1)
           if [ -z "$APK_PATH" ]; then
@@ -131,6 +134,7 @@ jobs:
           NAME="WesterosLige-nightly-${GITHUB_SHA:0:8}"
           cp "$APK_PATH" "$APK_DIR/$NAME.apk"
           cp "$APK_PATH" "$APK_DIR/WesterosLige.apk"
+          cp "$APK_PATH" "$APK_DIR/WesterosLige-v${{ env.VERSION }}.apk"
           echo "RENAMED_APK=$APK_DIR/$NAME.apk" >> "$GITHUB_ENV"
           echo "RELEASE_APK=$APK_DIR/WesterosLige.apk" >> "$GITHUB_ENV"
 
@@ -141,19 +145,20 @@ jobs:
           path: ${{ env.RENAMED_APK }}
           retention-days: 90
 
-      - name: Publish Release (latest)
-        # 每次构建成功发布正式版 Release：tag 用 apk-<sha8>（每次独立），上传固定名 asset WesterosLige.apk。
-        # GitHub 原生 /releases/latest 会自动指向最新创建的 release，无需 apk-latest 别名。
+      - name: Publish Release (v${{ env.VERSION }})
+        # 每次构建成功发布正式版 Release：tag 用 v<版本号>（0.0.1 → 0.0.2 → 0.0.3…），上传固定名 asset WesterosLige.apk。
+        # GitHub 原生 /releases/latest 会自动指向最新创建的 release。
         # 注意：本仓库为 private，未登录访问 release/asset 一律 404（GitHub 隐藏私有仓库存在性），
         # 登录 GitHub 账号后直链 https://github.com/<repo>/releases/latest/download/WesterosLige.apk 可用。
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          VERSION="${{ env.VERSION }}"
           SHA8="${GITHUB_SHA:0:8}"
-          TAG="apk-$SHA8"
+          TAG="v$VERSION"
           REL_JSON=$(curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" \
-            -d "{\"tag_name\":\"$TAG\",\"name\":\"WesterosLige $SHA8\",\"body\":\"自动构建正式版（commit $SHA8）\\n- 直链下载（需登录 GitHub）: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk\\n- 测试: 790+ passed（CI run ${{ github.run_id }}）\",\"draft\":false,\"prerelease\":false}")
+            -d "{\"tag_name\":\"$TAG\",\"name\":\"WesterosLige v$VERSION\",\"body\":\"自动构建正式版（commit $SHA8）\\n- 版本: v$VERSION\\n- 直链下载（需登录 GitHub）: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk\\n- 测试: 790+ passed（CI run ${{ github.run_id }}）\",\"draft\":false,\"prerelease\":false}")
           REL_ID=$(echo "$REL_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))")
           echo "RELEASE_ID=$REL_ID (tag $TAG)"
           if [ -z "$REL_ID" ]; then
@@ -167,8 +172,8 @@ jobs:
           echo "Release published: tag=$TAG (GitHub /releases/latest 自动指向它)"
 
       - name: Cleanup old releases (keep 3)
-        # 每次发布后清理，只保留最近 3 个带 apk- 前缀的 Release（按 created_at 倒序），
-        # apk-latest 别名不计入（它是固定指针）。
+        # 每次发布后清理，只保留最近 3 个带 v 前缀的 Release（0.0.x 版本，按 created_at 倒序）。
+        # 旧式 apk-<sha8> release 一并清理（不属于版本序列）。
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -190,7 +195,7 @@ jobs:
                   return e.code, e.read()
           s, raw = req(f"https://api.github.com/repos/{repo}/releases?per_page=100")
           releases = json.loads(raw)
-          vers = [r for r in releases if r.get("tag_name", "").startswith("apk-") and not r.get("tag_name", "").startswith("apk-latest")]
+          vers = [r for r in releases if r.get("tag_name", "").startswith("v")]
           keep = 3
           if len(vers) <= keep:
               print(f"versioned releases={len(vers)} <= {keep}, no cleanup")
@@ -199,11 +204,18 @@ jobs:
                   rid = rel["id"]
                   s2, _ = req(f"https://api.github.com/repos/{repo}/releases/{rid}", method="DELETE")
                   print(f"deleted release {rel.get('tag_name')} id={rid} -> HTTP {s2}")
+          # 清理旧式 apk-<sha8> release（不属于 0.0.x 版本序列）
+          old = [r for r in releases if r.get("tag_name", "").startswith("apk-")]
+          for rel in old:
+              rid = rel["id"]
+              s2, _ = req(f"https://api.github.com/repos/{repo}/releases/{rid}", method="DELETE")
+              print(f"deleted legacy release {rel.get('tag_name')} id={rid} -> HTTP {s2}")
           PY
 
       - name: Send APK to email
         # 对齐 wpk-update-notifier：SMTP 凭据走仓库 Secrets（SMTP_USER/SMTP_AUTH_CODE/SMTP_TO）。
         # 未配置 Secrets 时脚本自动跳过发信（exit 0），不影响构建结果。
+        # 发送带版本号的 APK（WesterosLige-v<版本>.apk），便于用户识别正式版。
         env:
           SMTP_HOST: smtp.qq.com
           SMTP_PORT: '465'
@@ -212,11 +224,12 @@ jobs:
           SMTP_TO: ${{ secrets.SMTP_TO }}
           RUN_ID: ${{ github.run_id }}
         run: |
-          python3 scripts/build_and_mail_apk.py --send --apk "${{ env.RENAMED_APK }}" --run-id "$RUN_ID"
+          VERSIONED_APK=$(dirname "${{ env.RENAMED_APK }}")/WesterosLige-v${{ env.VERSION }}.apk
+          ls -la "$VERSIONED_APK" && python3 scripts/build_and_mail_apk.py --send --apk "$VERSIONED_APK" --run-id "$RUN_ID"
 
       - name: Auto-update README download center
-        # 构建成功后自动刷新 README「下载中心」区块（Release 直链 + 最新 SHA）。
-        # 自动 commit 带 [skip ci] 防递归触发 CI；内容无变化时脚本跳过写入。
+        # 构建成功后自动刷新 README「下载中心」区块（Release 直链 + 版本号），并递增 version.txt（0.0.1 → 0.0.2）。
+        # 自动 commit 带 [skip ci] 防递归触发 CI；内容无变化时跳过写入。
         # checkout 默认在 detached HEAD，先切回 main 再改文件再 push；
         # push 前先 rebase（远端可能有其他 auto-update commit），失败容错不拖垮 job。
         env:
@@ -226,14 +239,20 @@ jobs:
         run: |
           git checkout main
           git pull --rebase origin main || true
-          python3 scripts/update_readme.py --download
-          if [ -n "$(git status --porcelain README.md)" ]; then
+          VERSION=$(cat version.txt)
+          echo "本次发布版本: v$VERSION"
+          python3 scripts/update_readme.py --download --version "$VERSION"
+          # 递增版本号写回 version.txt（下次构建用新版本）
+          NEW_VERSION=$(echo "$VERSION" | awk -F. '{print $1"."$2"."($3+1)}')
+          echo "$NEW_VERSION" > version.txt
+          echo "下次构建版本: v$NEW_VERSION"
+          if [ -n "$(git status --porcelain README.md version.txt)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add README.md
-            git commit -m "docs(readme): auto-update download center (run ${{ github.run_id }}) [skip ci]"
+            git add README.md version.txt
+            git commit -m "docs(readme): auto-update download center (run ${{ github.run_id }}) v$VERSION [skip ci]"
             git push origin main || true
-            echo "README download center updated & pushed"
+            echo "README download center updated & pushed (v$VERSION → v$NEW_VERSION)"
           else
             echo "README readme unchanged, skip"
           fi
