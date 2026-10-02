@@ -14,11 +14,11 @@ import 'package:westeros_life_simulator/game_engine.dart';
 void main() {
   group('Batch 10-47 模板总量', () {
     test('任务模板总数 52 → 54，协作仍 8，solo 46', () {
-      expect(allNpcTaskTemplates.length, 61);
+      expect(allNpcTaskTemplates.length, 67);
       final coop = allNpcTaskTemplates.where((t) => t.isCoop).toList();
       expect(coop.length, 9);
       final solo = allNpcTaskTemplates.where((t) => !t.isCoop).toList();
-      expect(solo.length, 52);
+      expect(solo.length, 58);
     });
     test('新模板存在且指向真实 NPC（泰温/艾莉亚）', () {
       expect(npcTaskTemplateById('task_tywin_mine'), isNotNull);
