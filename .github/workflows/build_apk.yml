@@ -50,7 +50,13 @@ jobs:
 
       - name: Generate platform folders
         # 本项目仓库不含 android/ 目录（纯 Dart 起步），CI 现场生成，保证构建可复现。
-        run: flutter create --platforms=android --org com.westeros . --project-name westeros_life_simulator
+        # 生成后会新增模板 test/widget_test.dart（引用模板 MyApp），本项目入口是 WesterosApp，
+        # 需删除该模板测试避免 analyze 报 creation_with_non_type。
+        run: |
+          flutter create --platforms=android --org com.westeros . --project-name westeros_life_simulator
+          rm -f test/widget_test.dart
+          echo "removed template widget_test.dart"
+          ls test/ | head -5
 
       - name: Ensure minSdk >= 23 (flutter_secure_storage 9.x requirement)
         # flutter create 模板默认 minSdk=flutter.minSdkVersion(21)，flutter_secure_storage 9.x 要求 >=23
