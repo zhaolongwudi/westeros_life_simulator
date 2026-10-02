@@ -203,9 +203,9 @@ ThemeData westerosTheme() {
       headlineLarge: serifTitle(base.textTheme.headlineLarge),
       headlineMedium: serifTitle(base.textTheme.headlineMedium),
       headlineSmall: serifTitle(base.textTheme.headlineSmall),
-      titleLarge: serifTitle(base.textTheme.titleLarge)?.copyWith(fontSize: 20),
+      titleLarge: serifTitle(base.textTheme.titleLarge).copyWith(fontSize: 20),
       titleMedium: serifTitle(base.textTheme.titleMedium),
-      titleSmall: serifTitle(base.textTheme.titleSmall)?.copyWith(
+      titleSmall: serifTitle(base.textTheme.titleSmall).copyWith(
         letterSpacing: 0.4,
       ),
       bodyLarge: base.textTheme.bodyLarge?.copyWith(

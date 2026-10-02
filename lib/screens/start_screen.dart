@@ -476,7 +476,7 @@ class _StartHero extends StatelessWidget {
             children: <Widget>[
               Icon(Icons.flag_outlined, size: 22, color: WesterosColors.steel),
               SizedBox(width: 14),
-              Icon(Icons.crown_outlined, size: 34, color: WesterosColors.goldBright),
+              Icon(Icons.workspace_premium_outlined, size: 34, color: WesterosColors.goldBright),
               SizedBox(width: 14),
               Icon(Icons.local_fire_department_outlined, size: 22, color: WesterosColors.bloodRed),
             ],

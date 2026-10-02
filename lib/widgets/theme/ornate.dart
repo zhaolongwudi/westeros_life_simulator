@@ -282,18 +282,16 @@ class GildedCard extends StatelessWidget {
         (highlight
             ? WesterosColors.goldDark.withValues(alpha: 0.16)
             : WesterosColors.barkHigh);
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(14),
-      side: BorderSide(color: borderColor, width: highlight ? 1.4 : 1),
-    );
+    final radius = BorderRadius.circular(14);
+    final side = BorderSide(color: borderColor, width: highlight ? 1.4 : 1);
     final content = Padding(padding: padding, child: child);
     if (onTap == null) {
       return Container(
         margin: margin,
         decoration: BoxDecoration(
           color: bg,
-          borderRadius: shape.borderRadius,
-          border: shape.side,
+          borderRadius: radius,
+          border: side,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.35),
@@ -305,14 +303,29 @@ class GildedCard extends StatelessWidget {
         child: content,
       );
     }
-    return Material(
-      color: bg,
+    return Container(
       margin: margin,
-      shape: shape,
-      child: InkWell(
-        borderRadius: shape.borderRadius,
-        onTap: onTap,
-        child: content,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: radius,
+        border: side,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          borderRadius: radius,
+          onTap: onTap,
+          child: content,
+        ),
       ),
     );
   }

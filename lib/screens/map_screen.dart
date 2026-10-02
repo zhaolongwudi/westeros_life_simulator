@@ -60,7 +60,6 @@ class _LocationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final typeLabel = switch (location.type) {
       LocationType.castle => '城堡',
       LocationType.city => '城市',
