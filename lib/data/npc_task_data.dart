@@ -1150,6 +1150,92 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
     rewardReputation: 4,
     rewardRelation: 7,
   ),
+  // 琼恩·艾林 solo（鹰巢城）
+  NpcTaskTemplate(
+    id: 'task_jon_arryn_border',
+    npcId: 'npc_jon_arryn',
+    title: '巡查血门补给线',
+    type: NpcTaskType.escort,
+    difficulty: 3,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '在鹰巢城听琼恩·艾林交代血门粮道要务', turnsRequired: 1),
+      NpcTaskStep(description: '沿月门山路巡查补给车队，肃清山道匪患', turnsRequired: 2),
+      NpcTaskStep(description: '护送粮车安全抵达血门，回鹰巢城复命', turnsRequired: 1),
+    ],
+    rewardGold: 80,
+    rewardReputation: 6,
+    rewardRelation: 8,
+  ),
+  // 弥赛拉 solo（君临）
+  NpcTaskTemplate(
+    id: 'task_myrcella_doll',
+    npcId: 'npc_myrcella',
+    title: '寻找遗失的金发布偶',
+    type: NpcTaskType.investigate,
+    difficulty: 1,
+    deadlineMonths: 3,
+    steps: [
+      NpcTaskStep(description: '听弥赛拉描述布偶的模样与遗失的地点', turnsRequired: 1),
+      NpcTaskStep(description: '在花园与走廊细细搜寻，从侍女口中问出线索', turnsRequired: 1),
+      NpcTaskStep(description: '把布偶交还弥赛拉，看她破涕为笑', turnsRequired: 1),
+    ],
+    rewardGold: 30,
+    rewardReputation: 2,
+    rewardRelation: 6,
+  ),
+  // 雷加·坦格利安 solo（流亡之地）
+  NpcTaskTemplate(
+    id: 'task_rhaegar_music',
+    npcId: 'npc_rhaegar',
+    title: '寻回失落的高庭竖琴',
+    type: NpcTaskType.delivery,
+    difficulty: 3,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '听雷加描述那把银弦竖琴，眼中满是怀念', turnsRequired: 1),
+      NpcTaskStep(description: '在厄索斯集市打听竖琴的下落，追至商人手中', turnsRequired: 2),
+      NpcTaskStep(description: '把竖琴带回流亡营地，交还雷加', turnsRequired: 1),
+    ],
+    rewardGold: 65,
+    rewardReputation: 5,
+    rewardRelation: 8,
+  ),
+  // 韦赛里斯 solo（流亡之地）
+  NpcTaskTemplate(
+    id: 'task_viserys_treaty',
+    npcId: 'npc_viserys',
+    title: '向潘托斯总督递送求援信',
+    type: NpcTaskType.diplomacy,
+    difficulty: 3,
+    deadlineMonths: 4,
+    steps: [
+      NpcTaskStep(description: '听韦赛里斯吹嘘王座继承权，接过求援信', turnsRequired: 1),
+      NpcTaskStep(description: '穿越厄索斯荒野抵达潘托斯，面见总督', turnsRequired: 2),
+      NpcTaskStep(description: '带回总督的答复与一袋金币', turnsRequired: 1),
+    ],
+    rewardGold: 75,
+    rewardReputation: 4,
+    rewardRelation: 6,
+  ),
+  // 协作任务（Batch 10-62 · 谷地鹰巢城）：琼恩·艾林 × 莱莎·艾林
+  NpcTaskTemplate(
+    id: 'task_jon_arryn_lys_coop',
+    npcId: 'npc_jon_arryn',
+    coNpcId: 'npc_lys_arryn',
+    title: '重整月门商路的秩序',
+    type: NpcTaskType.diplomacy,
+    difficulty: 4,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '听琼恩·艾林与莱莎分别交代月门山道劫掠成患的苦衷', turnsRequired: 1),
+      NpcTaskStep(description: '与谷地骑士一同清剿山道匪寨', turnsRequired: 2),
+      NpcTaskStep(description: '护送商队重新走通月门商路，回鹰巢城复命', turnsRequired: 2),
+    ],
+    rewardGold: 120,
+    rewardReputation: 8,
+    rewardRelation: 9,
+  ),
 ];
 
 /// 按 ID 查找任务模板。

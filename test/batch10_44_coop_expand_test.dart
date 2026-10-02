@@ -16,9 +16,9 @@ import 'package:westeros_life_simulator/game_engine.dart';
 void main() {
   group('Batch 10-44 协作任务扩充·数据', () {
     test('总模板 48 → 52，协作 8 个', () {
-      expect(allNpcTaskTemplates.length, 67);
+      expect(allNpcTaskTemplates.length, 72);
       final coop = allNpcTaskTemplates.where((t) => t.isCoop).toList();
-      expect(coop.length, 9);
+      expect(coop.length, 10);
     });
 
     test('新增 4 个协作模板存在且指向真实 NPC', () {

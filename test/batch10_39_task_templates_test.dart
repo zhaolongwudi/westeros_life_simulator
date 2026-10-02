@@ -19,7 +19,7 @@ import 'package:westeros_life_simulator/game_engine.dart';
 void main() {
   group('Batch 10-39 模板总量', () {
     test('任务模板总数从 32 扩到 44（Batch 10-41 再扩至 48）', () {
-      expect(allNpcTaskTemplates.length, 67);
+      expect(allNpcTaskTemplates.length, 72);
     });
     test('新 NPC 各有 2 个模板', () {
       expect(npcTaskTemplatesOf('npc_oberon_martell').length, 2);
