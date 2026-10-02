@@ -43,21 +43,43 @@ class AiResponse {
 /// AI 服务。
 class AiService {
   AiService({
-    required this.apiKey,
+    String? apiKey,
+    this.apiKeys = const <String>[],
     this.baseUrl = 'https://token.sensenova.cn/v1',
     this.model = 'sensenova-6.8-flash-lite',
     Dio? dio,
-  }) : _dio = dio ?? Dio();
+  }) : _dio = dio ?? Dio() {
+    // 兼容：单 key 入参加入池（前置优先）。
+    final all = <String>[...apiKeys];
+    if (apiKey != null && apiKey.isNotEmpty && !all.contains(apiKey)) {
+      all.insert(0, apiKey);
+    }
+    _apiKeys = all.where((k) => k.isNotEmpty).toList();
+  }
 
-  final String apiKey;
   final String baseUrl;
   final String model;
   final Dio _dio;
 
+  /// 多 API Key 池（构造后归一化，保证非空且无重复）。
+  late final List<String> _apiKeys;
+
+  /// 本轮起始轮换偏移（静态，跨实例滚动，均匀分散流量）。
+  static int _roundRobinOffset = 0;
+
+  /// 可用的 API Key 池（测试与调试用）。
+  List<String> get apiKeys => List<String>.unmodifiable(_apiKeys);
+
+  /// 兼容旧字段：主 key（池中第一个）。
+  String get apiKey => _apiKeys.isEmpty ? '' : _apiKeys.first;
+
   /// 生成叙事与选项。
   ///
-  /// 内置基础容错：HTTP 429 / 网络错误时按指数退避自动重试
-  /// （最多 [maxRetries] 次，间隔 1s/2s/4s...），提升可用性。
+  /// 内置容错（Batch 10-59 升级）：
+  /// 1. **多 Key 轮换**：请求失败（429 / 网络错误 / 5xx）时自动换下一个 Key 重试，
+  ///    遍历整个 Key 池后才放弃——避免单个 Key 限流导致 AI 功能不可用。
+  /// 2. 单 Key 路径完全向后兼容（池只有 1 个 key，等价于旧版指数退避重试）。
+  /// 3. 起始 key 按 round-robin 偏移，让多个 key 均匀分摊流量。
   Future<AiResponse> generateNarrative({
     required Player player,
     required String context,
@@ -68,37 +90,65 @@ class AiService {
     int maxRetries = 3,
   }) async {
     final prompt = _buildPrompt(player, context, availableEvents, season, currentYear);
-    var attempt = 0;
-
-    while (true) {
-      attempt++;
-      final response = await _postChat(prompt, maxTokens);
-      if (response.isSuccess) return response;
-
-      // 可重试的错误：429 / 网络错误 / 5xx；其余直接返回
-      final msg = response.errorMessage ?? '';
-      final retryable = msg.contains('429') ||
-          msg.contains('timed out') ||
-          msg.contains('Connection') ||
-          msg.contains('Network error') ||
-          msg.contains('SocketException') ||
-          msg.startsWith('HTTP 5');
-      if (!retryable || attempt > maxRetries) return response;
-
-      // 指数退避：1s / 2s / 4s ...
-      final delay = Duration(milliseconds: 500 * (1 << (attempt - 1)) * 2);
-      await Future<void>.delayed(delay);
+    if (_apiKeys.isEmpty) {
+      return AiResponse(
+        narrative: '',
+        choices: <EventChoice>[],
+        isSuccess: false,
+        errorMessage: '未配置 API Key',
+      );
     }
+
+    // round-robin 起始偏移：让每次请求从不同 key 开始，均匀分摊。
+    final startIndex = _roundRobinOffset % _apiKeys.length;
+    _roundRobinOffset = (_roundRobinOffset + 1) % _apiKeys.length;
+
+    // 遍历整个 key 池：每个 key 最多重试 maxRetries 次（指数退避）。
+    var lastResponse = AiResponse(
+      narrative: '',
+      choices: <EventChoice>[],
+      isSuccess: false,
+      errorMessage: '未知错误',
+    );
+
+    for (var i = 0; i < _apiKeys.length; i++) {
+      final keyIndex = (startIndex + i) % _apiKeys.length;
+      final key = _apiKeys[keyIndex];
+      for (var attempt = 0; attempt <= maxRetries; attempt++) {
+        final response = await _postChat(prompt, maxTokens, apiKey: key);
+        if (response.isSuccess) return response;
+
+        lastResponse = response;
+        // 可重试的错误：429 / 网络错误 / 5xx；其余直接放弃当前 key，换下一个。
+        final msg = response.errorMessage ?? '';
+        final retryable = msg.contains('429') ||
+            msg.contains('timed out') ||
+            msg.contains('Connection') ||
+            msg.contains('Network error') ||
+            msg.contains('SocketException') ||
+            msg.startsWith('HTTP 5');
+        if (!retryable) break;
+
+        if (attempt >= maxRetries) break; // 当前 key 重试耗尽，换下一个 key
+
+        // 指数退避：1s / 2s / 4s ...
+        final delay = Duration(milliseconds: 500 * (1 << attempt) * 2);
+        await Future<void>.delayed(delay);
+      }
+    }
+    return lastResponse;
   }
 
   /// 发起一次 chat/completions 请求并解析。
-  Future<AiResponse> _postChat(String prompt, int maxTokens) async {
+  Future<AiResponse> _postChat(String prompt, int maxTokens,
+      {String? apiKey}) async {
+    final key = apiKey ?? (_apiKeys.isEmpty ? '' : _apiKeys.first);
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         '$baseUrl/chat/completions',
         options: Options(
           headers: {
-            'Authorization': 'Bearer $apiKey',
+            'Authorization': 'Bearer $key',
             'Content-Type': 'application/json',
           },
           sendTimeout: const Duration(seconds: 60),

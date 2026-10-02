@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 import '../game_engine.dart';
 import '../providers/game_state_provider.dart';
+import '../data/ai_provider_defaults.dart';
 import '../services/ai_config.dart';
 import '../services/save_service.dart';
 import '../utils/text_formats.dart';
@@ -160,80 +161,152 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await _refreshSaves();
   }
 
-  /// 编辑 AI 配置。
+  /// 编辑 AI 配置（Batch 10-59：提供商预设 + 多 Key + 模型下拉）。
   Future<void> _editAiConfig() async {
     final config = _aiConfig ?? AiConfig.defaultConfig();
-    final apiKeyController = TextEditingController(text: config.apiKey);
+    // 多 key：换行分隔展示，便于粘贴多个。
+    final keysController = TextEditingController(
+      text: config.apiKeys.join('\n'),
+    );
     final modelController = TextEditingController(text: config.model);
     final baseUrlController = TextEditingController(text: config.baseUrl);
+    var selectedProvider = config.provider;
+    var selectedModel = config.model;
+    // 候选模型随 provider 变化。
+    var candidateModels = providerDefaultsOf(selectedProvider).models;
 
     final saved = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('AI 配置'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: apiKeyController,
-                decoration: const InputDecoration(
-                  labelText: 'API Key',
-                  hintText: '粘贴你的 API Key',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final defaults = providerDefaultsOf(selectedProvider);
+          return AlertDialog(
+            title: const Text('AI 配置'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Text('提供商', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedProvider,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    items: kAiProviderDefaults
+                        .map((d) => DropdownMenuItem<String>(
+                              value: d.name,
+                              child: Text(d.label),
+                            ))
+                        .toList(),
+                    onChanged: (v) {
+                      if (v == null) return;
+                      setDialogState(() {
+                        selectedProvider = v;
+                        // 切换提供商时模型跟随默认，baseUrl 清空（回落默认）。
+                        candidateModels = providerDefaultsOf(v).models;
+                        selectedModel = '';
+                        modelController.text = '';
+                        baseUrlController.text = '';
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  const Text('API Key（每行一个，自动轮换）',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  TextField(
+                    controller: keysController,
+                    maxLines: 5,
+                    minLines: 3,
+                    decoration: const InputDecoration(
+                      hintText: '粘贴 API Key，每行一个\n多个 Key 会自动轮换，单个 Key 限流时自动切换',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text('模型', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  DropdownButtonFormField<String>(
+                    // provider 切换时强制重建下拉（initialValue 只在首次 build 生效）。
+                    key: ValueKey<String>('model_$selectedProvider'),
+                    initialValue: selectedModel.isEmpty
+                        ? defaults.model
+                        : selectedModel,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    items: candidateModels
+                        .map((m) => DropdownMenuItem<String>(
+                              value: m,
+                              child: Text(m),
+                            ))
+                        .toList(),
+                    onChanged: (v) {
+                      if (v == null) return;
+                      setDialogState(() {
+                        selectedModel = v;
+                        modelController.text = v;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  const Text('Base URL（留空用默认）',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  TextField(
+                    controller: baseUrlController,
+                    decoration: InputDecoration(
+                      hintText: defaults.baseUrl,
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '默认：${defaults.baseUrl} · ${defaults.model}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: modelController,
-                decoration: const InputDecoration(
-                  labelText: '模型',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('取消'),
               ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: baseUrlController,
-                decoration: const InputDecoration(
-                  labelText: 'Base URL',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('保存'),
               ),
             ],
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('保存'),
-          ),
-        ],
+          );
+        },
       ),
     );
 
     if (saved == true) {
+      final keys = keysController.text
+          .split('\n')
+          .map((k) => k.trim())
+          .where((k) => k.isNotEmpty)
+          .toList();
       final newConfig = AiConfig(
-        apiKey: apiKeyController.text.trim(),
-        model: modelController.text.trim().isEmpty
-            ? AiConfig.defaultConfig().model
-            : modelController.text.trim(),
-        baseUrl: baseUrlController.text.trim().isEmpty
-            ? AiConfig.defaultConfig().baseUrl
-            : baseUrlController.text.trim(),
+        apiKeys: keys,
+        model: selectedModel,
+        baseUrl: baseUrlController.text.trim(),
+        provider: selectedProvider,
       );
       await newConfig.save();
       if (!mounted) return;
       setState(() => _aiConfig = newConfig);
-      _showSnack('AI 配置已保存');
+      _showSnack('AI 配置已保存（${keys.length} 个 Key）');
     }
-    apiKeyController.dispose();
+    keysController.dispose();
     modelController.dispose();
     baseUrlController.dispose();
   }
@@ -346,7 +419,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: const Text('AI 配置'),
               subtitle: Text(
                 (_aiConfig?.isConfigured ?? false)
-                    ? '已配置 · 模型 ${_aiConfig?.model ?? ''}'
+                    ? '已配置 ${_aiConfig!.apiKeys.length} 个 Key · ${providerDefaultsOf(_aiConfig!.provider).label} · ${_aiConfig!.resolvedModel}'
                     : '未配置 API Key（AI 行动模式不可用）',
               ),
               trailing: IconButton(

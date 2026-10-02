@@ -48,9 +48,9 @@ mixin GameAiMixin
 
     final ai = service ??
         AiService(
-          apiKey: config.apiKey,
-          model: config.model,
-          baseUrl: config.baseUrl,
+          apiKeys: config.apiKeys,
+          model: config.resolvedModel,
+          baseUrl: config.resolvedBaseUrl,
         );
     final context = worldSnapshot() +
         '\n\n玩家行动：$action\n\n请根据当前世界状态生成叙事与选项。';
