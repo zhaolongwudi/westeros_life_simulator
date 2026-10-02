@@ -75,9 +75,10 @@ class AiService {
 
   /// 生成叙事与选项。
   ///
-  /// 内置容错（Batch 10-59 升级）：
-  /// 1. **多 Key 轮换**：请求失败（429 / 网络错误 / 5xx）时自动换下一个 Key 重试，
-  ///    遍历整个 Key 池后才放弃——避免单个 Key 限流导致 AI 功能不可用。
+  /// 内置容错（Batch 10-59 升级 + 用户反馈 Batch 10-59-fix1）：
+  /// 1. **多 Key 每次请求自动轮换**：不等待失败，每次请求直接用下一个 Key；
+  ///    失败（429/网络/5xx）也不重试同一个 Key，直接换下一个——避免反复打
+  ///    同一个 Key 触发其 TPM/RPM 限流。遍历整个 Key 池后才放弃。
   /// 2. 单 Key 路径完全向后兼容（池只有 1 个 key，等价于旧版指数退避重试）。
   /// 3. 起始 key 按 round-robin 偏移，让多个 key 均匀分摊流量。
   Future<AiResponse> generateNarrative({
@@ -103,7 +104,6 @@ class AiService {
     final startIndex = _roundRobinOffset % _apiKeys.length;
     _roundRobinOffset = (_roundRobinOffset + 1) % _apiKeys.length;
 
-    // 遍历整个 key 池：每个 key 最多重试 maxRetries 次（指数退避）。
     var lastResponse = AiResponse(
       narrative: '',
       choices: <EventChoice>[],
@@ -111,15 +111,13 @@ class AiService {
       errorMessage: '未知错误',
     );
 
-    for (var i = 0; i < _apiKeys.length; i++) {
-      final keyIndex = (startIndex + i) % _apiKeys.length;
-      final key = _apiKeys[keyIndex];
+    if (_apiKeys.length == 1) {
+      // 单 Key：等价旧版指数退避重试（batch9 契约）。
+      final key = _apiKeys.first;
       for (var attempt = 0; attempt <= maxRetries; attempt++) {
         final response = await _postChat(prompt, maxTokens, apiKey: key);
         if (response.isSuccess) return response;
-
         lastResponse = response;
-        // 可重试的错误：429 / 网络错误 / 5xx；其余直接放弃当前 key，换下一个。
         final msg = response.errorMessage ?? '';
         final retryable = msg.contains('429') ||
             msg.contains('timed out') ||
@@ -127,14 +125,20 @@ class AiService {
             msg.contains('Network error') ||
             msg.contains('SocketException') ||
             msg.startsWith('HTTP 5');
-        if (!retryable) break;
-
-        if (attempt >= maxRetries) break; // 当前 key 重试耗尽，换下一个 key
-
-        // 指数退避：1s / 2s / 4s ...
+        if (!retryable || attempt >= maxRetries) break;
         final delay = Duration(milliseconds: 500 * (1 << attempt) * 2);
         await Future<void>.delayed(delay);
       }
+      return lastResponse;
+    }
+
+    // 多 Key：每次请求自动轮换下一个 key，失败直接换 key 不重试同一 key。
+    for (var i = 0; i < _apiKeys.length; i++) {
+      final keyIndex = (startIndex + i) % _apiKeys.length;
+      final key = _apiKeys[keyIndex];
+      final response = await _postChat(prompt, maxTokens, apiKey: key);
+      if (response.isSuccess) return response;
+      lastResponse = response;
     }
     return lastResponse;
   }

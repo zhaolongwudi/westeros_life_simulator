@@ -169,6 +169,64 @@ void main() {
       // 两次起始 key 不同（静态 round-robin 跨实例滚动）
       expect(firstKeys[0], isNot(firstKeys[1]));
     });
+
+    test('多 key 每次请求自动轮换（成功也不重复打同一 key）', () async {
+      final used = <String>[];
+      final dio3 = Dio();
+      dio3.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            used.add(
+              (options.headers['Authorization'] as String? ?? '')
+                  .replaceFirst('Bearer ', ''),
+            );
+            // 全部成功，仍然轮换（不等待失败）
+            handler.resolve(
+              Response<dynamic>(
+                requestOptions: options,
+                statusCode: 200,
+                data: <String, dynamic>{
+                  'choices': <dynamic>[
+                    <String, dynamic>{
+                      'message': <String, dynamic>{
+                        'content': '{"narrative":"n","choices":[]}',
+                      },
+                    },
+                  ],
+                },
+              ),
+            );
+          },
+        ),
+      );
+      final s3 = AiService(
+        apiKeys: <String>['k1', 'k2', 'k3'],
+        dio: dio3,
+        baseUrl: 'https://mock.example.com/v1',
+      );
+      for (var i = 0; i < 3; i++) {
+        await s3.generateNarrative(
+          player: Player.defaultPlayer(),
+          context: '测试',
+          availableEvents: const <GameEvent>[],
+          maxRetries: 3,
+        );
+      }
+      // 连续三次请求：每次都用「下一个」key（相邻请求不重复打同一 key）。
+      // 起始 key 受静态 round-robin 偏移影响，只断言「相邻不同 + 三轮各用不同 key」。
+      expect(used.length, 3);
+      expect(used.toSet().length, 3); // 三次用了三个不同 key（k1/k2/k3 轮询）
+      expect(used[0], isNot(used[1]));
+      expect(used[1], isNot(used[2]));
+    });
+
+    test('多 key 失败直接换下一个，不重试同一 key', () async {
+      final (dio, usedKeys) = _captureDio(<String>{'key_a'});
+      final response = await _run(dio, <String>['key_a', 'key_b', 'key_c']);
+      expect(response.isSuccess, isTrue);
+      // key_a 429 → 直接换 key_b（成功），key_a 只打一次、不被重试
+      expect(usedKeys, <String>['key_a', 'key_b']);
+    });
   });
 
   group('Batch 10-59 提供商预设', () {
