@@ -179,11 +179,14 @@ class AiService {
         );
       }
     } on DioException catch (e) {
+      // 优先用 HTTP 状态码（含 429 等限流语义）；无 status 时回落网络错误。
+      final status = e.response?.statusCode;
+      final msg = status != null ? 'HTTP $status' : (e.message ?? 'Network error');
       return AiResponse(
         narrative: '',
         choices: <EventChoice>[],
         isSuccess: false,
-        errorMessage: e.message ?? 'Network error',
+        errorMessage: msg,
       );
     } catch (e) {
       return AiResponse(

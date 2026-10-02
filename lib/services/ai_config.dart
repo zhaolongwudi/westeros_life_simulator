@@ -92,11 +92,16 @@ class AiConfig {
       final legacyKey = prefs.getString('ai_api_key') ?? '';
       if (legacyKey.isNotEmpty) keys = <String>[legacyKey];
     }
+    final storedProvider = prefs.getString('ai_provider') ?? 'sensenova';
+    // 空值回落 provider 默认（保持旧测试与配置页预期一致）。
+    final storedModel = prefs.getString('ai_model') ?? '';
+    final storedBaseUrl = prefs.getString('ai_base_url') ?? '';
+    final defaults = providerDefaultsOf(storedProvider);
     return AiConfig(
       apiKeys: keys,
-      model: prefs.getString('ai_model') ?? '',
-      baseUrl: prefs.getString('ai_base_url') ?? '',
-      provider: prefs.getString('ai_provider') ?? 'sensenova',
+      model: storedModel.isEmpty ? defaults.model : storedModel,
+      baseUrl: storedBaseUrl.isEmpty ? defaults.baseUrl : storedBaseUrl,
+      provider: storedProvider,
     );
   }
 
