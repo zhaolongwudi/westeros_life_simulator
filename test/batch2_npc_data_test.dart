@@ -7,7 +7,7 @@ import 'package:westeros_life_simulator/data/npc_data.dart';
 void main() {
   group('NPC 数据', () {
     test('allNpcs 包含 36 个 NPC', () {
-      expect(allNpcs.length, 36);
+      expect(allNpcs.length, 38);
     });
 
     test('所有 NPC ID 唯一', () {

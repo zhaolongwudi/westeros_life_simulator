@@ -1360,5 +1360,81 @@
     "rewardGold": 60,
     "rewardReputation": 5,
     "rewardRelation": 7
+  },
+  {
+    "id": "task_royce_clan",
+    "npcId": "npc_royce",
+    "title": "清剿月门的山岳部族",
+    "type": "NpcTaskType.hunt",
+    "difficulty": 4,
+    "deadlineMonths": 5,
+    "steps": [
+      {
+        "description": "听约恩罗列山岳部族袭扰月门的路线",
+        "turnsRequired": 1
+      },
+      {
+        "description": "沿青铜门至月门一线设伏，击溃部族掠骑",
+        "turnsRequired": 2
+      },
+      {
+        "description": "带回报捷，与约恩一同清点战果",
+        "turnsRequired": 1
+      }
+    ],
+    "rewardGold": 95,
+    "rewardReputation": 7,
+    "rewardRelation": 8
+  },
+  {
+    "id": "task_royce_arryn_border",
+    "npcId": "npc_royce",
+    "title": "排查谷地边境的部族异动",
+    "type": "NpcTaskType.investigate",
+    "difficulty": 4,
+    "deadlineMonths": 6,
+    "steps": [
+      {
+        "description": "与约恩、琼恩·艾林核对血门各哨所的禀报",
+        "turnsRequired": 1
+      },
+      {
+        "description": "乔装走访谷地边民，追查部族集结的传闻",
+        "turnsRequired": 2
+      },
+      {
+        "description": "将情报带回鹰巢城，与二人共议防线",
+        "turnsRequired": 1
+      }
+    ],
+    "rewardGold": 105,
+    "rewardReputation": 8,
+    "rewardRelation": 9,
+    "coNpcId": "npc_jon_arryn"
+  },
+  {
+    "id": "task_brienne_escort",
+    "npcId": "npc_brienne_tarth",
+    "title": "护送塔斯岛使节至风息堡",
+    "type": "NpcTaskType.escort",
+    "difficulty": 3,
+    "deadlineMonths": 5,
+    "steps": [
+      {
+        "description": "在塔斯岛点齐护卫，随使节登船",
+        "turnsRequired": 1
+      },
+      {
+        "description": "横渡狭海，护送使节抵达风息堡",
+        "turnsRequired": 2
+      },
+      {
+        "description": "完成交接，与布蕾妮一同返航",
+        "turnsRequired": 1
+      }
+    ],
+    "rewardGold": 80,
+    "rewardReputation": 6,
+    "rewardRelation": 8
   }
 ]

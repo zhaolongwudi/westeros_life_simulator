@@ -994,6 +994,59 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
     rewardReputation: 5,
     rewardRelation: 7,
   ),
+  // ==================== Batch 10-54 扩充：罗伊斯/塔斯 ====================
+  // 约恩·罗伊斯 solo（符石城·鹰巢城）
+  NpcTaskTemplate(
+    id: 'task_royce_clan',
+    npcId: 'npc_royce',
+    title: '清剿月门的山岳部族',
+    type: NpcTaskType.hunt,
+    difficulty: 4,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '听约恩罗列山岳部族袭扰月门的路线', turnsRequired: 1),
+      NpcTaskStep(description: '沿青铜门至月门一线设伏，击溃部族掠骑', turnsRequired: 2),
+      NpcTaskStep(description: '带回报捷，与约恩一同清点战果', turnsRequired: 1),
+    ],
+    rewardGold: 95,
+    rewardReputation: 7,
+    rewardRelation: 8,
+  ),
+  // 约恩 × 琼恩·艾林（鹰巢城）：排查谷地边境的部族异动
+  NpcTaskTemplate(
+    id: 'task_royce_arryn_border',
+    npcId: 'npc_royce',
+    coNpcId: 'npc_jon_arryn',
+    title: '排查谷地边境的部族异动',
+    type: NpcTaskType.investigate,
+    difficulty: 4,
+    deadlineMonths: 6,
+    steps: [
+      NpcTaskStep(description: '与约恩、琼恩·艾林核对血门各哨所的禀报', turnsRequired: 1),
+      NpcTaskStep(description: '乔装走访谷地边民，追查部族集结的传闻', turnsRequired: 2),
+      NpcTaskStep(description: '将情报带回鹰巢城，与二人共议防线', turnsRequired: 1),
+    ],
+    rewardGold: 105,
+    rewardReputation: 8,
+    rewardRelation: 9,
+  ),
+  // 布蕾妮 solo（塔斯岛）
+  NpcTaskTemplate(
+    id: 'task_brienne_escort',
+    npcId: 'npc_brienne_tarth',
+    title: '护送塔斯岛使节至风息堡',
+    type: NpcTaskType.escort,
+    difficulty: 3,
+    deadlineMonths: 5,
+    steps: [
+      NpcTaskStep(description: '在塔斯岛点齐护卫，随使节登船', turnsRequired: 1),
+      NpcTaskStep(description: '横渡狭海，护送使节抵达风息堡', turnsRequired: 2),
+      NpcTaskStep(description: '完成交接，与布蕾妮一同返航', turnsRequired: 1),
+    ],
+    rewardGold: 80,
+    rewardReputation: 6,
+    rewardRelation: 8,
+  ),
 ];
 
 /// 按 ID 查找任务模板。

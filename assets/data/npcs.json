@@ -1224,5 +1224,70 @@
     "faith": "马神",
     "isAlive": true,
     "mood": 0
+  },
+  {
+    "id": "npc_royce",
+    "name": "约恩·罗伊斯",
+    "type": "NpcType.noble",
+    "age": 55,
+    "gender": "male",
+    "familyId": "family_royce",
+    "locationId": "location_the_eyrie",
+    "personality": [
+      "骄傲",
+      "好战",
+      "忠诚"
+    ],
+    "goals": [
+      "守护谷地"
+    ],
+    "fears": [
+      "谷地沦陷"
+    ],
+    "secrets": [],
+    "relations": {
+      "npc_jon_arryn": 80,
+      "npc_lys_arryn": 60
+    },
+    "skills": {
+      "sword": 9,
+      "leadership": 8,
+      "politics": 6
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
+  },
+  {
+    "id": "npc_brienne_tarth",
+    "name": "布蕾妮·塔斯",
+    "type": "NpcType.noble",
+    "age": 22,
+    "gender": "female",
+    "familyId": "family_tarbeck",
+    "locationId": "location_tarbeck",
+    "personality": [
+      "忠诚",
+      "正直",
+      "坚韧"
+    ],
+    "goals": [
+      "证明自己"
+    ],
+    "fears": [
+      "辜负信任"
+    ],
+    "secrets": [
+      "对外表自卑"
+    ],
+    "relations": {},
+    "skills": {
+      "sword": 9,
+      "leadership": 7,
+      "politics": 5
+    },
+    "faith": "七神",
+    "isAlive": true,
+    "mood": 0
   }
 ]
