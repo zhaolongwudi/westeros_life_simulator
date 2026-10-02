@@ -70,15 +70,9 @@ class SystemsScreen extends StatelessWidget {
                       itemCount: available.length,
                       itemBuilder: (context, index) {
                         final s = available[index];
-                        return Container(
+                        return GildedCard(
                           margin: const EdgeInsets.only(bottom: 8),
-                          decoration: BoxDecoration(
-                            color: WesterosColors.barkHigh,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: WesterosColors.outlineGold.withValues(alpha: 0.5),
-                            ),
-                          ),
+                          padding: EdgeInsets.zero,
                           child: ListTile(
                             leading: Icon(
                               Icons.grid_view_outlined,
