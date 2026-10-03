@@ -29,7 +29,7 @@ lib/
 │   ├── event_data.dart            # 72 事件（60 + 12 复合）
 │   ├── system_data.dart           # 74 系统
 │   ├── item_data.dart             # 34 物品
-│   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节；seasonWorldTrend 季节世界动向 Batch 10-50；regionWorldTrend 地区风土人情 Batch 10-52；seasonFarmTrend 时节农事 Batch 10-56；localMarketTrend 本地集市行情 Batch 10-58）
+│   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节；seasonWorldTrend 季节世界动向 Batch 10-50；regionWorldTrend 地区风土人情 Batch 10-52；seasonFarmTrend 时节农事 Batch 10-56；localMarketTrend 本地集市行情 Batch 10-58；locationLore 所在地名人轶事·历史典故 Batch 10-69）
 │   ├── balance_data.dart           # ⭐ 数值配置集中（初始值/生存消耗/每日上限/头衔阶梯/活动经济/婚姻与世代阈值，Batch 10-30 · M4a；无 import 依赖的叶子模块）
 │   └── npc_task_data.dart         # NPC 多步骤任务模板（72 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯/奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈/卢斯·波顿/拉姆斯·波顿/席恩/霍斯特/约恩·罗伊斯/布蕾妮·塔斯/杰奥·莫尔蒙/艾德慕·徒利/瓦德·佛雷/莱莎·艾林/乔佛瑞/托曼/琼恩·艾林/弥赛拉/雷加/韦赛里斯，Batch 10-18 起逐步扩充，10-39 扩至 44，10-41 协作任务扩至 48，10-44 协作任务扩至 52（君临×2/高庭/派克城），10-47 扩至 54（泰温+艾莉亚各 +1 solo），10-53 扩至 58（卢斯·波顿/拉姆斯·波顿/席恩/霍斯特各 +1 solo），10-54 扩至 61（约恩·罗伊斯/布蕾妮·塔斯各 +1 solo + 约恩×琼恩·艾林协作），10-55 扩至 67（杰奥/艾德慕/瓦德/莱莎/乔佛瑞/托曼各 +1 solo），10-61 扩至 71（琼恩·艾林/弥赛拉/雷加/韦赛里斯各 +1 solo），10-62 扩至 72（琼恩·艾林×莱莎·艾林谷地协作）；协作任务含 coNpcId）
 │
@@ -193,6 +193,8 @@ GameEngine extends GameProviderBase with:
 | **AI 注入地区风土人情** | services/ai_service.dart（`_buildPrompt` 内 `regionTrendDesc`：regionWorldTrend 区域宏观风土人情段落——季节世界动向之后、可用事件之前，与季节世界动向形成「时节 × 地域」双轴，Batch 10-52） |
 | **AI 注入时节农事** | services/ai_service.dart（`_buildPrompt` 内 `farmTrendDesc`：seasonFarmTrend(season, region) 按「季节 × 区域」返回生计实事段落——地区风土人情之后、可用事件之前，与季节世界动向/地区风土人情形成「时节 × 地域 × 生计」三轴，Batch 10-56） |
 | **AI 注入本地集市行情** | services/ai_service.dart（`_buildPrompt` 内 `marketTrendDesc`：localMarketTrend(season, region) 按「季节 × 区域」返回集市行情风向段落——时节农事之后、可用事件之前，与季节世界动向/地区风土人情/时节农事形成「时节 × 地域 × 生计 × 集市」四轴，Batch 10-58） |
+| **AI 注入所在地名人轶事** | services/ai_service.dart（`_buildPrompt` 内 `loreDesc`：locationLore(region, locationId) 按知名地点/区域返回历史典故段落——本地集市行情之后、可用事件之前，与地区风土人情等形成「地理 × 生计 × 集市 × 历史」四轴，Batch 10-69） |
+| **AI 注入局势关联 NPC 立场** | services/ai_service.dart（`_buildPrompt` 内 `stanceDesc`：`_worldStanceDesc`/`_npcStanceFor`——按 top2 世界事件 × 玩家关系 NPC（前 3 个）经家族对外关系网络（family.relations 敌友阈值 ±20）推导「谁站在哪边」，本月世界局势之后、季节世界动向之前，Batch 10-70） |
 | **AI 注入当前地点详情** | services/ai_service.dart（`_buildPrompt` 内 `locationDesc`：当前地点名/类型/危险度分级（安全/一般/危险/极度危险）/人口/特色/相连地点名/描述——玩家状态从「地点：location_winterfell（北境）」升级为完整地理实境，Batch 10-63） |
 | **AI 注入关系 NPC 身份** | services/ai_service.dart（`_buildPrompt` 内 `relationDesc`：关系列表从「NPC ID: 好感度」升级为「名字（身份·家族·所在地）: 好感度」，未知 NPC 回退原格式，Batch 10-64） |
 | **AI 注入在场 NPC 性格/目标** | services/ai_service.dart（`_buildPrompt` 内 `onSiteNpcDesc`：在场 NPC 附加「性格」（personality 前 2 条）与「目标」（goals 前 2 条）——AI 之前只知道名字/关系/心情，人物叙事缺乏深度，Batch 10-65） |
@@ -324,6 +326,8 @@ GameEngine extends GameProviderBase with:
 | batch10_58_market_trend_test | **AI 注入本地集市行情**（10-58，8 用例）：季节×区域注入抽查（北境冬/西境夏/王领秋/河湾地春/多恩永冬）/ 未知区域兜底 / 已知区域未知季节兜底 / 既有注入（世界局势/季节动向/地区风土人情/时节农事/区域引导）不回归 |
 | batch10_67_68_prompt_enhance_test | **AI 注入家族特质/秘密 + 关系 NPC 秘密**（10-67/68，6 用例）：史塔克家族特质（坚韧·忠诚·荣誉·战斗）/ 家族秘密（琼恩·雪诺的真实身份·史塔克家族与龙的关系，取前 2 条）/ 自由民兜底 / 关系 NPC 秘密（艾德·史塔克：琼恩·雪诺的真实身份）/ 无秘密 NPC 不输出 / 既有注入不回归 |
 | batch10_63_64_prompt_enhance_test | **AI prompt 注入增强**（10-63/64，12 用例）：当前地点详情注入（临冬城/君临/高庭/未知兜底/既有注入不回归）/ 关系 NPC 身份注入（已知 NPC 身份信息/未知 NPC 回退/关系为空/既有注入不回归）/ 标签函数契约（locationTypeLabel/npcTypeLabel 关键值） |
+| batch10_69_location_lore_test | **AI 注入所在地名人轶事**（10-69，9 用例）：知名地点典故注入（临冬城/君临/凯岩城/长城/高庭/龙石岛）/ 未知地点回退区域级历史底色 / 未知区域兜底文案 / 既有注入（世界局势/季节动向/地区/农事/集市）不回归 |
+| batch10_70_world_stance_test | **AI 注入当前局势关联 NPC 立场**（10-70，5 用例）：有关系 NPC + 涉及兰尼斯特事件 → 史塔克 NPC 立场敌对 / 有事件无关系 NPC 兜底 / 无事件兜底 / 未知 NPC ID 立场不明 / 既有注入（世界局势/季节/地区/农事/集市/轶事）不回归 |
 | batch10_65_66_prompt_enhance_test | **AI prompt 注入增强**（10-65/66，6 用例）：在场 NPC 性格/目标注入（艾德·史塔克性格·目标/前 2 条防膨胀/关系·心情·可委托不回归）/ 家族对外关系注入（史塔克敌对·友善/自由民兜底/家族名·族语·规模·影响力不回归） |
 | batch10_57_family_branches_test | **当代支脉横版图**（10-57，4 用例）：已婚有子女（偶→当→子徽章）/ 未婚有子女（无偶徽章）/ 已婚无子女（无子徽章）/ 未婚无子女（不显示区块） |
 | batch10_59_ai_multi_key_test | **AI 多 Key 轮换 + 多模型选择**（10-59 + fix1，12 用例）：首 key 429 自动换第二个成功 / 全部 key 失败返回最后错误 / 单 key 向后兼容（apiKey 入参进入池）/ round-robin 连续两次起始不同 / **多 key 每次请求自动轮换（成功也不重复打同一 key）** / **多 key 失败直接换下一个不重试同一 key** / 3 提供商预设（默认模型+chatBaseUrl）/ 未知提供商回落第一 / resolved 按提供商回落 + 显式优先 / 多 key 持久化往返 / 旧单 key（ai_api_key）迁移 / 保存时旧键同步写入 |
@@ -387,7 +391,7 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v5.6（Batch 10-67/68 AI prompt 注入增强：家族特质/秘密 + 关系 NPC 秘密）· 最后更新：2026-10-03*
+*文档版本：v5.7（Batch 10-69/70 AI prompt 注入增强：所在地名人轶事·历史典故 + 局势关联 NPC 立场）· 最后更新：2026-10-03*
 
 ## 八、构建 APK 与直发邮箱（临时任务脚本，2026-10-02 新增）
 
@@ -420,4 +424,4 @@ GameEngine extends GameProviderBase with:
   - **只保留最近 3 次**：Cleanup 步骤按 created_at 倒序删多余 `v0.0.x` release（v 版本序列，旧 apk-<sha8> 一并清理）
 - **已知验证**：run `36958877137` ✅（手动触发 CI 验证 changelog 链路，analyze/test 全绿 + auto-update 幂等跳过）；run `37007321396` ✅（release-publish 全步骤 success）；run `37004310167` ❌（auto-update push 非快进被拒 → 已加 pull --rebase 容错）；run `37048376650` ✅（head fcbd46f，fix readme 收尾闭环，analyze-test 全绿）
 ---
-*文档版本：v5.6（Batch 10-67/68 AI prompt 注入增强：家族特质/秘密 + 关系 NPC 秘密）· 最后更新：2026-10-03*
+*文档版本：v5.7（Batch 10-69/70 AI prompt 注入增强：所在地名人轶事·历史典故 + 局势关联 NPC 立场）· 最后更新：2026-10-03*
