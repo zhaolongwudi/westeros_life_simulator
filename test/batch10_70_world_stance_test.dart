@@ -74,7 +74,7 @@ String _stanceSection(String body) {
 }
 
 /// 构造一个涉及兰尼斯特家族的局势事件（用于测试史塔克 NPC 的立场推导）。
-final GameEvent _lannisterCrisis = GameEvent(
+const GameEvent _lannisterCrisis = GameEvent(
   id: 'event_test_lannister_crisis',
   name: '兰尼斯特继承危机',
   type: EventType.political,
