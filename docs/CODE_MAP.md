@@ -194,7 +194,8 @@ GameEngine extends GameProviderBase with:
 | **AI 注入时节农事** | services/ai_service.dart（`_buildPrompt` 内 `farmTrendDesc`：seasonFarmTrend(season, region) 按「季节 × 区域」返回生计实事段落——地区风土人情之后、可用事件之前，与季节世界动向/地区风土人情形成「时节 × 地域 × 生计」三轴，Batch 10-56） |
 | **AI 注入本地集市行情** | services/ai_service.dart（`_buildPrompt` 内 `marketTrendDesc`：localMarketTrend(season, region) 按「季节 × 区域」返回集市行情风向段落——时节农事之后、可用事件之前，与季节世界动向/地区风土人情/时节农事形成「时节 × 地域 × 生计 × 集市」四轴，Batch 10-58） |
 | **AI 注入所在地名人轶事** | services/ai_service.dart（`_buildPrompt` 内 `loreDesc`：locationLore(region, locationId) 按知名地点/区域返回历史典故段落——本地集市行情之后、可用事件之前，与地区风土人情等形成「地理 × 生计 × 集市 × 历史」四轴，Batch 10-69） |
-| **AI 注入局势关联 NPC 立场** | services/ai_service.dart（`_buildPrompt` 内 `stanceDesc`：`_worldStanceDesc`/`_npcStanceFor`——按 top2 世界事件 × 玩家关系 NPC（前 3 个）经家族对外关系网络（family.relations 敌友阈值 ±20）推导「谁站在哪边」，本月世界局势之后、季节世界动向之前，Batch 10-70） |
+| **AI 注入局势关联 NPC 立场** | services/ai_service.dart（`_buildPrompt` 内 `stanceDesc`：`_worldStanceDesc`/`_npcStanceFor`——按 top2 世界事件 × 玩家关系 NPC（前 3 个）经家族对外关系网络（family.relations 敌友阈值 ±20）推导「谁站在哪边」，本月世界局势之后、季节世界动向之前，Batch 10-70 + 10-72 动态化：玩家与 NPC 关系绝对值 ≥20 时追加「因与你交好…倾向考虑你的立场 / 因与你结怨…可能与你对立」，关系平平省略） |
+| **AI 注入家族谱系成员** | services/ai_service.dart（`_buildPrompt` 内 `familyMembersDesc`：按玩家家族取在世同族 NPC（名字/身份/所在地/与玩家的关系，最多 6 个防膨胀）作「- 家族成员：」行，自由民兜底「自由民，无家族可依附」/ 无在世同族兜底，Batch 10-71） |
 | **AI 注入当前地点详情** | services/ai_service.dart（`_buildPrompt` 内 `locationDesc`：当前地点名/类型/危险度分级（安全/一般/危险/极度危险）/人口/特色/相连地点名/描述——玩家状态从「地点：location_winterfell（北境）」升级为完整地理实境，Batch 10-63） |
 | **AI 注入关系 NPC 身份** | services/ai_service.dart（`_buildPrompt` 内 `relationDesc`：关系列表从「NPC ID: 好感度」升级为「名字（身份·家族·所在地）: 好感度」，未知 NPC 回退原格式，Batch 10-64） |
 | **AI 注入在场 NPC 性格/目标** | services/ai_service.dart（`_buildPrompt` 内 `onSiteNpcDesc`：在场 NPC 附加「性格」（personality 前 2 条）与「目标」（goals 前 2 条）——AI 之前只知道名字/关系/心情，人物叙事缺乏深度，Batch 10-65） |
@@ -328,6 +329,8 @@ GameEngine extends GameProviderBase with:
 | batch10_63_64_prompt_enhance_test | **AI prompt 注入增强**（10-63/64，12 用例）：当前地点详情注入（临冬城/君临/高庭/未知兜底/既有注入不回归）/ 关系 NPC 身份注入（已知 NPC 身份信息/未知 NPC 回退/关系为空/既有注入不回归）/ 标签函数契约（locationTypeLabel/npcTypeLabel 关键值） |
 | batch10_69_location_lore_test | **AI 注入所在地名人轶事**（10-69，9 用例）：知名地点典故注入（临冬城/君临/凯岩城/长城/高庭/龙石岛）/ 未知地点回退区域级历史底色 / 未知区域兜底文案 / 既有注入（世界局势/季节动向/地区/农事/集市）不回归 |
 | batch10_70_world_stance_test | **AI 注入当前局势关联 NPC 立场**（10-70，5 用例）：有关系 NPC + 涉及兰尼斯特事件 → 史塔克 NPC 立场敌对 / 有事件无关系 NPC 兜底 / 无事件兜底 / 未知 NPC ID 立场不明 / 既有注入（世界局势/季节/地区/农事/集市/轶事）不回归 |
+| batch10_71_family_members_test | **AI 注入家族谱系成员**（10-71，4 用例）：有家族玩家 → 注入同族成员（史塔克家族/身份/所在地/关系）/ 与同族私交关系值体现 / 自由民兜底「自由民，无家族可依附」/ 既有注入（世代谱系/家族/对外关系/特质/秘密/成员）不回归 |
+| batch10_72_world_stance_dynamic_test | **AI 注入 NPC 立场随玩家关系动态化**（10-72，5 用例）：好感 NPC（关系 80）→ 追加「因与你交好…倾向考虑你的立场」/ 恶感 NPC（关系 -40）→ 追加「因与你结怨…可能与你对立」/ 关系平平（10）不追加动态修饰 / 无事件兜底不回归 / 既有注入（10-70 立场段落 + 10-71 家族成员）不回归 |
 | batch10_65_66_prompt_enhance_test | **AI prompt 注入增强**（10-65/66，6 用例）：在场 NPC 性格/目标注入（艾德·史塔克性格·目标/前 2 条防膨胀/关系·心情·可委托不回归）/ 家族对外关系注入（史塔克敌对·友善/自由民兜底/家族名·族语·规模·影响力不回归） |
 | batch10_57_family_branches_test | **当代支脉横版图**（10-57，4 用例）：已婚有子女（偶→当→子徽章）/ 未婚有子女（无偶徽章）/ 已婚无子女（无子徽章）/ 未婚无子女（不显示区块） |
 | batch10_59_ai_multi_key_test | **AI 多 Key 轮换 + 多模型选择**（10-59 + fix1，12 用例）：首 key 429 自动换第二个成功 / 全部 key 失败返回最后错误 / 单 key 向后兼容（apiKey 入参进入池）/ round-robin 连续两次起始不同 / **多 key 每次请求自动轮换（成功也不重复打同一 key）** / **多 key 失败直接换下一个不重试同一 key** / 3 提供商预设（默认模型+chatBaseUrl）/ 未知提供商回落第一 / resolved 按提供商回落 + 显式优先 / 多 key 持久化往返 / 旧单 key（ai_api_key）迁移 / 保存时旧键同步写入 |
@@ -391,7 +394,7 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v5.7（Batch 10-69/70 AI prompt 注入增强：所在地名人轶事·历史典故 + 局势关联 NPC 立场）· 最后更新：2026-10-03*
+*文档版本：v5.8（Batch 10-71/72 AI prompt 注入增强：家族谱系成员 + NPC 立场随玩家关系动态化）· 最后更新：2026-10-03*
 
 ## 八、构建 APK 与直发邮箱（临时任务脚本，2026-10-02 新增）
 
@@ -424,4 +427,4 @@ GameEngine extends GameProviderBase with:
   - **只保留最近 3 次**：Cleanup 步骤按 created_at 倒序删多余 `v0.0.x` release（v 版本序列，旧 apk-<sha8> 一并清理）
 - **已知验证**：run `36958877137` ✅（手动触发 CI 验证 changelog 链路，analyze/test 全绿 + auto-update 幂等跳过）；run `37007321396` ✅（release-publish 全步骤 success）；run `37004310167` ❌（auto-update push 非快进被拒 → 已加 pull --rebase 容错）；run `37048376650` ✅（head fcbd46f，fix readme 收尾闭环，analyze-test 全绿）
 ---
-*文档版本：v5.7（Batch 10-69/70 AI prompt 注入增强：所在地名人轶事·历史典故 + 局势关联 NPC 立场）· 最后更新：2026-10-03*
+*文档版本：v5.8（Batch 10-71/72 AI prompt 注入增强：家族谱系成员 + NPC 立场随玩家关系动态化）· 最后更新：2026-10-03*
