@@ -197,6 +197,8 @@ GameEngine extends GameProviderBase with:
 | **AI 注入关系 NPC 身份** | services/ai_service.dart（`_buildPrompt` 内 `relationDesc`：关系列表从「NPC ID: 好感度」升级为「名字（身份·家族·所在地）: 好感度」，未知 NPC 回退原格式，Batch 10-64） |
 | **AI 注入在场 NPC 性格/目标** | services/ai_service.dart（`_buildPrompt` 内 `onSiteNpcDesc`：在场 NPC 附加「性格」（personality 前 2 条）与「目标」（goals 前 2 条）——AI 之前只知道名字/关系/心情，人物叙事缺乏深度，Batch 10-65） |
 | **AI 注入家族对外关系** | services/ai_service.dart（`_buildPrompt` 内 `familyDesc`：家族附加「对外关系」网络——family.relations 映射家族名 + 敌对/中立/友善立场（阈值 ±20），AI 政治叙事有立场支撑，Batch 10-66） |
+| **AI 注入家族特质/秘密** | services/ai_service.dart（`_buildPrompt` 内 `familyDesc`：家族附加「特质」（traits 全量）与「秘密」（secrets 前 2 条，空则省略）——AI 知道家族文化气质与隐藏秘密（如史塔克家族的琼恩·雪诺身世），Batch 10-67） |
+| **AI 注入关系 NPC 秘密** | services/ai_service.dart（`_buildPrompt` 内 `relationDesc`：关系 NPC 附加「秘密」（secrets 前 1 条，空则省略）——AI 能围绕人物隐藏秘密展开更深剧情（如琼恩·雪诺的真实身份），Batch 10-68） |
 | **AI 多 Key 轮换** | services/ai_service.dart（`generateNarrative`：**多 Key 每次请求自动轮换下一个 Key**（round-robin 起始偏移 + 每次 +1），失败 429/网络/5xx 也直接换下一个不重试同一 Key（避免触发 TPM/RPM 限流）；单 Key 保留指数退避重试；空池返回「未配置 API Key」，Batch 10-59 + fix1） |
 | **AI 提供商预设** | data/ai_provider_defaults.dart（sensenova/atria/deepseek 3 家：默认模型/模型候选/baseUrl，`providerDefaultsOf` 单一真相对齐，Batch 10-59）+ services/ai_config.dart（`resolvedModel`/`resolvedBaseUrl` 空值回落 provider 默认） |
 | **AI 配置存储（多 Key + 提供商）** | services/ai_config.dart（`apiKeys` JSON 数组持久化 `ai_api_keys` + `provider` 字段 + 双向同步旧单 key 键 `ai_api_key` + 兼容旧构造参数 `apiKey:`，Batch 10-59） |
@@ -320,6 +322,7 @@ GameEngine extends GameProviderBase with:
 | batch10_52_region_trend_test | **AI 注入地区风土人情**（10-52，7 用例）：区域注入抽查（北境/西境/王领/多恩/河湾地）/ 未知区域兜底 / 既有注入（世界局势/季节动向/区域引导）不回归 |
 | batch10_56_farm_trend_test | **AI 注入时节农事**（10-56，8 用例）：季节×区域注入抽查（北境冬/西境夏/王领秋/河湾地春/多恩永冬）/ 未知区域兜底 / 已知区域未知季节兜底 / 既有注入（世界局势/季节动向/地区风土人情/区域引导）不回归 |
 | batch10_58_market_trend_test | **AI 注入本地集市行情**（10-58，8 用例）：季节×区域注入抽查（北境冬/西境夏/王领秋/河湾地春/多恩永冬）/ 未知区域兜底 / 已知区域未知季节兜底 / 既有注入（世界局势/季节动向/地区风土人情/时节农事/区域引导）不回归 |
+| batch10_67_68_prompt_enhance_test | **AI 注入家族特质/秘密 + 关系 NPC 秘密**（10-67/68，6 用例）：史塔克家族特质（坚韧·忠诚·荣誉·战斗）/ 家族秘密（琼恩·雪诺的真实身份·史塔克家族与龙的关系，取前 2 条）/ 自由民兜底 / 关系 NPC 秘密（艾德·史塔克：琼恩·雪诺的真实身份）/ 无秘密 NPC 不输出 / 既有注入不回归 |
 | batch10_63_64_prompt_enhance_test | **AI prompt 注入增强**（10-63/64，12 用例）：当前地点详情注入（临冬城/君临/高庭/未知兜底/既有注入不回归）/ 关系 NPC 身份注入（已知 NPC 身份信息/未知 NPC 回退/关系为空/既有注入不回归）/ 标签函数契约（locationTypeLabel/npcTypeLabel 关键值） |
 | batch10_65_66_prompt_enhance_test | **AI prompt 注入增强**（10-65/66，6 用例）：在场 NPC 性格/目标注入（艾德·史塔克性格·目标/前 2 条防膨胀/关系·心情·可委托不回归）/ 家族对外关系注入（史塔克敌对·友善/自由民兜底/家族名·族语·规模·影响力不回归） |
 | batch10_57_family_branches_test | **当代支脉横版图**（10-57，4 用例）：已婚有子女（偶→当→子徽章）/ 未婚有子女（无偶徽章）/ 已婚无子女（无子徽章）/ 未婚无子女（不显示区块） |
@@ -384,7 +387,7 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v5.5（Batch 10-65/66 AI prompt 注入增强：在场 NPC 性格/目标 + 家族对外关系）· 最后更新：2026-10-03*
+*文档版本：v5.6（Batch 10-67/68 AI prompt 注入增强：家族特质/秘密 + 关系 NPC 秘密）· 最后更新：2026-10-03*
 
 ## 八、构建 APK 与直发邮箱（临时任务脚本，2026-10-02 新增）
 
@@ -417,4 +420,4 @@ GameEngine extends GameProviderBase with:
   - **只保留最近 3 次**：Cleanup 步骤按 created_at 倒序删多余 `v0.0.x` release（v 版本序列，旧 apk-<sha8> 一并清理）
 - **已知验证**：run `36958877137` ✅（手动触发 CI 验证 changelog 链路，analyze/test 全绿 + auto-update 幂等跳过）；run `37007321396` ✅（release-publish 全步骤 success）；run `37004310167` ❌（auto-update push 非快进被拒 → 已加 pull --rebase 容错）；run `37048376650` ✅（head fcbd46f，fix readme 收尾闭环，analyze-test 全绿）
 ---
-*文档版本：v5.5（Batch 10-65/66 AI prompt 注入增强：在场 NPC 性格/目标 + 家族对外关系）· 最后更新：2026-10-03*
+*文档版本：v5.6（Batch 10-67/68 AI prompt 注入增强：家族特质/秘密 + 关系 NPC 秘密）· 最后更新：2026-10-03*
