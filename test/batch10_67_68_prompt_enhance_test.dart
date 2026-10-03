@@ -76,9 +76,9 @@ String _familyLine(String body) {
   return body.substring(start, end);
 }
 
-/// 提取「关系」行内容（「- 关系：」行）。
+/// 提取「关系」行内容（「- 关系（NPC: 好感度）：」行）。
 String _relationLine(String body) {
-  final start = body.indexOf('- 关系：');
+  final start = body.indexOf('关系（NPC: 好感度）：');
   expect(start, greaterThanOrEqualTo(0));
   final end = body.indexOf('\n', start);
   expect(end, greaterThan(start));
