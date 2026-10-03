@@ -604,8 +604,8 @@ $seasonGuide
         // 关系平平则省略，让立场从「家族恩怨」升级为「家族恩怨 × 私人关系」双维动态。
         final personal = rn.relation.abs() >= 20
             ? (rn.relation > 0
-                ? '，因与你交好（${n.name}，关系 $rn.relation），倾向考虑你的立场'
-                : '，因与你结怨（关系 $rn.relation），可能与你对立')
+                ? '，因与你交好（${n.name}，关系 ${rn.relation}），倾向考虑你的立场'
+                : '，因与你结怨（关系 ${rn.relation}），可能与你对立')
             : '';
         return '· $eventText：${n.name}（${fam?.name ?? '无家族'}家族，'
             '与你关系 ${rn.relation}）$stance$personal';
