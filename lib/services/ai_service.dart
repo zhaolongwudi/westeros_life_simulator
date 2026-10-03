@@ -14,6 +14,7 @@ import '../data/item_data.dart';
 import '../data/balance_data.dart';
 import '../models/event.dart';
 import '../models/family.dart';
+import '../models/location.dart';
 import '../models/player.dart';
 import '../utils/labels.dart';
 import 'event_prompt_filter.dart';
@@ -229,8 +230,19 @@ class AiService {
     // Batch 10-50：注入季节世界动向——当前季节下整个维斯特洛的宏观变化，
     // 与玩家视角的叙事引导互补，让 AI 围绕「季节驱动世界」展开叙事。
     final seasonTrendDesc = seasonWorldTrend(season);
+    // Batch 10-64：注入关系 NPC 身份信息——之前只输出「NPC ID: 好感度」，
+    // AI 不知道对方是谁（名字/身份/家族/所在地），叙事难以依托人物关系展开。
+    // 现在升级为「名字（身份·家族·所在地）: 好感度」，找不到 NPC 时回退原 ID。
     final relationDesc = player.relations.entries
-        .map((e) => '${e.key}: ${e.value}')
+        .map((e) {
+          final n = npcById(e.key);
+          if (n == null) return '${e.key}: ${e.value}';
+          final fam = familyById(n.familyId);
+          final loc = locationById(n.locationId);
+          final famText = fam == null ? '无家族' : '${fam.name}家族';
+          final locText = loc == null ? '未知之地' : loc.name;
+          return '${n.name}（${npcTypeLabel(n.type)}·$famText·$locText）: ${e.value}';
+        })
         .join('、');
     // Batch 10-15：注入在场 NPC 关系（名字 + 关系值 + 心情 + 任务）
     // Batch 10-22：在场 NPC 多步骤任务模板注入（标题 + 难度 + 期限，替代旧 tasks.first）
@@ -337,11 +349,42 @@ class AiService {
     // Batch 10-9：差异化叙事引导（身份 / 区域 / 季节）
     final idGuide = identityNarrativeGuide(player.identity);
     String region = '';
+    Location? currentLocation;
     for (final l in allLocations) {
       if (l.id == player.locationId) {
         region = l.region;
+        currentLocation = l;
         break;
       }
+    }
+    // Batch 10-63：注入当前地点详情——让 AI 知道玩家身处何地、周围有什么。
+    // 之前只有「地点：location_winterfell（北境）」一行 ID + 区域，AI 完全不知道
+    // 地点名/类型/危险度/人口/特色/相连地点，叙事容易脱离地理实境。
+    final String locationDesc;
+    final cl = currentLocation;
+    if (cl == null) {
+      locationDesc = '（未知之地）';
+    } else {
+      final dangerLabel = switch (cl.dangerLevel) {
+        <= 2 => '安全',
+        <= 5 => '一般',
+        <= 8 => '危险',
+        _ => '极度危险',
+      };
+      final featuresText = cl.features.isEmpty ? '无特殊特色' : cl.features.join('、');
+      final connectedText = cl.connectedTo.isEmpty
+          ? '无相连地点'
+          : cl.connectedTo
+              .map((cid) {
+                for (final l in allLocations) {
+                  if (l.id == cid) return l.name;
+                }
+                return cid;
+              })
+              .join('、');
+      locationDesc = '${cl.name}（${locationTypeLabel(cl.type)}，$dangerLabel，'
+          '人口约 ${cl.population}）——${cl.description.isEmpty ? '（无描述）' : cl.description}'
+          '；特色：$featuresText；可前往：$connectedText';
     }
     final regionGuide = regionNarrativeGuide(region);
     // Batch 10-52：注入地区风土人情——当前所在区域的宏观气质与常态底色，
@@ -367,6 +410,8 @@ class AiService {
 - 家族：$familyDesc
 - 年龄：${player.age}
 - 地点：${player.locationId}（${region.isEmpty ? '未知区域' : region}）
+当前地点：
+$locationDesc
 - 金币：${player.gold}
 - 声望：${player.reputation}
 - 生命/精力/饱食：${player.health}/${player.energy}/${player.hunger}

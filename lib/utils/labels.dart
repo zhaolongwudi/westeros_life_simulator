@@ -11,7 +11,9 @@
 library;
 
 import '../models/event.dart';
+import '../models/location.dart';
 import '../models/marital.dart';
+import '../models/npc.dart';
 import '../models/player.dart';
 
 /// 身份中文标签。
@@ -79,5 +81,44 @@ String spouseOriginLabel(SpouseOrigin origin) {
     SpouseOrigin.commoner => '平民',
     SpouseOrigin.merchant => '商人',
     SpouseOrigin.warrior => '战士',
+  };
+}
+/// 地点类型中文标签（Batch 10-63）。
+///
+/// 覆盖 LocationType 全部枚举（含当前数据未用但定义存在的
+/// temple/tavern/market），避免未来扩充地点时出现英文枚举名泄漏。
+String locationTypeLabel(LocationType type) {
+  return switch (type) {
+    LocationType.castle => '城堡',
+    LocationType.city => '城市',
+    LocationType.village => '村庄',
+    LocationType.fort => '要塞',
+    LocationType.temple => '神庙',
+    LocationType.academy => '学院',
+    LocationType.tavern => '酒馆',
+    LocationType.market => '市场',
+    LocationType.wilderness => '荒野',
+    LocationType.supernatural => '超自然领域',
+    LocationType.unknown => '未知世界',
+  };
+}
+/// NPC 类型中文标签（Batch 10-64）。
+///
+/// 覆盖 NpcType 全部枚举（含当前数据未用但定义存在的
+/// soldier/merchant/priest/scholar/adventurer/assassin/maester/commoner/supernatural），
+/// 避免未来扩充 NPC 时出现英文枚举名泄漏。
+String npcTypeLabel(NpcType type) {
+  return switch (type) {
+    NpcType.noble => '贵族',
+    NpcType.soldier => '士兵',
+    NpcType.merchant => '商人',
+    NpcType.priest => '神职人员',
+    NpcType.scholar => '学者',
+    NpcType.adventurer => '冒险者',
+    NpcType.assassin => '刺客',
+    NpcType.maester => '学士',
+    NpcType.wildling => '野人',
+    NpcType.commoner => '平民',
+    NpcType.supernatural => '超自然存在',
   };
 }
