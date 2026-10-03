@@ -233,6 +233,8 @@ class AiService {
     // Batch 10-64：注入关系 NPC 身份信息——之前只输出「NPC ID: 好感度」，
     // AI 不知道对方是谁（名字/身份/家族/所在地），叙事难以依托人物关系展开。
     // 现在升级为「名字（身份·家族·所在地）: 好感度」，找不到 NPC 时回退原 ID。
+    // Batch 10-68：关系 NPC 附加秘密（secrets 前 1 条，空则省略）——AI 能围绕
+    // NPC 隐藏秘密（如琼恩·雪诺的真实身份）展开更深的剧情。
     final relationDesc = player.relations.entries
         .map((e) {
           final n = npcById(e.key);
@@ -241,7 +243,8 @@ class AiService {
           final loc = locationById(n.locationId);
           final famText = fam == null ? '无家族' : '${fam.name}家族';
           final locText = loc == null ? '未知之地' : loc.name;
-          return '${n.name}（${npcTypeLabel(n.type)}·$famText·$locText）: ${e.value}';
+          final secretText = n.secrets.isEmpty ? '' : '，秘密：${n.secrets.first}';
+          return '${n.name}（${npcTypeLabel(n.type)}·$famText·$locText$secretText）: ${e.value}';
         })
         .join('、');
     // Batch 10-15：注入在场 NPC 关系（名字 + 关系值 + 心情 + 任务）
@@ -333,7 +336,14 @@ class AiService {
           })
           .join('、');
       final relationPart = pf.relations.isEmpty ? '' : '；对外关系：$relText';
-      familyDesc = '${pf.name}家族（族语「${pf.motto}」，$scaleLabel，影响力 ${pf.influence}$relationPart）';
+      // Batch 10-67：注入家族特质与秘密——AI 之前只知道家族规模/影响力/对外关系，
+      // 不知道家族的文化气质（traits）与隐藏秘密（secrets），叙事难以体现家族底蕴；
+      // 现在附加「特质：xxx」「秘密：xxx（前 2 条，空则省略）」。
+      final traitPart = pf.traits.isEmpty ? '' : '；特质：${pf.traits.join('、')}';
+      final secretPart = pf.secrets.isEmpty
+          ? ''
+          : '；秘密：${pf.secrets.take(2).join('、')}';
+      familyDesc = '${pf.name}家族（族语「${pf.motto}」，$scaleLabel，影响力 ${pf.influence}$relationPart$traitPart$secretPart）';
     }
     // Batch 10-48：注入头衔晋升趋势——用 balance_data 单一真相量化「下一档头衔 + 所需声望」，
     // 取代旧的距离描述（90/70 魔法数字），让 AI 叙事能围绕玩家的头衔目标展开。
