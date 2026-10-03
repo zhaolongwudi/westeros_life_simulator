@@ -246,6 +246,8 @@ class AiService {
         .join('、');
     // Batch 10-15：注入在场 NPC 关系（名字 + 关系值 + 心情 + 任务）
     // Batch 10-22：在场 NPC 多步骤任务模板注入（标题 + 难度 + 期限，替代旧 tasks.first）
+    // Batch 10-65：附加性格/目标注入——AI 之前只知道 NPC 名字/关系/心情，
+    // 不知道对方性格特质与行事目标，人物叙事缺乏深度；现在附加「性格·目标」。
     final onSiteNpcDesc = allNpcs
         .where((n) => n.isAlive && n.locationId == player.locationId)
         .map((n) {
@@ -254,7 +256,14 @@ class AiService {
       final taskPart = templates.isEmpty
           ? ''
           : '，可委托：${templates.map((t) => '「${t.title}」（${t.typeLabel}，难度 ${t.difficulty}，期限 ${t.deadlineMonths} 月）').join('、')}';
-      return '${n.name}（关系 $rel${n.mood.isEmpty ? '' : '，心情${n.mood}'}$taskPart）';
+      // Batch 10-65：性格与目标（各取前 2 条防 prompt 膨胀；空则省略）。
+      final traitPart = n.personality.isEmpty
+          ? ''
+          : '，性格：${n.personality.take(2).join('、')}';
+      final goalPart = n.goals.isEmpty
+          ? ''
+          : '，目标：${n.goals.take(2).join('、')}';
+      return '${n.name}（关系 $rel${n.mood.isEmpty ? '' : '，心情${n.mood}'}$traitPart$goalPart$taskPart）';
     }).join('、');
     final flagDesc = player.flags.entries
         .where((e) => e.value)
@@ -308,7 +317,23 @@ class AiService {
           : pf.scale == FamilyScale.minor
               ? '小家族'
               : '家户';
-      familyDesc = '${pf.name}家族（族语「${pf.motto}」，$scaleLabel，影响力 ${pf.influence}）';
+      // Batch 10-66：注入家族对外关系网络——AI 之前只知道家族名称/族语/规模/影响力，
+      // 不知道玩家家族与其他家族的恩怨（盟友/宿敌），政治叙事缺乏立场支撑；
+      // 现在附加「对外关系：家族名（敌对/中立/友善）」列表。
+      final relText = pf.relations.entries
+          .map((re) {
+            final other = familyById(re.key);
+            final otherName = other == null ? re.key : other.name;
+            final stance = switch (re.value) {
+              < -20 => '敌对',
+              > 20 => '友善',
+              _ => '中立',
+            };
+            return '$otherName（$stance ${re.value}）';
+          })
+          .join('、');
+      final relationPart = pf.relations.isEmpty ? '' : '；对外关系：$relText';
+      familyDesc = '${pf.name}家族（族语「${pf.motto}」，$scaleLabel，影响力 ${pf.influence}$relationPart）';
     }
     // Batch 10-48：注入头衔晋升趋势——用 balance_data 单一真相量化「下一档头衔 + 所需声望」，
     // 取代旧的距离描述（90/70 魔法数字），让 AI 叙事能围绕玩家的头衔目标展开。
