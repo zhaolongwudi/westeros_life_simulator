@@ -117,13 +117,9 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
-
 **2026-10-03 · feat(batch10-63/64): AI prompt 注入当前地点详情 + 关系 NPC 身份信息**（`8fa1fe2`）
-
 **2026-10-02 · feat(batch10-61/62): 剩余 NPC 任务模板补齐 + 谷地协作任务**（`7d2f9d4`）
-
 **2026-10-02 · fix(ui): 系统面板列表项 Container→GildedCard（ListTile ink 断言）**（`cdd8066`）
-
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
 ---
