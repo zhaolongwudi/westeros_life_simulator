@@ -227,6 +227,13 @@ class AiService {
         : worldNews
             .map((e) => '· ${e.name}——${e.description}')
             .join('\n');
+    // Batch 10-70：注入当前局势关联 NPC 立场——让 AI 知道「谁在这场风波中站在哪边」。
+    // 复用 top2 世界事件，对玩家关系 NPC（取前 3 个）按其家族对外关系网络
+    // （family.relations 敌友阈值 ±20）推导立场：
+    //   - 局势事件涉及某家族 → 相关 NPC 的家族与谁敌对/友善
+    //   - 玩家与 NPC 的好感度也一并提示（AI 知道玩家站在谁那边有风险）
+    // 让 AI 的政治叙事有「人物 × 局势」的立场支撑，而不只是干巴巴的事件列表。
+    final stanceDesc = _worldStanceDesc(player, worldNews);
     // Batch 10-50：注入季节世界动向——当前季节下整个维斯特洛的宏观变化，
     // 与玩家视角的叙事引导互补，让 AI 围绕「季节驱动世界」展开叙事。
     final seasonTrendDesc = seasonWorldTrend(season);
@@ -470,6 +477,8 @@ $locationDesc
 ${context}
 本月世界局势：
 ${worldNewsDesc}
+局势关联 NPC 立场：
+${stanceDesc}
 季节世界动向：
 ${seasonTrendDesc}
 地区风土人情：
@@ -537,6 +546,67 @@ $seasonGuide
       }
     }
     return power;
+  }
+
+  /// 生成「局势关联 NPC 立场」描述（Batch 10-70）。
+  ///
+  /// 基于本月 top2 世界事件，对玩家关系 NPC（取前 3 个，防 prompt 膨胀），
+  /// 按其家族对外关系网络推导「事件对 NPC 意味着什么、他会站在哪边」：
+  ///   - NPC 家族与事件关键词涉及的家族是敌/友（family.relations 阈值 ±20）
+  ///   - 玩家与 NPC 的好感度一并提示，让 AI 知道玩家所处位置的风险
+  /// 让 AI 的政治叙事有「人物 × 局势」的立场支撑。
+  String _worldStanceDesc(Player player, List<GameEvent> worldNews) {
+    if (worldNews.isEmpty) return '（本月暂无重大传闻，各势力按兵不动）';
+    // 收集玩家有关系（好感度非 0）的 NPC，取前 3 个。
+    final relatedNpcs = player.relations.entries
+        .where((e) => e.value != 0)
+        .take(3)
+        .map((e) => (npcId: e.key, relation: e.value))
+        .toList();
+    if (relatedNpcs.isEmpty) {
+      return '（你与任何势力都无深交，局势如何发展与你关系有限）';
+    }
+    final lines = <String>[];
+    for (final news in worldNews) {
+      final eventText = '${news.name}（${news.description}）';
+      final npcLines = relatedNpcs.map((rn) {
+        final n = npcById(rn.npcId);
+        if (n == null) return '· $eventText：${rn.npcId}（关系 ${rn.relation}）立场不明';
+        final fam = familyById(n.familyId);
+        final stance = _npcStanceFor(fam, news);
+        return '· $eventText：${n.name}（${fam?.name ?? '无家族'}家族，'
+            '与你关系 ${rn.relation}）$stance';
+      }).join('\n');
+      lines.add(npcLines);
+    }
+    return lines.join('\n');
+  }
+
+  /// 推导单个 NPC 对某局势事件的立场描述（基于家族对外关系网络）。
+  ///
+  /// 从事件名称/描述中抽取家族关键词（家族名/id），按 family.relations 敌友阈值
+  /// （>20 友善 / <-20 敌对）给出「可能站在谁一边」的判断；无家族或抽不到
+  /// 关键词时回退中性描述，绝不抛。
+  String _npcStanceFor(Family? fam, GameEvent news) {
+    if (fam == null) return '立场随局势而动（无家族背景）';
+    final text = '${news.name}${news.description}';
+    // 家族名/id 关键词都参与匹配（如「史塔克」「family_stark」）。
+    String? hitKey;
+    String? hitName;
+    for (final otherFam in allFamilies) {
+      if (otherFam.id == fam.id) continue;
+      if (text.contains(otherFam.name) || text.contains(otherFam.id)) {
+        hitKey = otherFam.id;
+        hitName = otherFam.name;
+        break;
+      }
+    }
+    if (hitKey == null) return '牵涉此事的立场未明，谨慎观望';
+    final relation = fam.relations[hitKey];
+    if (relation == null) return '与${hitName}家族无明确恩怨，保持中立观察';
+    if (relation > 20) return '与${hitName}家族友善（关系 $relation），可能站在其一边';
+    if (relation < -20) return '与${hitName}家族敌对（关系 $relation），可能与其对立';
+    return '与${hitName}家族关系平平（$relation），此事务必权衡';
   }
 
   /// 解析 AI 响应。
