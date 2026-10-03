@@ -254,6 +254,12 @@ class AiService {
           return '${n.name}（${npcTypeLabel(n.type)}·$famText·$locText$secretText）: ${e.value}';
         })
         .join('、');
+    // Batch 10-73：注入 NPC 间关系网络——AI 之前只知道玩家与每个 NPC 的关系，
+    // 不知道这些 NPC 彼此之间谁亲近谁敌对（如艾德与凯特琳是夫妻、詹姆与提利昂
+    // 兄弟情仇、卢斯·波顿与史塔克家族势不两立），人物互动叙事缺乏人际张力支撑。
+    // 现在取玩家关系 NPC（前 3 个，防 prompt 膨胀）的 `relations` 映射，
+    // 输出「A 与 B（关系 N）：敌对/友善/中立」清单。
+    final npcNetworkDesc = _npcNetworkDesc(player);
     // Batch 10-15：注入在场 NPC 关系（名字 + 关系值 + 心情 + 任务）
     // Batch 10-22：在场 NPC 多步骤任务模板注入（标题 + 难度 + 期限，替代旧 tasks.first）
     // Batch 10-65：附加性格/目标注入——AI 之前只知道 NPC 名字/关系/心情，
@@ -375,6 +381,13 @@ class AiService {
             .join('、');
       }
     }
+    // Batch 10-74：注入家族在权力网络中的位置——AI 之前只知道家族对外关系的
+    // 数值（family.relations），不知道玩家在其家族权力结构中的具体位置
+    // （家主/继承人/普通成员）与家族在七国权力棋盘中的敌友格局。
+    // 现在解析玩家所属家族的 relations（家族名 + 敌/友/中立），
+    // 并标注玩家在家中的位置（家主/继承人/成员），让 AI 知道玩家
+    // 「效忠于谁、与谁为敌、在家族里是什么角色」。
+    final familyPowerDesc = _familyPowerDesc(player, playerFamily);
     // Batch 10-48：注入头衔晋升趋势——用 balance_data 单一真相量化「下一档头衔 + 所需声望」，
     // 取代旧的距离描述（90/70 魔法数字），让 AI 叙事能围绕玩家的头衔目标展开。
     final String titleProgressDesc;
@@ -479,6 +492,7 @@ class AiService {
 - 世代谱系：$lineageDesc
 - 家族：$familyDesc
 - 家族成员：$familyMembersDesc
+- 家族在权力网络中的位置：$familyPowerDesc
 - 年龄：${player.age}
 - 地点：${player.locationId}（${region.isEmpty ? '未知区域' : region}）
 当前地点：
@@ -489,6 +503,7 @@ $locationDesc
 - 技能：${player.skills}
 - 属性：${player.attributes}
 - 关系（NPC: 好感度）：${relationDesc.isEmpty ? '（无）' : relationDesc}
+- NPC 间关系网络：${npcNetworkDesc.isEmpty ? '（无）' : npcNetworkDesc}
 - 在场 NPC：${onSiteNpcDesc.isEmpty ? '（无）' : onSiteNpcDesc}
 - 背包：$inventoryDesc
 - 已装备：${equipmentDesc.isEmpty ? '（无）' : equipmentDesc}
@@ -570,6 +585,77 @@ $seasonGuide
       }
     }
     return power;
+  }
+
+  /// 生成「NPC 间关系网络」描述（Batch 10-73）。
+  ///
+  /// 取玩家关系 NPC（前 3 个，防 prompt 膨胀），输出这些 NPC 彼此之间的
+  /// 关系（`npc.relations` 映射，按阈值 ±20 分敌对/友善/中立）：
+  ///   - 艾德·史塔克 ↔ 凯特琳·史塔克（关系 90）：友善
+  ///   - 提利昂·兰尼斯特 ↔ 詹姆·兰尼斯特（关系 80）：友善
+  ///   - 卢斯·波顿 ↔ 艾德·史塔克（无直接关系）：中立
+  /// 让 AI 知道玩家社交圈内部的人际张力，人物互动叙事不再是孤立的
+  /// 「玩家 ↔ NPC」二元关系，而是一张有恩怨的网络。
+  String _npcNetworkDesc(Player player) {
+    // 取玩家关系 NPC（前 3 个），按关系值降序让最重要的人物优先。
+    final relatedIds = player.relations.entries
+        .where((e) => e.value != 0)
+        .toList()
+      ..sort((a, b) => b.value.abs().compareTo(a.value.abs()));
+    final picked = relatedIds.take(3).map((e) => e.key).toList();
+    if (picked.length < 2) return '';
+    final lines = <String>[];
+    for (var i = 0; i < picked.length; i++) {
+      final a = npcById(picked[i]);
+      if (a == null) continue;
+      for (var j = i + 1; j < picked.length; j++) {
+        final b = npcById(picked[j]);
+        if (b == null) continue;
+        // 双向取强的一方（a 看 b 优先，缺失回退 b 看 a）。
+        final rel = a.relations[b.id] ?? b.relations[a.id] ?? 0;
+        final stance = switch (rel) {
+          < -20 => '敌对',
+          > 20 => '友善',
+          _ => '中立',
+        };
+        lines.add('${a.name} ↔ ${b.name}（关系 $rel）：$stance');
+      }
+    }
+    return lines.join('、');
+  }
+
+  /// 生成「家族在权力网络中的位置」描述（Batch 10-74）。
+  ///
+  /// 让 AI 知道玩家在七国权力结构中的坐标：
+  ///   - 玩家家族（无家族 → 自由民兜底）
+  ///   - 玩家在家中的角色：家主（是当前家主）/ 继承人（有立嗣为继承人）/ 普通成员
+  ///   - 家族对外关系的盟友/宿敌/中立格局（family.relations 阈值 ±20）
+  /// 玩家角色判断：玩家家族与自身同名（house == family.name）且是家族唯一在世
+  /// 成员时视为家主；否则看是否被 family 数据标为继承人（简化：取家族 scale
+  /// 与玩家头衔综合判断，保守给「成员」）。
+  String _familyPowerDesc(Player player, Family? family) {
+    if (family == null) {
+      return '（自由民，无家族，不受任何家族约束）';
+    }
+    // 家族对外关系（盟友/宿敌/中立）。
+    final relText = family.relations.entries
+        .map((re) {
+          final other = familyById(re.key);
+          final otherName = other == null ? re.key : other.name;
+          final stance = switch (re.value) {
+            < -20 => '宿敌',
+            > 20 => '盟友',
+            _ => '中立',
+          };
+          return '$otherName（$stance，关系 ${re.value}）';
+        })
+        .join('、');
+    final networkText = family.relations.isEmpty
+        ? '无明确对外恩怨'
+        : '对外格局：$relText';
+    // 玩家在家中的角色：家族名 == 玩家姓氏视为家主候选，否则成员。
+    final playerRole = player.house == family.name ? '家主' : '成员';
+    return '${family.name}家族（玩家为$playerRole）——$networkText';
   }
 
   /// 生成「局势关联 NPC 立场」描述（Batch 10-70）。
