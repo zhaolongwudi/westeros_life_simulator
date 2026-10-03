@@ -434,6 +434,11 @@ class AiService {
     // （什么好卖/什么贵/什么滞销/物价起伏），让 AI 围绕「此时此地买卖什么划算」
     // 展开叙事，与季节世界动向/地区风土人情/时节农事形成「时节 × 地域 × 生计 × 集市」四轴。
     final marketTrendDesc = localMarketTrend(season, region);
+    // Batch 10-69：注入所在地名人轶事·历史典故——当前所在区域 × 地点的
+    // 历史纵深（知名地点的传说/名人轶事/历史典故），让 AI 叙事围绕
+    // 「脚下的土地记得什么」展开，与地区风土人情/时节农事/本地集市行情
+    // 形成「地理 × 生计 × 集市 × 历史」四轴。
+    final loreDesc = locationLore(region, player.locationId);
     final seasonGuide = seasonNarrativeGuide(season);
     return '''
 当前玩家状态：
@@ -473,6 +478,8 @@ ${regionTrendDesc}
 ${farmTrendDesc}
 本地集市行情：
 ${marketTrendDesc}
+所在地轶事·历史典故：
+${loreDesc}
 可用事件：
 ${eventsDesc}
 叙事引导（身份）：
