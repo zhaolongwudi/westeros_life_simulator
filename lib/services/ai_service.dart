@@ -352,6 +352,29 @@ class AiService {
           : '；秘密：${pf.secrets.take(2).join('、')}';
       familyDesc = '${pf.name}家族（族语「${pf.motto}」，$scaleLabel，影响力 ${pf.influence}$relationPart$traitPart$secretPart）';
     }
+    // Batch 10-71：注入家族谱系成员——AI 之前只看到家族名称/族语/规模/影响力/对外关系/
+    // 特质/秘密，不知道家族内部都有谁（哪些同族 NPC 在世、各自身份/所在地/与玩家的关系），
+    // 家族叙事缺乏「人」的维度；现在附加「同族成员」清单（取在世，最多 6 个防 prompt 膨胀）。
+    final String familyMembersDesc;
+    final pmf = playerFamily;
+    if (pmf == null) {
+      familyMembersDesc = '（自由民，无家族可依附）';
+    } else {
+      final members =
+          npcsByFamily(pmf.id).where((n) => n.isAlive).take(6).toList();
+      if (members.isEmpty) {
+        familyMembersDesc = '（暂无在世同族）';
+      } else {
+        familyMembersDesc = members
+            .map((n) {
+              final loc = locationById(n.locationId);
+              final locText = loc == null ? '未知之地' : loc.name;
+              final rel = player.relations[n.id] ?? 0;
+              return '${n.name}（${npcTypeLabel(n.type)}·$locText，关系 $rel）';
+            })
+            .join('、');
+      }
+    }
     // Batch 10-48：注入头衔晋升趋势——用 balance_data 单一真相量化「下一档头衔 + 所需声望」，
     // 取代旧的距离描述（90/70 魔法数字），让 AI 叙事能围绕玩家的头衔目标展开。
     final String titleProgressDesc;
@@ -455,6 +478,7 @@ class AiService {
 - 头衔晋升：$titleProgressDesc
 - 世代谱系：$lineageDesc
 - 家族：$familyDesc
+- 家族成员：$familyMembersDesc
 - 年龄：${player.age}
 - 地点：${player.locationId}（${region.isEmpty ? '未知区域' : region}）
 当前地点：
@@ -574,8 +598,17 @@ $seasonGuide
         if (n == null) return '· $eventText：${rn.npcId}（关系 ${rn.relation}）立场不明';
         final fam = familyById(n.familyId);
         final stance = _npcStanceFor(fam, news);
+        // Batch 10-72：动态立场修饰——玩家与 NPC 关系好坏直接影响其立场倾向。
+        // 10-70 只给「与你关系 N」这个静态数值，AI 难以判断玩家身处风波哪一侧；
+        // 现在当关系绝对值 ≥20 时追加明确倾向（好感→倾向站在你这边；恶感→可能与你对立），
+        // 关系平平则省略，让立场从「家族恩怨」升级为「家族恩怨 × 私人关系」双维动态。
+        final personal = rn.relation.abs() >= 20
+            ? (rn.relation > 0
+                ? '，因与你交好（${n.name}，关系 $rn.relation），倾向考虑你的立场'
+                : '，因与你结怨（关系 $rn.relation），可能与你对立')
+            : '';
         return '· $eventText：${n.name}（${fam?.name ?? '无家族'}家族，'
-            '与你关系 ${rn.relation}）$stance';
+            '与你关系 ${rn.relation}）$stance$personal';
       }).join('\n');
       lines.add(npcLines);
     }
