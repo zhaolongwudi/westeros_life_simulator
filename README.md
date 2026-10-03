@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-03 · fix(batch10-73): 移除 unused_import models/event.dart**（`7edf079`）
+
+**2026-10-03 · feat(batch10-73/74): AI 注入 NPC 间关系网络 + 家族在权力网络中的位置**（`464bc0e`）
+
 **2026-10-03 · fix(batch10-72): Dart record 字段字符串插值必须用 ${...}（$rn.relation 会裸展开整个 record）**（`1b5cca3`）
-
-**2026-10-03 · feat(batch10-71/72): AI 注入家族谱系成员关系 + NPC 立场随玩家关系动态化**（`cdd9cc0`）
-
-**2026-10-03 · fix(batch10-70): 测试事件常量改 const（non_constant_list_element）**（`0da69e4`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
