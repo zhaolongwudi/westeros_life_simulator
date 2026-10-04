@@ -275,7 +275,22 @@ class AiService {
     // 现在升级为「名字（身份·家族·所在地）: 好感度」，找不到 NPC 时回退原 ID。
     // Batch 10-68：关系 NPC 附加秘密（secrets 前 1 条，空则省略）——AI 能围绕
     // NPC 隐藏秘密（如琼恩·雪诺的真实身份）展开更深的剧情。
-    final relationDesc = player.relations.entries
+    // Batch 10-83：加人数预算——`player.relations` 是长会话里唯一无上限累积的
+    // map（全库 38 个 NPC），原先逐条累加注入，38 条时本段约 1443 字符。
+    // 现在按 |关系值| 降序取前 `BalanceData.kAiPromptRelationBudget`（8）位，
+    // 同值保持原插入序（用原始下标作次级键，规避 Dart sort 不稳定），
+    // 超出部分只给「另有 N 人有交情」尾注而非逐个展开。
+    final relationEntries = player.relations.entries.toList()
+      ..sort((a, b) {
+        final byAbs = b.value.abs().compareTo(a.value.abs());
+        // 同 |关系值| 时以 NPC id 作次级键：Dart 的 List.sort 不稳定，
+        // 不加次级键会导致同分条目每次构建顺序可能不同（与 10-33 事件筛选同因）。
+        if (byAbs != 0) return byAbs;
+        return a.key.compareTo(b.key);
+      });
+    final shownRelations =
+        relationEntries.take(BalanceData.kAiPromptRelationBudget).toList();
+    final relationDesc = shownRelations
         .map((e) {
           final n = npcById(e.key);
           if (n == null) return '${e.key}: ${e.value}';
@@ -287,6 +302,11 @@ class AiService {
           return '${n.name}（${npcTypeLabel(n.type)}·$famText·$locText$secretText）: ${e.value}';
         })
         .join('、');
+    // 截断尾注：告知 AI 还有其他有交情的人，但不逐个展开（省 token）。
+    final hiddenRelations = player.relations.length - shownRelations.length;
+    final relationTail =
+        hiddenRelations > 0 ? '（另有 $hiddenRelations 人有交情）' : '';
+    final relationFullDesc = '$relationDesc$relationTail';
     // Batch 10-73：注入 NPC 间关系网络——AI 之前只知道玩家与每个 NPC 的关系，
     // 不知道这些 NPC 彼此之间谁亲近谁敌对（如艾德与凯特琳是夫妻、詹姆与提利昂
     // 兄弟情仇、卢斯·波顿与史塔克家族势不两立），人物互动叙事缺乏人际张力支撑。
@@ -543,7 +563,7 @@ $locationDesc
 - 生命/精力/饱食：${player.health}/${player.energy}/${player.hunger}
 - 技能：$skillDesc
 - 属性：$attributeDesc
-- 关系（NPC: 好感度）：${relationDesc.isEmpty ? '（无）' : relationDesc}
+- 关系（NPC: 好感度）：${relationFullDesc.isEmpty ? '（无）' : relationFullDesc}
 - NPC 间关系网络：${npcNetworkDesc.isEmpty ? '（无）' : npcNetworkDesc}
 - 在场 NPC：${onSiteNpcDesc.isEmpty ? '（无）' : onSiteNpcDesc}
 - 背包：$inventoryDesc
