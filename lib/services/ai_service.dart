@@ -19,6 +19,25 @@ import '../models/player.dart';
 import '../utils/labels.dart';
 import 'event_prompt_filter.dart';
 
+/// 玩家身份 → 事件文本命中关键词（Batch 10-77）。
+///
+/// 用于「与你相关的可用事件」筛选：把玩家身份翻译成事件描述里可能出现的
+/// 中文说法，命中即视为该事件与玩家身份直接相关。提升为顶层常量，
+/// 避免每次请求重建 Map。
+const Map<PlayerIdentity, List<String>> _identityEventKeywords =
+    <PlayerIdentity, List<String>>{
+  PlayerIdentity.noble: <String>['贵族', '领主'],
+  PlayerIdentity.commoner: <String>['平民', '百姓'],
+  PlayerIdentity.soldier: <String>['士兵', '骑士', '军人'],
+  PlayerIdentity.merchant: <String>['商人', '商路', '商队'],
+  PlayerIdentity.priest: <String>['神职', '教士', '祭司'],
+  PlayerIdentity.scholar: <String>['学者', '学城'],
+  PlayerIdentity.adventurer: <String>['冒险'],
+  PlayerIdentity.assassin: <String>['刺客', '暗杀'],
+  PlayerIdentity.maester: <String>['学士', '学城'],
+  PlayerIdentity.wildling: <String>['野人', '先民'],
+};
+
 /// AI 响应结果。
 class AiResponse {
   const AiResponse({
@@ -216,8 +235,22 @@ class AiService {
       player: player,
       season: season,
     );
+    // Batch 10-78/10-77：先解析玩家所属家族（原本在下方求值，
+    // 但事件行标注与相关事件筛选都要用到它，故上移到此处）。
+    Family? playerFamily;
+    for (final f in allFamilies) {
+      if (f.id == player.familyId) {
+        playerFamily = f;
+        break;
+      }
+    }
     final eventsDesc = selectedEvents
-        .map((e) => '- ${e.name}: ${e.description}')
+        .map((e) =>
+            // Batch 10-78：每条事件尾部附「对你而言：xxx」利害标注——
+            // 原先只是中立罗列「名: 描述」，AI 无从判断这件事对玩家是福是祸；
+            // 现在按 EventType × 玩家身份/家族给出利害倾向（短短语，不做长篇分析）。
+            '- ${e.name}: ${e.description}'
+            '（对你而言：${_eventStanceDesc(e, player, playerFamily)}）')
         .join('\n');
     // Batch 10-45：注入本月世界局势——从相关度最高的预算内事件取前 2 条，
     // 让 AI 叙事围绕当前世界大事展开（复用事件预算筛选器的相关度排序）。
@@ -316,13 +349,10 @@ class AiService {
         : '第 ${player.generationRecords.length + 1} 代，先祖：'
             '${player.generationRecords.map((g) => '${g.generation}代 ${g.name}（${g.title}${g.achievement.isEmpty ? '' : "，${g.achievement}"}）').join(' → ')}';
     // Batch 10-22：注入家族信息（名称/族语/规模/影响力）
-    Family? playerFamily;
-    for (final f in allFamilies) {
-      if (f.id == player.familyId) {
-        playerFamily = f;
-        break;
-      }
-    }
+    // Batch 10-77：注入「与你相关的可用事件」——预算内事件里再筛一遍，
+    // 挑出命中玩家家族名/id 或身份关键词的事件，让 AI 知道哪几件是「自家的事」。
+    final relevantEventsDesc =
+        _relevantEventsDesc(player, playerFamily, selectedEvents);
     final String familyDesc;
     final pf = playerFamily;
     if (pf == null) {
@@ -542,6 +572,7 @@ ${marketTrendDesc}
 ${loreDesc}
 可用事件：
 ${eventsDesc}
+- 与你相关的可用事件：$relevantEventsDesc
 叙事引导（身份）：
 $idGuide
 叙事引导（区域）：
@@ -668,6 +699,87 @@ $seasonGuide
     // 玩家在家中的角色：家族名 == 玩家姓氏视为家主候选，否则成员。
     final playerRole = player.house == family.name ? '家主' : '成员';
     return '${family.name}家族（玩家为$playerRole）——$networkText';
+  }
+
+  /// 生成「与你相关的可用事件」描述（Batch 10-77）。
+  ///
+  /// Batch 10-33 起可用事件只按「地点/季节/数值/标记」相关度截取前 12 条，
+  /// AI 看到的是一串中立的事件名 + 描述——它不知道其中哪几件**直接关系到
+  /// 玩家自己的家族或身份**。现在从同一批预算内事件里再筛一遍：
+  ///   - 家族命中：事件名/描述/tags 含玩家家族名或家族 id（如「史塔克」「family_stark」）
+  ///   - 身份命中：含玩家身份的中文关键词（如「贵族」「骑士」「商人」「学士」）
+  /// 输出「· {事件名}（关联：家族·史塔克）」清单（最多 3 条防膨胀），
+  /// 让 AI 知道「哪几件事是我家的事」，能据此写出切身的利害取舍。
+  String _relevantEventsDesc(Player player, Family? family, List<GameEvent> events) {
+    if (events.isEmpty) {
+      return '（本月无事件可考）';
+    }
+    // 玩家身份的中文关键词（PlayerIdentity 10 类，取代表性说法）。
+    final identityHits =
+        _identityEventKeywords[player.identity] ?? const <String>[];
+    final famName = family?.name ?? '';
+    final famId = family?.id ?? '';
+    final parts = <String>[];
+    for (final e in events) {
+      if (parts.length >= 3) break;
+      final haystack = '${e.name}${e.description}${e.tags.join()}';
+      final reasons = <String>[];
+      if (famName.isNotEmpty &&
+          (haystack.contains(famName) || haystack.contains(famId))) {
+        reasons.add('家族·${family!.name}');
+      }
+      for (final kw in identityHits) {
+        if (haystack.contains(kw)) {
+          reasons.add('身份·${identityLabel(player.identity)}');
+          break;
+        }
+      }
+      if (reasons.isEmpty) continue;
+      parts.add('· ${e.name}（关联：${reasons.join('/')}）');
+    }
+    return parts.isEmpty
+        ? '（本月无直接牵涉你家族/身份的大事）'
+        : parts.join('、');
+  }
+
+  /// 生成单条事件「对你而言」的利害标注（Batch 10-78）。
+  ///
+  /// 可用事件清单原本只是「名: 描述」的中性罗列，AI 无从判断这件事对玩家
+  /// 是福是祸。现在按 `EventType` × 玩家身份/家族给出利害倾向：
+  ///   - 家族类 + 玩家有家族 → 「本家族兴衰系于你一身」
+  ///   - 战争类 → 「战火燎原，你的处境随之动荡」
+  ///   - 经济类 + 商人 → 「商人身家随市况起落」
+  ///   - 宗教类 + 神职 → 「你的立场将被教门审视」
+  ///   - …其余类型给中性关注点（谋利/避祸）
+  /// 只输出简短短语，挂在事件行尾，不做长篇分析。
+  String _eventStanceDesc(GameEvent e, Player player, Family? family) {
+    final fam = family;
+    switch (e.type) {
+      case EventType.family:
+        return fam == null ? '旁人的家事，与你无涉' : '本家族兴衰系于你一身';
+      case EventType.war:
+        return '战火燎原，你的处境随之动荡';
+      case EventType.economic:
+        return player.identity == PlayerIdentity.merchant
+            ? '商人身家随市况起落'
+            : '钱粮与物价随之波动';
+      case EventType.religious:
+        return player.identity == PlayerIdentity.priest ||
+                player.identity == PlayerIdentity.maester
+            ? '你的立场将被教门审视'
+            : '信仰与人心随之动摇';
+      case EventType.political:
+        return fam == null
+            ? '朝堂风云，与你暂无直接干系'
+            : '你的家族表态将影响结果';
+      case EventType.magical:
+      case EventType.supernatural:
+        return '诡异之事，或有未知牵连';
+      case EventType.adventure:
+        return '机缘与危险并存';
+      case EventType.daily:
+        return '寻常日子，一念之差可成转折';
+    }
   }
 
   /// 生成「玩家在家族继承顺位中的位置」描述（Batch 10-75）。
