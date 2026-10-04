@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-04 · feat(batch10-79/80): AI 注入 NPC 技能与信仰 + 邻近地点路途风险**（`2e79ed4`）
+
 **2026-10-04 · feat(batch10-77/78): AI 注入与你相关的可用事件 + 事件利害标注**（`a49d3a9`）
 
 **2026-10-04 · feat(batch10-75/76): AI 注入家族继承顺位 + 当地势力与玩家立场**（`85071c1`）
-
-**2026-10-03 · fix(batch10-73): 移除 unused_import models/event.dart**（`7edf079`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
