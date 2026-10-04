@@ -301,8 +301,15 @@ class AiService {
           final loc = locationById(n.locationId);
           final famText = fam == null ? '无家族' : '${fam.name}家族';
           final locText = loc == null ? '未知之地' : loc.name;
+          // Batch 10-89：补 `id=<npcId>` 标注。此前关系段只给中文名
+          // （10-64 起），而 prompt 尾部的「效果键约定」要 AI 用
+          // `relations.<NPC标识>` 写好感度——AI 无从得知该用哪个 id，
+          // 只能瞎猜（原文示例写的是 `relations.tyrion`，而全库 38 个 NPC
+          // id 全是 `npc_` 前缀，AI 照抄就写出一个永不会命中的幽灵键）。
+          // 现在把真实 id 直接标在名字后面，AI 只需复制粘贴。
           final secretText = n.secrets.isEmpty ? '' : '，秘密：${n.secrets.first}';
-          return '${n.name}（${npcTypeLabel(n.type)}·$famText·$locText$secretText）: ${e.value}';
+          return '${n.name}（${npcTypeLabel(n.type)}·$famText·$locText$secretText）'
+              '[id=${e.key}]: ${e.value}';
         })
         .join('、');
     // 截断尾注：告知 AI 还有其他有交情的人，但不逐个展开（省 token）。
@@ -611,15 +618,16 @@ $regionGuide
 $seasonGuide
 请生成一段叙事文本（200-500 字），描述当前情境，并提供 2-4 个选项。
 每个选项包含：文本、效果（JSON 格式）、叙事。
-效果键约定：
+效果键约定（键名后的 id 必须与上文列出的一致，原样复制，不要自行翻译或简写）：
 - 金币：gold
 - 声望：reputation
-- 技能：skills.技能名（如 skills.sword）
-- 属性：attributes.属性名（如 attributes.strength）
-- 关系：relations.NPC标识（正数加好感，负数降好感，如 relations.tyrion: 10）
+- 技能：skills.技能名（如 skills.sword；可用键：sword 剑术 / archery 弓术 / riding 骑术 / speech 口才 / alchemy 炼金）
+- 属性：attributes.属性名（如 attributes.strength；可用键：strength 力量 / agility 敏捷 / intelligence 智识 / charisma 魅力 / willpower 意志 / perception 感知）
+- 关系：relations.NPC标识（正数加好感，负数降好感，如 relations.npc_tyrion: 10；NPC标识见上文「关系」行 [id=...] 标注）
 - 世界状态：flags.标记名（正值设置标记，如 flags.honor_pledge: 1；0 或负值清除标记）
 - 生存状态：health / energy / hunger（如 health: 10 回血，energy: -15 耗精力，hunger: 20 进食）
 - 物品：inventory.物品ID（正数获得物品，如 inventory.item_bread: 1；负数消耗/丢弃）
+- 数值范围：单次技能/属性 ±1~3、关系 ±5~20、好感/恶感累计不超过 ±100（超出按边界截断）
 
 输出格式（JSON）：
 {
@@ -1261,7 +1269,8 @@ $seasonGuide
 - 叙事文本 200-500 字，用具体的场景、对话、气味、天气来营造氛围
 - 不要写“你感到危险”，要写“守夜人的火炬在风中摇晃，墙外的狼嚎断断续续”
 - 选项要体现代价与机会：有的选项让玩家变强但树敌，有的选项需要放弃某些东西
-- 效果键必须严格遵循约定，数值要合理（技能+1~3，属性+1~2，关系±5~20）
+- 效果键必须严格遵循约定，数值要合理（技能+1~3，属性+1~2，关系±5~20，好感/恶感累计不超过±100）
+- 关系键与物品键必须原样使用提示词中列出的 id（如 relations.npc_tyrion / inventory.item_bread），不要自行翻译成英文单词或简写
 - 保持维斯特洛世界观一致性：季节、家族、地点、历史事件都要准确
 ''';
 }

@@ -234,7 +234,7 @@ void main() {
         'reputation',
         'skills.sword',
         'attributes.strength',
-        'relations.tyrion',
+        'relations.npc_tyrion',
         'flags.honor_pledge',
         'inventory.item_bread',
       ]) {

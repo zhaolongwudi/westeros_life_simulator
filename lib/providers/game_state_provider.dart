@@ -7,6 +7,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../data/balance_data.dart';
 import '../models/event.dart';
 import '../models/player.dart';
 import '../utils/json_safe.dart';
@@ -233,21 +234,34 @@ class GameStateProvider extends ChangeNotifier {
         newPlayer = newPlayer.copyWith(
           reputation: (newPlayer.reputation + value).clamp(0, 100),
         );
+      } else if (key.startsWith('relations.')) {
+        final npcId = key.substring(10);
+        final newRels = Map<String, int>.from(newPlayer.relations);
+        // Batch 10-90：好感度钳制 ±100，与 `event_service.applyEffects`
+        // 的同名分支对齐（那边早有 `.clamp(-100, 100)`，这边一直漏了——
+        // 两处实现不一致，AI 选项走本路径写 `relations.npc_tyrion: 9999`
+        // 会让关系值无上界累积：① `npcRelationLabel` 的六档阈值（±20/40/
+        // 60/80）在越界后完全失效；② `mixin_npc_interact` 的示好成本公式
+        // `(5 + (100 - rel) ~/ 20).clamp(3, 12)` 在 rel > 100 时已无意义；
+        // ③ `ai_service` 的 ±20 敌友判定同样失去区分度。
+        // 边界值 ±100 与 `npcRelationLabel` 的「挚友 / 敌对」档位、
+        // 以及 10-83 关系段预算的取值域天然对齐。
+        newRels[npcId] =
+            ((newRels[npcId] ?? 0) + value).clamp(-BalanceData.kRelationClamp,
+                BalanceData.kRelationClamp);
+        newPlayer = newPlayer.copyWith(relations: newRels);
       } else if (key.startsWith('skills.')) {
         final skillName = key.substring(7);
         final newSkills = Map<String, int>.from(newPlayer.skills);
-        newSkills[skillName] = (newSkills[skillName] ?? 0) + value;
+        // Batch 10-90：防负数破底（与 gold 的 `max(0, ...)` 同策略）——
+        // 技能是「等级」，负等级在 `train` 的门槛判定与 prompt 展示里都无意义。
+        newSkills[skillName] = max(0, (newSkills[skillName] ?? 0) + value);
         newPlayer = newPlayer.copyWith(skills: newSkills);
       } else if (key.startsWith('attributes.')) {
         final attrName = key.substring(11);
         final newAttrs = Map<String, int>.from(newPlayer.attributes);
-        newAttrs[attrName] = (newAttrs[attrName] ?? 0) + value;
+        newAttrs[attrName] = max(0, (newAttrs[attrName] ?? 0) + value);
         newPlayer = newPlayer.copyWith(attributes: newAttrs);
-      } else if (key.startsWith('relations.')) {
-        final npcId = key.substring(10);
-        final newRels = Map<String, int>.from(newPlayer.relations);
-        newRels[npcId] = (newRels[npcId] ?? 0) + value;
-        newPlayer = newPlayer.copyWith(relations: newRels);
       } else if (key.startsWith('flags.')) {
         final flagName = key.substring(6);
         final newFlags = Map<String, bool>.from(newPlayer.flags);

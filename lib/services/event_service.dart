@@ -1,6 +1,7 @@
 /// 事件服务：事件触发条件检查、效果计算、存档。
 library;
 
+import '../data/balance_data.dart';
 import '../models/event.dart';
 import '../models/player.dart';
 
@@ -143,8 +144,12 @@ class EventService {
           } else if (key.startsWith('relations.')) {
             final npcId = key.substring(10);
             final newRelations = Map<String, int>.from(newPlayer.relations);
-            newRelations[npcId] =
-                ((newRelations[npcId] ?? 0) + value).clamp(-100, 100);
+            // Batch 10-90：硬编码的 100 收口 BalanceData.kRelationClamp，
+            // 与 GameStateProvider.applyEffects 的同名分支共享同一真相。
+            newRelations[npcId] = ((newRelations[npcId] ?? 0) + value).clamp(
+              -BalanceData.kRelationClamp,
+              BalanceData.kRelationClamp,
+            );
             newPlayer = newPlayer.copyWith(relations: newRelations);
             applied[key] = value;
           } else if (key.startsWith('flags.')) {

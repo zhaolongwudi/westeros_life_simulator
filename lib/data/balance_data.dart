@@ -427,6 +427,26 @@ class BalanceData {
   /// 【为什么取 8】与背包段预算同量级；按 map 插入序截断
   /// （Dart map 字面量是 LinkedHashMap，顺序确定），保留最早获得的状态。
   static const int kAiPromptFlagBudget = 8;
+  // ==================== Batch 10-90 好感度护栏 ====================
+  /// 好感度绝对值上限（关系效果的钳制边界）。
+  ///
+  /// 【为什么需要】好感度有**两条**写入通道，历史上只有一条带护栏：
+  /// ① `event_service.applyEffects` 的 `relations.<id>` 分支硬编码了
+  ///    `.clamp(-100, 100)`；
+  /// ② `GameStateProvider.applyEffects`（**AI 选项走这条**）却是裸加法，
+  ///    AI 输出 `relations.npc_tyrion: 9999` 就让关系值无上界累积。
+  /// 越界的连带后果有三处：
+  ///  - `mixin_npc_interact.npcRelationLabel` 的六档阈值（±20/40/60/80）
+  ///    在越界后完全失效（>80 一律「挚友」）；
+  ///  - `npcFavor` 的示好成本公式 `(5 + (100 - rel) ~/ 20).clamp(3, 12)`
+  ///    在 rel > 100 时算出负数再被 clamp，成本恒为 3 金；
+  ///  - `ai_service` 的敌友判定阈值 ±20 同样失去区分度。
+  ///
+  /// 【为什么取 100】与 `npcRelationLabel` 的「挚友 / 敌对」两档饱和值
+  /// 天然对齐（越界无新增语义）；同时是 `ai_service` 敌友阈值 ±20 的
+  /// 5 倍裕度，不会让 AI 侧的立场推导提前饱和。
+  static const int kRelationClamp = 100;
+
   // ==================== 便捷派生 ====================
 
   /// 夫妻感情等级标签。
