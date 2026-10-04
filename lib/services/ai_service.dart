@@ -875,9 +875,28 @@ $seasonGuide
     final desc = shown.map((n) {
       final rel = player.relations[n.id] ?? 0;
       final templates = npcTaskTemplatesOf(n.id);
-      final taskPart = templates.isEmpty
-          ? ''
-          : '，可委托：${templates.map((t) => '「${t.title}」（${t.typeLabel}，难度 ${t.difficulty}，期限 ${t.deadlineMonths} 月）').join('、')}';
+      // Batch 10-85：单 NPC 的任务模板预算——实测单模板 ≈ 29 字符、单 NPC 最多
+      // 3 个（艾德/罗柏/珊莎/艾莉亚等 10 人），10-82 预算内 5 位共 14 个模板
+      // ≈ 406 字符，是「在场 NPC」段（635 字符）的主要来源。现在每位人物只展开
+      // 前 `BalanceData.kAiPromptOnSiteNpcTaskBudget`（2）个，其余用
+      // 「另有 N 个可委托」尾注告知 AI，不逐条展开（保留「手上还有活」的语义）。
+      final String taskPart;
+      if (templates.isEmpty) {
+        taskPart = '';
+      } else {
+        final taskBudget = BalanceData.kAiPromptOnSiteNpcTaskBudget;
+        final shownTasks = templates.take(taskBudget).map((t) {
+          return '「${t.title}」（${t.typeLabel}，难度 ${t.difficulty}，'
+              '期限 ${t.deadlineMonths} 月）';
+        }).join('、');
+        // 用常量算隐藏数而非 split 反推：任务标题本身可能含「、」，
+        // 按分隔符数反推会算错。
+        final shownCount =
+            templates.length < taskBudget ? templates.length : taskBudget;
+        final hiddenTasks = templates.length - shownCount;
+        final taskTail = hiddenTasks > 0 ? '（另有 $hiddenTasks 个可委托）' : '';
+        taskPart = '，可委托：$shownTasks$taskTail';
+      }
       // 性格/目标各取前 `BalanceData.kAiPromptNpcTraitCount`/`kAiPromptNpcGoalCount`
       // 条防 prompt 膨胀（空则省略）。
       final traitPart = n.personality.isEmpty
