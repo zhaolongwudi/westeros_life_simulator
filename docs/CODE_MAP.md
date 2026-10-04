@@ -1,6 +1,6 @@
 # 维斯特洛人生模拟器 · 代码地图（CODE_MAP）
 
-> **本文件是代码结构导航索引**（v5.12 · Batch 10-79/80 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
+> **本文件是代码结构导航索引**（v5.13 · Batch 10-81/82 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
 > 再读本文件快速定位「哪个功能在哪个文件、哪个方法」。避免盲目翻代码。
 >
 > 定位三步法：
@@ -205,7 +205,9 @@ GameEngine extends GameProviderBase with:
 | **AI 注入当前地点详情** | services/ai_service.dart（`_buildPrompt` 内 `locationDesc`：当前地点名/类型/危险度分级（安全/一般/危险/极度危险）/人口/特色/相连地点名/描述——玩家状态从「地点：location_winterfell（北境）」升级为完整地理实境，Batch 10-63） |
 | **AI 注入关系 NPC 身份** | services/ai_service.dart（`_buildPrompt` 内 `relationDesc`：关系列表从「NPC ID: 好感度」升级为「名字（身份·家族·所在地）: 好感度」，未知 NPC 回退原格式，Batch 10-64） |
 | **AI 注入在场 NPC 性格/目标** | services/ai_service.dart（`_buildPrompt` 内 `onSiteNpcDesc`：在场 NPC 附加「性格」（personality 前 2 条）与「目标」（goals 前 2 条）——AI 之前只知道名字/关系/心情，人物叙事缺乏深度，Batch 10-65） |
-| **AI 注入 NPC 技能与信仰** | services/ai_service.dart（`_buildPrompt` 内 `onSiteNpcDesc` 追加 `，skills：…，信仰：…` + `_skillDesc` 静态纯函数（按值降序取前 2 项，超出附「另有 N 项」）+ `utils/labels.dart` 的 `skillLabel` 文案层（sword→剑术/leadership→统率/politics→权谋 等 10 键位 + 未知键原样兜底）——`npc.skills`/`npc.faith` 全库 38 NPC 全有值却从未进入 prompt，AI 不知道眼前人会不会动刀、信哪一位神，Batch 10-79） |
+| **AI 注入 NPC 技能与信仰** | services/ai_service.dart（`_buildPrompt` 内 `_onSiteNpcDesc` 输出 `，skills：…，信仰：…` + `_skillDesc` 静态纯函数（按值降序取前 2 项，超出附「另有 N 项」）+ `utils/labels.dart` 的 `skillLabel` 文案层（sword→剑术/leadership→统率/politics→权谋 等键位 + 未知键原样兜底）——`npc.skills`/`npc.faith` 全库 38 NPC 全有值却从未进入 prompt，Batch 10-79；10-81 补齐玩家侧键 riding/speech/alchemy） |
+| **AI 注入玩家技能/属性（中文标签化）** | services/ai_service.dart（`_buildPrompt` 内 `skillDesc`/`attributeDesc` 走 `_kvDesc` 静态纯函数（`Map<String,int>` + 标签函数参数 → 「剑术 3、弓术 2、骑术 3、口才 2、炼金 0」）+ `utils/labels.dart` 的 `attributeLabel`（strength→力量/agility→敏捷/intelligence→智识/charisma→魅力/willpower→意志/perception→感知）——原两行直接插裸字典 `{sword: 3, ...}`，AI 看到英文键名 + Dart Map 字面量；键数数值全量保留，仅键名中文化，Batch 10-81） |
+| **AI 在场 NPC 人数预算** | services/ai_service.dart（`_onSiteNpcDesc` 按 `BalanceData.kAiPromptOnSiteNpcBudget`（=5）`take()` 截断，超出附「另有 N 位在场未展开」尾注——实测临冬城 8 位 NPC 同场（艾德/凯特琳/罗柏/珊莎/艾莉亚/布兰/瑞肯/琼恩），每位带关系+心情+性格+目标+技能+信仰+任务清单，全量单行 700+ 字；截断值 5 覆盖全部既有测试依赖的前 3 位）+ `BalanceData.kAiPromptNpcNetworkBudget`（=3）收口 `_npcNetworkDesc` 的硬编码 `take(3)`，Batch 10-82（预算常量与 M4c-2 `kAiPromptEventBudget` 同处 `balance_data.dart`） |
 | **AI 注入邻近地点与路途风险** | services/ai_service.dart（`_buildPrompt` 内新增「- 邻近地点与路途风险：」行 + `_nearbyRiskDesc` 静态纯函数（`family`,`location` 两参）：逐个相邻地点输出「地点名（危险度分级，沿用 10-63 阈值 ≤2 安全/≤5 一般/≤8 危险/其余 极度危险，治主：governorId→NPC 名或「无明确治主」，与玩家家族敌友：自家领地/盟友领地/敌对领地/关系平平，复用 10-76 阈值 ±20）」，最多 4 条防膨胀 + 超出尾注「另有 N 处未列」；`connectedTo`（69 处）此前仅以「可前往：白港、巴隆镇」地名形式进入 prompt（10-63），AI 不知道这条路通往敌国，Batch 10-80） |
 | **AI 注入家族对外关系** | services/ai_service.dart（`_buildPrompt` 内 `familyDesc`：家族附加「对外关系」网络——family.relations 映射家族名 + 敌对/中立/友善立场（阈值 ±20），AI 政治叙事有立场支撑，Batch 10-66） |
 | **AI 注入家族特质/秘密** | services/ai_service.dart（`_buildPrompt` 内 `familyDesc`：家族附加「特质」（traits 全量）与「秘密」（secrets 前 2 条，空则省略）——AI 知道家族文化气质与隐藏秘密（如史塔克家族的琼恩·雪诺身世），Batch 10-67） |
@@ -342,6 +344,7 @@ GameEngine extends GameProviderBase with:
 | batch10_74_family_power_test | **AI 注入家族在权力网络中的位置**（10-74，4 用例）：有家族玩家 → 注入家族名 + 玩家角色 + 对外格局（兰尼斯特宿敌/徒利盟友）/ 姓氏与家族同名 → 角色「家主」/ 自由民兜底「自由民，无家族，不受任何家族约束」/ 既有注入不回归 |
 | batch10_75_76_inheritance_local_test | **AI 注入家族继承顺位 + 当地势力与玩家立场**（10-75/76，11 用例）：① 10-75 继承顺位——有子女 → 注入顺位名单（第一顺位/第二顺位 + 培养方向 + 进修中/已督导标记，最多列 4 人 + 「另有 N 名子女不列顺位」尾注）/ 无子女 → 兜底「尚无子嗣，继承悬而未决」/ 自由民 → 兜底「无继承顺位」；② 10-76 当地势力——自家领地（临冬城·艾德·史塔克→史塔克家族治下）/ 敌对势力治下（恐怖堡·卢斯·波顿→史塔克 -80 敌对「你在敌对势力治下」）/ 无治主地点 → 兜底「无明确治主」/ 自由民 → 不涉家族对立；③ 既有注入不回归（家族权力网络 / NPC 间关系网络 / 当前地点） |
 | batch10_77_78_event_alignment_test | **AI 注入与你相关的可用事件 + 事件利害标注**（10-77/78，10 用例）：① 10-77——描述含家族名 → 注入「关联：家族·史塔克」/ 身份关键词命中（士兵+边境征兵）→ 注入「关联：身份·士兵」/ 无关联 → 兜底「本月无直接牵涉你家族/身份的大事」/ 自由民 → 兜底不虚构家族关联/ 5 条全关联事件 → 只取前 3 条；② 10-78——家族类事件 → 行尾含「（对你而言：…系于你一身）」/ 战争类 → 含「对你而言」/ 自由民 + 家族事件 → 仍注入但不含「系于你一身」/ 事件名与描述仍全量注入（`- 边贸争端: 两城商路被截。` 不回归）/ 既有注入不回归（本月世界局势 / 家族继承顺位 / 当地势力与你的立场） |
+| batch10_81_82_prompt_budget_test | **AI prompt 玩家技能/属性中文化 + 人数预算化**（10-81/82，10 用例）：① 10-81——技能行注入「剑术 3、弓术 2、骑术 3、口才 2、炼金 0」且无英文裸键（含裸字典 `{` 形态）/ 属性行注入 6 个中文键且无 strength 等英文泄漏 / 键数不截断（技能 5 项 + 属性 6 项，无「另有」尾注）/ `skillLabel` 覆盖玩家侧 riding→骑术·speech→口才·alchemy→炼金（10-79 漏键）+ 未知键兜底 / `attributeLabel` 覆盖 6 键 + 未知兜底；② 10-82——临冬城 8 位 NPC → 只展开前 5 位 + 「另有 3 位在场未展开」尾注 / 预算内前 5 位（艾德/凯特琳/罗柏/珊莎/艾莉亚）全部展开 / 第 6 位起（布兰/瑞肯/琼恩·雪诺）不出现 / 未知地点→「（无）」兜底 / 既有注入不回归（信仰·性格·目标·可委托·关系 0 + NPC 网络 + 玩家技能属性行）/ 预算常量下限契约 |
 | batch10_79_80_skill_nearby_test | **AI 注入 NPC 技能与信仰 + 邻近地点路途风险**（10-79/80，8 用例）：① 10-79——在场 NPC 注入技能（艾德→统率/剑术）与信仰/ 技能键名不得泄漏英文裸键（无 sword/leadership/politics）/ 超 2 项附「另有 1 项」尾注；② 10-80——临冬城列出白港（dangerLevel 2→安全）+ 巴隆镇（3→一般）+ 两者 governorId null→「无明确治主」/ 玩家处恐怖堡→相邻临冬城标「自家领地」且当地势力行标「敌对」/ 未知地点 id→「未知之地」兜底 / 自由民→不出现「自家领地」「盟友领地」/ 既有注入不回归（当地势力·当前地点·在场 NPC·所在地轶事） |
 | batch10_72_world_stance_dynamic_test | **AI 注入 NPC 立场随玩家关系动态化**（10-72，5 用例）：好感 NPC（关系 80）→ 追加「因与你交好…倾向考虑你的立场」/ 恶感 NPC（关系 -40）→ 追加「因与你结怨…可能与你对立」/ 关系平平（10）不追加动态修饰 / 无事件兜底不回归 / 既有注入（10-70 立场段落 + 10-71 家族成员）不回归 |
 | batch10_65_66_prompt_enhance_test | **AI prompt 注入增强**（10-65/66，6 用例）：在场 NPC 性格/目标注入（艾德·史塔克性格·目标/前 2 条防膨胀/关系·心情·可委托不回归）/ 家族对外关系注入（史塔克敌对·友善/自由民兜底/家族名·族语·规模·影响力不回归） |
@@ -407,7 +410,7 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v5.12（Batch 10-79/80 AI prompt 注入增强：NPC 技能与信仰 + 邻近地点路途风险）· 最后更新：2026-10-04*
+*文档版本：v5.13（Batch 10-81/82 AI prompt 预算化：玩家技能属性中文化 + 在场 NPC 人数预算）· 最后更新：2026-10-04*
 
 ## 八、构建 APK 与直发邮箱（临时任务脚本，2026-10-02 新增）
 
@@ -440,4 +443,4 @@ GameEngine extends GameProviderBase with:
   - **只保留最近 3 次**：Cleanup 步骤按 created_at 倒序删多余 `v0.0.x` release（v 版本序列，旧 apk-<sha8> 一并清理）
 - **已知验证**：run `36958877137` ✅（手动触发 CI 验证 changelog 链路，analyze/test 全绿 + auto-update 幂等跳过）；run `37007321396` ✅（release-publish 全步骤 success）；run `37004310167` ❌（auto-update push 非快进被拒 → 已加 pull --rebase 容错）；run `37048376650` ✅（head fcbd46f，fix readme 收尾闭环，analyze-test 全绿）
 ---
-*文档版本：v5.12（Batch 10-79/80 AI prompt 注入增强：NPC 技能与信仰 + 邻近地点路途风险）· 最后更新：2026-10-04*
+*文档版本：v5.13（Batch 10-81/82 AI prompt 预算化：玩家技能属性中文化 + 在场 NPC 人数预算）· 最后更新：2026-10-04*
