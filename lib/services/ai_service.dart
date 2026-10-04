@@ -388,6 +388,11 @@ class AiService {
     // 并标注玩家在家中的位置（家主/继承人/成员），让 AI 知道玩家
     // 「效忠于谁、与谁为敌、在家族里是什么角色」。
     final familyPowerDesc = _familyPowerDesc(player, playerFamily);
+    // Batch 10-75：注入玩家在家族继承顺位中的位置——AI 之前只知道玩家是
+    // 「家主/成员」（10-74），不知道有子女时的继承顺位、谁被重点培养，
+    // 也不知道无子嗣时继承悬而未决的政治风险。现在附加「- 家族继承顺位：」行
+    // （子女按出生顺序标注第一/第二顺位，命中培养档案时附培养方向）。
+    final inheritanceDesc = _inheritanceDesc(player, playerFamily);
     // Batch 10-48：注入头衔晋升趋势——用 balance_data 单一真相量化「下一档头衔 + 所需声望」，
     // 取代旧的距离描述（90/70 魔法数字），让 AI 叙事能围绕玩家的头衔目标展开。
     final String titleProgressDesc;
@@ -464,6 +469,11 @@ class AiService {
           '人口约 ${cl.population}）——${cl.description.isEmpty ? '（无描述）' : cl.description}'
           '；特色：$featuresText；可前往：$connectedText';
     }
+    // Batch 10-76：注入当地势力与玩家的立场——`location.governorId` 全库 69 处赋值
+    // 却从未进入 AI prompt，AI 只知道「脚下是临冬城」，不知道「此地由谁治下、
+    // 该领主与你的家族是敌是友、你自己与他关系如何」。现在附加
+    // 「- 当地势力与你的立场：」行（治主名/身份/家族/敌友判定/与玩家关系）。
+    final localPowerDesc = _localPowerDesc(player, playerFamily, currentLocation);
     final regionGuide = regionNarrativeGuide(region);
     // Batch 10-52：注入地区风土人情——当前所在区域的宏观气质与常态底色，
     // 与玩家视角的区域引导互补，让 AI 围绕「区域驱动世界」展开叙事，
@@ -493,10 +503,12 @@ class AiService {
 - 家族：$familyDesc
 - 家族成员：$familyMembersDesc
 - 家族在权力网络中的位置：$familyPowerDesc
+- 家族继承顺位：$inheritanceDesc
 - 年龄：${player.age}
 - 地点：${player.locationId}（${region.isEmpty ? '未知区域' : region}）
 当前地点：
 $locationDesc
+- 当地势力与你的立场：$localPowerDesc
 - 金币：${player.gold}
 - 声望：${player.reputation}
 - 生命/精力/饱食：${player.health}/${player.energy}/${player.hunger}
@@ -656,6 +668,100 @@ $seasonGuide
     // 玩家在家中的角色：家族名 == 玩家姓氏视为家主候选，否则成员。
     final playerRole = player.house == family.name ? '家主' : '成员';
     return '${family.name}家族（玩家为$playerRole）——$networkText';
+  }
+
+  /// 生成「玩家在家族继承顺位中的位置」描述（Batch 10-75）。
+  ///
+  /// Batch 10-74 只告诉 AI 玩家是「家主/成员」，但没有子嗣信息——AI 不知道
+  /// 谁会继承家族、谁被重点培养，也不知道无子嗣时的继承悬疑。现在按
+  /// `player.children` 的出生顺序标注顺位（第一/第二/第三顺位），命中
+  /// `player.childRearing` 的子女附加培养方向与学城进修标记：
+  ///   - 瑞德·史塔克（第一顺位，培养 剑术，进修中）
+  ///   - 珊莎·史塔克（第二顺位）
+  /// 让 AI 的家族政治叙事有「谁将来接班」的继承维度。
+  String _inheritanceDesc(Player player, Family? family) {
+    if (family == null) {
+      return '（自由民，无家族，无继承顺位）';
+    }
+    if (player.children.isEmpty) {
+      return '（${family.name}家族尚无子嗣，继承悬而未决，旁支虎视眈眈）';
+    }
+    const ordinals = <String>['第一', '第二', '第三', '第四', '第五'];
+    final parts = <String>[];
+    for (var i = 0; i < player.children.length; i++) {
+      if (parts.length >= 4) break;
+      final child = player.children[i];
+      final order = i < ordinals.length ? ordinals[i] : '第${i + 1}';
+      final rearing = player.childRearing
+          .where((x) => x.name == child)
+          .toList();
+      var extra = '';
+      if (rearing.isNotEmpty) {
+        final r = rearing.first;
+        final focusText = r.focus.isEmpty ? '' : '培养 ${r.focus}';
+        final schoolText = r.sentToSchool ? '，进修中' : '';
+        final tutoredText = r.tutored ? '，已亲自督导' : '';
+        final all = '$focusText$schoolText$tutoredText';
+        if (all.isNotEmpty) extra = '（$all）';
+      }
+      parts.add('$child（$order顺位$extra）');
+    }
+    final tail = player.children.length > parts.length
+        ? '（另有 ${player.children.length - parts.length} 名子女不列顺位）'
+        : '';
+    return '${parts.join('、')}$tail';
+  }
+
+  /// 生成「当地势力与玩家的立场」描述（Batch 10-76）。
+  ///
+  /// `location.governorId`（69 处地点数据赋值）此前从未进入 AI prompt，AI 只知道
+  /// 玩家身在何处，不知道脚下这片地由谁治下、该领主与玩家家族是敌是友、玩家
+  /// 与他个人关系如何。现在输出：
+  ///   - 治主 NPC 名 + 身份 + 家族
+  ///   - 治主家族与玩家家族关系（自家领地 / 盟友 / 敌对 / 中立，阈值 ±20）
+  ///   - 玩家与治主的个人关系值
+  /// 让 AI 能写出「你在敌国领主的治下」这类地理 × 权力交叉叙事。
+  String _localPowerDesc(Player player, Family? family, Location? loc) {
+    final l = loc;
+    if (l == null) {
+      return '（未知之地，无从判断当地势力）';
+    }
+    final governorId = l.governorId;
+    if (governorId == null || governorId.isEmpty) {
+      return '${l.name}无明确治主（名义上直属领地，地方豪强代管）';
+    }
+    final governor = npcById(governorId);
+    if (governor == null) {
+      return '${l.name}的治主数据缺失（$governorId），地方权力真空';
+    }
+    final govFamily = familyById(governor.familyId);
+    final govFamilyName = govFamily == null ? '无家族' : govFamily.name;
+    final fam = family;
+    String stanceText;
+    if (fam == null) {
+      stanceText = '你是自由民，不受任何家族旗号庇护';
+    } else if (govFamily != null && govFamily.id == fam.id) {
+      stanceText = '此地正是${fam.name}家族自家领地';
+    } else {
+      final rel = fam.relations[govFamily?.id ?? ''];
+      if (rel == null) {
+        stanceText = '${fam.name}家族与${govFamilyName}家族无明确恩怨';
+      } else if (rel > 20) {
+        stanceText = '${fam.name}家族与${govFamilyName}家族为盟友（关系 $rel）';
+      } else if (rel < -20) {
+        stanceText =
+            '${fam.name}家族与${govFamilyName}家族敌对（关系 $rel），你在敌对势力治下';
+      } else {
+        stanceText = '${fam.name}家族与${govFamilyName}家族关系平平（$rel）';
+      }
+    }
+    final rel = player.relations[governor.id];
+    final relText = rel == null
+        ? '你与治主尚无直接交集'
+        : (rel >= 20
+            ? '你与治主交好（关系 $rel）'
+            : (rel <= -20 ? '你与治主交恶（关系 $rel）' : '你与治主关系平常（$rel）'));
+    return '${l.name}由${governor.name}（${npcTypeLabel(governor.type)}·${govFamilyName}家族）治下：$stanceText；$relText';
   }
 
   /// 生成「局势关联 NPC 立场」描述（Batch 10-70）。
