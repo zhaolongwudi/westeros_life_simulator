@@ -182,7 +182,8 @@ void main() {
       expect(seg, contains('，性格：'));
       expect(seg, contains('，目标：'));
       expect(seg, contains('，可委托：'));
-      expect(seg, contains('，关系 0'));
+      // 关系值紧跟全角括号：艾德·史塔克（关系 0，心情沉稳…
+      expect(seg, contains('（关系 0，'));
       // 10-73 NPC 网络段落仍在
       expect(body, contains('- NPC 间关系网络：'));
       // 10-81 玩家技能属性行仍在
