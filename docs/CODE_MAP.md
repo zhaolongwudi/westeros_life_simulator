@@ -1,6 +1,6 @@
 # 维斯特洛人生模拟器 · 代码地图（CODE_MAP）
 
-> **本文件是代码结构导航索引**（v5.9 · Batch 10-73/74 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
+> **本文件是代码结构导航索引**（v5.10 · Batch 10-75/76 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
 > 再读本文件快速定位「哪个功能在哪个文件、哪个方法」。避免盲目翻代码。
 >
 > 定位三步法：
@@ -198,6 +198,8 @@ GameEngine extends GameProviderBase with:
 | **AI 注入家族谱系成员** | services/ai_service.dart（`_buildPrompt` 内 `familyMembersDesc`：按玩家家族取在世同族 NPC（名字/身份/所在地/与玩家的关系，最多 6 个防膨胀）作「- 家族成员：」行，自由民兜底「自由民，无家族可依附」/ 无在世同族兜底，Batch 10-71） |
 | **AI 注入 NPC 间关系网络** | services/ai_service.dart（`_buildPrompt` 内 `npcNetworkDesc` + `_npcNetworkDesc` 纯函数：取玩家关系 NPC（前 3 个，按关系值绝对值降序）的 `npc.relations` 映射，输出「A ↔ B（关系 N）：敌对/友善/中立」清单（双向取强、阈值 ±20）——让 AI 知道玩家社交圈内部的人际张力，Batch 10-73） |
 | **AI 注入家族在权力网络中的位置** | services/ai_service.dart（`_buildPrompt` 内 `familyPowerDesc` + `_familyPowerDesc` 纯函数：玩家家族名 + 玩家在家角色（姓氏与家族同名=家主，否则成员）+ 家族对外格局（family.relations 阈值 ±20 分宿敌/盟友/中立）；自由民兜底「自由民，无家族，不受任何家族约束」，Batch 10-74） |
+| **AI 注入玩家家族继承顺位** | services/ai_service.dart（`_buildPrompt` 内 `inheritanceDesc` + `_inheritanceDesc` 纯函数：按 `player.children` 出生顺序标注第一~第五顺位，命中 `player.childRearing` 的子女附加培养方向/进修中/已督导标记，最多列 4 人 + 「另有 N 名子女不列顺位」尾注；无子嗣兜底「尚无子嗣，继承悬而未决，旁支虎视眈眈」/ 自由民兜底「无继承顺位」；紧跟「家族在权力网络中的位置」之后，Batch 10-75） |
+| **AI 注入当地势力与玩家立场** | services/ai_service.dart（`_buildPrompt` 内 `localPowerDesc` + `_localPowerDesc` 纯函数：读 `location.governorId`（69 处地点数据赋值）解析治主 NPC → 输出「{地点}由{治主}（{身份}·{家族}家族）治下：{自家领地/盟友/敌对/关系平平/无明确恩怨}；你与治主{交好/交恶/关系平常/尚无直接交集}」；无治主地点兜底「无明确治主（名义上直属领地，地方豪强代管）」/ 自由民兜底「不受任何家族旗号庇护」；紧随「当前地点」段落之后，Batch 10-76） |
 | **AI 注入当前地点详情** | services/ai_service.dart（`_buildPrompt` 内 `locationDesc`：当前地点名/类型/危险度分级（安全/一般/危险/极度危险）/人口/特色/相连地点名/描述——玩家状态从「地点：location_winterfell（北境）」升级为完整地理实境，Batch 10-63） |
 | **AI 注入关系 NPC 身份** | services/ai_service.dart（`_buildPrompt` 内 `relationDesc`：关系列表从「NPC ID: 好感度」升级为「名字（身份·家族·所在地）: 好感度」，未知 NPC 回退原格式，Batch 10-64） |
 | **AI 注入在场 NPC 性格/目标** | services/ai_service.dart（`_buildPrompt` 内 `onSiteNpcDesc`：在场 NPC 附加「性格」（personality 前 2 条）与「目标」（goals 前 2 条）——AI 之前只知道名字/关系/心情，人物叙事缺乏深度，Batch 10-65） |
@@ -334,6 +336,7 @@ GameEngine extends GameProviderBase with:
 | batch10_71_family_members_test | **AI 注入家族谱系成员**（10-71，4 用例）：有家族玩家 → 注入同族成员（史塔克家族/身份/所在地/关系）/ 与同族私交关系值体现 / 自由民兜底「自由民，无家族可依附」/ 既有注入（世代谱系/家族/对外关系/特质/秘密/成员）不回归 |
 | batch10_73_npc_network_test | **AI 注入 NPC 间关系网络**（10-73，5 用例）：多关系 NPC → 注入「A ↔ B（关系 N）：友善」（艾德↔凯特琳 90 友善）/ 无直接关系 → 中立（卢斯·波顿 ↔ 艾德·史塔克 0 中立）/ 关系 NPC 不足 2 个 → 兜底「（无）」/ 无关系 NPC → 兜底 / 既有注入不回归 |
 | batch10_74_family_power_test | **AI 注入家族在权力网络中的位置**（10-74，4 用例）：有家族玩家 → 注入家族名 + 玩家角色 + 对外格局（兰尼斯特宿敌/徒利盟友）/ 姓氏与家族同名 → 角色「家主」/ 自由民兜底「自由民，无家族，不受任何家族约束」/ 既有注入不回归 |
+| batch10_75_76_inheritance_local_test | **AI 注入家族继承顺位 + 当地势力与玩家立场**（10-75/76，11 用例）：① 10-75 继承顺位——有子女 → 注入顺位名单（第一顺位/第二顺位 + 培养方向 + 进修中/已督导标记，最多列 4 人 + 「另有 N 名子女不列顺位」尾注）/ 无子女 → 兜底「尚无子嗣，继承悬而未决」/ 自由民 → 兜底「无继承顺位」；② 10-76 当地势力——自家领地（临冬城·艾德·史塔克→史塔克家族治下）/ 敌对势力治下（恐怖堡·卢斯·波顿→史塔克 -80 敌对「你在敌对势力治下」）/ 无治主地点 → 兜底「无明确治主」/ 自由民 → 不涉家族对立；③ 既有注入不回归（家族权力网络 / NPC 间关系网络 / 当前地点） |
 | batch10_72_world_stance_dynamic_test | **AI 注入 NPC 立场随玩家关系动态化**（10-72，5 用例）：好感 NPC（关系 80）→ 追加「因与你交好…倾向考虑你的立场」/ 恶感 NPC（关系 -40）→ 追加「因与你结怨…可能与你对立」/ 关系平平（10）不追加动态修饰 / 无事件兜底不回归 / 既有注入（10-70 立场段落 + 10-71 家族成员）不回归 |
 | batch10_65_66_prompt_enhance_test | **AI prompt 注入增强**（10-65/66，6 用例）：在场 NPC 性格/目标注入（艾德·史塔克性格·目标/前 2 条防膨胀/关系·心情·可委托不回归）/ 家族对外关系注入（史塔克敌对·友善/自由民兜底/家族名·族语·规模·影响力不回归） |
 | batch10_57_family_branches_test | **当代支脉横版图**（10-57，4 用例）：已婚有子女（偶→当→子徽章）/ 未婚有子女（无偶徽章）/ 已婚无子女（无子徽章）/ 未婚无子女（不显示区块） |
