@@ -118,30 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
-**2026-10-04 · refactor(batch10-84): AI prompt 10 处硬编码 take() 收口到 balance_data
+**2026-10-04 · fix(batch10-85): 修正凯特琳无尾注断言的文案模糊**（`d69c6b8`）
 
-ai_service.dart 的 prompt 构建散落 10 处裸数字截断：
-  worldNews take(2) / 家族 secrets take(2) / 家族成员 take(6) /
-  性格 take(2) / 目标 take(2) / NPC skills take(2)+rest=length-2 /
-  邻近地点 take(4)+tail>4 / 相关事件 parts>=3 / 世界立场 take(3)
+**2026-10-04 · test(batch10-86): AI prompt 全量 token 基线护栏**（`3f0e59b`）
 
-数字没有单一真相，改一处要翻 10 处注释；且 _skillDesc 里 take(2) 与
-length-2 必须同步改，漏一处就静默出错（如 tail>4 未跟 take 改）。
-
-纯重构：9 个常量取值与原硬编码逐项相同，输出逐字不变。
-常量附取证依据（既有测试断言下限 + 全库数据规模），注释同步更新。
-
-新增源码级护栏测试：扫描 ai_service.dart 断言无残留 .take(数字)。
-test/batch10_84_prompt_budget_constants_test.dart 15 用例。**（`69a4bd2`）
-
-**2026-10-04 · feat(batch10-83): AI prompt 玩家关系段人数预算**（`748a2d8`）
-
-**2026-10-04 · fix(batch10-81/82): 修正在场 NPC 关系断言锚点（全角括号）
-
-CI run 37179344997 失败：949 tests passed / 1 failed。
-根因：断言写 contains(\"，关系 0\")，实际输出是「艾德·史塔克（关系 0，」
-——关系值紧跟全角括号而非逗号，锚点不匹配。
-改为 contains(\"（关系 0，\"）。纯测试修复，产品代码零改动。**（`adf6809`）
+**2026-10-04 · feat(batch10-85): AI prompt 在场 NPC 任务模板预算化**（`4810172`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
