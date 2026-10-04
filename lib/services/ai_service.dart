@@ -312,7 +312,16 @@ class AiService {
       final goalPart = n.goals.isEmpty
           ? ''
           : '，目标：${n.goals.take(2).join('、')}';
-      return '${n.name}（关系 $rel${n.mood.isEmpty ? '' : '，心情${n.mood}'}$traitPart$goalPart$taskPart）';
+      // Batch 10-79：技能与信仰注入——`npc.skills`（38 个 NPC 全部带
+      // sword/leadership/politics 三键）与 `npc.faith`（七神/旧神/光之王/
+      // 淹神/马神）此前全库从未进入 AI prompt，AI 不知道眼前这个人
+      // 会不会打架、能不能议事、信哪一位神，人物行为逻辑缺乏依据。
+      // 技能按数值降序取前 2 项（键名经 skillLabel 中文化），信仰单值直出。
+      final skillText = n.skills.isEmpty
+          ? ''
+          : '，skills：${_skillDesc(n.skills)}';
+      final faithPart = n.faith.isEmpty ? '' : '，信仰：${n.faith}';
+      return '${n.name}（关系 $rel${n.mood.isEmpty ? '' : '，心情${n.mood}'}$traitPart$goalPart$skillText$faithPart$taskPart）';
     }).join('、');
     final flagDesc = player.flags.entries
         .where((e) => e.value)
@@ -504,6 +513,11 @@ class AiService {
     // 该领主与你的家族是敌是友、你自己与他关系如何」。现在附加
     // 「- 当地势力与你的立场：」行（治主名/身份/家族/敌友判定/与玩家关系）。
     final localPowerDesc = _localPowerDesc(player, playerFamily, currentLocation);
+    // Batch 10-80：注入邻近地点与路途风险——`location.connectedTo`（69 处）
+    // 此前只以「可前往：白港、巴隆镇」的地名形式进入 prompt（10-63），
+    // AI 不知道邻近之地的危险度、治主是谁、是不是敌国领土。现在附加
+    // 「- 邻近地点与路途风险：」行（逐个相邻地点：危险度/治主/敌友）。
+    final nearbyRiskDesc = _nearbyRiskDesc(playerFamily, currentLocation);
     final regionGuide = regionNarrativeGuide(region);
     // Batch 10-52：注入地区风土人情——当前所在区域的宏观气质与常态底色，
     // 与玩家视角的区域引导互补，让 AI 围绕「区域驱动世界」展开叙事，
@@ -539,6 +553,7 @@ class AiService {
 当前地点：
 $locationDesc
 - 当地势力与你的立场：$localPowerDesc
+- 邻近地点与路途风险：$nearbyRiskDesc
 - 金币：${player.gold}
 - 声望：${player.reputation}
 - 生命/精力/饱食：${player.health}/${player.energy}/${player.hunger}
@@ -822,6 +837,84 @@ $seasonGuide
         ? '（另有 ${player.children.length - parts.length} 名子女不列顺位）'
         : '';
     return '${parts.join('、')}$tail';
+  }
+
+  /// 生成 NPC 技能短描述（Batch 10-79）。
+  ///
+  /// 按技能值降序取前 2 项（防 prompt 膨胀），键名经 `skillLabel` 中文化：
+  ///   - 艾德·史塔克 → 「统率 9、剑术 8」
+  /// AI 此前只知道在场 NPC 的名字/关系/心情/性格/目标，不知道这个人
+  /// 会不会动刀、能不能议事，人物行为逻辑（谁该出面、谁能说服谁）
+  /// 缺少依据。空表返回空串，由调用方省略整个字段。
+  static String _skillDesc(Map<String, int> skills) {
+    if (skills.isEmpty) return '';
+    final entries = skills.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final top =
+        entries.take(2).map((e) => '${skillLabel(e.key)} ${e.value}').join('、');
+    final rest = entries.length - 2;
+    return rest > 0 ? '$top（另有 $rest 项）' : top;
+  }
+
+  /// 生成「邻近地点与路途风险」描述（Batch 10-80）。
+  ///
+  /// `location.connectedTo`（69 个地点全部赋值）与 `dangerLevel`（0-10 分级）
+  /// 此前只以「可前往：白港、巴隆镇」的地名形式进入 prompt（Batch 10-63），
+  /// AI 不知道邻近的这些地方有多危险、由谁治下、是不是敌国领土，
+  /// 出行叙事缺乏地理风险支撑。现在为每个相邻地点补：
+  ///   - 危险度分级（沿用 10-63 阈值：≤2 安全 / ≤5 一般 / ≤8 危险 / 其余 极度危险）
+  ///   - 治主（`governorId` → NPC 名，无治主则「无明确治主」）
+  ///   - 与玩家家族的敌友（复用 10-76 阈值 ±20）——让 AI 知道「这条路通往敌国」
+  /// 最多列 4 条防 prompt 膨胀。
+  static String _nearbyRiskDesc(Family? family, Location? loc) {
+    final l = loc;
+    if (l == null) return '（未知之地，无从判断邻近何处）';
+    if (l.connectedTo.isEmpty) return '${l.name}四邻不接他处，无路可往';
+    final parts = <String>[];
+    for (final cid in l.connectedTo.take(4)) {
+      final n = locationById(cid);
+      if (n == null) {
+        parts.add('$cid（数据缺失）');
+        continue;
+      }
+      final dangerLabel = switch (n.dangerLevel) {
+        <= 2 => '安全',
+        <= 5 => '一般',
+        <= 8 => '危险',
+        _ => '极度危险',
+      };
+      final gov = n.governorId == null || n.governorId!.isEmpty
+          ? null
+          : npcById(n.governorId!);
+      final govText = gov?.name ?? '无明确治主';
+      // 与玩家家族的敌友（自由民 → 不受旗号庇护；无数据 → 无明确恩怨）。
+      String stanceText;
+      final fam = family;
+      if (fam == null) {
+        stanceText = '你是自由民，无家族旗号可倚';
+      } else {
+        final govFam = gov == null ? null : familyById(gov.familyId);
+        if (govFam != null && govFam.id == fam.id) {
+          stanceText = '自家领地';
+        } else {
+          final rel = fam.relations[govFam?.id ?? ''];
+          if (rel == null) {
+            stanceText = '与${fam.name}家族无明确恩怨';
+          } else if (rel > 20) {
+            stanceText = '盟友领地（$rel）';
+          } else if (rel < -20) {
+            stanceText = '敌对领地（$rel）';
+          } else {
+            stanceText = '关系平平（$rel）';
+          }
+        }
+      }
+      parts.add('${n.name}（$dangerLabel，治主：$govText，$stanceText）');
+    }
+    final tail = l.connectedTo.length > 4
+        ? '（另有 ${l.connectedTo.length - 4} 处未列）'
+        : '';
+    return '自${l.name}可往：${parts.join('；')}$tail';
   }
 
   /// 生成「当地势力与玩家的立场」描述（Batch 10-76）。

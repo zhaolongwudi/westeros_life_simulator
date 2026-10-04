@@ -122,3 +122,25 @@ String npcTypeLabel(NpcType type) {
     NpcType.supernatural => '超自然存在',
   };
 }
+
+/// 技能键中文标签（Batch 10-79）。
+///
+/// 当前全库 NPC 仅用 sword/leadership/politics 三键（38/38 全覆盖）；
+/// 另定义 archery/scholarship/stealth 等键位供后续扩充，此处一并给出标签，
+/// 避免未来新增 NPC 时英文键名泄漏进 AI prompt。
+/// 未知键原样返回（兜底，不抛）。
+String skillLabel(String key) {
+  return switch (key) {
+    'sword' => '剑术',
+    'leadership' => '统率',
+    'politics' => '权谋',
+    'archery' => '弓术',
+    'scholarship' => '学问',
+    'stealth' => '潜行',
+    'fencing' => '刺击',
+    'survival' => '野外求生',
+    'craft' => '手工技艺',
+    'magic' => '魔法',
+    _ => key,
+  };
+}
