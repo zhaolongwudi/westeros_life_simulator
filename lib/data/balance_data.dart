@@ -335,6 +335,50 @@ class BalanceData {
   /// 也与在场 NPC 预算（5）同量级——在场的必然已展开，在场外的多为远亲。
   /// 最坏情况 38 → 8 可省约 79%。
   static const int kAiPromptRelationBudget = 8;
+  // ==================== Batch 10-84 硬编码 take() 收口 ====================
+  /// 「本月世界局势」注入的事件条数（相关度排序后的 top-N）。
+  ///
+  /// 复用 10-33 事件预算筛选器的相关度排序结果，取前 N 条作为本月大事。
+  /// 现状 2 = 取前 2；设此常量是为了让「几件大事算本月局势」成为可调数值。
+  static const int kAiPromptWorldNewsCount = 2;
+  /// 「家族成员」段最多列出的同族在世 NPC 数。
+  ///
+  /// 史塔克家族实测有 8 位在世 NPC；取前 6 位覆盖既有测试依赖的
+  /// 艾德/罗柏并留余量。现状 6 = 当前上限。
+  static const int kAiPromptFamilyMemberCount = 6;
+  /// 在场 NPC 行的「性格」最多注入几条。
+  ///
+  /// 全库 NPC personality 平均 2.9 条；取前 2 条覆盖既有测试断言
+  /// 「性格：正直、严肃」（batch10_65/66 明确断言第三条「忠诚」不出现）。
+  static const int kAiPromptNpcTraitCount = 2;
+  /// 在场 NPC 行的「目标」最多注入几条。
+  ///
+  /// 全库 NPC goals 平均 0.9 条；取前 2 条覆盖既有测试断言
+  /// 「目标：维护荣誉、保护家族」（艾德恰好 2 条）。
+  static const int kAiPromptNpcGoalCount = 2;
+  /// 在场 NPC 行的「技能」最多注入几项（其余给「另有 N 项」尾注）。
+  ///
+  /// 既有测试断言「另有 1 项」（艾德 3 键 skills，取前 2），故预算不能低于 2。
+  static const int kAiPromptNpcSkillCount = 2;
+  /// 「邻近地点与路途风险」最多逐条展开几个相邻地点（其余给「另有 N 处未列」）。
+  ///
+  /// 全库 69 个地点平均 4~5 条 connectedTo；取前 4 个覆盖既有测试的临冬城场景。
+  static const int kAiPromptNearbyLocationCount = 4;
+  /// 「与你相关的可用事件」最多列出几条。
+  ///
+  /// 从已按预算筛选过的事件里再筛家族/身份命中，取前 3 条。
+  /// 现状 3 = 当前上限。
+  static const int kAiPromptRelevantEventCount = 3;
+  /// 「局势关联 NPC 立场」对每个世界事件最多取几个玩家关系 NPC 推导立场。
+  ///
+  /// 现实 2 个世界事件 × 3 个 NPC = 6 行，是「局势关联 NPC 立场」段的全部体量。
+  /// 现状 3 = 当前上限。
+  static const int kAiPromptStanceNpcCount = 3;
+  /// 家族「秘密」最多注入几条（familyDesc 内）。
+  ///
+  /// 既有测试断言「秘密：琼恩·雪诺的真实身份、史塔克家族与龙的关系」（史塔克 2 条全出），
+  /// 故预算不能低于 2。全库家族 secrets 平均 0.4 条、最多 2 条。
+  static const int kAiPromptFamilySecretCount = 2;
   // ==================== 便捷派生 ====================
 
   /// 夫妻感情等级标签。

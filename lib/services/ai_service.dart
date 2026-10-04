@@ -252,16 +252,19 @@ class AiService {
             '- ${e.name}: ${e.description}'
             '（对你而言：${_eventStanceDesc(e, player, playerFamily)}）')
         .join('\n');
-    // Batch 10-45：注入本月世界局势——从相关度最高的预算内事件取前 2 条，
-    // 让 AI 叙事围绕当前世界大事展开（复用事件预算筛选器的相关度排序）。
-    final worldNews = selectedEvents.take(2).toList();
+    // Batch 10-45：注入本月世界局势——从相关度最高的预算内事件取前
+    // `BalanceData.kAiPromptWorldNewsCount`（2）条，让 AI 叙事围绕当前世界大事展开
+    // （复用事件预算筛选器的相关度排序）。
+    final worldNews =
+        selectedEvents.take(BalanceData.kAiPromptWorldNewsCount).toList();
     final worldNewsDesc = worldNews.isEmpty
         ? '（本月暂无重大传闻）'
         : worldNews
             .map((e) => '· ${e.name}——${e.description}')
             .join('\n');
     // Batch 10-70：注入当前局势关联 NPC 立场——让 AI 知道「谁在这场风波中站在哪边」。
-    // 复用 top2 世界事件，对玩家关系 NPC（取前 3 个）按其家族对外关系网络
+    // 复用 top2 世界事件，对玩家关系 NPC（取前 `BalanceData.kAiPromptStanceNpcCount`）
+    // 按其家族对外关系网络
     // （family.relations 敌友阈值 ±20）推导立场：
     //   - 局势事件涉及某家族 → 相关 NPC 的家族与谁敌对/友善
     //   - 玩家与 NPC 的好感度也一并提示（AI 知道玩家站在谁那边有风险）
@@ -398,19 +401,23 @@ class AiService {
       final traitPart = pf.traits.isEmpty ? '' : '；特质：${pf.traits.join('、')}';
       final secretPart = pf.secrets.isEmpty
           ? ''
-          : '；秘密：${pf.secrets.take(2).join('、')}';
+          : '；秘密：${pf.secrets.take(BalanceData.kAiPromptFamilySecretCount).join('、')}';
       familyDesc = '${pf.name}家族（族语「${pf.motto}」，$scaleLabel，影响力 ${pf.influence}$relationPart$traitPart$secretPart）';
     }
     // Batch 10-71：注入家族谱系成员——AI 之前只看到家族名称/族语/规模/影响力/对外关系/
     // 特质/秘密，不知道家族内部都有谁（哪些同族 NPC 在世、各自身份/所在地/与玩家的关系），
-    // 家族叙事缺乏「人」的维度；现在附加「同族成员」清单（取在世，最多 6 个防 prompt 膨胀）。
+    // 家族叙事缺乏「人」的维度；现在附加「同族成员」清单（取在世，最多
+    // `BalanceData.kAiPromptFamilyMemberCount` 个防 prompt 膨胀）。
     final String familyMembersDesc;
     final pmf = playerFamily;
     if (pmf == null) {
       familyMembersDesc = '（自由民，无家族可依附）';
     } else {
       final members =
-          npcsByFamily(pmf.id).where((n) => n.isAlive).take(6).toList();
+          npcsByFamily(pmf.id)
+              .where((n) => n.isAlive)
+              .take(BalanceData.kAiPromptFamilyMemberCount)
+              .toList();
       if (members.isEmpty) {
         familyMembersDesc = '（暂无在世同族）';
       } else {
@@ -731,7 +738,8 @@ $seasonGuide
   /// 玩家自己的家族或身份**。现在从同一批预算内事件里再筛一遍：
   ///   - 家族命中：事件名/描述/tags 含玩家家族名或家族 id（如「史塔克」「family_stark」）
   ///   - 身份命中：含玩家身份的中文关键词（如「贵族」「骑士」「商人」「学士」）
-  /// 输出「· {事件名}（关联：家族·史塔克）」清单（最多 3 条防膨胀），
+  /// 输出「· {事件名}（关联：家族·史塔克）」清单
+  /// （最多 `BalanceData.kAiPromptRelevantEventCount` 条防膨胀），
   /// 让 AI 知道「哪几件事是我家的事」，能据此写出切身的利害取舍。
   String _relevantEventsDesc(Player player, Family? family, List<GameEvent> events) {
     if (events.isEmpty) {
@@ -744,7 +752,7 @@ $seasonGuide
     final famId = family?.id ?? '';
     final parts = <String>[];
     for (final e in events) {
-      if (parts.length >= 3) break;
+      if (parts.length >= BalanceData.kAiPromptRelevantEventCount) break;
       final haystack = '${e.name}${e.description}${e.tags.join()}';
       final reasons = <String>[];
       if (famName.isNotEmpty &&
@@ -870,18 +878,20 @@ $seasonGuide
       final taskPart = templates.isEmpty
           ? ''
           : '，可委托：${templates.map((t) => '「${t.title}」（${t.typeLabel}，难度 ${t.difficulty}，期限 ${t.deadlineMonths} 月）').join('、')}';
-      // Batch 10-65：性格与目标（各取前 2 条防 prompt 膨胀；空则省略）。
+      // 性格/目标各取前 `BalanceData.kAiPromptNpcTraitCount`/`kAiPromptNpcGoalCount`
+      // 条防 prompt 膨胀（空则省略）。
       final traitPart = n.personality.isEmpty
           ? ''
-          : '，性格：${n.personality.take(2).join('、')}';
+          : '，性格：${n.personality.take(BalanceData.kAiPromptNpcTraitCount).join('、')}';
       final goalPart = n.goals.isEmpty
           ? ''
-          : '，目标：${n.goals.take(2).join('、')}';
+          : '，目标：${n.goals.take(BalanceData.kAiPromptNpcGoalCount).join('、')}';
       // Batch 10-79：技能与信仰注入——`npc.skills`（38 个 NPC 全部带
       // sword/leadership/politics 三键）与 `npc.faith`（七神/旧神/光之王/
       // 淹神/马神）此前全库从未进入 AI prompt，AI 不知道眼前这个人
       // 会不会打架、能不能议事、信哪一位神，人物行为逻辑缺乏依据。
-      // 技能按数值降序取前 2 项（键名经 skillLabel 中文化），信仰单值直出。
+      // 技能按数值降序取前 `BalanceData.kAiPromptNpcSkillCount` 项（键名经
+      // skillLabel 中文化），信仰单值直出。
       final skillText = n.skills.isEmpty
           ? ''
           : '，skills：${_skillDesc(n.skills)}';
@@ -908,7 +918,8 @@ $seasonGuide
 
   /// 生成 NPC 技能短描述（Batch 10-79）。
   ///
-  /// 按技能值降序取前 2 项（防 prompt 膨胀），键名经 `skillLabel` 中文化：
+  /// 按技能值降序取前 `BalanceData.kAiPromptNpcSkillCount` 项（防 prompt 膨胀），
+  /// 键名经 `skillLabel` 中文化：
   ///   - 艾德·史塔克 → 「统率 9、剑术 8」
   /// AI 此前只知道在场 NPC 的名字/关系/心情/性格/目标，不知道这个人
   /// 会不会动刀、能不能议事，人物行为逻辑（谁该出面、谁能说服谁）
@@ -917,9 +928,12 @@ $seasonGuide
     if (skills.isEmpty) return '';
     final entries = skills.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    final top =
-        entries.take(2).map((e) => '${skillLabel(e.key)} ${e.value}').join('、');
-    final rest = entries.length - 2;
+    final budget = BalanceData.kAiPromptNpcSkillCount;
+    final top = entries
+        .take(budget)
+        .map((e) => '${skillLabel(e.key)} ${e.value}')
+        .join('、');
+    final rest = entries.length - budget;
     return rest > 0 ? '$top（另有 $rest 项）' : top;
   }
 
@@ -932,13 +946,14 @@ $seasonGuide
   ///   - 危险度分级（沿用 10-63 阈值：≤2 安全 / ≤5 一般 / ≤8 危险 / 其余 极度危险）
   ///   - 治主（`governorId` → NPC 名，无治主则「无明确治主」）
   ///   - 与玩家家族的敌友（复用 10-76 阈值 ±20）——让 AI 知道「这条路通往敌国」
-  /// 最多列 4 条防 prompt 膨胀。
+  /// 最多列 `BalanceData.kAiPromptNearbyLocationCount` 条防 prompt 膨胀。
   static String _nearbyRiskDesc(Family? family, Location? loc) {
     final l = loc;
     if (l == null) return '（未知之地，无从判断邻近何处）';
     if (l.connectedTo.isEmpty) return '${l.name}四邻不接他处，无路可往';
     final parts = <String>[];
-    for (final cid in l.connectedTo.take(4)) {
+    final budget = BalanceData.kAiPromptNearbyLocationCount;
+    for (final cid in l.connectedTo.take(budget)) {
       final n = locationById(cid);
       if (n == null) {
         parts.add('$cid（数据缺失）');
@@ -978,8 +993,8 @@ $seasonGuide
       }
       parts.add('${n.name}（$dangerLabel，治主：$govText，$stanceText）');
     }
-    final tail = l.connectedTo.length > 4
-        ? '（另有 ${l.connectedTo.length - 4} 处未列）'
+    final tail = l.connectedTo.length > budget
+        ? '（另有 ${l.connectedTo.length - budget} 处未列）'
         : '';
     return '自${l.name}可往：${parts.join('；')}$tail';
   }
@@ -1038,17 +1053,18 @@ $seasonGuide
 
   /// 生成「局势关联 NPC 立场」描述（Batch 10-70）。
   ///
-  /// 基于本月 top2 世界事件，对玩家关系 NPC（取前 3 个，防 prompt 膨胀），
+  /// 基于本月 top2 世界事件，对玩家关系 NPC（取前 `BalanceData.kAiPromptStanceNpcCount`
+  /// 个，防 prompt 膨胀），
   /// 按其家族对外关系网络推导「事件对 NPC 意味着什么、他会站在哪边」：
   ///   - NPC 家族与事件关键词涉及的家族是敌/友（family.relations 阈值 ±20）
   ///   - 玩家与 NPC 的好感度一并提示，让 AI 知道玩家所处位置的风险
   /// 让 AI 的政治叙事有「人物 × 局势」的立场支撑。
   String _worldStanceDesc(Player player, List<GameEvent> worldNews) {
     if (worldNews.isEmpty) return '（本月暂无重大传闻，各势力按兵不动）';
-    // 收集玩家有关系（好感度非 0）的 NPC，取前 3 个。
+    // 收集玩家有关系（好感度非 0）的 NPC，取前 `BalanceData.kAiPromptStanceNpcCount` 个。
     final relatedNpcs = player.relations.entries
         .where((e) => e.value != 0)
-        .take(3)
+        .take(BalanceData.kAiPromptStanceNpcCount)
         .map((e) => (npcId: e.key, relation: e.value))
         .toList();
     if (relatedNpcs.isEmpty) {
