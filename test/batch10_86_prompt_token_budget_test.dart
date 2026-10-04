@@ -6,25 +6,26 @@
 ///
 /// 【基线来源（真实取证，非估算）】默认玩家（`Player.defaultPlayer()`：
 /// noble 身份 / 临冬城 / winter / family_stark / 无关系无任务）单次请求的
-/// 分段实测（用一次性脚本按 `ai_service.dart` 模板逐段复现拼接）：
+/// 分段实测。取证实测分两轮：
 ///
-///   固定骨架（剔除 24 个插值的模板字面量）  1355 字符 + systemPrompt 491
-///   在场 NPC（10-82 预算 5 位 + 10-85 模板预算 2）  709
-///   静态模板 8 段（身份/区域/季节/季节动向/风土/农事/集市/轶事）  566
-///   可用事件（10-33 预算 12 条）              492
-///   家族 6 段（对外关系/特质/秘密/成员/权力/继承）  472
-///   玩家数值行（技能/属性/装备/家谱/头衔阶梯）    400
-///   地点 3 段（详情/当地势力/邻近风险）         330
-///   关系段（10-83 预算 8 位）                 311
-///   世界局势 + 局势立场                        240
-///   ─────────────────────────────────────────────
-///   user prompt 合计 ≈ 4877 字符（≈ 4000 token，保守按 0.75 字符/token）
+///   第一轮（一次性 Python 脚本按 `ai_service.dart` 模板逐段复现拼接）估算
+///   4877 字符，其中固定骨架 1355 + systemPrompt 491 占大头。
 ///
-/// 【阈值取法】`kMaxPromptChars = 5900`（实测 ×1.2 向上取整到百位）：
-///   - 上界要**高于**当前实测，否则测试环境差异会误红；
-///   - 上界要**明显低于**预算失效后的规模（若三处预算全部失效，
-///     关系段 38 位 + 在场 NPC 8 位 + 事件全量 72 条 ≈ 7500+ 字符），
-///     否则护栏形同虚设。
+///   第二轮（CI 实测，见 run `37205470965` 的 `[10-86]` 打印）校正为：
+///     user prompt 总长            3664 字符
+///     在场 NPC 段（10-82+10-85 双预算）  671
+///     关系段（10-83 预算 8 位，38 人场景） 265
+///     可用事件块（10-33 预算 12 条）      ≈ 500
+///
+///   两轮差异来自脚本对静态模板分支长度的高估（真实命中分支比脚本解析的短）。
+///   **护栏阈值以 CI 实测为准**，脚本估算仅用于定位大头的相对排序。
+///
+/// 【阈值取法】上界 5900 / 下界 2500：
+///   - 上界要**高于** CI 实测（3664），留 60% 余量容纳文案正常增长；
+///   - 上界要**明显低于**预算失效后的规模（实测基线 3664 基础上，关系段
+///     从 8 位放回 38 位 +1178、在场 NPC 从 5 位放回 8 位且模板全量 +479、
+///     事件从 12 条放回 72 条 +2000，合计 ≈ 7300），否则护栏形同虚设；
+///   - 下界防「误删整段注入」静默通过（删「可用事件」或「在场 NPC」必跌破）。
 ///
 /// 【覆盖】
 ///  1. 默认玩家 user prompt 长度 ≤ 基线上界（核心护栏）
@@ -43,28 +44,27 @@ import 'package:westeros_life_simulator/models/event.dart';
 import 'package:westeros_life_simulator/models/player.dart';
 import 'package:westeros_life_simulator/services/ai_service.dart';
 
-/// user prompt 基线上界（字符）。= Batch 10-86 取证实测 4877 × 1.2 → 5900。
+/// user prompt 基线上界（字符）。
 ///
-/// 预算全部失效时的规模参考（用于说明为何 5900 仍有区分力）：
-///   关系段 38 位（1 处）      ≈ 1443（vs 预算后 311）
-///   在场 NPC 8 位 + 全量模板  ≈ 1150（vs 预算后 709）
-///   事件全量 72 条            ≈ 2950（vs 预算后 492）
-///   → 三处同时失效 ≈ 7500+ 字符，远超 5900 上界。
+/// = CI 实测 3664 留约 60% 余量。预算全部失效时的规模参考（说明本上界
+/// 仍有区分力）：关系段 38 位（1 处）+1178、在场 NPC 8 位且模板全量 +479、
+/// 事件全量 72 条 +2000 → 合计 ≈ 7300 字符，远超 5900。
 const int kMaxPromptChars = 5900;
 
 /// user prompt 下界（字符）。防止「误删整段注入」静默通过。
 ///
-/// 取实测 4877 的 70%（≈ 3400），留出波动空间：正常文案微调不会跌破，
-/// 但删掉一两个段落（如「可用事件」492 + 「在场 NPC」709）一定会跌破。
-const int kMinPromptChars = 3400;
+/// 取 CI 实测 3664 的 70%（≈ 2500），留足波动空间：正常文案微调或
+/// 小段重构不会跌破，但删掉一两个段落（如「可用事件」或「在场 NPC」）
+/// 一定会跌破。
+const int kMinPromptChars = 2500;
 
-/// 关系段单独上界（字符）。10-83 预算 8 位实测 ≈ 311，留 60% 余量。
+/// 关系段单独上界（字符）。10-83 预算 8 位实测 ≈ 265，留 88% 余量。
 const int kMaxRelationChars = 500;
 
-/// 在场 NPC 段单独上界（字符）。10-82 + 10-85 双预算后实测 ≈ 709。
+/// 在场 NPC 段单独上界（字符）。10-82 + 10-85 双预算后实测 ≈ 671。
 const int kMaxOnSiteNpcChars = 1000;
 
-/// 可用事件段单独上界（字符）。10-33 预算 12 条实测 ≈ 492。
+/// 可用事件段单独上界（字符）。10-33 预算 12 条实测 ≈ 500。
 const int kMaxEventsChars = 800;
 
 /// 构造捕获请求体的 mock Dio。
@@ -159,11 +159,26 @@ String _userContent(String requestBody) {
 }
 
 /// 提取以 [anchor] 开头的那一行内容。
+///
+/// 只适用于**单行**段落（如 `- 在场 NPC：…`）。多行块（如 `可用事件：`
+/// 后面跟着 12 行事件）必须用 [_block]——用本函数量多行块会只量到首行，
+/// 断言形同虚设（10-86 首版就踩了这个坑，实测「可用事件段 = 5 字符」）。
 String _line(String body, String anchor) {
   final start = body.indexOf(anchor);
   if (start < 0) return '';
   final end = body.indexOf('\n', start);
   return end > start ? body.substring(start, end) : body.substring(start);
+}
+
+/// 提取从 [anchor] 到下一个 [nextAnchor] 之前的整块内容（多行段落用）。
+///
+/// 若 [nextAnchor] 不存在，取到字符串末尾。
+String _block(String body, String anchor, String nextAnchor) {
+  final start = body.indexOf(anchor);
+  if (start < 0) return '';
+  final end = body.indexOf(nextAnchor, start + anchor.length);
+  if (end < 0) return body.substring(start);
+  return body.substring(start, end);
 }
 
 void main() {
@@ -222,10 +237,20 @@ void main() {
         events: all,
       );
       final user = _userContent(body);
-      final eventsSeg = _line(user, '可用事件：');
+      // 事件段是多行块（12 行事件 + 「- 与你相关的可用事件」行），
+      // 必须用 _block 量整块，不能用 _line（只量到首行 = 5 字符）。
+      final eventsSeg = _block(user, '可用事件：', '叙事引导（身份）：');
       // ignore: avoid_print
-      print('[10-86] 可用事件段 = ${eventsSeg.length} 字符（上界 $kMaxEventsChars）');
+      print('[10-86] 可用事件块 = ${eventsSeg.length} 字符（上界 $kMaxEventsChars）');
       expect(eventsSeg.length, lessThanOrEqualTo(kMaxEventsChars));
+      // 事件行以 '- ' 开头，条数即行数；断言恰为预算值
+      final eventLines = eventsSeg
+          .split('\n')
+          .where((l) => l.startsWith('- ') && l.contains('（对你而言：'))
+          .length;
+      // ignore: avoid_print
+      print('[10-86] 事件条数 = $eventLines（预算 ${BalanceData.kAiPromptEventBudget}）');
+      expect(eventLines, BalanceData.kAiPromptEventBudget);
       expect(user.length, lessThanOrEqualTo(kMaxPromptChars));
     });
 
@@ -243,7 +268,7 @@ void main() {
         '固定骨架+systemPrompt': 1355 + 491,
         '在场 NPC': _line(user, '- 在场 NPC：').length,
         '关系段': _line(user, '- 关系（NPC: 好感度）：').length,
-        '可用事件': _line(user, '可用事件：').length,
+        '可用事件': _block(user, '可用事件：', '叙事引导（身份）：').length,
         '家族': _line(user, '- 家族：').length,
         '家族成员': _line(user, '- 家族成员：').length,
         '家族权力': _line(user, '- 家族在权力网络中的位置：').length,
