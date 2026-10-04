@@ -304,7 +304,7 @@ class AiService {
           // Batch 10-89：补 `id=<npcId>` 标注。此前关系段只给中文名
           // （10-64 起），而 prompt 尾部的「效果键约定」要 AI 用
           // `relations.<NPC标识>` 写好感度——AI 无从得知该用哪个 id，
-          // 只能瞎猜（原文示例写的是 `relations.tyrion`，而全库 38 个 NPC
+          // 只能瞎猜（原文示例写的是不带前缀的短 id，而全库 38 个 NPC
           // id 全是 `npc_` 前缀，AI 照抄就写出一个永不会命中的幽灵键）。
           // 现在把真实 id 直接标在名字后面，AI 只需复制粘贴。
           final secretText = n.secrets.isEmpty ? '' : '，秘密：${n.secrets.first}';
@@ -635,7 +635,7 @@ $seasonGuide
   "choices": [
     {
       "text": "选项文本",
-      "effects": {"gold": 10, "reputation": 5, "skills.sword": 1, "relations.tyrion": 10, "flags.honor_pledge": 1, "inventory.item_bread": 1},
+      "effects": {"gold": 10, "reputation": 5, "skills.sword": 1, "relations.npc_tyrion": 10, "flags.honor_pledge": 1, "inventory.item_bread": 1},
       "narrative": "选择后的叙事"
     }
   ]

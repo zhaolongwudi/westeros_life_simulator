@@ -294,17 +294,23 @@ void main() {
           File('lib/providers/game_state_provider.dart').readAsStringSync();
       final eventSrc =
           File('lib/services/event_service.dart').readAsStringSync();
+      // 先剥掉注释再扫：否则会命中 10-90 注释里为了说明历史而引用的
+      // 「`.clamp(-100, 100)`」字样（首轮 CI 就被这个自造的假阳性坑红过一次）。
+      final codeOnly = RegExp(r'^\s*(//.*)?$').pattern;
       for (final entry in <String, String>{
         'game_state_provider.dart': providerSrc,
         'event_service.dart': eventSrc,
       }.entries) {
+        final lines = entry.value.split('\n')
+            .where((l) => !RegExp(codeOnly).hasMatch(l))
+            .join('\n');
         expect(
-          entry.value.contains('BalanceData.kRelationClamp'),
+          lines.contains('BalanceData.kRelationClamp'),
           isTrue,
           reason: '${entry.key} 未引用 kRelationClamp',
         );
         expect(
-          RegExp(r'clamp\(\s*-100,\s*100\s*\)').hasMatch(entry.value),
+          RegExp(r'clamp\(\s*-100,\s*100\s*\)').hasMatch(lines),
           isFalse,
           reason: '${entry.key} 仍有硬编码 clamp(-100, 100)',
         );
