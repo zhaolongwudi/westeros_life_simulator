@@ -1,6 +1,6 @@
 # 维斯特洛人生模拟器 · 代码地图（CODE_MAP）
 
-> **本文件是代码结构导航索引**（v5.17 · Batch 10-89/90 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
+> **本文件是代码结构导航索引**（v5.18 · Batch 10-91/92 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
 > 再读本文件快速定位「哪个功能在哪个文件、哪个方法」。避免盲目翻代码。
 >
 > 定位三步法：
@@ -30,7 +30,7 @@ lib/
 │   ├── system_data.dart           # 74 系统
 │   ├── item_data.dart             # 34 物品
 │   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节；seasonWorldTrend 季节世界动向 Batch 10-50；regionWorldTrend 地区风土人情 Batch 10-52；seasonFarmTrend 时节农事 Batch 10-56；localMarketTrend 本地集市行情 Batch 10-58；locationLore 所在地名人轶事·历史典故 Batch 10-69）
-│   ├── balance_data.dart           # ⭐ 数值配置集中（初始值/生存消耗/每日上限/头衔阶梯/活动经济/婚姻与世代阈值，Batch 10-30 · M4a；**好感度护栏 kRelationClamp=100**，Batch 10-90；AI prompt 各段预算常量亦收口于此 Batch 10-82~88；无 import 依赖的叶子模块）
+│   ├── balance_data.dart           # ⭐ 数值配置集中（初始值/生存消耗/每日上限/头衔阶梯/活动经济/婚姻与世代阈值，Batch 10-30 · M4a；**好感度护栏 kRelationClamp=100**，Batch 10-90；**技能/属性键白名单 kPlayerSkillKeys(13)/kPlayerAttributeKeys(6)**，Batch 10-92，键集与 `labels` 标签表同源；AI prompt 各段预算常量亦收口于此 Batch 10-82~88；无 import 依赖的叶子模块）
 │   └── npc_task_data.dart         # NPC 多步骤任务模板（72 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯/奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈/卢斯·波顿/拉姆斯·波顿/席恩/霍斯特/约恩·罗伊斯/布蕾妮·塔斯/杰奥·莫尔蒙/艾德慕·徒利/瓦德·佛雷/莱莎·艾林/乔佛瑞/托曼/琼恩·艾林/弥赛拉/雷加/韦赛里斯，Batch 10-18 起逐步扩充，10-39 扩至 44，10-41 协作任务扩至 48，10-44 协作任务扩至 52（君临×2/高庭/派克城），10-47 扩至 54（泰温+艾莉亚各 +1 solo），10-53 扩至 58（卢斯·波顿/拉姆斯·波顿/席恩/霍斯特各 +1 solo），10-54 扩至 61（约恩·罗伊斯/布蕾妮·塔斯各 +1 solo + 约恩×琼恩·艾林协作），10-55 扩至 67（杰奥/艾德慕/瓦德/莱莎/乔佛瑞/托曼各 +1 solo），10-61 扩至 71（琼恩·艾林/弥赛拉/雷加/韦赛里斯各 +1 solo），10-62 扩至 72（琼恩·艾林×莱莎·艾林谷地协作）；协作任务含 coNpcId）
 │
 ├── models/                        # 【模型层】不可变实体（copyWith + toJson/fromJson）
@@ -218,6 +218,7 @@ GameEngine extends GameProviderBase with:
 | **AI 状态段条目预算** | services/ai_service.dart（`_buildPrompt` 内 `flagDesc` 改走 `_flagDesc` 纯函数：原把 flags 里所有 true 的键无上限拼成一行，两条无界写入通道—① `event_service.applyEffects` 的 `flags.〈名〉` **不校验键名**（AI 选项每回合都可新增键）、② `mixin_generation.advanceGeneration` 每代写 `house.childDead.〈继承人名〉` 只增不删；现按 map 插入序取前 `BalanceData.kAiPromptFlagBudget`（=8）项，超出附「（另有 N 项未列）」尾注；CI 实测 14 项状态段 = 38 字符；`equipped.*` 键走独立的「已装备」段不受影响（物品类型硬上限 33），Batch 10-88） |
 | **AI 效果键 id 契约（幽灵键修复）** | services/ai_service.dart（`_buildPrompt` 内 `relationDesc` 每条尾部追加 `[id=<npcId>]`；效果键约定段的示例由 `relations.tyrion` 改为真实 id `relations.npc_tyrion` + 头部加「原样复制，不要自行翻译或简写」硬约束 + 技能/属性可用键白名单；`systemPrompt` 同步补 id 原样使用约束。**根因**：prompt 示例写的 NPC id 全库不存在（38/38 真实 id 都是 `npc_` 前缀），而关系段只给中文名从不给 id → AI 只能照抄幽灵键，好感度永远加不到该 NPC 身上，且幽灵键按 \|值\| 参与 10-83 关系段预算排序、白占预算位。取证：最坏 8 条关系行 321~380 字符，仍 < 10-86 的 500 上界，Batch 10-89） |
 | **好感度/技能数值护栏（两条写入通道统一）** | providers/game_state_provider.dart（`applyEffects`：`relations.<id>` 分支由裸加法改为 `.clamp(-BalanceData.kRelationClamp, kRelationClamp)`，与 `event_service.applyEffects` 早已存在的同名护栏对齐——**AI 选项走的是这条，此前完全没有上界**；`skills.`/`attributes.` 补 `max(0, ...)` 防负等级，与 gold 的 `max(0, ...)` 同策略）+ services/event_service.dart（硬编码的 `clamp(-100, 100)` 收口到 `BalanceData.kRelationClamp`）+ data/balance_data.dart（新增 `kRelationClamp=100` 单一真相，与 `npcRelationLabel` 的「挚友/敌对」档位饱和值对齐）。越界的连带失效：`npcRelationLabel` 六档阈值、`npcFavor` 示好成本公式、ai_service 敌友判定阈值，Batch 10-90） |
+| **效果键白名单守卫（幽灵物品/技能/属性键）** | providers/game_state_provider.dart（`applyEffects`：`inventory.<id>` 分支补 `itemById(itemId) == null` 即 `continue`；`skills.`/`attributes.` 补 `BalanceData.kPlayerSkillKeys`/`kPlayerAttributeKeys` 白名单 `contains` 检查。**此前全库只有 `mixin_life.addItem` 校验物品 id**，两条 applyEffects 通道都不校验，AI 写 `inventory.dragon_scale` 就会往背包塞永不存在的物品）+ services/event_service.dart（同三处守卫，但不合规键登记进 `failedEffects`——该通道本就有此语义，金币不足即走这条路）+ data/balance_data.dart（新增 `kPlayerSkillKeys` 13 键 / `kPlayerAttributeKeys` 6 键，**键集取自 `labels.skillLabel`/`attributeLabel` 的标签分支，单一真相**）。幽灵技能键后果：`labels` 未知键兜底 `_ => key` 会把英文/中文原始键名泄漏进技能面板，且 `mixin_play.train` 的 `skills.containsKey` 判定失真（AI 能「教会」不存在的技能）。白名单取 13 而非玩家侧 5 键：内容事件写 alchemy/speech/stealth/riding/archery，`mixin_npc_interact` 学者分支把 NPC 的 leadership/politics/sword 灌进玩家技能表，Batch 10-91/92） |
 | **AI 多 Key 轮换** | services/ai_service.dart（`generateNarrative`：**多 Key 每次请求自动轮换下一个 Key**（round-robin 起始偏移 + 每次 +1），失败 429/网络/5xx 也直接换下一个不重试同一 Key（避免触发 TPM/RPM 限流）；单 Key 保留指数退避重试；空池返回「未配置 API Key」，Batch 10-59 + fix1） |
 | **AI 提供商预设** | data/ai_provider_defaults.dart（sensenova/atria/deepseek 3 家：默认模型/模型候选/baseUrl，`providerDefaultsOf` 单一真相对齐，Batch 10-59）+ services/ai_config.dart（`resolvedModel`/`resolvedBaseUrl` 空值回落 provider 默认） |
 | **AI 配置存储（多 Key + 提供商）** | services/ai_config.dart（`apiKeys` JSON 数组持久化 `ai_api_keys` + `provider` 字段 + 双向同步旧单 key 键 `ai_api_key` + 兼容旧构造参数 `apiKey:`，Batch 10-59） |
@@ -289,7 +290,7 @@ GameEngine extends GameProviderBase with:
 | 过月 | advance | advanceMonth | 是 |
 | 帮助 | help | _helpText | 否 |
 
-## 五、测试文件映射（test/ 66 文件 + regression/ 5 文件 = 71 文件）
+## 五、测试文件映射（test/ 98 文件 + regression/ 5 文件 = 103 文件）
 
 | 测试文件 | 覆盖 |
 |----------|------|
@@ -359,6 +360,7 @@ GameEngine extends GameProviderBase with:
 | batch10_79_80_skill_nearby_test | **AI 注入 NPC 技能与信仰 + 邻近地点路途风险**（10-79/80，8 用例）：① 10-79——在场 NPC 注入技能（艾德→统率/剑术）与信仰/ 技能键名不得泄漏英文裸键（无 sword/leadership/politics）/ 超 2 项附「另有 1 项」尾注；② 10-80——临冬城列出白港（dangerLevel 2→安全）+ 巴隆镇（3→一般）+ 两者 governorId null→「无明确治主」/ 玩家处恐怖堡→相邻临冬城标「自家领地」且当地势力行标「敌对」/ 未知地点 id→「未知之地」兜底 / 自由民→不出现「自家领地」「盟友领地」/ 既有注入不回归（当地势力·当前地点·在场 NPC·所在地轶事） |
 | batch10_72_world_stance_dynamic_test | **AI 注入 NPC 立场随玩家关系动态化**（10-72，5 用例）：好感 NPC（关系 80）→ 追加「因与你交好…倾向考虑你的立场」/ 恶感 NPC（关系 -40）→ 追加「因与你结怨…可能与你对立」/ 关系平平（10）不追加动态修饰 / 无事件兜底不回归 / 既有注入（10-70 立场段落 + 10-71 家族成员）不回归 |
 | batch10_89_90_effect_key_contract_test | **AI 效果键 id 契约修复 + 好感度/技能数值护栏**（10-89/90，14 用例）：① 10-89——关系行每条带真实 id `[id=npc_nev]` 且中文名/关系值形态不变 / 38 NPC 全有交情时 prompt 里出现的每个 `[id=...]` 都能被 `npcById` 解析（无杜撰 id）且恰为预算 8 个 / 效果键约定示例改真实 id `relations.npc_tyrion` 且旧幽灵键 `relations.tyrion` 在整个 prompt 中消失 / 「原样复制」硬约束 + 11 个技能/属性可用键白名单 + 「累计不超过 ±100」/ systemPrompt 同步 / 既有关系行形态回归（未知 id 回退原格式·关系为空「（无）」·秘密字段）；② 10-90——好感度上界 9999→100 / 下界 -9999→-100 / 边内 15 后 -5 照常得 10 / provider 与 event_service 两条通道边界一致 / 技能·属性防负破底（-999→0）与正常增减不受影响（+2/+1）/ `kRelationClamp==100` / 源码级扫描两文件都引用常量且无硬编码 `clamp(-100, 100)`（**扫描前须剥注释行**，首版被注释里的说明文字误判）。**踩坑记录：首轮 CI 1018 passed / 2 failed——① 只改了「效果键约定」段的示例，漏改 JSON 输出模板里的 `"relations.tyrion": 10`（那才是 AI 真正会照抄的位置）；② 源码扫描正则命中了自己写的注释** |
+| batch10_91_92_effect_key_whitelist_test | **效果键白名单守卫（幽灵物品/技能/属性键）**（10-91/92，20 用例）：① 10-91——provider 侧未知物品 id 不落盘 / 真实 id 数量正确 / 合法键与幽灵键混合时幽灵键被单独丢弃 / 未知物品「消耗」无副作用（不误删真实物品）/ event_service 侧未知 id 进 `failedEffects` 且不落盘 / 真实 id 登记 `applied` / 两条通道判定一致；② 10-92——未知技能键与未知属性键不落盘 / **NPC 侧键位 `leadership` 合法**（`mixin_npc_interact` 学者分支的真实写入通道，白名单必须收）/ **中文翻译键 `skills.剑术` 不落盘**（否则 `labels` 的 `_ => key` 让中文键名进技能面板）/ 合法增减不受影响 / event_service 侧进 `failedEffects`；③ 两条最重要的护栏——**全量 72 个事件的所有 `inventory.`/`skills.`/`attributes.` 键零回归断言**（白名单漏一个真实键，该事件效果会静默失效）+ `defaultPlayer` 全部键在白名单内 + **白名单与 `labels` 标签表双向同步断言**（杜绝「加了标签忘了加白名单」）/ 源码级扫描两条通道都引用三个常量（**扫描前须剥注释行**，坑 52）。**设计决策：刻意不改 prompt 侧**——10-87 已断言背包段 `isNot(contains('item_bread'))`（英文 id 不再泄漏），补 `[id=...]` 会与「减 token」方向相反且需改 3 条既有断言，故撤回 |
 | batch10_65_66_prompt_enhance_test | **AI prompt 注入增强**（10-65/66，6 用例）：在场 NPC 性格/目标注入（艾德·史塔克性格·目标/前 2 条防膨胀/关系·心情·可委托不回归）/ 家族对外关系注入（史塔克敌对·友善/自由民兜底/家族名·族语·规模·影响力不回归） |
 | batch10_57_family_branches_test | **当代支脉横版图**（10-57，4 用例）：已婚有子女（偶→当→子徽章）/ 未婚有子女（无偶徽章）/ 已婚无子女（无子徽章）/ 未婚无子女（不显示区块） |
 | batch10_59_ai_multi_key_test | **AI 多 Key 轮换 + 多模型选择**（10-59 + fix1，12 用例）：首 key 429 自动换第二个成功 / 全部 key 失败返回最后错误 / 单 key 向后兼容（apiKey 入参进入池）/ round-robin 连续两次起始不同 / **多 key 每次请求自动轮换（成功也不重复打同一 key）** / **多 key 失败直接换下一个不重试同一 key** / 3 提供商预设（默认模型+chatBaseUrl）/ 未知提供商回落第一 / resolved 按提供商回落 + 显式优先 / 多 key 持久化往返 / 旧单 key（ai_api_key）迁移 / 保存时旧键同步写入 |
