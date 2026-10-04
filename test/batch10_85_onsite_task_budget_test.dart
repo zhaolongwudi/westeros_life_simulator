@@ -94,17 +94,23 @@ String _onSiteLine(String body) {
 
 void main() {
   group('Batch 10-85 在场 NPC 任务模板预算化', () {
-    test('模板数 = 预算（凯特琳 2 个）→ 全量展开，无尾注', () async {
+    test('模板数 = 预算（凯特琳 2 个）→ 全量展开，无任务尾注', () async {
       final body = await _promptFor(Player.defaultPlayer());
       final line = _onSiteLine(body);
       expect(npcTaskTemplatesOf('npc_catelyn').length, 2);
-      // 凯特琳段内不出现尾注（她的条目后紧跟「、罗柏·史塔克」）
+      // 凯特琳段内不出现任务模板尾注（她的条目后紧跟「、罗柏·史塔克」）
       final catStart = line.indexOf('凯特琳·史塔克');
       expect(catStart, greaterThanOrEqualTo(0));
       final catEnd = line.indexOf('、罗柏·史塔克', catStart);
       final catSeg = line.substring(catStart, catEnd);
       expect(catSeg, contains('可委托：'));
-      expect(catSeg, isNot(contains('另有')));
+      // 两个模板都全量展开
+      for (final t in npcTaskTemplatesOf('npc_catelyn')) {
+        expect(catSeg, contains(t.title));
+      }
+      // 任务模板尾注专属文案是「另有 N 个可委托」；
+      // 段内的「另有 1 项」是 10-79 的技能尾注，与本批无关，不能一并断言。
+      expect(catSeg, isNot(contains('个可委托')));
     });
 
     test('模板数 > 预算（艾德 3 个）→ 展开前 2 + 「另有 1 个可委托」尾注', () async {
