@@ -8,6 +8,9 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 
 import '../data/balance_data.dart';
+// Batch 10-91：`applyEffects` 的 `inventory.<id>` 分支要 `itemById` 校验
+// 物品 id 是否真实存在（与 `mixin_life.addItem` 的既有校验对齐）。
+import '../data/item_data.dart';
 import '../models/event.dart';
 import '../models/player.dart';
 import '../utils/json_safe.dart';
@@ -221,8 +224,16 @@ class GameStateProvider extends ChangeNotifier {
   /// 将效果 Map 应用到玩家身上，返回新玩家。
   ///
   /// 支持键：gold / reputation / skills.<name> / attributes.<name> /
-  /// relations.<npcId> / flags.<flagName>（value>0 置真，<=0 清除）。
+  /// relations.<npcId> / flags.<flagName>（value>0 置真，<=0 清除）/
+  /// inventory.<itemId>（value>0 获得，<0 消耗）。
   /// 供事件选项（[applyChoice]）与 AI 生成选项共用。
+  ///
+  /// 【键名白名单，Batch 10-91/92】`skills.` / `attributes.` 的键须在
+  /// `BalanceData.kPlayerSkillKeys` / `kPlayerAttributeKeys` 内，
+  /// `inventory.` 的 id 须能被 `itemById` 解析；不合规的键**静默跳过**
+  /// （本方法没有 `failedEffects` 通道，与未知顶层键的既有行为一致）。
+  /// 与 `event_service.applyEffects` 的同名分支判定完全一致，
+  /// 区别仅在失败如何上报（那边登记进 `failedEffects`）。
   Player applyEffects(Player player, Map<String, int> effects) {
     var newPlayer = player;
     for (final entry in effects.entries) {
@@ -252,6 +263,12 @@ class GameStateProvider extends ChangeNotifier {
         newPlayer = newPlayer.copyWith(relations: newRels);
       } else if (key.startsWith('skills.')) {
         final skillName = key.substring(7);
+        // Batch 10-92：键名白名单守卫——拒绝写入清单外技能键。
+        // 幽灵技能键会让 `labels.skillLabel` 的 `_ => key` 兜底把原始键名
+        // 泄漏进技能面板，并让 `train` 的 `skills.containsKey` 判定失真
+        // （AI 可以「教会」一个不存在的技能）。静默跳过：本方法无
+        // `failedEffects` 通道可报告（与未知顶层键的既有行为一致）。
+        if (!BalanceData.kPlayerSkillKeys.contains(skillName)) continue;
         final newSkills = Map<String, int>.from(newPlayer.skills);
         // Batch 10-90：防负数破底（与 gold 的 `max(0, ...)` 同策略）——
         // 技能是「等级」，负等级在 `train` 的门槛判定与 prompt 展示里都无意义。
@@ -259,6 +276,8 @@ class GameStateProvider extends ChangeNotifier {
         newPlayer = newPlayer.copyWith(skills: newSkills);
       } else if (key.startsWith('attributes.')) {
         final attrName = key.substring(11);
+        // Batch 10-92：同上一分支，属性键同样走白名单。
+        if (!BalanceData.kPlayerAttributeKeys.contains(attrName)) continue;
         final newAttrs = Map<String, int>.from(newPlayer.attributes);
         newAttrs[attrName] = max(0, (newAttrs[attrName] ?? 0) + value);
         newPlayer = newPlayer.copyWith(attributes: newAttrs);
@@ -269,6 +288,13 @@ class GameStateProvider extends ChangeNotifier {
         newPlayer = newPlayer.copyWith(flags: newFlags);
       } else if (key.startsWith('inventory.')) {
         final itemId = key.substring(10);
+        // Batch 10-91：物品 id 白名单守卫——`itemById(id) == null` 即拒绝。
+        // 与 `mixin_life.addItem` 的既有校验对齐（那边早就有
+        // `if (item == null) return false;`），此前只有这一条通道校验、
+        // 两条 applyEffects 通道不校验，属实现不一致。幽灵物品键后果：
+        // 背包段（10-87）会把未知 id 直接打出来浪费预算位，存档与
+        // 物品面板积累永远无法使用/显示的无效条目。
+        if (itemById(itemId) == null) continue;
         final newInv = List<String>.from(newPlayer.inventory);
         if (value > 0) {
           // 获得物品（数量倍）

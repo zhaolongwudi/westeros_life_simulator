@@ -948,6 +948,13 @@ $seasonGuide
   /// `BalanceData.kAiPromptInventoryEntryCount`（8）种，超出部分附
   /// 「另有 N 种物品未列」尾注——保留「车上还有别的货」的语义。
   /// 聚合顺带解决了重复：同种物品合并成一条 `×N`，比逐件罗列省 token。
+  ///
+  /// 【10-91 更新】旧的「未知 id 回退原 id」策略现已只可能来自
+  /// **守卫上线前写入的旧存档**（写侧自 10-91 起拒绝未知 id），
+  /// 故本段的 id 回退分支退化为存档兜底，不再是每回合的活跃通道。
+  /// 10-87 刻意不把英文 id 放进本段（`isNot(contains('item_bread'))`
+  /// 断言「英文 id 不再泄漏」），故 AI 侧拿不到真实物品 id 是**既定取舍**，
+  /// 不是遗漏——写侧守卫负责兜住 AI 自造的幽灵键。
   String _inventoryDesc(Player player) {
     if (player.inventory.isEmpty) return '（空）';
     // 按物品聚合数量（保留首次出现顺序，Dart map 字面量是 LinkedHashMap）。

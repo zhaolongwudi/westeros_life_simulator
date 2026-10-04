@@ -2,6 +2,9 @@
 library;
 
 import '../data/balance_data.dart';
+// Batch 10-91：`applyEffects` 的 `inventory.<id>` 分支要 `itemById` 校验
+// 物品 id 是否真实存在（与 `mixin_life.addItem` 的既有校验对齐）。
+import '../data/item_data.dart';
 import '../models/event.dart';
 import '../models/player.dart';
 
@@ -131,16 +134,28 @@ class EventService {
         default:
           if (key.startsWith('skills.')) {
             final skillName = key.substring(7);
-            final newSkills = Map<String, int>.from(newPlayer.skills);
-            newSkills[skillName] = (newSkills[skillName] ?? 0) + value;
-            newPlayer = newPlayer.copyWith(skills: newSkills);
-            applied[key] = value;
+            // Batch 10-92：键名白名单守卫——与 `GameStateProvider.applyEffects`
+            // 的同名分支对齐（那边静默跳过，本通道有 `failedEffects`
+            // 可报告，故按「失败」语义登记，便于调用方排查）。
+            if (!BalanceData.kPlayerSkillKeys.contains(skillName)) {
+              failed[key] = value;
+            } else {
+              final newSkills = Map<String, int>.from(newPlayer.skills);
+              newSkills[skillName] = (newSkills[skillName] ?? 0) + value;
+              newPlayer = newPlayer.copyWith(skills: newSkills);
+              applied[key] = value;
+            }
           } else if (key.startsWith('attributes.')) {
             final attrName = key.substring(11);
-            final newAttrs = Map<String, int>.from(newPlayer.attributes);
-            newAttrs[attrName] = (newAttrs[attrName] ?? 0) + value;
-            newPlayer = newPlayer.copyWith(attributes: newAttrs);
-            applied[key] = value;
+            // Batch 10-92：属性键白名单守卫，同上。
+            if (!BalanceData.kPlayerAttributeKeys.contains(attrName)) {
+              failed[key] = value;
+            } else {
+              final newAttrs = Map<String, int>.from(newPlayer.attributes);
+              newAttrs[attrName] = (newAttrs[attrName] ?? 0) + value;
+              newPlayer = newPlayer.copyWith(attributes: newAttrs);
+              applied[key] = value;
+            }
           } else if (key.startsWith('relations.')) {
             final npcId = key.substring(10);
             final newRelations = Map<String, int>.from(newPlayer.relations);
@@ -160,22 +175,31 @@ class EventService {
             applied[key] = value;
           } else if (key.startsWith('inventory.')) {
             final itemId = key.substring(10);
-            final newInv = List<String>.from(newPlayer.inventory);
-            if (value > 0) {
-              for (var i = 0; i < value; i++) {
-                newInv.add(itemId);
-              }
+            // Batch 10-91：物品 id 白名单守卫——`itemById(id) == null` 即拒绝。
+            // 与 `mixin_life.addItem` 的既有校验、以及
+            // `GameStateProvider.applyEffects` 的同名分支三方对齐。
+            // 幽灵物品键会让背包段（10-87）白占预算位，存档与物品面板
+            // 积累永远无法使用的无效条目。
+            if (itemById(itemId) == null) {
+              failed[key] = value;
             } else {
-              var toRemove = -value;
-              while (toRemove > 0) {
-                final idx = newInv.indexOf(itemId);
-                if (idx < 0) break;
-                newInv.removeAt(idx);
-                toRemove--;
+              final newInv = List<String>.from(newPlayer.inventory);
+              if (value > 0) {
+                for (var i = 0; i < value; i++) {
+                  newInv.add(itemId);
+                }
+              } else {
+                var toRemove = -value;
+                while (toRemove > 0) {
+                  final idx = newInv.indexOf(itemId);
+                  if (idx < 0) break;
+                  newInv.removeAt(idx);
+                  toRemove--;
+                }
               }
+              newPlayer = newPlayer.copyWith(inventory: newInv);
+              applied[key] = value;
             }
-            newPlayer = newPlayer.copyWith(inventory: newInv);
-            applied[key] = value;
           } else if (key == 'health') {
             newPlayer = newPlayer.copyWith(
               health: (newPlayer.health + value).clamp(0, 100),

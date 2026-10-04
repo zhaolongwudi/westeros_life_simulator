@@ -406,6 +406,10 @@ class BalanceData {
   /// `event_service.applyEffects` 的 `inventory.<id>` 分支**不校验 id 是否存在**，
   /// AI 选项可写入任意未知 id，因此该段是随回合数无界增长的一段。
   ///
+  /// 【10-91 更新】写侧已补 `itemById` 守卫（两条 applyEffects 通道），
+  /// 「AI 每回合写入新未知 id」这条无界通道已关闭；但本段长度上界
+  /// 仍由物品种类数决定（全库 33 种 > 预算 8），故预算保留不变。
+  ///
   /// 【为什么取 8】现有内容管道共 33 种物品，真实玩家常驻 3~8 种；
   /// 取 8 覆盖绝大多数存档，其余用尾注告知 AI「车上还有别的货」，
   /// 而不逐条罗列（保留「持有物不止这些」的语义）。
@@ -446,7 +450,56 @@ class BalanceData {
   /// 天然对齐（越界无新增语义）；同时是 `ai_service` 敌友阈值 ±20 的
   /// 5 倍裕度，不会让 AI 侧的立场推导提前饱和。
   static const int kRelationClamp = 100;
-
+  // ==================== Batch 10-91/92 效果键白名单 ====================
+  /// 玩家技能键白名单（`skills.<key>` 的合法键集）。
+  ///
+  /// 【为什么需要】`skills.`/`attributes.` 分支历史上**不校验键名**，
+  /// AI 选项可写入任意字符串（如 `skills.leadership` 这类 NPC 侧键位，
+  /// 或 `skills.剑术` 这类中文翻译），后果与 10-89 的幽灵关系键同构：
+  ///  1. `labels.skillLabel` 的未知键兜底是 `_ => key`（原样返回），
+  ///     于是**英文/中文原始键名直接泄漏进技能面板 UI**；
+  ///  2. `mixin_play.train` 的「你从未学过 X」判定以 `skills.containsKey`
+  ///     为准，幽灵键会让 AI「教会」玩家一个本不存在的技能，
+  ///     而面板上它是一个没有中文标签的裸键；
+  ///  3. 技能是 10-79/10-81 注入 prompt 的键，无标签键在 prompt 里也无意义。
+  ///
+  /// 【键集来源】`labels.skillLabel` 的 13 个分支——它同时是 UI 标签表与
+  /// 契约表，新增技能必须同步该表，故以此为单一真相。
+  ///
+  /// 【为什么是 13 而非只留玩家侧 5 键】玩家侧 `Player.defaultPlayer`
+  /// 只初始化 sword/archery/riding/speech/alchemy 五键，但内容事件里
+  /// `alchemy`/`speech`/`stealth`/`riding`/`archery` 都在写入，且
+  /// `mixin_npc_interact` 的学者分支会直接把 NPC 的 skills 键
+  /// （leadership/politics/sword）灌进玩家技能表。取全集 13 键，
+  /// 这三条真实写入通道全部合法，不误伤既有内容。
+  static const Set<String> kPlayerSkillKeys = <String>{
+    'sword', // 剑术
+    'leadership', // 统率
+    'politics', // 权谋
+    'archery', // 弓术
+    'scholarship', // 学问
+    'stealth', // 潜行
+    'fencing', // 刺击
+    'survival', // 野外求生
+    'craft', // 手工技艺
+    'magic', // 魔法
+    'riding', // 骑术（玩家侧）
+    'speech', // 口才（玩家侧）
+    'alchemy', // 炼金（玩家侧）
+  };
+  /// 玩家属性键白名单（`attributes.<key>` 的合法键集）。
+  ///
+  /// 来源同为 `labels.attributeLabel` 的 6 个分支（单一真相）。
+  /// 未知属性键同样会以 `_ => key` 兜底泄漏原文进属性面板，
+  /// 且无任何内容事件/指令会写入清单外的键。
+  static const Set<String> kPlayerAttributeKeys = <String>{
+    'strength', // 力量
+    'agility', // 敏捷
+    'intelligence', // 智识
+    'charisma', // 魅力
+    'willpower', // 意志
+    'perception', // 感知
+  };
   // ==================== 便捷派生 ====================
 
   /// 夫妻感情等级标签。
