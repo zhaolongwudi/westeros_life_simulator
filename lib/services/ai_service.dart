@@ -297,32 +297,9 @@ class AiService {
     // Batch 10-22：在场 NPC 多步骤任务模板注入（标题 + 难度 + 期限，替代旧 tasks.first）
     // Batch 10-65：附加性格/目标注入——AI 之前只知道 NPC 名字/关系/心情，
     // 不知道对方性格特质与行事目标，人物叙事缺乏深度；现在附加「性格·目标」。
-    final onSiteNpcDesc = allNpcs
-        .where((n) => n.isAlive && n.locationId == player.locationId)
-        .map((n) {
-      final rel = player.relations[n.id] ?? 0;
-      final templates = npcTaskTemplatesOf(n.id);
-      final taskPart = templates.isEmpty
-          ? ''
-          : '，可委托：${templates.map((t) => '「${t.title}」（${t.typeLabel}，难度 ${t.difficulty}，期限 ${t.deadlineMonths} 月）').join('、')}';
-      // Batch 10-65：性格与目标（各取前 2 条防 prompt 膨胀；空则省略）。
-      final traitPart = n.personality.isEmpty
-          ? ''
-          : '，性格：${n.personality.take(2).join('、')}';
-      final goalPart = n.goals.isEmpty
-          ? ''
-          : '，目标：${n.goals.take(2).join('、')}';
-      // Batch 10-79：技能与信仰注入——`npc.skills`（38 个 NPC 全部带
-      // sword/leadership/politics 三键）与 `npc.faith`（七神/旧神/光之王/
-      // 淹神/马神）此前全库从未进入 AI prompt，AI 不知道眼前这个人
-      // 会不会打架、能不能议事、信哪一位神，人物行为逻辑缺乏依据。
-      // 技能按数值降序取前 2 项（键名经 skillLabel 中文化），信仰单值直出。
-      final skillText = n.skills.isEmpty
-          ? ''
-          : '，skills：${_skillDesc(n.skills)}';
-      final faithPart = n.faith.isEmpty ? '' : '，信仰：${n.faith}';
-      return '${n.name}（关系 $rel${n.mood.isEmpty ? '' : '，心情${n.mood}'}$traitPart$goalPart$skillText$faithPart$taskPart）';
-    }).join('、');
+    // Batch 10-79：附加技能与信仰。
+    // Batch 10-82：抽为 `_onSiteNpcDesc` 并加人数预算（临冬城 8 位 → 取前 5 + 尾注）。
+    final onSiteNpcDesc = _onSiteNpcDesc(player);
     final flagDesc = player.flags.entries
         .where((e) => e.value)
         .map((e) => e.key)
@@ -330,6 +307,13 @@ class AiService {
     final inventoryDesc = player.inventory.isEmpty
         ? '（空）'
         : player.inventory.join('、');
+    // Batch 10-81：玩家技能/属性中文标签化——原先直接插裸字典
+    // `{sword: 3, archery: 2, ...}`，AI 看到的是英文键名 + Dart Map 字面量，
+    // 既占 token 又要 AI 自己猜含义。现在走 `labels.skillLabel` /
+    // `labels.attributeLabel` 输出「剑术 3、弓术 2、骑术 3、口才 2、炼金 0」。
+    // 键数与数值全量保留（玩家自身属性不多，不设预算），仅键名中文化。
+    final skillDesc = _kvDesc(player.skills, skillLabel);
+    final attributeDesc = _kvDesc(player.attributes, attributeLabel);
     final titleDesc = player.title.isEmpty ? '（无）' : player.title;
     // Batch 10-19：注入婚姻状态/子女培养/进行中任务
     final marriageDesc = player.spouse == null
@@ -557,8 +541,8 @@ $locationDesc
 - 金币：${player.gold}
 - 声望：${player.reputation}
 - 生命/精力/饱食：${player.health}/${player.energy}/${player.hunger}
-- 技能：${player.skills}
-- 属性：${player.attributes}
+- 技能：$skillDesc
+- 属性：$attributeDesc
 - 关系（NPC: 好感度）：${relationDesc.isEmpty ? '（无）' : relationDesc}
 - NPC 间关系网络：${npcNetworkDesc.isEmpty ? '（无）' : npcNetworkDesc}
 - 在场 NPC：${onSiteNpcDesc.isEmpty ? '（无）' : onSiteNpcDesc}
@@ -647,7 +631,8 @@ $seasonGuide
 
   /// 生成「NPC 间关系网络」描述（Batch 10-73）。
   ///
-  /// 取玩家关系 NPC（前 3 个，防 prompt 膨胀），输出这些 NPC 彼此之间的
+  /// 取玩家关系 NPC（前 `BalanceData.kAiPromptNpcNetworkBudget` 个 = 3，Batch 10-82
+  /// 由硬编码 3 收口到预算常量防膨胀），输出这些 NPC 彼此之间的
   /// 关系（`npc.relations` 映射，按阈值 ±20 分敌对/友善/中立）：
   ///   - 艾德·史塔克 ↔ 凯特琳·史塔克（关系 90）：友善
   ///   - 提利昂·兰尼斯特 ↔ 詹姆·兰尼斯特（关系 80）：友善
@@ -660,7 +645,10 @@ $seasonGuide
         .where((e) => e.value != 0)
         .toList()
       ..sort((a, b) => b.value.abs().compareTo(a.value.abs()));
-    final picked = relatedIds.take(3).map((e) => e.key).toList();
+    final picked = relatedIds
+        .take(BalanceData.kAiPromptNpcNetworkBudget)
+        .map((e) => e.key)
+        .toList();
     if (picked.length < 2) return '';
     final lines = <String>[];
     for (var i = 0; i < picked.length; i++) {
@@ -837,6 +825,65 @@ $seasonGuide
         ? '（另有 ${player.children.length - parts.length} 名子女不列顺位）'
         : '';
     return '${parts.join('、')}$tail';
+  }
+
+  /// 生成「在场 NPC」描述（Batch 10-15/22/65/79，10-82 加预算）。
+  ///
+  /// 每位在场 NPC 输出「名字（关系 N，心情 X，性格 A、B，目标 C、D，
+  /// skills：统率 9、剑术 8（另有 1 项），信仰：旧神，可委托：「任务」…）」。
+  ///
+  /// **10-82 预算化**：实测临冬城有 8 位 NPC 同场，全量注入单行 700+ 字，
+  /// token 占比过高。按 `BalanceData.kAiPromptOnSiteNpcBudget`（5）截取，
+  /// 超出部分附「另有 N 位在场」尾注——保留「还有人」的语义，不让 AI
+  /// 误以为在场只有这几位。截断值 5 覆盖了全部既有测试依赖的
+  /// 艾德/凯特琳/罗柏（前 3 位）并留 2 位余量。
+  String _onSiteNpcDesc(Player player) {
+    final onsite = allNpcs
+        .where((n) => n.isAlive && n.locationId == player.locationId)
+        .toList();
+    if (onsite.isEmpty) return '';
+    final budget = BalanceData.kAiPromptOnSiteNpcBudget;
+    final shown = onsite.take(budget);
+    final desc = shown.map((n) {
+      final rel = player.relations[n.id] ?? 0;
+      final templates = npcTaskTemplatesOf(n.id);
+      final taskPart = templates.isEmpty
+          ? ''
+          : '，可委托：${templates.map((t) => '「${t.title}」（${t.typeLabel}，难度 ${t.difficulty}，期限 ${t.deadlineMonths} 月）').join('、')}';
+      // Batch 10-65：性格与目标（各取前 2 条防 prompt 膨胀；空则省略）。
+      final traitPart = n.personality.isEmpty
+          ? ''
+          : '，性格：${n.personality.take(2).join('、')}';
+      final goalPart = n.goals.isEmpty
+          ? ''
+          : '，目标：${n.goals.take(2).join('、')}';
+      // Batch 10-79：技能与信仰注入——`npc.skills`（38 个 NPC 全部带
+      // sword/leadership/politics 三键）与 `npc.faith`（七神/旧神/光之王/
+      // 淹神/马神）此前全库从未进入 AI prompt，AI 不知道眼前这个人
+      // 会不会打架、能不能议事、信哪一位神，人物行为逻辑缺乏依据。
+      // 技能按数值降序取前 2 项（键名经 skillLabel 中文化），信仰单值直出。
+      final skillText = n.skills.isEmpty
+          ? ''
+          : '，skills：${_skillDesc(n.skills)}';
+      final faithPart = n.faith.isEmpty ? '' : '，信仰：${n.faith}';
+      return '${n.name}（关系 $rel${n.mood.isEmpty ? '' : '，心情${n.mood}'}$traitPart$goalPart$skillText$faithPart$taskPart）';
+    }).join('、');
+    // 10-82：截断尾注——告知 AI 还有其他人在场，但不逐个展开（省 token）。
+    final hidden = onsite.length - budget;
+    final tail = hidden > 0 ? '（另有 $hidden 位在场未展开）' : '';
+    return '$desc$tail';
+  }
+
+  /// 把「键 → 数值」映射格式化为中文短描述（Batch 10-81）。
+  ///
+  /// 通用工具：`skillLabel` / `attributeLabel` 传入做键名中文化，
+  /// 输出「剑术 3、弓术 2、骑术 3」（保持 Map 插入序，数值原样）。
+  /// 用于玩家技能行（10-81）与属性行；空表返回空串由调用方兜底。
+  static String _kvDesc(Map<String, int> kv, String Function(String) label) {
+    if (kv.isEmpty) return '';
+    return kv.entries
+        .map((e) => '${label(e.key)} ${e.value}')
+        .join('、');
   }
 
   /// 生成 NPC 技能短描述（Batch 10-79）。

@@ -123,12 +123,12 @@ String npcTypeLabel(NpcType type) {
   };
 }
 
-/// 技能键中文标签（Batch 10-79）。
+/// 技能键中文标签（Batch 10-79，10-81 补玩家侧键）。
 ///
-/// 当前全库 NPC 仅用 sword/leadership/politics 三键（38/38 全覆盖）；
-/// 另定义 archery/scholarship/stealth 等键位供后续扩充，此处一并给出标签，
-/// 避免未来新增 NPC 时英文键名泄漏进 AI prompt。
-/// 未知键原样返回（兜底，不抛）。
+/// NPC 侧（npc_data.dart）用 sword/leadership/politics 三键；
+/// 玩家侧（player.dart defaultPlayer）用 sword/archery/riding/speech/alchemy，
+/// 两套键位不同——10-81 补齐玩家侧的 riding/speech/alchemy，
+/// 避免玩家技能行中文化时漏键退回英文。未知键原样返回（兜底，不抛）。
 String skillLabel(String key) {
   return switch (key) {
     'sword' => '剑术',
@@ -141,6 +141,26 @@ String skillLabel(String key) {
     'survival' => '野外求生',
     'craft' => '手工技艺',
     'magic' => '魔法',
+    // 玩家侧键（player.dart）
+    'riding' => '骑术',
+    'speech' => '口才',
+    'alchemy' => '炼金',
+    _ => key,
+  };
+}
+
+/// 属性键中文标签（Batch 10-81）。
+///
+/// 玩家 `attributes` 六个键：strength/agility/intelligence/charisma/
+/// willpower/perception。未知键原样返回（兜底，不抛）。
+String attributeLabel(String key) {
+  return switch (key) {
+    'strength' => '力量',
+    'agility' => '敏捷',
+    'intelligence' => '智识',
+    'charisma' => '魅力',
+    'willpower' => '意志',
+    'perception' => '感知',
     _ => key,
   };
 }

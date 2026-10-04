@@ -305,6 +305,21 @@ class BalanceData {
   static const int kAiScoreIdentity = 2;
   /// 数值条件匹配评分（minGold/minEnergy/maxEnergy/minAge 等命中一次）。
   static const int kAiScoreNumeric = 1;
+  // ==================== Batch 10-82 AI Prompt 人数预算 ====================
+  /// AI 叙事 prompt 单次最多注入的在场 NPC 数。
+  ///
+  /// 实测临冬城有 8 位 NPC 同场（艾德/凯特琳/罗柏/珊莎/艾莉亚/布兰/瑞肯/琼恩），
+  /// 每位带「关系+心情+性格+目标+技能+信仰+可委托任务清单」，全量注入单行可达
+  /// 700+ 字、token 占比过高。取前 5 位（覆盖全部既有测试依赖的艾德/凯特琳/罗柏
+  /// 并留 2 位余量），超出部分附「另有 N 位在场」尾注。
+  static const int kAiPromptOnSiteNpcBudget = 5;
+  /// AI 叙事 prompt 单次最多列出的「NPC 间关系网络」边数。
+  ///
+  /// `_npcNetworkDesc` 取玩家关系 NPC 前 3 个并做**两两组合**（i<j），
+  /// 最多 C(3,2)=3 条边，且双方无直接关系时回落 0（中立）。
+  /// 取预算 3 = 当前实际上限，设此常量是为了给未来放宽「前 N 个 NPC」
+  /// 留出显式上限，避免组合数 O(N²) 膨胀挤占预算。
+  static const int kAiPromptNpcNetworkBudget = 3;
   // ==================== 便捷派生 ====================
 
   /// 夫妻感情等级标签。
