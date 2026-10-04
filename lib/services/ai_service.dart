@@ -323,13 +323,17 @@ class AiService {
     // Batch 10-79：附加技能与信仰。
     // Batch 10-82：抽为 `_onSiteNpcDesc` 并加人数预算（临冬城 8 位 → 取前 5 + 尾注）。
     final onSiteNpcDesc = _onSiteNpcDesc(player);
-    final flagDesc = player.flags.entries
-        .where((e) => e.value)
-        .map((e) => e.key)
-        .join('、');
-    final inventoryDesc = player.inventory.isEmpty
-        ? '（空）'
-        : player.inventory.join('、');
+    // Batch 10-87：背包段聚合去重 + 中文名 + 条目预算——原先直接插
+    // `player.inventory.join('、')`，AI 看到的是裸英文 id 且逐件重复
+    // （12 个黑面包写 12 遍 `item_bread`），而背包无上限（addItem 恒成功、
+    // AI 选项 `inventory.<id>` 不校验 id）。现按物品聚合输出
+    // 「黑面包 ×3、长剑 ×1」，最多 `BalanceData.kAiPromptInventoryEntryCount`（8）种。
+    final inventoryDesc = _inventoryDesc(player);
+    // Batch 10-88：状态段条目预算——原先把 flags 里所有 true 的键无上限拼成一行，
+    // 而 `applyEffects` 的 `flags.<名>` 不校验键名、`advanceGeneration` 每代写
+    // `house.childDead.<继承人名>` 只增不删，两条通道都会让它随回合数无界增长。
+    // 现取前 `BalanceData.kAiPromptFlagBudget`（8）项 + 尾注。
+    final flagDesc = _flagDesc(player);
     // Batch 10-81：玩家技能/属性中文标签化——原先直接插裸字典
     // `{sword: 3, archery: 2, ...}`，AI 看到的是英文键名 + Dart Map 字面量，
     // 既占 token 又要 AI 自己猜含义。现在走 `labels.skillLabel` /
@@ -921,6 +925,55 @@ $seasonGuide
     final hidden = onsite.length - budget;
     final tail = hidden > 0 ? '（另有 $hidden 位在场未展开）' : '';
     return '$desc$tail';
+  }
+
+  /// 生成「背包」描述（Batch 10-87）。
+  ///
+  /// 原先直接插 `player.inventory.join('、')`，AI 看到的是**裸英文物品 id
+  /// 且逐件重复**（持有 12 个黑面包就写 12 遍 `item_bread`）。而背包**没有上限**
+  /// —— `mixin_life.addItem` 注释明写「背包无上限，恒成功」，`applyEffects`
+  /// 的 `inventory.<id>` 分支也不校验 id 是否存在，AI 选项可写入任意未知 id，
+  /// 这使该段成为随回合数无界增长的一段。
+  ///
+  /// 现在按物品聚合并取中文名（未知 id 回退原 id，与 `itemName` 同策略），
+  /// 输出「黑面包 ×3、长剑 ×1」；最多列
+  /// `BalanceData.kAiPromptInventoryEntryCount`（8）种，超出部分附
+  /// 「另有 N 种物品未列」尾注——保留「车上还有别的货」的语义。
+  /// 聚合顺带解决了重复：同种物品合并成一条 `×N`，比逐件罗列省 token。
+  String _inventoryDesc(Player player) {
+    if (player.inventory.isEmpty) return '（空）';
+    // 按物品聚合数量（保留首次出现顺序，Dart map 字面量是 LinkedHashMap）。
+    final counts = <String, int>{};
+    for (final id in player.inventory) {
+      counts[id] = (counts[id] ?? 0) + 1;
+    }
+    final entries = counts.entries.toList();
+    final shown = entries.take(BalanceData.kAiPromptInventoryEntryCount);
+    final desc = shown
+        .map((e) => '${itemName(e.key)} ×${e.value}')
+        .join('、');
+    final hidden = entries.length - shown.length;
+    final tail = hidden > 0 ? '（另有 $hidden 种物品未列）' : '';
+    return '$desc$tail';
+  }
+
+  /// 生成「状态」描述（Batch 10-88）。
+  ///
+  /// 原先把 `player.flags` 里所有为 true 的键无上限拼成一行。两条无界写入通道：
+  /// ① `event_service.applyEffects` 的 `flags.<名>` 分支**不校验键名**，
+  ///    AI 选项每回合都可能新增一个键；② `advanceGeneration` 每次换代写
+  ///    `house.childDead.<继承人名>`，只增不删。
+  ///
+  /// 现在按 map 插入序取前 `BalanceData.kAiPromptFlagBudget`（8）项，
+  /// 超出部分附「另有 N 项未列」尾注（保留「身上还有别的事」语义）。
+  String _flagDesc(Player player) {
+    final active =
+        player.flags.entries.where((e) => e.value).map((e) => e.key).toList();
+    if (active.isEmpty) return '';
+    final shown = active.take(BalanceData.kAiPromptFlagBudget);
+    final hidden = active.length - shown.length;
+    final tail = hidden > 0 ? '（另有 $hidden 项未列）' : '';
+    return '${shown.join('、')}$tail';
   }
 
   /// 把「键 → 数值」映射格式化为中文短描述（Batch 10-81）。

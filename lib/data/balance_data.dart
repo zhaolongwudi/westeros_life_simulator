@@ -394,6 +394,39 @@ class BalanceData {
   /// ≈ 116 字符（在场 NPC 段降约 18%）；余下模板用尾注告知 AI「另有 N 个可委托」
   /// 而不逐条展开，保留「这位人物手上还有活」的语义。
   static const int kAiPromptOnSiteNpcTaskBudget = 2;
+
+
+  // ==================== Batch 10-87 背包段预算 ====================
+  /// 「背包」段最多逐条列出几种物品（超出给「另有 N 种物品未列」尾注）。
+  ///
+  /// 【为什么需要预算】`_buildPrompt` 的背包段原先直接
+  /// `player.inventory.join('、')`，输出的是**裸英文物品 ID 且逐件重复**：
+  /// 持有 12 个黑面包就写 12 遍 `item_bread`（≈120 字符）。而背包**没有上限**——
+  /// `mixin_life.addItem` 注释明写「背包无上限，恒成功」，且
+  /// `event_service.applyEffects` 的 `inventory.<id>` 分支**不校验 id 是否存在**，
+  /// AI 选项可写入任意未知 id，因此该段是随回合数无界增长的一段。
+  ///
+  /// 【为什么取 8】现有内容管道共 33 种物品，真实玩家常驻 3~8 种；
+  /// 取 8 覆盖绝大多数存档，其余用尾注告知 AI「车上还有别的货」，
+  /// 而不逐条罗列（保留「持有物不止这些」的语义）。
+  static const int kAiPromptInventoryEntryCount = 8;
+
+
+  // ==================== Batch 10-88 状态段预算 ====================
+  /// 「状态」段最多列出几个为 true 的 flags 键（超出给「另有 N 项未列」尾注）。
+  ///
+  /// 【为什么需要预算】状态段原先把 `player.flags` 里所有 true 的键
+  /// 无上限拼成一行。两条无界写入通道：
+  /// ① `event_service.applyEffects` 的 `flags.<名>` 分支**不校验键名**，
+  ///    AI 选项每回合都可能新增一个键；
+  /// ② `mixin_generation.advanceGeneration` 每次换代写
+  ///    `house.childDead.<继承人名>`，只增不删。
+  /// 另有 `equipped.<物品 id>` 最多 33 键（物品种类硬上限）。
+  /// 真实存档常见 2~6 项，但理论无上界，故设显式预算。
+  ///
+  /// 【为什么取 8】与背包段预算同量级；按 map 插入序截断
+  /// （Dart map 字面量是 LinkedHashMap，顺序确定），保留最早获得的状态。
+  static const int kAiPromptFlagBudget = 8;
   // ==================== 便捷派生 ====================
 
   /// 夫妻感情等级标签。
