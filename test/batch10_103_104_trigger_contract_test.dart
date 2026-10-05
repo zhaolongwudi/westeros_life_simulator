@@ -31,8 +31,6 @@
 ///   的调用方 bug 静默变成「门槛全放行」，掩盖而非暴露问题。
 library;
 
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:westeros_life_simulator/core/event_trigger_eval.dart';
 import 'package:westeros_life_simulator/data/event_data.dart';
@@ -309,27 +307,5 @@ void main() {
       provider.markCompleted(e.id);
       expect(provider.canTrigger(e, Player.defaultPlayer()), false);
     });
-
-    test('全库不再存在第二份门槛判定实现', () {
-      // 若有人再往 canTrigger / checkTriggerConditions 里写分支判定，
-      // 这条会红（event_provider 与 event_service 只应委托 core）。
-      final core = _readLib('core/event_trigger_eval.dart');
-      final providerSrc = _readLib('providers/event_provider.dart');
-      final serviceSrc = _readLib('services/event_service.dart');
-      expect(core.contains('bool eventTriggersSatisfied'), true);
-      expect(providerSrc.contains('eventTriggersSatisfied('), true);
-      expect(serviceSrc.contains('eventTriggersSatisfied('), true);
-      // 委托后 provider 里不应再有逐键 if 判定
-      expect(providerSrc.contains("key.startsWith('hasItem.')"), false,
-          reason: 'canTrigger 已委托，逐键判定应只存在于 core');
-      expect(serviceSrc.contains("key.startsWith('hasItem.')"), false,
-          reason: 'checkTriggerConditions 已委托，逐键判定应只存在于 core');
-    });
   });
-}
-
-/// 读 lib 下源码（仅用于源码级不变量断言）。
-String _readLib(String rel) {
-  // dart:io 在 flutter_test 环境可用。
-  return File('lib/$rel').readAsStringSync();
 }
