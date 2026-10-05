@@ -261,12 +261,12 @@ void main() {
         expect(
           service.checkTriggerConditions(e, player, ctx),
           true,
-          reason: "season:any 不应被 context 季节覆盖：$ctx",
+          reason: 'season:any 不应被 context 季节覆盖：$ctx',
         );
       }
       // canTrigger 侧同样恒真
       final provider2 = EventProvider(events: <GameEvent>[e]);
-      for (final s in <String>['spring', 'summer', 'autumn', 'winter', null]) {
+      for (final s in <String?>['spring', 'summer', 'autumn', 'winter', null]) {
         expect(
           provider2.canTrigger(e, player, season: s),
           true,
