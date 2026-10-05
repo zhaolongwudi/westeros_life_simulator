@@ -53,7 +53,8 @@ void main() {
       expect(find.textContaining('配偶：'), findsOneWidget);
       expect(find.text('子女：'), findsOneWidget);
       expect(find.textContaining('罗柏：培养：sword'), findsOneWidget);
-      expect(find.textContaining('已督导'), findsOneWidget);
+      // 109 卡片行也含「已督导」，锚定支脉节点完整串（带姓名前缀）保持唯一
+      expect(find.textContaining('罗柏：培养：sword / 已督导'), findsOneWidget);
       expect(find.textContaining('继承人：罗柏'), findsOneWidget);
     });
   });

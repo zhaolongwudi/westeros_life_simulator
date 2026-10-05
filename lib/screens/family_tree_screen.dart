@@ -535,7 +535,10 @@ class _InheritanceOrderCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
+                          // Batch 10-110 测试锚点：卡片培养档案唯一 Key，
+                          // 与支脉节点（带姓名前缀）区分，避免 textContaining 双命中。
                           _rearingBrief(engine, p.children[i]),
+                          key: Key('inherit-rearing-${p.children[i]}'),
                           style: const TextStyle(
                             fontSize: 12,
                             color: WesterosColors.inkDim,

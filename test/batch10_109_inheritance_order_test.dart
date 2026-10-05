@@ -50,11 +50,23 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('继承顺位'), findsOneWidget);
-      // 罗柏行：培养 + 已督导
-      expect(find.text('培养：sword'), findsOneWidget);
-      expect(find.text('已督导'), findsOneWidget);
-      // 琼恩行：进修中（sendChildToSchool）
-      expect(find.text('进修中'), findsOneWidget);
+      // 罗柏行（卡片 Key 锚定）：培养 + 已督导
+      // 支脉节点带姓名前缀（罗柏：…），卡片行不带，故按 Key 隔离断言。
+      final robbCard = find.byKey(const Key('inherit-rearing-罗柏'));
+      expect(
+        find.descendant(of: robbCard, matching: find.textContaining('培养：sword')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: robbCard, matching: find.textContaining('已督导')),
+        findsOneWidget,
+      );
+      // 琼恩行（卡片 Key 锚定）：进修中
+      final jonCard = find.byKey(const Key('inherit-rearing-琼恩'));
+      expect(
+        find.descendant(of: jonCard, matching: find.textContaining('进修中')),
+        findsOneWidget,
+      );
       // 罗柏为继承人（长子）
       expect(find.text('👑 继承人'), findsOneWidget);
     });
