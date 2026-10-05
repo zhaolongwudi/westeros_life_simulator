@@ -1,6 +1,6 @@
 # 维斯特洛人生模拟器 · 代码地图（CODE_MAP）
 
-> **本文件是代码结构导航索引**（v5.19 · Batch 10-93/94 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
+> **本文件是代码结构导航索引**（v5.20 · Batch 10-95/96 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
 > 再读本文件快速定位「哪个功能在哪个文件、哪个方法」。避免盲目翻代码。
 >
 > 定位三步法：
@@ -291,7 +291,7 @@ GameEngine extends GameProviderBase with:
 | 过月 | advance | advanceMonth | 是 |
 | 帮助 | help | _helpText | 否 |
 
-## 五、测试文件映射（test/ 98 文件 + regression/ 5 文件 = 103 文件）
+## 五、测试文件映射（test/ 100 文件 + regression/ 5 文件 = 105 文件）
 
 | 测试文件 | 覆盖 |
 |----------|------|
@@ -363,6 +363,7 @@ GameEngine extends GameProviderBase with:
 | batch10_89_90_effect_key_contract_test | **AI 效果键 id 契约修复 + 好感度/技能数值护栏**（10-89/90，14 用例）：① 10-89——关系行每条带真实 id `[id=npc_nev]` 且中文名/关系值形态不变 / 38 NPC 全有交情时 prompt 里出现的每个 `[id=...]` 都能被 `npcById` 解析（无杜撰 id）且恰为预算 8 个 / 效果键约定示例改真实 id `relations.npc_tyrion` 且旧幽灵键 `relations.tyrion` 在整个 prompt 中消失 / 「原样复制」硬约束 + 11 个技能/属性可用键白名单 + 「累计不超过 ±100」/ systemPrompt 同步 / 既有关系行形态回归（未知 id 回退原格式·关系为空「（无）」·秘密字段）；② 10-90——好感度上界 9999→100 / 下界 -9999→-100 / 边内 15 后 -5 照常得 10 / provider 与 event_service 两条通道边界一致 / 技能·属性防负破底（-999→0）与正常增减不受影响（+2/+1）/ `kRelationClamp==100` / 源码级扫描两文件都引用常量且无硬编码 `clamp(-100, 100)`（**扫描前须剥注释行**，首版被注释里的说明文字误判）。**踩坑记录：首轮 CI 1018 passed / 2 failed——① 只改了「效果键约定」段的示例，漏改 JSON 输出模板里的 `"relations.tyrion": 10`（那才是 AI 真正会照抄的位置）；② 源码扫描正则命中了自己写的注释** |
 | batch10_91_92_effect_key_whitelist_test | **效果键白名单守卫（幽灵物品/技能/属性键）**（10-91/92，20 用例）：① 10-91——provider 侧未知物品 id 不落盘 / 真实 id 数量正确 / 合法键与幽灵键混合时幽灵键被单独丢弃 / 未知物品「消耗」无副作用（不误删真实物品）/ event_service 侧未知 id 进 `failedEffects` 且不落盘 / 真实 id 登记 `applied` / 两条通道判定一致；② 10-92——未知技能键与未知属性键不落盘 / **NPC 侧键位 `leadership` 合法**（`mixin_npc_interact` 学者分支的真实写入通道，白名单必须收）/ **中文翻译键 `skills.剑术` 不落盘**（否则 `labels` 的 `_ => key` 让中文键名进技能面板）/ 合法增减不受影响 / event_service 侧进 `failedEffects`；③ 两条最重要的护栏——**全量 72 个事件的所有 `inventory.`/`skills.`/`attributes.` 键零回归断言**（白名单漏一个真实键，该事件效果会静默失效）+ `defaultPlayer` 全部键在白名单内 + **白名单与 `labels` 标签表双向同步断言**（杜绝「加了标签忘了加白名单」）/ 源码级扫描两条通道都引用三个常量（**扫描前须剥注释行**，坑 52）。**设计决策：刻意不改 prompt 侧**——10-87 已断言背包段 `isNot(contains('item_bread'))`（英文 id 不再泄漏），补 `[id=...]` 会与「减 token」方向相反且需改 3 条既有断言，故撤回 |
 | batch10_93_94_effect_summary_test | **AI 选项效果摘要补齐 + 被拒效果键可见化**（10-93/94，17 用例）：① 10-93——技能 delta 出中文标签行 `⚔️ 剑术 +1（4）` / 属性 `🛡️ 力量 +2` / 关系出 NPC 中文名 `🤝 提利昂·兰尼斯特 +10（10）` / 物品出中文名 `🎒 黑面包 +2` / 负向 delta 带负号 / **按真实 delta 求值**（`skills.alchemy: -5` 被 `max(0,...)` 破底后摘要不得显示「炼金 -5」）/ 幽灵键不产生 delta 摘要行（被 10-91/92 守卫拦下即无变化反馈）/ **摘要不出英文 id**（断言 `isNot(contains('item_bread'))` 与 `isNot(contains('npc_tyrion'))`，与 10-87 口径一致）/ 无变化时不输出空摘要行；② 10-94——三道守卫拒绝的键按顺序登记进 `lastRejectedEffectKeys` / 合法键不登记 / **拒绝记录不跨回合残留**（下一次调用清空）/ 未知顶层键不登记（沿用静默忽略语义）/ 合法键与被拒键混合时只登记被拒的那个（且合法键照常落盘）/ `applyAiChoice` 输出 `（其中 N 项效果未生效：skills.hacking）` / 无被拒键时不输出提示行 / 合法效果与提示行共存（金币摘要 + 被拒提示）。**踩坑记录（坑 53，首轮 CI 37247768820 2 红，产品代码零改动）**：① 10-93 断言 `isNot(contains('hacking'))` 与 10-94「有意把被拒键名打进提示行」互斥——同批两个特性在同一段输出上断言层相反，改为按特性切开；② 10-94 断言 `provider.player.skills['sword']` 但 `applyEffects` 是**纯函数**（返回新 `Player`，不改 provider 自身的 `_player`，落盘由 `updatePlayer`/`applyChoice` 负责），首版漏接返回值故读到原值 3。 |
+| batch10_95_96_effect_drift_test | **双通道实现漂移治理**（10-95/96，18 用例）：① 10-95——`event_service` 的 `skills.`/`attributes.` 负 delta 钳到 0（`max(0,...)`，与 10-90 的 provider 侧对齐；此前事件通道是裸加法可写出负等级）/ 破底时**仍算已应用**（与 provider 侧 `rejected` 语义区分：钳制 ≠ 拒绝）/ 恰好归零照常落盘 / 正值行为不变 / 护栏常量 `kRelationClamp=100` 单一真相；② 10-96——**全量 72 事件 relations. 效果键与门槛键零幽灵断言**（键集 vs `allNpcs` 全集，两条独立用例：效果键 + 门槛键）/ 4 个幽灵键（`lord`/`family_head`/`merchant_leader`/`castle_black`）已彻底移除 / 删效果键后选项仍有 `reputation` 承载叙事褒奖 / **删门槛后 `canChoose` 恒 true**（含守夜人选项的 `flags.sworn_brother` 不被误伤）/ skills/attributes/inventory 全库键零回归 + 每条事件仍有无条件选项 + 事件总量仍是 72。**关键取证（一次性脚本，脚本已删）**：`event_data` 的 `skills./attributes.` 效果值**负值 0 处**、`batch3_event_service_test` 对该通道**只测正值** → 10-95 零回归；`relations.` 幽灵键 4 个（效果 2 + 门槛 2）均非真实 npc id，`ai_service.dart:299` 的 `n == null` 兜底 + `player_panel_screen.dart:294` 的 `relations.entries` 遍历是两条泄漏面；`canChoose` 的 `default` 分支只处理 skills/attributes/hasItem/flag，故 `relations.` 门槛恒静默放行。**撤回一条候选**：`flags.` 布尔化语义差异（event_service 用 `value != 0`、provider 用 `value > 0`）经取证收益为零（`event_data` 全部 flags 值都是 1，测试只测 0/1，两通道结果完全一致）→ 不改。**决策记录**：四键均为泛化角色概念（领主/家主/商队首领/守夜人）无唯一对应 NPC，强行映射会让该 NPC 关系值被无关事件污染，故删除而非映射 |
 | batch10_65_66_prompt_enhance_test | **AI prompt 注入增强**（10-65/66，6 用例）：在场 NPC 性格/目标注入（艾德·史塔克性格·目标/前 2 条防膨胀/关系·心情·可委托不回归）/ 家族对外关系注入（史塔克敌对·友善/自由民兜底/家族名·族语·规模·影响力不回归） |
 | batch10_57_family_branches_test | **当代支脉横版图**（10-57，4 用例）：已婚有子女（偶→当→子徽章）/ 未婚有子女（无偶徽章）/ 已婚无子女（无子徽章）/ 未婚无子女（不显示区块） |
 | batch10_59_ai_multi_key_test | **AI 多 Key 轮换 + 多模型选择**（10-59 + fix1，12 用例）：首 key 429 自动换第二个成功 / 全部 key 失败返回最后错误 / 单 key 向后兼容（apiKey 入参进入池）/ round-robin 连续两次起始不同 / **多 key 每次请求自动轮换（成功也不重复打同一 key）** / **多 key 失败直接换下一个不重试同一 key** / 3 提供商预设（默认模型+chatBaseUrl）/ 未知提供商回落第一 / resolved 按提供商回落 + 显式优先 / 多 key 持久化往返 / 旧单 key（ai_api_key）迁移 / 保存时旧键同步写入 |
@@ -426,7 +427,7 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v5.19（Batch 10-93/94 效果摘要补齐 + 被拒效果键可见化）· 最后更新：2026-10-05*
+*文档版本：v5.20（Batch 10-95/96 双通道实现漂移治理）· 最后更新：2026-10-05*
 
 ## 八、构建 APK 与直发邮箱（临时任务脚本，2026-10-02 新增）
 
@@ -459,4 +460,4 @@ GameEngine extends GameProviderBase with:
   - **只保留最近 3 次**：Cleanup 步骤按 created_at 倒序删多余 `v0.0.x` release（v 版本序列，旧 apk-<sha8> 一并清理）
 - **已知验证**：run `36958877137` ✅（手动触发 CI 验证 changelog 链路，analyze/test 全绿 + auto-update 幂等跳过）；run `37007321396` ✅（release-publish 全步骤 success）；run `37004310167` ❌（auto-update push 非快进被拒 → 已加 pull --rebase 容错）；run `37048376650` ✅（head fcbd46f，fix readme 收尾闭环，analyze-test 全绿）
 ---
-*文档版本：v5.19（Batch 10-93/94 效果摘要补齐 + 被拒效果键可见化）· 最后更新：2026-10-05*
+*文档版本：v5.20（Batch 10-95/96 双通道实现漂移治理）· 最后更新：2026-10-05*
