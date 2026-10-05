@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
-**2026-10-05 · fix(batch10-95/96): 效果落盘轴 · 双通道实现漂移治理**（`7d4ae3c`）
+**2026-10-05 · fix(batch10-97): require non-empty suffix for prefix match**（`ab642de`）
 
-**2026-10-05 · test(batch10-93/94): 修首轮 CI 两处断言笔误**（`9694bbc`）
+**2026-10-05 · fix(batch10-97): 物品集符号名纠正 allItems -> kItems（CI 37270034492 undefined_identifier）**（`55764e7`）
 
-**2026-10-05 · feat(batch10-93/94): AI 选项效果摘要补齐 + 被拒效果键可见化**（`6b7e8fc`）
+**2026-10-05 · feat(batch10-97/98): flags. 效果键分层白名单 + prompt 契约同步（效果落盘轴收官）**（`e9a5949`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
