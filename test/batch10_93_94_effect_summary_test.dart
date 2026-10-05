@@ -34,6 +34,18 @@
 /// 【断言写法：中文锚点照抄实际输出的全角标点（坑 51）】
 /// 摘要行的数值后缀是全角括号，如 `⚔️ 剑术 +1（4）`——断言里
 /// 必须写全角 `（）`，不能写成半角。
+///
+/// 【首轮 CI 2 红（16 用例中 14 过，两处独立根因，均为测试自身笔误）】
+///  ① 10-93 的「幽灵键不产生摘要行」断言 `isNot(contains('hacking'))`，
+///     但 10-94 **有意**把被拒键名打进「未生效」提示行——同批两个
+///     特性在断言层互斥。改法：10-93 只断言「不出 ⚔️/🛡️/🎒 中文
+///     delta 摘要」，键名出现与否交给 10-94 断言。**教训：同批引入
+///     两个会互相影响同一段输出的特性时，断言要按特性切开，
+///     不要让一个用例同时锁住两边的相反预期。**
+///  ② 10-94 断言 `provider.player.skills['sword'] == 4`——但
+///     `applyEffects` 是**纯函数**（返回新 `Player`，不改 provider
+///     自身的 `_player`，落盘由 `updatePlayer`/`applyChoice` 负责），
+///     首版漏接返回值故读到原值 3。改法：断言返回值。
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -108,16 +120,22 @@ void main() {
       expect(result, isNot(contains('炼金 -5')));
     });
 
-    test('幽灵键不产生摘要行（被 10-91/92 守卫拦下即无反馈）', () {
+    test('幽灵键不产生 delta 摘要行（被 10-91/92 守卫拦下即无变化反馈）', () {
       final engine = GameEngine()..startNewGame();
       final result = engine.applyAiChoice(_aiChoice(<String, int>{
         'skills.hacking': 5,
         'attributes.luck': 5,
         'inventory.item_dragon_scale': 3,
       }));
-      expect(result, isNot(contains('hacking')));
-      expect(result, isNot(contains('luck')));
-      expect(result, isNot(contains('龙鳞')));
+      // 幽灵键不落盘 → 求差无 delta → 不出 ⚔️/🛡️/🎒 摘要行。
+      // 【注意】被拒键名本身会出现在 10-94 的「未生效」提示行里，
+      // 故此处只断言「不出中文 delta 摘要」，不断言键名不出现。
+      expect(result, isNot(contains('⚔️')));
+      expect(result, isNot(contains('🛡️')));
+      expect(result, isNot(contains('🎒')));
+      // 10-94 负责把三个被拒键名一并报出来（这正是脱节可见化的目的）。
+      expect(result, contains('3 项效果未生效'));
+      expect(result, contains('skills.hacking'));
     });
 
     test('摘要不出英文 id（与 10-87 口径一致）', () {
@@ -200,7 +218,10 @@ void main() {
 
     test('合法键与被拒键混合时，只登记被拒的那个', () {
       final provider = GameStateProvider();
-      provider.applyEffects(
+      // 【注意】`applyEffects` 是纯函数：返回新 Player，**不改** provider 自身
+      // 的 `_player`（落盘由调用方 `updatePlayer`/`applyChoice` 负责），
+      // 故此处必须断言返回值而不是 `provider.player`。
+      final updated = provider.applyEffects(
         provider.player,
         const <String, int>{
           'skills.sword': 1,
@@ -208,7 +229,9 @@ void main() {
         },
       );
       expect(provider.lastRejectedEffectKeys, <String>['skills.hacking']);
-      expect(provider.player.skills['sword'], 4);
+      // 合法键照常落盘：默认玩家剑术 3 → 4。
+      expect(updated.skills['sword'], 4);
+      expect(updated.skills.containsKey('hacking'), isFalse);
     });
 
     test('applyAiChoice 把被拒键输出成提示行', () {
