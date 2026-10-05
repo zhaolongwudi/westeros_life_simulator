@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
-**2026-10-05 · fix(batch10-101): compress prompt contract line to fit 10-86 token budget (157->80 chars)**（`07075fb`）
+**2026-10-05 · fix(batch10-103/104): drop fragile whole-file source assertion, keep behavioral dual-channel guard**（`257fba7`）
 
-**2026-10-05 · feat(batch10-101/102): reject unknown top-level effect keys + Chinese names in panel flags/inventory**（`2719819`）
+**2026-10-05 · fix(batch10-103/104): single-quote lint + String? nullable season list in test**（`d83cd00`）
 
-**2026-10-05 · fix(batch10-100): assert chip text with textContaining, not find.text**（`3b36026`）
+**2026-10-05 · feat(batch10-103/104): fix 41 dead threshold keys + season:any never-firing event, unify both trigger channels into single truth**（`872d058`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
