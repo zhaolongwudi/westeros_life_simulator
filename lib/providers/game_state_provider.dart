@@ -119,6 +119,27 @@ class GameStateProvider extends ChangeNotifier {
   bool _isGameActive = false;
   bool _isGameOver = false;
 
+  /// Batch 10-94：最近一次 [applyEffects] 被写侧守卫拒绝的效果键（有序）。
+  ///
+  /// 【为什么做成字段而不是改返回值】`applyEffects` 返回 `Player`
+  /// 是三条调用方（`applyChoice` 事件选项、`applyAiChoice` AI 选项、
+  /// 以及 10 条既有测试）共同依赖的契约，改成记录类型会连带改全部
+  /// 调用方与断言；加字段是纯增量、不破坏任何既有签名。
+  ///
+  /// 【每次调用入口清空】避免上一回合的残留被下回合误读。
+  /// 【只记被守卫拒绝的键】未知顶层键沿用既有「静默忽略」语义不记，
+  /// 否则摘要提示会从「AI 写了不存在的技能」退化成「AI 写了未知的键」，
+  /// 对玩家无信息量。
+  List<String> _lastRejectedEffectKeys = <String>[];
+
+  /// 最近一次 [applyEffects] 被写侧守卫（10-91/92 白名单）拒绝的效果键。
+  ///
+  /// 供 `mixin_ai.applyAiChoice` 输出提示行——让「叙事里写着提利昂
+  /// 好感 +10、状态却毫无变化」这类脱节对玩家可见。
+  /// 空列表表示本次没有键被拒（或尚未调用过 [applyEffects]）。
+  List<String> get lastRejectedEffectKeys =>
+      List<String>.unmodifiable(_lastRejectedEffectKeys);
+
   /// 事件历史上限（Batch 10-27 · M2）。
   ///
   /// 旧实现无上限：history 只在 [applyChoice] 里无限追加，每回合又全量
@@ -230,12 +251,15 @@ class GameStateProvider extends ChangeNotifier {
   ///
   /// 【键名白名单，Batch 10-91/92】`skills.` / `attributes.` 的键须在
   /// `BalanceData.kPlayerSkillKeys` / `kPlayerAttributeKeys` 内，
-  /// `inventory.` 的 id 须能被 `itemById` 解析；不合规的键**静默跳过**
-  /// （本方法没有 `failedEffects` 通道，与未知顶层键的既有行为一致）。
+  /// `inventory.` 的 id 须能被 `itemById` 解析；不合规的键**跳过落盘**，
+  /// 并登记进 [lastRejectedEffectKeys]（Batch 10-94：供 `applyAiChoice`
+  /// 提示，让「叙事写了但状态没变」的脱节对玩家可见）。
   /// 与 `event_service.applyEffects` 的同名分支判定完全一致，
   /// 区别仅在失败如何上报（那边登记进 `failedEffects`）。
   Player applyEffects(Player player, Map<String, int> effects) {
     var newPlayer = player;
+    // Batch 10-94：每次调用入口清空，避免上一回合的拒绝记录被误读。
+    final rejected = <String>[];
     for (final entry in effects.entries) {
       final key = entry.key;
       final value = entry.value;
@@ -266,9 +290,13 @@ class GameStateProvider extends ChangeNotifier {
         // Batch 10-92：键名白名单守卫——拒绝写入清单外技能键。
         // 幽灵技能键会让 `labels.skillLabel` 的 `_ => key` 兜底把原始键名
         // 泄漏进技能面板，并让 `train` 的 `skills.containsKey` 判定失真
-        // （AI 可以「教会」一个不存在的技能）。静默跳过：本方法无
-        // `failedEffects` 通道可报告（与未知顶层键的既有行为一致）。
-        if (!BalanceData.kPlayerSkillKeys.contains(skillName)) continue;
+        // （AI 可以「教会」一个不存在的技能）。本方法无 `failedEffects` 通道，
+        // 故不落盘；Batch 10-94 起另登记进 `lastRejectedEffectKeys`，
+        // 供 `applyAiChoice` 提示——脱节对玩家可见，不再静默。
+        if (!BalanceData.kPlayerSkillKeys.contains(skillName)) {
+          rejected.add(key);
+          continue;
+        }
         final newSkills = Map<String, int>.from(newPlayer.skills);
         // Batch 10-90：防负数破底（与 gold 的 `max(0, ...)` 同策略）——
         // 技能是「等级」，负等级在 `train` 的门槛判定与 prompt 展示里都无意义。
@@ -277,7 +305,10 @@ class GameStateProvider extends ChangeNotifier {
       } else if (key.startsWith('attributes.')) {
         final attrName = key.substring(11);
         // Batch 10-92：同上一分支，属性键同样走白名单。
-        if (!BalanceData.kPlayerAttributeKeys.contains(attrName)) continue;
+        if (!BalanceData.kPlayerAttributeKeys.contains(attrName)) {
+          rejected.add(key);
+          continue;
+        }
         final newAttrs = Map<String, int>.from(newPlayer.attributes);
         newAttrs[attrName] = max(0, (newAttrs[attrName] ?? 0) + value);
         newPlayer = newPlayer.copyWith(attributes: newAttrs);
@@ -294,7 +325,11 @@ class GameStateProvider extends ChangeNotifier {
         // 两条 applyEffects 通道不校验，属实现不一致。幽灵物品键后果：
         // 背包段（10-87）会把未知 id 直接打出来浪费预算位，存档与
         // 物品面板积累永远无法使用/显示的无效条目。
-        if (itemById(itemId) == null) continue;
+        // 【Batch 10-94】同上，拒绝时登记键名供提示行使用。
+        if (itemById(itemId) == null) {
+          rejected.add(key);
+          continue;
+        }
         final newInv = List<String>.from(newPlayer.inventory);
         if (value > 0) {
           // 获得物品（数量倍）
@@ -326,6 +361,9 @@ class GameStateProvider extends ChangeNotifier {
         );
       }
     }
+    // Batch 10-94：登记本次被守卫拒绝的键（含 0 命中，
+    // 保证上一次的结果不会残留到下一次调用）。
+    _lastRejectedEffectKeys = rejected;
     return newPlayer;
   }
 

@@ -37,8 +37,9 @@
 /// 登记进 `failedEffects`，不再污染存档/UI，这正是本批的目标。
 ///
 /// 【两条通道的失败语义不同，是刻意的】
-///  - `GameStateProvider.applyEffects`：静默 `continue`——它没有
-///    `failedEffects` 通道，与既有「未知顶层键」行为一致；
+///  - `GameStateProvider.applyEffects`：不落盘，Batch 10-94 起登记进
+///    `lastRejectedEffectKeys` 供 UI 侧提示（本通道无返回值可承载报告，
+///    加字段是纯增量、不破坏既有签名）；
 ///  - `event_service.applyEffects`：登记进 `failed`——它本来就有这个
 ///    通道（金币不足就走这条路），调用方可据此排查。
 library;
