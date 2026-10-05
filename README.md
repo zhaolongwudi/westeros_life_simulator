@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
-**2026-10-05 · fix(batch10-103/104): drop fragile whole-file source assertion, keep behavioral dual-channel guard**（`257fba7`）
+**2026-10-05 · fix(batch10-105): stepper lazy content + button textStyle inherit parity**（`b41c5fa`）
 
-**2026-10-05 · fix(batch10-103/104): single-quote lint + String? nullable season list in test**（`d83cd00`）
+**2026-10-05 · fix(batch10-105/106): resolved CI failures — memory save service + stable button style**（`70762a6`）
 
-**2026-10-05 · feat(batch10-103/104): fix 41 dead threshold keys + season:any never-firing event, unify both trigger channels into single truth**（`872d058`）
+**2026-10-05 · feat(batch10-105/106): home menu + stepper setup + AI multi-model config & connection test**（`8a6416d`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
