@@ -585,7 +585,13 @@ class BalanceData {
   static bool isPlayerFlagKeyValid(String flagName) {
     if (kPlayerFlagKeys.contains(flagName)) return true;
     for (final prefix in kPlayerFlagPrefixes) {
-      if (flagName.startsWith(prefix)) return true;
+      // 要求前缀后有**非空**后缀：`flags.equipped.`（没有物品 id）
+      // 不是合法键——它会写出一条 equip/unequip 永远命中不了、只会在
+      // 玩家面板「状态标记」区块占一行、并在存档里常驻的空槽位。
+      // （此处若只判 `startsWith`，裸前缀会被误判为合法。）
+      if (flagName.length > prefix.length && flagName.startsWith(prefix)) {
+        return true;
+      }
     }
     return false;
   }
