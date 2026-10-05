@@ -7,8 +7,6 @@
 /// 4. AiService.testConnection（成功 / HTTP 400 / 未配 Key）与 fetchModels（解析 / 空数据 / 未配 Key）
 library;
 
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -93,12 +91,10 @@ void main() {
   // ── 1. HomeScreen 开屏首页 ───────────────────────────
   group('Batch 10-105 开屏首页', () {
     testWidgets('主菜单渲染三按钮（无存档态）', (tester) async {
-      final dir = Directory.systemTemp.createTempSync('westeros_home_test');
-      addTearDown(() => dir.deleteSync(recursive: true));
       await tester.pumpWidget(
         MaterialApp(
           home: HomeScreen(
-            saveService: SaveService(saveDir: dir.path),
+            saveService: _MemorySaveService(),
           ),
         ),
       );
@@ -111,12 +107,10 @@ void main() {
     });
 
     testWidgets('无存档时「继续游戏」按钮为禁用态', (tester) async {
-      final dir = Directory.systemTemp.createTempSync('westeros_home_test2');
-      addTearDown(() => dir.deleteSync(recursive: true));
       await tester.pumpWidget(
         MaterialApp(
           home: HomeScreen(
-            saveService: SaveService(saveDir: dir.path),
+            saveService: _MemorySaveService(),
           ),
         ),
       );
@@ -138,12 +132,10 @@ void main() {
     });
 
     testWidgets('点「开始新游戏」进入开局分步向导', (tester) async {
-      final dir = Directory.systemTemp.createTempSync('westeros_home_test3');
-      addTearDown(() => dir.deleteSync(recursive: true));
       await tester.pumpWidget(
         MaterialApp(
           home: HomeScreen(
-            saveService: SaveService(saveDir: dir.path),
+            saveService: _MemorySaveService(),
           ),
         ),
       );
@@ -161,6 +153,9 @@ void main() {
   // ── 2. StartScreen 分步向导 ──────────────────────────
   group('Batch 10-105 开局分步向导', () {
     testWidgets('第 0 步姓名/性别，底部「开始游戏」禁用', (tester) async {
+      tester.view.physicalSize = const Size(1080, 4000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(const MaterialApp(home: StartScreen()));
       await tester.pumpAndSettle();
 
@@ -181,6 +176,9 @@ void main() {
     });
 
     testWidgets('逐级「下一步」可到达确认页，开始游戏变为可用', (tester) async {
+      tester.view.physicalSize = const Size(1080, 4000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(const MaterialApp(home: StartScreen()));
       await tester.pumpAndSettle();
 
@@ -339,4 +337,12 @@ void main() {
       expect(await _serviceNoKey().fetchModels(), isEmpty);
     });
   });
+}
+
+/// 内存版存档服务（测试用，避免 flutter_test FakeAsync 下真实文件 IO 不 resolve）。
+class _MemorySaveService extends SaveService {
+  _MemorySaveService() : super(saveDir: '/tmp/nonexistent_batch10_105_test_dir');
+
+  @override
+  Future<List<SaveMetadata>> listSaves() async => <SaveMetadata>[];
 }

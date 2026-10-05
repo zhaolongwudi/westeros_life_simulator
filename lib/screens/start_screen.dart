@@ -320,25 +320,29 @@ class _StartScreenState extends State<StartScreen> {
                 onPressed: canStart ? _startGame : null,
                 icon: const Icon(Icons.play_arrow),
                 label: Text('开始游戏（$name）'),
-                style: canStart
-                    ? FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                        backgroundColor: WesterosColors.gold,
-                        foregroundColor: WesterosColors.barkDeep,
-                        textStyle: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.8,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          side: const BorderSide(
-                            color: WesterosColors.goldBright,
-                            width: 1.2,
-                          ),
-                        ),
-                      )
-                    : null,
+                // 恒提供 style（disabled/enabled 同一 styleFrom）：
+                // Material 的 AnimatedDefaultTextStyle 在 style null ↔ 自定义间切换时
+                // 会因 inherit 值不同 lerp 崩溃（Batch 10-105 实测），
+                // disabled 视觉由 disabledBackgroundColor/disabledForegroundColor 承担。
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  backgroundColor: WesterosColors.gold,
+                  foregroundColor: WesterosColors.barkDeep,
+                  disabledBackgroundColor: WesterosColors.barkMid,
+                  disabledForegroundColor: WesterosColors.inkDim,
+                  textStyle: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    side: const BorderSide(
+                      color: WesterosColors.goldBright,
+                      width: 1.2,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
