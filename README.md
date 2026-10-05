@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-05 · fix(batch10-107): widen onGet mock type to dynamic for list-shape models response**（`182350b`）
+
+**2026-10-05 · feat(batch10-107): fetchModels multi-shape response compatibility for vendor /models**（`99eb5ba`）
+
 **2026-10-05 · fix(batch10-105): stepper lazy content + button textStyle inherit parity**（`b41c5fa`）
-
-**2026-10-05 · fix(batch10-105/106): resolved CI failures — memory save service + stable button style**（`70762a6`）
-
-**2026-10-05 · feat(batch10-105/106): home menu + stepper setup + AI multi-model config & connection test**（`8a6416d`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
