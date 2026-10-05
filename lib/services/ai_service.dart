@@ -198,14 +198,35 @@ class AiService {
       if (response.statusCode == 200) {
         return (true, '连接正常（${model ?? this.model}）');
       }
-      return (false, 'HTTP ${response.statusCode}');
+      final status = response.statusCode;
+      final errMsg = _extractErrorMessage(response.data);
+      return (false, errMsg != null ? 'HTTP $status（$errMsg）' : 'HTTP $status');
     } on DioException catch (e) {
       final status = e.response?.statusCode;
-      final msg = status != null ? 'HTTP $status' : (e.message ?? 'Network error');
-      return (false, msg);
+      if (status != null) {
+        final errMsg = _extractErrorMessage(e.response?.data);
+        return (false, errMsg != null ? 'HTTP $status（$errMsg）' : 'HTTP $status');
+      }
+      return (false, e.message ?? 'Network error');
     } catch (e) {
       return (false, e.toString());
     }
+  }
+  /// 从厂商错误响应体中提取可读错误信息（Batch 10-108）。
+  ///
+  /// 兼容两种形态：
+  /// - OpenAI 风格：`{"error":{"message":"..."}}`（商汤/DeepSeek 实测均为该形态）
+  /// - 字符串：`{"error":"..."}`
+  /// 无错误信息时返回 null（调用方回落为纯状态码）。
+  static String? _extractErrorMessage(dynamic data) {
+    if (data is! Map) return null;
+    final error = data['error'];
+    if (error is Map) {
+      final m = error['message'];
+      return (m is String && m.isNotEmpty) ? m : null;
+    }
+    if (error is String && error.isNotEmpty) return error;
+    return null;
   }
 
   /// 自动识别厂商可用模型列表：GET {baseUrl}/models（OpenAI 兼容接口）。

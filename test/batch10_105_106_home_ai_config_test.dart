@@ -278,7 +278,7 @@ void main() {
       expect(msg, contains('连接正常'));
     });
 
-    test('testConnection 失败（HTTP 400）', () async {
+    test('testConnection 失败（HTTP 400，字符串错误体）', () async {
       final (dio, _) = _captureDio(
         onPost: () => (400, <String, dynamic>{'error': 'bad request'}),
       );
@@ -290,6 +290,37 @@ void main() {
       final (ok, msg) = await service.testConnection();
       expect(ok, isFalse);
       expect(msg, contains('HTTP 400'));
+      expect(msg, contains('bad request'));
+    });
+    test('testConnection 失败（HTTP 401，OpenAI 风格错误体）', () async {
+      // Batch 10-108：商汤/DeepSeek 实测错误体为 {"error":{"message":"..."}}。
+      final (dio, _) = _captureDio(
+        onPost: () => (401, <String, dynamic>{
+          'error': <String, dynamic>{'message': 'Authorization Not Found'},
+        }),
+      );
+      final service = AiService(
+        apiKeys: const <String>['key_a'],
+        dio: dio,
+        baseUrl: 'https://mock.example.com/v1',
+      );
+      final (ok, msg) = await service.testConnection();
+      expect(ok, isFalse);
+      expect(msg, contains('HTTP 401'));
+      expect(msg, contains('Authorization Not Found'));
+    });
+    test('testConnection 失败（错误体无 message 回落纯状态码）', () async {
+      final (dio, _) = _captureDio(
+        onPost: () => (500, <String, dynamic>{'error': <String, dynamic>{'code': 'x'}}),
+      );
+      final service = AiService(
+        apiKeys: const <String>['key_a'],
+        dio: dio,
+        baseUrl: 'https://mock.example.com/v1',
+      );
+      final (ok, msg) = await service.testConnection();
+      expect(ok, isFalse);
+      expect(msg, 'HTTP 500');
     });
 
     test('testConnection 未配 Key 短路', () async {
