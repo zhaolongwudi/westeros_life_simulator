@@ -237,41 +237,19 @@ class _StartScreenState extends State<StartScreen> {
                   controlsBuilder: (context, details) =>
                       const SizedBox.shrink(),
                   steps: <Step>[
-                    Step(
-                      title: const Text('姓名'),
-                      isActive: _step >= 0,
-                      content: _buildNameStep(),
-                    ),
-                    Step(
-                      title: const Text('身份'),
-                      isActive: _step >= 1,
-                      content: _buildIdentityStep(),
-                    ),
-                    Step(
-                      title: const Text('家族'),
-                      isActive: _step >= 2,
-                      content: _buildFamilyStep(),
-                    ),
-                    Step(
-                      title: const Text('出生地'),
-                      isActive: _step >= 3,
-                      content: _buildLocationStep(),
-                    ),
-                    Step(
-                      title: const Text('时代'),
-                      isActive: _step >= 4,
-                      content: _buildEraStep(),
-                    ),
-                    Step(
-                      title: const Text('出生季节'),
-                      isActive: _step >= 5,
-                      content: _buildSeasonStep(),
-                    ),
-                    Step(
-                      title: const Text('确认'),
-                      isActive: _step >= 6,
-                      content: _buildConfirmStep(),
-                    ),
+                    for (var i = 0; i <= _lastStep; i++)
+                      Step(
+                        title: Text(_stepTitle(i)),
+                        isActive: _step >= i,
+                        // 只渲染当前步 content：Stepper 会把所有 step 的
+                        // content 都参与布局（含动画期），7 步全展开会
+                        // 撑爆外层 Column（Batch 10-105 实测 RenderFlex
+                        // overflow ~96000px）。非当前步用空组件占位，
+                        // 标题仍常显（batch10_60 文本契约不受影响）。
+                        content: i == _step
+                            ? _buildStepContent(i)
+                            : const SizedBox.shrink(),
+                      ),
                   ],
                 ),
               ),
@@ -281,6 +259,46 @@ class _StartScreenState extends State<StartScreen> {
         ),
       ),
     );
+  }
+
+  /// 分步标题（Batch 10-105：保持既有文本契约，7 步标题常显）。
+  String _stepTitle(int i) {
+    switch (i) {
+      case 0:
+        return '姓名';
+      case 1:
+        return '身份';
+      case 2:
+        return '家族';
+      case 3:
+        return '出生地';
+      case 4:
+        return '时代';
+      case 5:
+        return '出生季节';
+      default:
+        return '确认';
+    }
+  }
+
+  /// 当前步内容（仅当前步渲染，见 Stepper steps 注释）。
+  Widget _buildStepContent(int i) {
+    switch (i) {
+      case 0:
+        return _buildNameStep();
+      case 1:
+        return _buildIdentityStep();
+      case 2:
+        return _buildFamilyStep();
+      case 3:
+        return _buildLocationStep();
+      case 4:
+        return _buildEraStep();
+      case 5:
+        return _buildSeasonStep();
+      default:
+        return _buildConfirmStep();
+    }
   }
 
   /// 底部固定操作栏：上一步 / 下一步 / 开始游戏。
@@ -334,6 +352,10 @@ class _StartScreenState extends State<StartScreen> {
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
+                    // inherit: false 与 Material 默认按钮 textStyle 对齐，
+                    // 否则 disabled→enabled 切换时 AnimatedDefaultTextStyle
+                    // 因 inherit 值不同 lerp 崩溃（Batch 10-105 实测）。
+                    inherit: false,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
