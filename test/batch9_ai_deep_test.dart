@@ -70,10 +70,16 @@ void main() {
       final provider = GameStateProvider();
       final player = provider.applyEffects(
         provider.player,
-        const <String, int>{'relations.tyrion': 15, 'relations.jon': -5},
+        // Batch 10-99：键须为真实 npc id。此处原先用的 `tyrion`/`jon`
+        // （不带 `npc_` 前缀）正是本批要治的幽灵键，改用真实 id 保持
+        // 「好感度可增减」这一原测试意图。
+        const <String, int>{
+          'relations.npc_tyrion': 15,
+          'relations.npc_jon_snow': -5,
+        },
       );
-      expect(player.relations['tyrion'], 15);
-      expect(player.relations['jon'], -5);
+      expect(player.relations['npc_tyrion'], 15);
+      expect(player.relations['npc_jon_snow'], -5);
     });
     test('状态效果键 flags.<name> 设置与清除', () {
       final provider = GameStateProvider();

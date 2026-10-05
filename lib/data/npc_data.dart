@@ -848,6 +848,27 @@ Npc? npcById(String id) {
   return null;
 }
 
+/// `relations.<npcId>` 效果键的 id 合法性判定（Batch 10-99 单一真相）。
+///
+/// 【为什么需要】`relations.` 是五类效果键里最后一个**完全不校验键名**的
+/// 类（`inventory.`/`skills.`/`attributes.`/`flags.` 分别在 10-91/92/97
+/// 治完）。Batch 10-89 只改了 prompt 示例文案（`relations.tyrion` →
+/// `relations.npc_tyrion`），**从未加写侧守卫**——AI 只要写
+/// `relations.tyrion`，好感度就落进一个永不存在的槽位，后果三重：
+///  ① `ai_service` 关系段的 `n == null` 兜底把 `tyrion: 15` 原样打进
+///     prompt（AI 看着像真的）；
+///  ② `player_panel_screen` 遍历 `relations.entries` 让玩家面板出现
+///     名为 `tyrion` 的条目；
+///  ③ 幽灵键按 `|值|` 参与 10-83 关系段预算排序，白占 8 个预算位，
+///     把真实关系挤出窗口。
+///
+/// 【为什么不写成静态键集】`inventory.`/`skills.`/`attributes.`/`flags.`
+/// 都能列静态白名单，而 NPC 共 **38 个**且会随批次持续扩充，静态白名单
+/// 必须靠测试「逐条比对防漂移」来兜，属可维护性负债。本方法直接查
+/// [allNpcs]（本文件唯一真相），与 `itemById`（10-91 物品守卫的单一
+/// 真相）同构——**新增 NPC 自动生效，无需改白名单**。
+bool isNpcIdValid(String npcId) => npcById(npcId) != null;
+
 /// 按家族筛选 NPC。
 List<Npc> npcsByFamily(String familyId) {
   return allNpcs.where((n) => n.familyId == familyId).toList();

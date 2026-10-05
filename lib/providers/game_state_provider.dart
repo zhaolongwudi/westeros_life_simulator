@@ -11,6 +11,9 @@ import '../data/balance_data.dart';
 // Batch 10-91：`applyEffects` 的 `inventory.<id>` 分支要 `itemById` 校验
 // 物品 id 是否真实存在（与 `mixin_life.addItem` 的既有校验对齐）。
 import '../data/item_data.dart';
+// Batch 10-99：`applyEffects` 的 `relations.<npcId>` 分支要 `isNpcIdValid`
+// 校验 NPC id 是否真实存在（与 `npc_data.npcById` 同源，单一真相）。
+import '../data/npc_data.dart';
 import '../models/event.dart';
 import '../models/player.dart';
 import '../utils/json_safe.dart';
@@ -273,6 +276,18 @@ class GameStateProvider extends ChangeNotifier {
         );
       } else if (key.startsWith('relations.')) {
         final npcId = key.substring(10);
+        // Batch 10-99：NPC id 白名单守卫——`isNpcIdValid(id) == false` 即拒绝。
+        // 与 10-91 的物品守卫、10-92 的技能/属性守卫、10-97 的 flags 分层
+        // 守卫同构，至此**五类效果键全部有校验**（此前 `relations.` 只在
+        // 10-89 改过 prompt 示例文案，写侧一直没设防）。
+        // 幽灵 NPC 键后果：① `ai_service` 关系段 `n == null` 兜底把裸 id
+        // 打进 prompt；② `player_panel` 出现名为 `tyrion` 的条目；
+        // ③ 按 `|值|` 参与 10-83 关系段预算排序、白占预算位。
+        // 【Batch 10-94】同上，拒绝时登记键名供 `applyAiChoice` 提示行使用。
+        if (!isNpcIdValid(npcId)) {
+          rejected.add(key);
+          continue;
+        }
         final newRels = Map<String, int>.from(newPlayer.relations);
         // Batch 10-90：好感度钳制 ±100，与 `event_service.applyEffects`
         // 的同名分支对齐（那边早有 `.clamp(-100, 100)`，这边一直漏了——

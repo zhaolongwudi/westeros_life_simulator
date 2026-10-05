@@ -7,6 +7,8 @@ import '../data/balance_data.dart';
 // Batch 10-91：`applyEffects` 的 `inventory.<id>` 分支要 `itemById` 校验
 // 物品 id 是否真实存在（与 `mixin_life.addItem` 的既有校验对齐）。
 import '../data/item_data.dart';
+// Batch 10-99：`relations.<npcId>` 分支要 `isNpcIdValid` 校验 NPC id。
+import '../data/npc_data.dart';
 import '../models/event.dart';
 import '../models/player.dart';
 
@@ -166,15 +168,24 @@ class EventService {
             }
           } else if (key.startsWith('relations.')) {
             final npcId = key.substring(10);
-            final newRelations = Map<String, int>.from(newPlayer.relations);
-            // Batch 10-90：硬编码的 100 收口 BalanceData.kRelationClamp，
-            // 与 GameStateProvider.applyEffects 的同名分支共享同一真相。
-            newRelations[npcId] = ((newRelations[npcId] ?? 0) + value).clamp(
-              -BalanceData.kRelationClamp,
-              BalanceData.kRelationClamp,
-            );
-            newPlayer = newPlayer.copyWith(relations: newRelations);
-            applied[key] = value;
+            // Batch 10-99：NPC id 白名单守卫，与
+            // `GameStateProvider.applyEffects` 的同名分支对齐（那边先做，
+            // 本通道一直漏了——与 10-95/97 修 `max(0, ...)`/flags 同型）。
+            // 本通道有 `failedEffects` 语义（金币不足即走这条路），
+            // 故不合规键登记进 `failed` 而非静默丢弃。
+            if (!isNpcIdValid(npcId)) {
+              failed[key] = value;
+            } else {
+              final newRelations = Map<String, int>.from(newPlayer.relations);
+              // Batch 10-90：硬编码的 100 收口 BalanceData.kRelationClamp，
+              // 与 GameStateProvider.applyEffects 的同名分支共享同一真相。
+              newRelations[npcId] = ((newRelations[npcId] ?? 0) + value).clamp(
+                -BalanceData.kRelationClamp,
+                BalanceData.kRelationClamp,
+              );
+              newPlayer = newPlayer.copyWith(relations: newRelations);
+              applied[key] = value;
+            }
           } else if (key.startsWith('flags.')) {
             final flagName = key.substring(6);
             // Batch 10-97：状态标记键分层白名单守卫，与

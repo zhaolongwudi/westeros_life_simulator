@@ -6,6 +6,8 @@ library;
 import 'package:flutter/material.dart';
 
 import '../data/item_data.dart';
+// Batch 10-100：关系区块把裸 npc id 换成中文名，需 `npcById` 查名。
+import '../data/npc_data.dart';
 import '../game_engine.dart';
 import '../theme/westeros_theme.dart';
 import '../utils/labels.dart';
@@ -292,7 +294,7 @@ class PlayerPanelScreen extends StatelessWidget {
                     title: '关系',
                     icon: Icons.people_outline,
                     entries: p.relations.entries
-                        .map((e) => _Entry(e.key, '${e.value}'))
+                        .map((e) => _Entry(_relationName(e), '${e.value}'))
                         .toList(),
                   ),
                 ],
@@ -392,6 +394,21 @@ class _Entry {
   final String key;
   final String value;
 }
+
+/// 关系区块的中文名（Batch 10-100）。
+///
+/// 【为什么改】关系区块此前直接 `_Entry(e.key, ...)`，把 `npc_tyrion`
+/// 这类**裸英文 id** 当标题显示——与 10-87 背包段、10-93 效果摘要
+/// 「一律走中文名、不泄漏英文 id」的口径相反，玩家面板是全项目
+/// 泄漏英文 id 的最后一处。10-99 补写侧守卫后新幽灵键不会再落盘，
+/// 但**旧存档里已积累的幽灵键仍会显示**（存档兼容不做破坏性清洗），
+/// 故未知 id 一律回退显示原 id，绝不显示空白或抛错。
+///
+/// 走顶层 `npc_data.npcById` 而非 `GameEngine.npcById`：本屏已 import
+/// `npc_data`，顶层函数与实例方法同名不冲突（此处非 mixin 环境，
+/// 无坑 50 的「实例方法优先」歧义）。
+String _relationName(MapEntry<String, int> e) =>
+    npcById(e.key)?.name ?? e.key;
 
 /// 渲染单个子女的培养档案行。
 Widget _buildChildRearingLine(GameEngine e, String childName) {

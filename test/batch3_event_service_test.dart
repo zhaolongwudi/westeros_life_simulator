@@ -155,11 +155,12 @@ void main() {
         id: 'c1',
         text: '测试',
         requirements: const {},
-        effects: const {'relations.npc_1': 10},
+        // Batch 10-99：键须为真实 npc id（`npc_1` 是虚构 id，守卫已拒收）。
+        effects: const {'relations.npc_tyrion': 10},
         narrative: '测试',
       );
       final result = service.applyEffects(player, choice);
-      expect(result.newPlayer.relations['npc_1'], 10);
+      expect(result.newPlayer.relations['npc_tyrion'], 10);
     });
 
     test('applyEffects 标记效果', () {
