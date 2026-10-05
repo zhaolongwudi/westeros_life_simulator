@@ -141,7 +141,9 @@ void main() {
         const <String, int>{'title_grant': 1, 'gold': 10},
       );
       expect(p.gold, 110);
-      // 未知键 title_grant 被忽略但金币生效
+      // 未知键 title_grant 被忽略但金币生效。
+      // 【Batch 10-101】落盘行为不变，仍不生效；但改为登记进
+      // `lastRejectedEffectKeys`，与五类前缀键守卫同一通道。
     });
   });
 }

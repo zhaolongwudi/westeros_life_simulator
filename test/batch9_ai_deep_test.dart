@@ -57,7 +57,7 @@ void main() {
       expect(player.reputation, 100);
     });
 
-    test('未知效果键忽略', () {
+    test('未知效果键忽略（Batch 10-101 起登记进拒绝列表）', () {
       final provider = GameStateProvider();
       final player = provider.applyEffects(
         provider.player,
@@ -65,6 +65,11 @@ void main() {
       );
       expect(player.gold, 100); // 不变
       expect(player.reputation, 50);
+      // Batch 10-101：未识别顶层键不再是「静默丢弃」，而是登记进
+      // `lastRejectedEffectKeys`，让 `applyAiChoice` 输出「（其中 N 项
+      // 效果未生效：unknown）」。落盘行为不变（仍不生效），
+      // 变的只是**可见性**——这正是本批要闭合的契约。
+      expect(provider.lastRejectedEffectKeys, contains('unknown'));
     });
     test('关系效果键 relations.<npc> 增减好感', () {
       final provider = GameStateProvider();

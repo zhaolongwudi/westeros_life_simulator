@@ -133,7 +133,14 @@ class EventService {
           );
           applied[key] = value;
         case 'age':
-          newPlayer = newPlayer.copyWith(age: newPlayer.age + value);
+          // Batch 10-101：补年龄下界护栏，与 `GameStateProvider.applyEffects`
+          // 同名分支对齐（那边同批新增 `age` 分支时也带此护栏）。
+          // 此前本通道是裸加法，AI/事件写 `age: -99999` 会让年龄变负数：
+          // `isElder`（`age >= 55`）与 `minAge`/`maxAge` 门槛、
+          // 以及玩家面板「N 岁」展示会全部失真。与 10-95 给
+          // `skills./attributes.` 补 `max(0, ...)`、10-90 给好感度
+          // 补 `.clamp(-100, 100)` 同型——三处都是「裸加法无边界」。
+          newPlayer = newPlayer.copyWith(age: max(0, newPlayer.age + value));
           applied[key] = value;
         default:
           if (key.startsWith('skills.')) {

@@ -628,6 +628,7 @@ $seasonGuide
 - 生存状态：health / energy / hunger（如 health: 10 回血，energy: -15 耗精力，hunger: 20 进食）
 - 物品：inventory.物品ID（正数获得物品，如 inventory.item_bread: 1；负数消耗/丢弃）
 - 数值范围：单次技能/属性 ±1~3、关系 ±5~20、好感/恶感累计不超过 ±100（超出按边界截断）
+ - 【Batch 10-101】除以上列出的键外，其余键名一律无效、不会生效：没有 political / military / faith / magic / familyRelation / food / happiness 这类键，政治得失、家族关系、信仰与魔法的影响请写进叙事文本，不要试图用不存在的键表达
 
 输出格式（JSON）：
 {

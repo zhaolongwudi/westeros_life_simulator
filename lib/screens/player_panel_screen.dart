@@ -305,7 +305,7 @@ class PlayerPanelScreen extends StatelessWidget {
                     title: '状态标记',
                     icon: Icons.flag_outlined,
                     entries: p.flags.entries
-                        .map((e) => _Entry(e.key, '${e.value}'))
+                        .map((e) => _Entry(_flagName(e.key), '${e.value}'))
                         .toList(),
                   ),
                 ],
@@ -315,7 +315,9 @@ class PlayerPanelScreen extends StatelessWidget {
                   _SectionCard(
                     title: '背包',
                     icon: Icons.inventory_2_outlined,
-                    entries: p.inventory.map((e) => _Entry(e, '')).toList(),
+                    entries: p.inventory
+                        .map((e) => _Entry(_itemName(e), ''))
+                        .toList(),
                   ),
                 ],
               ],
@@ -409,6 +411,39 @@ class _Entry {
 /// 无坑 50 的「实例方法优先」歧义）。
 String _relationName(MapEntry<String, int> e) =>
     npcById(e.key)?.name ?? e.key;
+
+/// 状态标记区块的中文名（Batch 10-102）。
+///
+/// 【为什么改】与 10-100 关系区块同型：此前直接 `_Entry(e.key, ...)`，
+/// 把 `isAlive` / `equipped.item_sword` / `npc_task.npc_tyrion.xxx`
+/// 这类**裸英文键**当标题显示。10-97 补写侧分层白名单后新键不会再落盘，
+/// 但**旧存档里已积累的键、以及 5 个动态前缀拼出的键仍会显示**。
+///
+/// 【为什么动态前缀键回退显示原键而不是空白】`equipped.item_sword`
+/// 这类键的动态部分是**物品 id**（可翻中文名），但 `npc_task.` /
+/// `npc_story.` / `house.childDead.` 的动态部分是 **NPC id 或中文人名**
+/// （人名已是中文，再翻会得到空串）。故只对能确定翻出中文名的前缀
+/// 做替换，其余一律回退原键——绝不显示空白、绝不抛错。
+///
+/// 【单一真相】静态键走 `labels.flagLabel`（与 `identityLabel` /
+/// `skillLabel` / `attributeLabel` 同一层），不在本屏硬编码映射表，
+/// 避免两处标签表漂移。
+String _flagName(String key) {
+  final label = flagLabel(key);
+  if (label != null) return label;
+  // 动态前缀：equipped.<物品 id> 可翻物品中文名
+  if (key.startsWith('equipped.')) {
+    return '装备·${itemName(key.substring(9))}';
+  }
+  return key;
+}
+
+/// 背包区块的中文名（Batch 10-102）。
+///
+/// 与 10-87 prompt 背包段、10-93 效果摘要同一口径：一律走中文名。
+/// 未知 id 回退原 id（与 `itemName` 自身策略一致），保证旧存档里的
+/// 幽灵物品键仍可见而不是消失。
+String _itemName(String itemId) => itemName(itemId);
 
 /// 渲染单个子女的培养档案行。
 Widget _buildChildRearingLine(GameEngine e, String childName) {

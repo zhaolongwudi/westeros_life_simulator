@@ -389,6 +389,37 @@ class GameStateProvider extends ChangeNotifier {
         newPlayer = newPlayer.copyWith(
           hunger: (newPlayer.hunger + value).clamp(0, 100),
         );
+      } else if (key == 'age') {
+        // Batch 10-101：`age` 键只在事件通道处理，AI 通道一直漏了——
+        // 与 10-95 修 `skills./attributes.` 的 `max(0, ...)`、
+        // 10-90 修好感度 ±100 钳制同型（两处 applyEffects 漂移）。
+        // 事件数据目前零处使用 `age` 键（取证：`event_data` 内
+        // `'age'` 命中 0），故本分支对现有内容零影响，属补齐契约
+        // 对称性而非修 bug——**但 AI 写 `age: 5` 此前是静默丢弃**，
+        // 玩家看不到任何反馈，叙事里却写着「你又老了一岁」。
+        newPlayer = newPlayer.copyWith(age: max(0, newPlayer.age + value));
+      } else {
+        // Batch 10-101：未识别顶层键兜底拒收。
+        //
+        // 【本批最重要的发现】取证发现 `event_data` 存在 **10 个纯幽灵
+        // 顶层效果键**（`political`/`military`/`faith`/`magic`/`familyRelation`
+        // 等，共 78 处、覆盖 60+ 事件），两条 `applyEffects` 都不认识它们
+        // → 玩家点了「支持合法继承人」只拿到 `reputation`，叙事承诺的
+        // 政治资本变化**静默丢弃、无任何反馈**。
+        //
+        // 【为什么不删这些键而要兜底拒收】取证验证过删除的代价：
+        // ① **9 个选项会变成零效果死选项**（`choice_rest` 休息、
+        //    `choice_walk_away` 转身离开、`choice_just_look` 只看不买…），
+        //    而「转身离开本就没有收益」是**有意设计**，不是数据错误；
+        // ② **4 个事件选项组会同质化**（`event_family_intrigue` /
+        //    `event_church_split` 三选项坍缩成 rep +5/+5/-5）。故删除
+        //    破坏玩法，接线属新增玩法维度，均超出契约修复范围。
+        //
+        // 【本批只做契约闭合】把「静默丢弃」变成「可见的拒收」——
+        // 复用 10-94 已建成的 `lastRejectedEffectKeys` 通道，与
+        // 五类前缀键守卫完全同构，玩家看到「（其中 N 项效果未生效：…）」，
+        // 叙事与状态的脱节不再隐形。治理本身不新增任何玩法语义。
+        rejected.add(key);
       }
     }
     // Batch 10-94：登记本次被守卫拒绝的键（含 0 命中，

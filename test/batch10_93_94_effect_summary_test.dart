@@ -207,13 +207,17 @@ void main() {
       expect(provider.lastRejectedEffectKeys, isEmpty);
     });
 
-    test('未知顶层键不登记（沿用静默忽略语义）', () {
+    test('未知顶层键登记为被拒（Batch 10-101 语义反转）', () {
       final provider = GameStateProvider();
       provider.applyEffects(
         provider.player,
         const <String, int>{'title_grant': 1},
       );
-      expect(provider.lastRejectedEffectKeys, isEmpty);
+      // 【本用例语义在 Batch 10-101 被有意反转】10-93/94 建立「未识别
+      // 顶层键静默忽略」时，这是与 10-99 幽灵关系键断言并列的**反向**
+      // 护栏；10-101 把未识别键改为登记进拒绝列表（落盘行为不变，仅
+      // 从不可见变为可见），故本例由「不登记」翻转为「登记」。
+      expect(provider.lastRejectedEffectKeys, contains('title_grant'));
     });
 
     test('合法键与被拒键混合时，只登记被拒的那个', () {

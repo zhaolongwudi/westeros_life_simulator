@@ -164,3 +164,52 @@ String attributeLabel(String key) {
     _ => key,
   };
 }
+
+/// 状态标记键中文标签（Batch 10-102）。
+///
+/// 玩家 `flags` 的 26 个静态键（`BalanceData.kPlayerFlagKeys`：17 个内容
+/// 事件键 + 9 个引擎系统键）。未知键返回 **null 而非原样返回**——与
+/// `skillLabel` / `attributeLabel` 的兜底策略刻意不同：
+///
+/// 【为什么这里要 null 而不是原样返回】`flags` 与 `skills.`/`attributes.`
+/// 的关键差别是**动态前缀**。`flags.equipped.item_sword` /
+/// `flags.npc_task.npc_tyrion.某任务` 这类键由引擎在运行时拼出，
+/// 静态键表天然覆盖不到。若沿用「未知键原样返回」，调用方就无法区分
+/// 「这是个该翻中文名的静态键」与「这是个带动态部分的键、需另行处理」，
+/// 于是玩家面板只能显示裸英文键。返回 null 让调用方拿到「未命中静态表」
+/// 的信号，再按前缀规则兜底。
+///
+/// 键集与 `BalanceData.kPlayerFlagKeys` 一一对应（有测试断言零漂移）。
+String? flagLabel(String key) {
+  return switch (key) {
+    // —— 内容事件 17 键（event_data.dart 的字面量键）——
+    'honor_pledge' => '荣誉誓约',
+    'hasShelter' => '寻得庇护',
+    'hasDirewolf' => '驯服恐狼',
+    'hasBlessing' => '神明庇佑',
+    'hasVision' => '幻视',
+    'hasCandleVision' => '烛中幻象',
+    'hasCometRecord' => '彗星异象',
+    'hasWarned' => '已示警',
+    'hasFrozenVision' => '冰境幻视',
+    'guild_ally' => '商会盟友',
+    'guild_secret' => '商会秘闻',
+    'guild_enemy' => '商会敌对',
+    'sworn_brother' => '义兄弟',
+    'watch_friend' => '守夜人友人',
+    'market_hero' => '集市传奇',
+    'market_intel' => '集市情报',
+    'lord_favor' => '领主赏识',
+    // —— 引擎系统键 9 个（mixin 层）——
+    'isAlive' => '存活',
+    'isInjured' => '负伤',
+    'negotiated' => '今日已议价',
+    'isMarried' => '已婚',
+    'divorceYear' => '离婚当年',
+    'widowed' => '丧偶',
+    'isExiled' => '流放中',
+    'generation' => '已传承',
+    'inherited' => '已继承家主之位',
+    _ => null,
+  };
+}
