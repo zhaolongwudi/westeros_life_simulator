@@ -1,5 +1,5 @@
 # 维斯特洛人生模拟器 · 代码地图（CODE_MAP）
-> **本文件是代码结构导航索引**（v5.24 · Batch 10-103/104 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
+> **本文件是代码结构导航索引**（v5.25 · Batch 10-105/106 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
 > 再读本文件快速定位「哪个功能在哪个文件、哪个方法」。避免盲目翻代码。
 >
 > 定位三步法：
@@ -14,7 +14,7 @@
 ```
 lib/
 ├── main.dart                      # 入口（runApp）
-├── app.dart                       # 根组件：StartScreen → GameScreen
+├── app.dart                       # 根组件：HomeScreen → StartScreen → GameScreen（Batch 10-105 起 home 改 HomeScreen 主菜单）
 ├── game_engine.dart               # ⭐ 引擎宿主：组合全部 mixin（含混入顺序）
 │
 ├── core/                           # 【框架层】纯 Dart，无状态层依赖（Batch 10-28 · M3a 新增）
@@ -66,7 +66,8 @@ lib/
 │   （Batch 10-28 · M3a 自注册约定：9 个领域 mixin 各有 `registerXxxCommands(CommandRegistry)`；6 个领域各有 `registerXxxMonthlyHooks(MonthlyPipeline)`；共 12 个月度钩子 id）
 │
 ├── screens/                       # 【UI 层】全部为「壳」：只接线 + 布局，不含业务编排（Batch 10-29 · M3b）
-│   ├── start_screen.dart          # 开局选择界面
+│   ├── home_screen.dart           # ⭐ 开屏首页/主菜单（Batch 10-105 新增）：开始新游戏/继续游戏（读最近存档）/设置（AI/存档）三按钮 + 铁王座饰头；`MaterialApp.home` 指向此处，每次冷启动先进主菜单
+│   ├── start_screen.dart          # 开局选择界面（Batch 10-105 重写为 7 步 Stepper 分步向导：姓名/身份/家族/出生地/时代/出生季节/确认；底部固定操作栏；Stepper 只渲染当前步 content 防 overflow）
 │   ├── game_screen.dart           # ⭐ 主界面 245 行（Batch 10-29 · M3b 从 709 行瘦身；只做接线：引擎调用 + widgets 组合 + AI loading 态）
 │   ├── player_panel_screen.dart   # 玩家详情（含家谱区块，Batch 10-14）
 │   ├── npc_panel_screen.dart      # NPC 关系面板（Batch 10-15 新增）
@@ -96,9 +97,9 @@ lib/
 │   └── westeros_theme.dart        # ⭐ 「铁与火 · 羊皮纸与黄金」主题：bark* 五层深棕 + 兰尼斯特金 gold* + 史塔克钢 + 坦格利安血红 + 羊皮纸米色，serif 标题字体族；金边卡片/AppBar 底部金线/金色进度条等 17 类 ThemeData 覆盖；色板常量可被测试断言
 │
 ├── services/                      # 【服务层】外部/IO
-│   ├── ai_service.dart            # AiService：AI 叙事/选项生成（Dio，含在场 NPC 多步骤任务模板/家族信息注入，Batch 10-22；事件注入走 event_prompt_filter 预算化，Batch 10-33；时节农事注入 Batch 10-56；本地集市行情注入 Batch 10-58；**多 Key 轮换重试 Batch 10-59**）
+│   ├── ai_service.dart            # AiService：AI 叙事/选项生成（Dio，含在场 NPC 多步骤任务模板/家族信息注入，Batch 10-22；事件注入走 event_prompt_filter 预算化，Batch 10-33；时节农事注入 Batch 10-56；本地集市行情注入 Batch 10-58；**多 Key 轮换重试 Batch 10-59**；**连通性测试 testConnection + 自动识别模型 fetchModels Batch 10-106**）
 │   ├── event_prompt_filter.dart   # ⭐ 事件 prompt 预算筛选器（Batch 10-33 · M4c-2）：selectEventsForPrompt 按相关度评分（地点+3/季节+2/数值/标记+1）截取预算 12，全量 72→12 token 约降 83%；预算常量在 balance_data.dart
-│   ├── ai_config.dart             # AI 配置：多 Key 池（JSON 数组 `ai_api_keys`）/模型/BaseURL/提供商（Batch 10-59 重写；双向同步旧单 key 键 `ai_api_key`；resolvedModel/resolvedBaseUrl 空值回落 provider 默认）
+│   ├── ai_config.dart             # AI 配置：多 Key 池（JSON 数组 `ai_api_keys`）/模型/BaseURL/提供商（Batch 10-59 重写；双向同步旧单 key 键 `ai_api_key`；resolvedModel/resolvedBaseUrl 空值回落 provider 默认；**customModels 自定义模型列表持久化 `ai_custom_models` + allModels 去重保序 getter Batch 10-106**）
 │   ├── ai_provider_defaults.dart  # ⭐ AI 提供商预设（Batch 10-59 新增）：sensenova/atria/deepseek 3 家，含默认模型/模型候选/baseUrl（chatBaseUrl 自动拼 /v1）；providerDefaultsOf 单一真相对齐
 │   ├── event_service.dart         # 事件触发/效果/存档（注意：与 provider 双实现）
 │   ├── save_service.dart          # ⭐ 存档序列化/导入导出（Batch 10-26 · M1：写入 schemaVersion / 读档先 migrateSave / 坏档隔离 .corrupted）
@@ -223,6 +224,11 @@ GameEngine extends GameProviderBase with:
 | **`flags.` 效果键分层白名单（效果落盘轴收官）** | data/balance_data.dart（新增 `kPlayerFlagKeys` **26 个静态键** = 内容事件字面量键 17 + 引擎系统键 9（`isAlive`/`isInjured`/`negotiated`/`isMarried`/`divorceYear`/`widowed`/`isExiled`/`generation`/`inherited`），`kPlayerFlagPrefixes` **5 个受限动态前缀**（`equipped.`/`house.childDead.`/`npc_task.`/`npc_task_done.`/`npc_story.`），判定单一真相 `isPlayerFlagKeyValid(flagName)`——静态集命中或以某前缀开头**且后缀非空**）+ providers/game_state_provider.dart（`applyEffects` 的 `flags.` 分支补守卫，不合规键 `continue` 并登记进 `lastRejectedEffectKeys`）+ services/event_service.dart（同守卫，不合规键登记进 `failedEffects`）。**为什么分层而非纯白名单**：`flags.` 存在 5 个引擎运行时拼出的合法动态键（装备槽位写物品 id、已故子女写继承人中文名、任务/人物故事写「npcId.任务标题」），纯白名单会把它们全部拒收。**修正 10-95/96 的旧盘点**：旧盘点只记了 3 个前缀，**漏了 `npc_task.`（`mixin_npc_interact:250` 接任务）与 `npc_story.`（`:203` 人物故事）**——按旧盘点实现会静默拒收这两条内容数据；旧盘点还把 21 个 event 键当成全量静态键，实际其中 4 个是 `equipped.<物品 id>` 动态键，且**完全漏掉了引擎自己写的 9 个系统键**（只按事件键建白名单会让 `flags.isMarried` 被拒 → `formatFamilyTree` 婚姻显示恒为「未婚」）。**刻意不开 `house.childExiled.`**：全库只有读取（`mixin_generation:58`）没有写入，放行等于让 AI 有能力把家谱继承人从候选中剔除。Batch 10-97） |
 | **`relations.` 效果键守卫（五类键收官）** | data/npc_data.dart（新增 `isNpcIdValid(npcId)` —— **查 `allNpcs` 而非静态键集**，与 10-91 的 `itemById` 同构；**刻意不写白名单**是因 NPC 有 38 个且随批次持续扩充（10-54/61 都加过），静态集需靠测试逐条比对防漂移，而查表让「新增 NPC 自动生效」） + providers/game_state_provider.dart（`applyEffects` 的 `relations.` 分支补守卫，不合规键 `continue` 并登记进 `lastRejectedEffectKeys`） + services/event_service.dart（同守卫，不合规键登记进 `failedEffects`）。**这是五类效果键里最后一个没设防的**——10-89 只改了 prompt 示例文案，**写侧从未校验 npc id**。幽灵键（`relations.tyrion` 不带 `npc_` 前缀）三重后果：① `ai_service` 关系段 `n == null` 兜底把它原样打进 prompt（AI 看着像真的，继续基于幻影叙事）；② `player_panel` 出现名为 `tyrion` 的条目；③ 按 `\|值\|` 参与 10-83 关系段预算排序、白占 8 个预算位把真实关系挤出窗口。**取证**：`event_data` 的 `relations.` 效果/门槛键经 10-96 清理后已归零，故守卫对内容数据零回归。Batch 10-99） |
 | **AI 多 Key 轮换** | services/ai_service.dart（`generateNarrative`：**多 Key 每次请求自动轮换下一个 Key**（round-robin 起始偏移 + 每次 +1），失败 429/网络/5xx 也直接换下一个不重试同一 Key（避免触发 TPM/RPM 限流）；单 Key 保留指数退避重试；空池返回「未配置 API Key」，Batch 10-59 + fix1） |
+| **AI 连通性测试（测试系统）** | services/ai_service.dart（`testConnection({String? model})`：POST `$baseUrl/chat/completions` 最小 payload（ping/max_tokens:8/temperature:0/stream:false），返回 `(bool, String)`——成功「连接正常（{model}）」/ HTTP 状态码 / DioException message / 未配 Key 短路「未配置 API Key」；走主 Key 不触发轮换，Batch 10-106） |
+| **AI 自动识别厂商模型** | services/ai_service.dart（`fetchModels()`：GET `$baseUrl/models` 解析 OpenAI 兼容 `{"object":"list","data":[{"id":...}]}`，`get<Map<String,dynamic>>` 顶层 Map；空 id 跳过；失败返回空列表；走主 Key 不触发轮换，Batch 10-106） |
+| **AI 自定义模型列表 + 全模型下拉** | services/ai_config.dart（`customModels` 持久化 `ai_custom_models` JSON 数组 + `allModels` getter = 提供商候选 ∪ 自定义 ∪ 激活模型 去重保序；`clear()` 同步清空，Batch 10-106）+ screens/settings_screen.dart（`_editAiConfig` 弹窗：模型下拉用 allModels + 三按钮「自动识别模型/添加模型/测试连接」+ 结果回显 + 自定义模型逐项可移除；BaseURL 留空回落 `providerDefaultsOf(provider)`，Batch 10-106） |
+| **开屏首页（主菜单）** | screens/home_screen.dart（`HomeScreen`：开始新游戏/继续游戏（读最近存档 pushReplacement GameScreen）/设置（AI/存档）三按钮 + 铁王座饰头；`app.dart` 的 `MaterialApp.home` 指向此处——每次冷启动先进主菜单；`saveService` 可注入测试，Batch 10-105） |
+| **开局分步向导** | screens/start_screen.dart（7 步 Stepper：姓名/性别→身份→家族→出生地→时代→出生季节→确认；底部固定「上一步/下一步/开始游戏」；**Stepper 只渲染当前步 content（其余 SizedBox.shrink 占位、标题常显）防 RenderFlex overflow**；开始游戏按钮恒 styleFrom + textStyle `inherit:false` 防 disabled→enabled lerp 崩溃；保留 buildSetupPlayer/buildSetupProgress 纯函数与文本契约，Batch 10-105） |
 | **AI 提供商预设** | data/ai_provider_defaults.dart（sensenova/atria/deepseek 3 家：默认模型/模型候选/baseUrl，`providerDefaultsOf` 单一真相对齐，Batch 10-59）+ services/ai_config.dart（`resolvedModel`/`resolvedBaseUrl` 空值回落 provider 默认） |
 | **AI 配置存储（多 Key + 提供商）** | services/ai_config.dart（`apiKeys` JSON 数组持久化 `ai_api_keys` + `provider` 字段 + 双向同步旧单 key 键 `ai_api_key` + 兼容旧构造参数 `apiKey:`，Batch 10-59） |
 | **AI 回合编排（读配置→拼上下文→请求→装配）** | **mixins/mixin_ai.dart（runAiAction，Batch 10-29 · M3b；返回 `AiTurnResult`）** |
@@ -294,7 +300,7 @@ GameEngine extends GameProviderBase with:
 | 过月 | advance | advanceMonth | 是 |
 | 帮助 | help | _helpText | 否 |
 
-## 五、测试文件映射（test/ 104 文件 + regression/ 5 文件 = 109 文件）
+## 五、测试文件映射（test/ 105 文件 + regression/ 5 文件 = 110 文件）
 
 | 测试文件 | 覆盖 |
 |----------|------|
@@ -388,6 +394,7 @@ GameEngine extends GameProviderBase with:
 | **m6_robustness_test** | **M6 输入防护**（10-37，10 用例）：sanitizeCommand 正常/超长截断/恰好 80 不截断 / isCommandNoise 噪声判定 8 值 / resolveCommand 空·纯符号·超长·正常 / labels 文案集中层关键值 7 项 |
 | **batch10_101_102_effect_topkey_panel_test** | **10-101/102 顶层效果键 + 面板中文名**（21 用例）：`age` 键双通道对齐（AI 通道落盘/负值钳 0/事件通道同钳）+ 未识别顶层键拒收可见化（10 个幽灵键逐个登记 / 不落盘 / 事件通道 failedEffects 两通道一致 / 合法顶层键不误登记 / 裸前缀 `flags.equipped.` 仍拒——10-97 不回归 / 端到端「未生效」提示）+ `flagLabel` 单一真相（26 静态键零漂移 / 5 动态前缀不命中静态表 / 未知键返 null / 抽样核对中文名）+ 面板 widget（静态 flag 中文名 / 背包中文名 / 装备动态键「装备·长剑」/ 旧存档未知键回退原键） |
 | **batch10_103_104_trigger_contract_test** | **10-103/104 门槛契约**（14 用例）：全量 72 事件门槛键零死键（新增门槛键必须被引擎识别）+ 全量 72 事件 × 四季 × 3 玩家样本双通道判定一致（防第五次漂移）+ 节日四季可触发回归（season:any 曾恒 false）+ 季节性事件未误伤 + `season:any` 在 context 覆盖层下仍恒真（通配优先级）+ 非数字门槛值不抛异常（tryParse）+ `canTrigger` 只保留 provider 私有 isOneTime 校验 |
+| **batch10_105_106_home_ai_config_test** | **开屏首页 + 开局分步向导 + AI 多模型配置/测试系统**（10-105/106，13 用例）：① HomeScreen 主菜单——三按钮渲染（开始新游戏/继续游戏（暂无存档）/设置（AI/存档））/ 无存档「继续游戏」禁用态（GestureDetector.onTap null）/ 点「开始新游戏」push 到 StartScreen（AppBar「开始新人生」+ 姓名输入）；② 开局分步向导——第 0 步姓名/性别 + 底部「下一步」+「开始游戏」disabled / 逐级「下一步」6 次到确认页（「凛冬将至」findsWidgets + 「姓名：」「身份：」确认页独有）+「开始游戏」变可用；③ AiConfig——customModels 持久化往返 + allModels 去重保序（候选 ∪ 自定义 ∪ 激活）/ 旧单 Key 迁移兼容不受影响 / clear 清空 customModels；④ AiService——testConnection 成功（200）/ HTTP 400 / 未配 Key 短路「未配置 API Key」/ fetchModels 解析 OpenAI 兼容响应（空 id 跳过）/ 空数据空列表 / 未配 Key 短路。**测试要点（踩坑记录）**：flutter_test FakeAsync 下真实 `Directory` IO 不 resolve → 必须 override `listSaves` 的内存版 `_MemorySaveService`（参照 batch5，首轮 CI 因此 2 红）；Stepper 测试用高视口（`tester.view.physicalSize = Size(1080, 4000)`，参照 batch10_60）——Stepper 全量 content 布局会溢出（已由产品侧「懒加载 content」根治）；「凛冬将至」在第 0 步饰头与确认页都有 → findsWidgets |
 | **regression/（5 文件）** | **M6 跨批次回归**（10-38 · M6b，32 用例）：regression_legacy_save_test（旧档加载→引擎续玩→存档往返）/ regression_identity_branch_test（6 档工作收入互不越界 + 贸易商人差 17）/ regression_registry_test（46 指令引擎级可执行/消费回合/缺参/中英别名）/ regression_simulation_test（三策略对照/濒危救回/冬夏对比/200 月有界）/ regression_long_session_test（200/1000 回合 history 环形≤200/存档体积有界） |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
