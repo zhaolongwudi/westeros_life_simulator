@@ -117,6 +117,19 @@ class FamilyTreeScreen extends StatelessWidget {
                   _CurrentFamilyOverview(engine: e),
                   const SizedBox(height: 16),
                 ],
+                // Batch 10-109：继承顺位区块——按出生顺序列出子女顺位与培养档案，
+                // 继承人高亮。AI 侧 10-75 已注入继承顺位，但 UI 侧此前只有
+                // 「继承人：X」单一文本行，玩家看不到「谁被重点培养」；本区块
+                // 补齐信息对称（纯 UI，不改模型/引擎）。
+                if (p.children.isNotEmpty) ...[
+                  const _SectionHeader(
+                    icon: Icons.workspace_premium_outlined,
+                    title: '继承顺位',
+                  ),
+                  const SizedBox(height: 8),
+                  _InheritanceOrderCard(engine: e),
+                  const SizedBox(height: 16),
+                ],
                 // 当前世代
                 const _SectionHeader(
                   icon: Icons.account_tree_outlined,
@@ -380,6 +393,155 @@ class _CurrentFamilyOverview extends StatelessWidget {
         children: children,
       ),
     );
+  }
+}
+
+/// 继承顺位卡片（Batch 10-109）。
+///
+/// 按出生顺序列出子女的继承顺位与培养档案，继承人高亮——
+/// AI 侧 10-75 已注入继承顺位，本卡片把同一份信息对称到 UI：
+///   - 罗柏·史塔克（第一顺位，培养：sword / 已督导）👑 继承人
+///   - 珊莎·史塔克（第二顺位）
+/// 无子女时不渲染（调用方已用 `p.children.isNotEmpty` 守卫）。
+class _InheritanceOrderCard extends StatelessWidget {
+  const _InheritanceOrderCard({required this.engine});
+
+  final GameEngine engine;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = engine.player;
+    final heir = engine.heirName;
+    const ordinals = <String>['第一', '第二', '第三', '第四', '第五'];
+    return GildedCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          for (var i = 0; i < p.children.length; i++) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: i == 0
+                          ? const LinearGradient(
+                              colors: <Color>[
+                                WesterosColors.goldDark,
+                                WesterosColors.goldBright,
+                              ],
+                            )
+                          : const LinearGradient(
+                              colors: <Color>[
+                                WesterosColors.barkMid,
+                                WesterosColors.barkHigh,
+                              ],
+                            ),
+                      border: Border.all(
+                        color: i == 0
+                            ? WesterosColors.goldBright
+                            : WesterosColors.outlineGold.withValues(alpha: 0.6),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${i + 1}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: i == 0
+                              ? WesterosColors.barkDeep
+                              : WesterosColors.goldBright,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            Flexible(
+                              child: Text(
+                                '${p.children[i]}'
+                                '（${i < ordinals.length ? ordinals[i] : '第${i + 1}'}顺位）',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: WesterosColors.parchment,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            if (heir == p.children[i]) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: WesterosColors.goldDark
+                                      .withValues(alpha: 0.25),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: WesterosColors.goldBright
+                                        .withValues(alpha: 0.6),
+                                  ),
+                                ),
+                                child: const Text(
+                                  '👑 继承人',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: WesterosColors.goldBright,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _rearingBrief(engine, p.children[i]),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: WesterosColors.inkDim,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// 培养档案短述（与 `_childRearingText` 同源逻辑，仅去姓名前缀）。
+  static String _rearingBrief(GameEngine e, String childName) {
+    final p = e.player;
+    final records =
+        p.childRearing.where((r) => r.name == childName).toList();
+    final parts = <String>[];
+    if (records.isNotEmpty) {
+      final r = records.first;
+      if (r.focus.isNotEmpty) parts.add('培养：${r.focus}');
+      if (r.tutored) parts.add('已督导');
+      if (r.sentToSchool) parts.add('进修中');
+      if (r.reputationGain > 0) parts.add('声望 +${r.reputationGain}');
+    } else {
+      parts.add('尚未培养');
+    }
+    return parts.isEmpty ? '无记录' : parts.join(' / ');
   }
 }
 
