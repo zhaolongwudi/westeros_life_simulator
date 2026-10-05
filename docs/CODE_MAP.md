@@ -1,6 +1,6 @@
 # 维斯特洛人生模拟器 · 代码地图（CODE_MAP）
 
-> **本文件是代码结构导航索引**（v5.22 · Batch 10-99/100 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
+> **本文件是代码结构导航索引**（v5.23 · Batch 10-101/102 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
 > 再读本文件快速定位「哪个功能在哪个文件、哪个方法」。避免盲目翻代码。
 >
 > 定位三步法：
@@ -294,7 +294,7 @@ GameEngine extends GameProviderBase with:
 | 过月 | advance | advanceMonth | 是 |
 | 帮助 | help | _helpText | 否 |
 
-## 五、测试文件映射（test/ 102 文件 + regression/ 5 文件 = 107 文件）
+## 五、测试文件映射（test/ 104 文件 + regression/ 5 文件 = 109 文件）
 
 | 测试文件 | 覆盖 |
 |----------|------|
@@ -386,6 +386,7 @@ GameEngine extends GameProviderBase with:
 | **m5_experience_test** | **M5 体验层**（10-34/35，10 用例）：AI 失败降级（失败行+降级提示行 / 本地指令续玩 / 降级常量唯一）/ 长会话叙事（200 条渲染 / 200 条滚动到底 / 1000 条不崩 / GameScreen 冒烟）/ 导航宫格（窄屏 3 列 / 宽屏 4 列 / AppBar 宫格按钮弹出 9 入口） |
 | **m5_responsive_test** | **M5 响应式适配**（10-36，6 用例）：AdaptiveFrame 窄屏原样全宽不包 Center / 宽屏限宽可配置 / GameScreen 宽屏状态条≤700 + 契约不回归 / 窄屏状态条全宽 / PlayerPanelScreen·FamilyTreeScreen 宽屏 ListView 宽 900 |
 | **m6_robustness_test** | **M6 输入防护**（10-37，10 用例）：sanitizeCommand 正常/超长截断/恰好 80 不截断 / isCommandNoise 噪声判定 8 值 / resolveCommand 空·纯符号·超长·正常 / labels 文案集中层关键值 7 项 |
+| **batch10_101_102_effect_topkey_panel_test** | **10-101/102 顶层效果键 + 面板中文名**（21 用例）：`age` 键双通道对齐（AI 通道落盘/负值钳 0/事件通道同钳）+ 未识别顶层键拒收可见化（10 个幽灵键逐个登记 / 不落盘 / 事件通道 failedEffects 两通道一致 / 合法顶层键不误登记 / 裸前缀 `flags.equipped.` 仍拒——10-97 不回归 / 端到端「未生效」提示）+ `flagLabel` 单一真相（26 静态键零漂移 / 5 动态前缀不命中静态表 / 未知键返 null / 抽样核对中文名）+ 面板 widget（静态 flag 中文名 / 背包中文名 / 装备动态键「装备·长剑」/ 旧存档未知键回退原键） |
 | **regression/（5 文件）** | **M6 跨批次回归**（10-38 · M6b，32 用例）：regression_legacy_save_test（旧档加载→引擎续玩→存档往返）/ regression_identity_branch_test（6 档工作收入互不越界 + 贸易商人差 17）/ regression_registry_test（46 指令引擎级可执行/消费回合/缺参/中英别名）/ regression_simulation_test（三策略对照/濒危救回/冬夏对比/200 月有界）/ regression_long_session_test（200/1000 回合 history 环形≤200/存档体积有界） |
 
 > 坑：**扩充数据（事件/NPC）时，必须同步更新所有「总量/类型分布」断言**
@@ -433,7 +434,7 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v5.22（Batch 10-99/100 relations. 效果键守卫 + 玩家面板关系区中文名）· 最后更新：2026-10-05*
+*文档版本：v5.23（Batch 10-101/102 顶层效果键拒收可见化 + 面板 flags/背包中文名）· 最后更新：2026-10-05*
 
 ## 八、构建 APK 与直发邮箱（临时任务脚本，2026-10-02 新增）
 
@@ -466,4 +467,4 @@ GameEngine extends GameProviderBase with:
   - **只保留最近 3 次**：Cleanup 步骤按 created_at 倒序删多余 `v0.0.x` release（v 版本序列，旧 apk-<sha8> 一并清理）
 - **已知验证**：run `36958877137` ✅（手动触发 CI 验证 changelog 链路，analyze/test 全绿 + auto-update 幂等跳过）；run `37007321396` ✅（release-publish 全步骤 success）；run `37004310167` ❌（auto-update push 非快进被拒 → 已加 pull --rebase 容错）；run `37048376650` ✅（head fcbd46f，fix readme 收尾闭环，analyze-test 全绿）
 ---
-*文档版本：v5.22（Batch 10-99/100 relations. 效果键守卫 + 玩家面板关系区中文名）· 最后更新：2026-10-05*
+*文档版本：v5.23（Batch 10-101/102 顶层效果键拒收可见化 + 面板 flags/背包中文名）· 最后更新：2026-10-05*
