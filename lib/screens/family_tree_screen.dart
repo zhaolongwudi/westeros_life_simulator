@@ -219,6 +219,7 @@ class _LineageNode extends StatelessWidget {
     required this.name,
     this.isCurrent = false,
     this.badge,
+    this.subtitle,
   });
 
   final GenerationRecord? record;
@@ -228,6 +229,9 @@ class _LineageNode extends StatelessWidget {
 
   /// 徽章覆盖文字（如「偶」「子」）；为空时按既有规则取世代数字 /「当」。
   final String? badge;
+
+  /// 节点下方小字（如子女培养档案短述，Batch 10-110）；为空不渲染。
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -311,6 +315,22 @@ class _LineageNode extends StatelessWidget {
               fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
             ),
           ),
+          // Batch 10-110：节点小字（子女培养档案短述等）；为空不渲染。
+          if (subtitle != null && subtitle!.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              subtitle!,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 10,
+                color: isCur
+                    ? WesterosColors.goldBright.withValues(alpha: 0.8)
+                    : WesterosColors.inkDim,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -370,8 +390,15 @@ class _CurrentFamilyOverview extends StatelessWidget {
       isCurrent: true,
     );
     // 子女节点（每名子女一个节点，徽章「子」）
+    // Batch 10-110：子女节点附培养档案小字（与继承顺位卡片同源逻辑），
+    // 让「当代支脉」血脉快照一眼看出谁被重点培养。
     final childNodes = p.children
-        .map((c) => _LineageNode(label: '子女', name: c, badge: '子'))
+        .map((c) => _LineageNode(
+              label: '子女',
+              name: c,
+              badge: '子',
+              subtitle: _rearingBrief(engine, c),
+            ))
         .toList();
 
     final children = <Widget>[];
@@ -526,23 +553,6 @@ class _InheritanceOrderCard extends StatelessWidget {
     );
   }
 
-  /// 培养档案短述（与 `_childRearingText` 同源逻辑，仅去姓名前缀）。
-  static String _rearingBrief(GameEngine e, String childName) {
-    final p = e.player;
-    final records =
-        p.childRearing.where((r) => r.name == childName).toList();
-    final parts = <String>[];
-    if (records.isNotEmpty) {
-      final r = records.first;
-      if (r.focus.isNotEmpty) parts.add('培养：${r.focus}');
-      if (r.tutored) parts.add('已督导');
-      if (r.sentToSchool) parts.add('进修中');
-      if (r.reputationGain > 0) parts.add('声望 +${r.reputationGain}');
-    } else {
-      parts.add('尚未培养');
-    }
-    return parts.isEmpty ? '无记录' : parts.join(' / ');
-  }
 }
 
 /// 历代家主节点（时间轴条目，可点击查看详情，Batch 10-46）。
@@ -1094,4 +1104,26 @@ String _childRearingText(GameEngine e, String childName) {
     parts.add('尚未培养');
   }
   return '$childName：${parts.isEmpty ? '无记录' : parts.join(' / ')}';
+}
+
+/// 子女培养档案短述（Batch 10-109/110 共用，仅去姓名前缀）。
+///
+/// 与 [_childRearingText] 同源逻辑——继承顺位卡片（10-109）与当代支脉
+/// 子女节点（10-110）都需要一行「培养：sword / 已督导」式短述，而
+/// [_childRearingText] 自带姓名前缀，故抽此顶层函数供两处复用，避免
+/// 三份同源逻辑漂移（与 player_panel_screen 的 _childRearingText 同族）。
+String _rearingBrief(GameEngine e, String childName) {
+  final p = e.player;
+  final records = p.childRearing.where((r) => r.name == childName).toList();
+  final parts = <String>[];
+  if (records.isNotEmpty) {
+    final r = records.first;
+    if (r.focus.isNotEmpty) parts.add('培养：${r.focus}');
+    if (r.tutored) parts.add('已督导');
+    if (r.sentToSchool) parts.add('进修中');
+    if (r.reputationGain > 0) parts.add('声望 +${r.reputationGain}');
+  } else {
+    parts.add('尚未培养');
+  }
+  return parts.isEmpty ? '无记录' : parts.join(' / ');
 }
