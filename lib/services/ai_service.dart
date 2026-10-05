@@ -163,6 +163,88 @@ class AiService {
     return lastResponse;
   }
 
+  /// 连通性测试：向 BaseURL 发一个最小 chat/completions 请求，验证 Key 与网络。
+  ///
+  /// 设置页「测试连接」用。可选 [model] 覆盖（默认用本服务实例的 model）。
+  /// 返回：(isSuccess, message)——成功时 message 含「连接正常」；
+  /// 失败时 message 为可读错误（未配置 Key / HTTP 状态码 / 网络错误）。
+  /// 走主 Key（池中第一个），不触发轮换。
+  Future<(bool, String)> testConnection({String? model}) async {
+    if (_apiKeys.isEmpty) {
+      return (false, '未配置 API Key');
+    }
+    final key = _apiKeys.first;
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '$baseUrl/chat/completions',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $key',
+            'Content-Type': 'application/json',
+          },
+          sendTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
+        data: {
+          'model': model ?? this.model,
+          'messages': [
+            {'role': 'user', 'content': 'ping'},
+          ],
+          'max_tokens': 8,
+          'temperature': 0,
+          'stream': false,
+        },
+      );
+      if (response.statusCode == 200) {
+        return (true, '连接正常（${model ?? this.model}）');
+      }
+      return (false, 'HTTP ${response.statusCode}');
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      final msg = status != null ? 'HTTP $status' : (e.message ?? 'Network error');
+      return (false, msg);
+    } catch (e) {
+      return (false, e.toString());
+    }
+  }
+
+  /// 自动识别厂商可用模型列表：GET {baseUrl}/models（OpenAI 兼容接口）。
+  ///
+  /// 返回解析出的模型 id 列表；请求失败时返回空列表（调用方兜底）。
+  /// 走主 Key（池中第一个），不触发轮换。
+  Future<List<String>> fetchModels() async {
+    if (_apiKeys.isEmpty) return <String>[];
+    final key = _apiKeys.first;
+    try {
+      // OpenAI 兼容接口返回 {"object":"list","data":[{"id":...},...]}，
+      // 顶层是 Map，data 才是 List。
+      final response = await _dio.get<Map<String, dynamic>>(
+        '$baseUrl/models',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $key',
+            'Content-Type': 'application/json',
+          },
+          sendTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
+      );
+      if (response.statusCode != 200) return <String>[];
+      final data = response.data?['data'];
+      if (data is! List) return <String>[];
+      final models = <String>[];
+      for (final item in data) {
+        if (item is Map) {
+          final id = item['id'];
+          if (id is String && id.isNotEmpty) models.add(id);
+        }
+      }
+      return models;
+    } catch (_) {
+      return <String>[];
+    }
+  }
+
   /// 发起一次 chat/completions 请求并解析。
   Future<AiResponse> _postChat(String prompt, int maxTokens,
       {String? apiKey}) async {

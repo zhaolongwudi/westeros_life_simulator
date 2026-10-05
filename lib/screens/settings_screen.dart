@@ -10,6 +10,7 @@ import '../game_engine.dart';
 import '../providers/game_state_provider.dart';
 import '../data/ai_provider_defaults.dart';
 import '../services/ai_config.dart';
+import '../services/ai_service.dart';
 import '../services/save_service.dart';
 import '../theme/westeros_theme.dart';
 import '../utils/text_formats.dart';
@@ -163,7 +164,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await _refreshSaves();
   }
 
-  /// 编辑 AI 配置（Batch 10-59：提供商预设 + 多 Key + 模型下拉）。
+  /// 编辑 AI 配置（Batch 10-59 提供商/多 Key；Batch 10-106 多模型 + 自动识别 + 连通性测试）。
   Future<void> _editAiConfig() async {
     final config = _aiConfig ?? AiConfig.defaultConfig();
     // 多 key：换行分隔展示，便于粘贴多个。
@@ -174,14 +175,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final baseUrlController = TextEditingController(text: config.baseUrl);
     var selectedProvider = config.provider;
     var selectedModel = config.model;
-    // 候选模型随 provider 变化。
-    var candidateModels = providerDefaultsOf(selectedProvider).models;
+    // 自定义模型（自动识别 / 手动添加后并入）。
+    var customModels = <String>[...config.customModels];
+    // 连通性测试 / 自动识别的状态与结果。
+    var testing = false;
+    var fetching = false;
+    var testResult = '';
+    var fetchResult = '';
 
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) {
           final defaults = providerDefaultsOf(selectedProvider);
+          // 全部可选模型：提供商候选 + 自定义（去重）。
+          final allModels = <String>[];
+          final seen = <String>{};
+          for (final m in providerDefaultsOf(selectedProvider).models) {
+            if (seen.add(m)) allModels.add(m);
+          }
+          for (final m in customModels) {
+            if (seen.add(m)) allModels.add(m);
+          }
+          if (selectedModel.isNotEmpty && seen.add(selectedModel)) {
+            allModels.add(selectedModel);
+          }
           return AlertDialog(
             title: const Text('AI 配置'),
             content: SingleChildScrollView(
@@ -208,7 +226,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       setDialogState(() {
                         selectedProvider = v;
                         // 切换提供商时模型跟随默认，baseUrl 清空（回落默认）。
-                        candidateModels = providerDefaultsOf(v).models;
                         selectedModel = '';
                         modelController.text = '';
                         baseUrlController.text = '';
@@ -242,7 +259,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
-                    items: candidateModels
+                    items: allModels
                         .map((m) => DropdownMenuItem<String>(
                               value: m,
                               child: Text(m),
@@ -256,7 +273,129 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       });
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
+                  // 自动识别模型 + 手动添加 + 连通性测试
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: <Widget>[
+                      TextButton.icon(
+                        onPressed: fetching
+                            ? null
+                            : () => _fetchModels(
+                                  setDialogState,
+                                  baseUrlController,
+                                  keysController,
+                                  selectedProvider,
+                                  () => customModels,
+                                  (m) {
+                                    customModels = m;
+                                    if (selectedModel.isEmpty &&
+                                        m.isNotEmpty) {
+                                      selectedModel = m.first;
+                                      modelController.text = m.first;
+                                    }
+                                  },
+                                  (r) => fetchResult = r,
+                                  (f) => fetching = f,
+                                ),
+                        icon: fetching
+                            ? const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.settings_input_antenna, size: 16),
+                        label: Text(fetching ? '识别中…' : '自动识别模型'),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => _addCustomModel(
+                          setDialogState,
+                          modelController,
+                          () => customModels,
+                          (m) {
+                            customModels = m;
+                            selectedModel = m.last;
+                            modelController.text = m.last;
+                          },
+                        ),
+                        icon: const Icon(Icons.add, size: 16),
+                        label: const Text('添加模型'),
+                      ),
+                      TextButton.icon(
+                        onPressed: testing
+                            ? null
+                            : () => _testConnection(
+                                  setDialogState,
+                                  baseUrlController,
+                                  keysController,
+                                  selectedProvider,
+                                  selectedModel.isEmpty
+                                      ? defaults.model
+                                      : selectedModel,
+                                  (r) => testResult = r,
+                                  (t) => testing = t,
+                                ),
+                        icon: testing
+                            ? const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.wifi_tethering, size: 16),
+                        label: Text(testing ? '测试中…' : '测试连接'),
+                      ),
+                    ],
+                  ),
+                  if (fetchResult.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      fetchResult,
+                      style: TextStyle(
+                        color: fetchResult.startsWith('识别到')
+                            ? WesterosColors.goldBright
+                            : WesterosColors.bloodRed,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                  if (testResult.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      testResult,
+                      style: TextStyle(
+                        color: testResult.contains('连接正常')
+                            ? WesterosColors.goldBright
+                            : WesterosColors.bloodRed,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                  if (customModels.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    const Text('自定义模型', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    for (final m in customModels)
+                      ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(m, style: const TextStyle(fontSize: 13)),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.close, size: 16),
+                          tooltip: '移除',
+                          onPressed: () => setDialogState(() {
+                            customModels = customModels
+                                .where((x) => x != m)
+                                .toList();
+                            if (selectedModel == m) {
+                              selectedModel = '';
+                              modelController.text = '';
+                            }
+                          }),
+                        ),
+                      ),
+                  ],
+                  const SizedBox(height: 8),
                   const Text('Base URL（留空用默认）',
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
@@ -302,6 +441,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         model: selectedModel,
         baseUrl: baseUrlController.text.trim(),
         provider: selectedProvider,
+        customModels: customModels,
       );
       await newConfig.save();
       if (!mounted) return;
@@ -311,6 +451,138 @@ class _SettingsScreenState extends State<SettingsScreen> {
     keysController.dispose();
     modelController.dispose();
     baseUrlController.dispose();
+  }
+
+  /// 自动识别厂商模型：GET {baseUrl}/models，把识别结果并入自定义模型列表。
+  void _fetchModels(
+    StateSetter setDialogState,
+    TextEditingController baseUrlController,
+    TextEditingController keysController,
+    String provider,
+    List<String> Function() getCustom,
+    void Function(List<String>) setCustom,
+    void Function(String) setResult,
+    void Function(bool) setFetching,
+  ) async {
+    setDialogState(() => setFetching(true));
+    final keys = keysController.text
+        .split('\n')
+        .map((k) => k.trim())
+        .where((k) => k.isNotEmpty)
+        .toList();
+    if (keys.isEmpty) {
+      setDialogState(() {
+        setFetching(false);
+        setResult('请先填入至少一个 API Key');
+      });
+      return;
+    }
+    final baseUrl = baseUrlController.text.trim().isEmpty
+        ? providerDefaultsOf(provider).baseUrl
+        : baseUrlController.text.trim();
+    final service = AiService(
+      apiKeys: keys,
+      baseUrl: baseUrl.endsWith('/v1') ? baseUrl : '$baseUrl/v1',
+      model: 'ping',
+    );
+    final models = await service.fetchModels();
+    if (!mounted) return;
+    setDialogState(() {
+      setFetching(false);
+      if (models.isEmpty) {
+        setResult('未能识别模型（接口无数据或不可用）');
+      } else {
+        // 并入自定义列表（去重保序），不覆盖用户已加的。
+        final merged = <String>[...getCustom()];
+        for (final m in models) {
+          if (!merged.contains(m)) merged.add(m);
+        }
+        setCustom(merged);
+        setResult('识别到 ${models.length} 个模型');
+      }
+    });
+  }
+
+  /// 手动添加模型（文本输入，加入自定义列表并激活）。
+  void _addCustomModel(
+    StateSetter setDialogState,
+    TextEditingController modelController,
+    List<String> Function() getCustom,
+    void Function(List<String>) setCustom,
+  ) async {
+    final controller = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('添加模型'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: '模型名称，如 deepseek-chat',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('添加'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (name == null || name.isEmpty) return;
+    if (!mounted) return;
+    setDialogState(() {
+      final merged = <String>[...getCustom()];
+      if (!merged.contains(name)) merged.add(name);
+      setCustom(merged);
+      modelController.text = name;
+    });
+  }
+
+  /// 连通性测试：用当前 Key/BaseURL/模型发最小请求，把结果显示在弹窗内。
+  void _testConnection(
+    StateSetter setDialogState,
+    TextEditingController baseUrlController,
+    TextEditingController keysController,
+    String provider,
+    String model,
+    void Function(String) setResult,
+    void Function(bool) setTesting,
+  ) async {
+    setDialogState(() => setTesting(true));
+    final keys = keysController.text
+        .split('\n')
+        .map((k) => k.trim())
+        .where((k) => k.isNotEmpty)
+        .toList();
+    if (keys.isEmpty) {
+      setDialogState(() {
+        setTesting(false);
+        setResult('请先填入至少一个 API Key');
+      });
+      return;
+    }
+    final baseUrl = baseUrlController.text.trim().isEmpty
+        ? providerDefaultsOf(provider).baseUrl
+        : baseUrlController.text.trim();
+    final service = AiService(
+      apiKeys: keys,
+      baseUrl: baseUrl.endsWith('/v1') ? baseUrl : '$baseUrl/v1',
+      model: model,
+    );
+    final (ok, msg) = await service.testConnection(model: model);
+    if (!mounted) return;
+    setDialogState(() {
+      setTesting(false);
+      setResult(ok ? msg : '连接失败：$msg');
+    });
   }
 
   /// 新游戏（重置引擎）。

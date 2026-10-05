@@ -1,8 +1,10 @@
-/// AI 配置存储：多 API Key 池 / 模型 / BaseURL / 提供商。
+/// AI 配置存储：多 API Key 池 / 模型 / BaseURL / 提供商 / 自定义模型。
 ///
 /// 使用 SharedPreferences 持久化，供主界面 AI 叙事调用。
 /// Batch 10-59：升级为多 key（JSON 数组）+ 提供商预设（provider），
 /// 并向后兼容旧版单 key（api_key 明文键）。
+/// Batch 10-106：新增自定义模型列表（customModels，持久化 `ai_custom_models`），
+/// 供「输入厂商地址自动识别模型 / 手动添加模型」使用；模型下拉 = 提供商候选 ∪ 自定义。
 library;
 
 import 'dart:convert';
@@ -17,6 +19,7 @@ class AiConfig {
     this.model = '',
     this.baseUrl = '',
     this.provider = 'sensenova',
+    this.customModels = const <String>[],
   }) : _legacyApiKey = apiKey;
 
   /// 多 API Key 池（按顺序轮换）。
@@ -25,7 +28,7 @@ class AiConfig {
   /// 旧版单 key（兼容构造入参，仅当 apiKeys 为空时生效）。
   final String? _legacyApiKey;
 
-  /// 模型名（空则用 provider 默认）。
+  /// 模型名（空则用 provider 默认；也是「当前激活模型」）。
   final String model;
 
   /// BaseURL（空则用 provider 默认）。
@@ -33,6 +36,28 @@ class AiConfig {
 
   /// 提供商预设名（sensenova / atria / deepseek）。
   final String provider;
+
+  /// 用户自定义模型列表（手动添加 / 自动识别，Batch 10-106）。
+  /// 模型下拉选项 = 提供商候选 ∪ customModels，`model` 为激活项。
+  final List<String> customModels;
+
+  /// 全部可选模型（提供商候选 + 自定义，去重保序）。
+  ///
+  /// 供设置页模型下拉使用：「激活模型」一定在选项中；
+  /// 自定义模型中不在提供商候选里的排在候选之后。
+  List<String> get allModels {
+    final seen = <String>{};
+    final result = <String>[];
+    for (final m in providerDefaultsOf(provider).models) {
+      if (seen.add(m)) result.add(m);
+    }
+    for (final m in customModels) {
+      if (seen.add(m)) result.add(m);
+    }
+    // 确保激活模型在选项中（即使 provider 候选与自定义都没列出）。
+    if (model.isNotEmpty && seen.add(model)) result.add(model);
+    return result;
+  }
 
   /// 兼容旧字段：主 key（池中第一个；无池时回落构造入参的单 key）。
   String get apiKey {
@@ -96,12 +121,26 @@ class AiConfig {
     // 空值回落 provider 默认（保持旧测试与配置页预期一致）。
     final storedModel = prefs.getString('ai_model') ?? '';
     final storedBaseUrl = prefs.getString('ai_base_url') ?? '';
+    // 自定义模型列表（Batch 10-106）。
+    final customJson = prefs.getString('ai_custom_models');
+    List<String> customModels = <String>[];
+    if (customJson != null && customJson.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(customJson);
+        if (decoded is List) {
+          customModels = decoded.whereType<String>().toList();
+        }
+      } catch (_) {
+        customModels = <String>[];
+      }
+    }
     final defaults = providerDefaultsOf(storedProvider);
     return AiConfig(
       apiKeys: keys,
       model: storedModel.isEmpty ? defaults.model : storedModel,
       baseUrl: storedBaseUrl.isEmpty ? defaults.baseUrl : storedBaseUrl,
       provider: storedProvider,
+      customModels: customModels,
     );
   }
 
@@ -120,6 +159,10 @@ class AiConfig {
     await prefs.setString('ai_model', model);
     await prefs.setString('ai_base_url', baseUrl);
     await prefs.setString('ai_provider', provider);
+    await prefs.setString(
+      'ai_custom_models',
+      jsonEncode(customModels.where((m) => m.trim().isNotEmpty).toList()),
+    );
     // 同步旧单 key 键，保持老逻辑兼容
     await prefs.setString('ai_api_key', nonEmpty.isEmpty ? '' : nonEmpty.first);
   }
@@ -129,5 +172,6 @@ class AiConfig {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('ai_api_keys');
     await prefs.remove('ai_api_key');
+    await prefs.remove('ai_custom_models');
   }
 }
