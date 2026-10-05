@@ -39,7 +39,8 @@ Future<String> _promptFor(Player player) async {
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) {
-        final messages = options.data['messages'] as List<dynamic>;
+        final data = options.data as Map<String, dynamic>;
+        final messages = data['messages'] as List<dynamic>;
         final userMsg = messages.last as Map<String, dynamic>;
         captured = userMsg['content'] as String;
         handler.resolve(
