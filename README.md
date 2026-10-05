@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
-**2026-10-05 · feat(batch10-108): testConnection extracts vendor error message for real-device vendor testing**（`b60d74b`）
+**2026-10-05 · fix(batch10-109): assert card rearing text via Text.data keyed lookup**（`2d69f27`）
 
-**2026-10-05 · fix(batch10-107): widen onGet mock type to dynamic for list-shape models response**（`182350b`）
+**2026-10-05 · fix(batch10-109/110): inheritance card rearing text keyed; fix CI test collisions**（`e4601cf`）
 
-**2026-10-05 · feat(batch10-107): fetchModels multi-shape response compatibility for vendor /models**（`99eb5ba`）
+**2026-10-05 · feat(batch10-110): family tree current-branch child nodes show rearing brief**（`779d2d8`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
