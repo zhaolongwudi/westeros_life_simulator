@@ -305,8 +305,13 @@ void main() {
       );
       await tester.pumpWidget(_wrap(engine));
       await tester.pumpAndSettle();
-      expect(find.text('提利昂·兰尼斯特'), findsWidgets);
-      expect(find.text('npc_tyrion'), findsNothing);
+      // 【坑 55 新增】`_SectionCard` 的 Chip 文案是 `'${e.key} ${e.value}'`
+      // **合并成一个字符串**渲染，不是裸 `e.key`。故断言必须用
+      // `find.textContaining` / `textStartsWith`，不能 `find.text(name)`。
+      // （首版用 `find.text('提利昂·兰尼斯特')` 两次 CI 全红，根因即此。）
+      expect(find.textContaining('提利昂·兰尼斯特'), findsWidgets);
+      // 英文 id 不得出现在任何 chip 文案里
+      expect(find.textContaining('npc_tyrion'), findsNothing);
     });
 
     testWidgets('旧档幽灵键回退显示原 id（不空白、不抛错）', (tester) async {
@@ -320,7 +325,8 @@ void main() {
       );
       await tester.pumpWidget(_wrap(engine));
       await tester.pumpAndSettle();
-      expect(find.text('tyrion'), findsWidgets);
+      // 同上：chip 文案是 'tyrion 15'，用 textContaining 断言（坑 55）。
+      expect(find.textContaining('tyrion'), findsWidgets);
     });
   });
 
