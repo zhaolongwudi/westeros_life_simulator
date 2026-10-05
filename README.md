@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-05 · fix(batch10-101): compress prompt contract line to fit 10-86 token budget (157->80 chars)**（`07075fb`）
+
+**2026-10-05 · feat(batch10-101/102): reject unknown top-level effect keys + Chinese names in panel flags/inventory**（`2719819`）
+
 **2026-10-05 · fix(batch10-100): assert chip text with textContaining, not find.text**（`3b36026`）
-
-**2026-10-05 · fix(batch10-100): tall viewport so lazy ListView builds relation section**（`ba9270b`）
-
-**2026-10-05 · feat(batch10-99/100): relations. effect key write guard + relation panel Chinese names**（`b3b13ce`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
