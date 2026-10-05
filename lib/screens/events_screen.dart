@@ -168,8 +168,13 @@ class _EventCard extends StatelessWidget {
                     style: const TextStyle(color: WesterosColors.parchment),
                   ),
                   const SizedBox(height: 8),
+                  // 触发条件：Batch 10-103 补空态——门槛清空后
+                  // `entries.join('，')` 为空串，原实现会渲染出裸的
+                  // 「触发条件：」三个字加一个悬空冒号。
                   Text(
-                    '触发条件：${event.triggerConditions.entries.map((e) => '${e.key}=${e.value}').join('，')}',
+                    event.triggerConditions.isEmpty
+                        ? '触发条件：无（任何时候都可能发生）'
+                        : '触发条件：${event.triggerConditions.entries.map((e) => '${e.key}=${e.value}').join('，')}',
                     style: theme.textTheme.bodySmall,
                   ),
                   if (event.isOneTime)

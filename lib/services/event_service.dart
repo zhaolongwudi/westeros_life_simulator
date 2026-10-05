@@ -9,6 +9,8 @@ import '../data/balance_data.dart';
 import '../data/item_data.dart';
 // Batch 10-99：`relations.<npcId>` 分支要 `isNpcIdValid` 校验 NPC id。
 import '../data/npc_data.dart';
+// Batch 10-104：`checkTriggerConditions` 已委托给单一真相判定实现。
+import '../core/event_trigger_eval.dart';
 import '../models/event.dart';
 import '../models/player.dart';
 
@@ -35,78 +37,28 @@ class EventService {
   const EventService();
 
   /// 检查事件触发条件。
+  ///
+  /// 【Batch 10-104】委托给 `core/event_trigger_eval.dart` 单一真相，
+  /// 与 `EventProvider.canTrigger` 判定完全一致。本方法此前是 Batch 3
+  /// 独立写的第二份实现，与生产通道存在逐分支漂移（season 门槛恒静默
+  /// 放行 = fail-open，而生产通道是 fail-closed）。
+  /// 现在只有一份实现。
+  ///
+  /// [context] 是本方法独有的上下文覆盖层（生产无调用方，仅测试用）：
+  /// 键命中 `context` 时以 `context` 为准，否则走玩家状态判定。
+  /// 季节亦优先取自 `context['season']`（EventService 既有约定：
+  /// context 承载外部世界状态，如「当前是冬天」）。
   bool checkTriggerConditions(
     GameEvent event,
     Player player,
     Map<String, String> context,
   ) {
-    for (final entry in event.triggerConditions.entries) {
-      final key = entry.key;
-      final value = entry.value;
-
-      // 从上下文检查
-      if (context.containsKey(key)) {
-        if (context[key] != value) return false;
-        continue;
-      }
-
-      // 从玩家检查
-      switch (key) {
-        case 'locationId':
-          if (player.locationId != value) return false;
-        case 'familyId':
-          if (player.familyId != value) return false;
-        case 'identity':
-          if (player.identity.name != value) return false;
-        case 'minAge':
-          if (player.age < int.parse(value)) return false;
-        case 'maxAge':
-          if (player.age > int.parse(value)) return false;
-        case 'minGold':
-          if (player.gold < int.parse(value)) return false;
-        case 'minReputation':
-          if (player.reputation < int.parse(value)) return false;
-        case 'minHealth':
-          if (player.health < int.parse(value)) return false;
-        case 'maxHealth':
-          if (player.health > int.parse(value)) return false;
-        case 'minEnergy':
-          if (player.energy < int.parse(value)) return false;
-        case 'maxEnergy':
-          if (player.energy > int.parse(value)) return false;
-        case 'minHunger':
-          if (player.hunger < int.parse(value)) return false;
-        case 'maxHunger':
-          if (player.hunger > int.parse(value)) return false;
-        case 'isAlive':
-          if (value == 'true' && !(player.flags['isAlive'] ?? false)) {
-            return false;
-          }
-        default:
-          if (key.startsWith('skills.')) {
-            final skillName = key.substring(7);
-            final requiredLevel = int.parse(value);
-            final currentLevel = player.skills[skillName] ?? 0;
-            if (currentLevel < requiredLevel) return false;
-          } else if (key.startsWith('attributes.')) {
-            final attrName = key.substring(11);
-            final requiredValue = int.parse(value);
-            final currentValue = player.attributes[attrName] ?? 0;
-            if (currentValue < requiredValue) return false;
-          } else if (key.startsWith('hasItem.')) {
-            final itemId = key.substring(8);
-            final needCount = int.parse(value);
-            final haveCount =
-                player.inventory.where((i) => i == itemId).length;
-            if (haveCount < needCount) return false;
-          } else if (key == 'flag') {
-            if (!(player.flags[value] ?? false)) return false;
-          } else if (key == 'noFlag') {
-            if (player.flags[value] ?? false) return false;
-          }
-      }
-    }
-    return true;
+    return eventTriggersSatisfied(
+      event,
+      player,
+      season: context['season'],
+      context: context,
+    );
   }
 
   /// 应用事件效果。

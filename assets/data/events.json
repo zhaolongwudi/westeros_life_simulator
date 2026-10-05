@@ -4,9 +4,7 @@
     "name": "国王死亡",
     "type": "EventType.political",
     "description": "国王驾崩，王位继承危机爆发。",
-    "triggerConditions": {
-      "kingAge": "60+"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_support_heir",
@@ -62,9 +60,7 @@
     "name": "叛乱",
     "type": "EventType.political",
     "description": "领主不满，叛乱爆发。",
-    "triggerConditions": {
-      "lordDissatisfaction": "high"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_suppress",
@@ -125,9 +121,7 @@
     "name": "政变",
     "type": "EventType.political",
     "description": "宫廷政变，王位更替。",
-    "triggerConditions": {
-      "courtTension": "high"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_support_coup",
@@ -175,9 +169,7 @@
     "name": "御前会议",
     "type": "EventType.political",
     "description": "御前会议召开，讨论国事。",
-    "triggerConditions": {
-      "frequency": "monthly"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_attend",
@@ -224,9 +216,7 @@
     "name": "国王之手更替",
     "type": "EventType.political",
     "description": "国王之手职位更替。",
-    "triggerConditions": {
-      "handStatus": "changed"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_support_new",
@@ -271,9 +261,7 @@
     "name": "总主教更替",
     "type": "EventType.political",
     "description": "七神教会总主教更替。",
-    "triggerConditions": {
-      "septonStatus": "changed"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_support_new",
@@ -318,9 +306,7 @@
     "name": "大学士更替",
     "type": "EventType.political",
     "description": "学城大学士更替。",
-    "triggerConditions": {
-      "maesterStatus": "changed"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_support_new",
@@ -364,9 +350,7 @@
     "name": "长城总司令更替",
     "type": "EventType.political",
     "description": "长城守夜人总司令更替。",
-    "triggerConditions": {
-      "castellanStatus": "changed"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_support_new",
@@ -410,9 +394,7 @@
     "name": "铁金库债务危机",
     "type": "EventType.political",
     "description": "铁金库债务危机爆发。",
-    "triggerConditions": {
-      "debt": "high"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_repay",
@@ -462,9 +444,7 @@
     "name": "自由贸易城邦战争",
     "type": "EventType.political",
     "description": "自由贸易城邦之间爆发战争。",
-    "triggerConditions": {
-      "tradeTension": "high"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_support_side_a",
@@ -510,9 +490,7 @@
     "name": "家族联姻",
     "type": "EventType.family",
     "description": "家族之间联姻。",
-    "triggerConditions": {
-      "familyRelation": "positive"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_accept",
@@ -560,9 +538,7 @@
     "name": "家族继承",
     "type": "EventType.family",
     "description": "家族继承危机。",
-    "triggerConditions": {
-      "headAge": "60+"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_support_eldest",
@@ -608,9 +584,7 @@
     "name": "家族内斗",
     "type": "EventType.family",
     "description": "家族内部斗争。",
-    "triggerConditions": {
-      "familyTension": "high"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_side_a",
@@ -655,9 +629,7 @@
     "name": "家族秘密揭露",
     "type": "EventType.family",
     "description": "家族秘密被揭露。",
-    "triggerConditions": {
-      "secretExposure": "high"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_cover_up",
@@ -704,9 +676,7 @@
     "name": "家族诅咒",
     "type": "EventType.family",
     "description": "家族被诅咒。",
-    "triggerConditions": {
-      "curse": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_break_curse",
@@ -753,9 +723,7 @@
     "name": "家族预言",
     "type": "EventType.family",
     "description": "家族预言应验。",
-    "triggerConditions": {
-      "prophecy": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_fulfill",
@@ -800,9 +768,7 @@
     "name": "家族神器",
     "type": "EventType.family",
     "description": "家族神器现世。",
-    "triggerConditions": {
-      "relic": "discovered"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_claim",
@@ -848,9 +814,7 @@
     "name": "家族血脉",
     "type": "EventType.family",
     "description": "家族血脉危机。",
-    "triggerConditions": {
-      "bloodline": "crisis"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_preserve",
@@ -897,9 +861,7 @@
     "name": "家族仇恨",
     "type": "EventType.family",
     "description": "家族仇恨爆发。",
-    "triggerConditions": {
-      "grudge": "high"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_revenge",
@@ -947,9 +909,7 @@
     "name": "家族灭亡",
     "type": "EventType.family",
     "description": "家族灭亡危机。",
-    "triggerConditions": {
-      "familyStatus": "critical"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_save",
@@ -996,9 +956,7 @@
     "name": "战役",
     "type": "EventType.war",
     "description": "大规模战役爆发。",
-    "triggerConditions": {
-      "warStatus": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_fight",
@@ -1049,9 +1007,7 @@
     "name": "围城",
     "type": "EventType.war",
     "description": "城堡被围城。",
-    "triggerConditions": {
-      "siegeStatus": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_defend",
@@ -1102,9 +1058,7 @@
     "name": "背叛",
     "type": "EventType.war",
     "description": "盟友背叛。",
-    "triggerConditions": {
-      "allyRelation": "negative"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_revenge",
@@ -1152,9 +1106,7 @@
     "name": "刺杀",
     "type": "EventType.war",
     "description": "重要人物被刺杀。",
-    "triggerConditions": {
-      "targetStatus": "targeted"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_investigate",
@@ -1204,9 +1156,7 @@
     "name": "比武审判",
     "type": "EventType.war",
     "description": "比武审判开始。",
-    "triggerConditions": {
-      "trialStatus": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_fight",
@@ -1257,9 +1207,7 @@
     "name": "宗教审判",
     "type": "EventType.religious",
     "description": "宗教审判开始。",
-    "triggerConditions": {
-      "trialStatus": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_defend",
@@ -1308,9 +1256,7 @@
     "name": "神迹",
     "type": "EventType.religious",
     "description": "神迹显现。",
-    "triggerConditions": {
-      "miracle": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_accept",
@@ -1355,9 +1301,7 @@
     "name": "异端",
     "type": "EventType.religious",
     "description": "异端出现。",
-    "triggerConditions": {
-      "heresy": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_purge",
@@ -1405,9 +1349,7 @@
     "name": "教会分裂",
     "type": "EventType.religious",
     "description": "教会分裂。",
-    "triggerConditions": {
-      "churchTension": "high"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_side_a",
@@ -1452,9 +1394,7 @@
     "name": "总主教更替（宗教）",
     "type": "EventType.religious",
     "description": "总主教更替。",
-    "triggerConditions": {
-      "septonStatus": "changed"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_support_new",
@@ -1600,9 +1540,7 @@
     "name": "贸易繁荣",
     "type": "EventType.economic",
     "description": "贸易繁荣。",
-    "triggerConditions": {
-      "tradeStatus": "boom"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_invest",
@@ -1649,9 +1587,7 @@
     "name": "贸易危机",
     "type": "EventType.economic",
     "description": "贸易危机。",
-    "triggerConditions": {
-      "tradeStatus": "crisis"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_invest",
@@ -1698,9 +1634,7 @@
     "name": "铁金库债务",
     "type": "EventType.economic",
     "description": "铁金库债务。",
-    "triggerConditions": {
-      "debt": "high"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_repay",
@@ -1750,9 +1684,7 @@
     "name": "龙出现",
     "type": "EventType.magical",
     "description": "龙出现。",
-    "triggerConditions": {
-      "dragonStatus": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_claim",
@@ -1802,9 +1734,7 @@
     "name": "异鬼南下",
     "type": "EventType.magical",
     "description": "异鬼南下。",
-    "triggerConditions": {
-      "walkerStatus": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_fight",
@@ -1855,9 +1785,7 @@
     "name": "预言",
     "type": "EventType.magical",
     "description": "预言应验。",
-    "triggerConditions": {
-      "prophecy": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_fulfill",
@@ -1902,9 +1830,7 @@
     "name": "血魔法",
     "type": "EventType.magical",
     "description": "血魔法出现。",
-    "triggerConditions": {
-      "bloodMagic": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_use",
@@ -1951,9 +1877,7 @@
     "name": "绿先知",
     "type": "EventType.magical",
     "description": "绿先知出现。",
-    "triggerConditions": {
-      "greenSeer": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_follow",
@@ -2000,9 +1924,7 @@
     "name": "节日",
     "type": "EventType.daily",
     "description": "节日到来。",
-    "triggerConditions": {
-      "season": "any"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_celebrate",
@@ -2050,9 +1972,7 @@
     "name": "婚礼",
     "type": "EventType.daily",
     "description": "婚礼举行。",
-    "triggerConditions": {
-      "marriageStatus": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_attend",
@@ -2104,9 +2024,7 @@
     "name": "葬礼",
     "type": "EventType.daily",
     "description": "葬礼举行。",
-    "triggerConditions": {
-      "deathStatus": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_attend",
@@ -2155,9 +2073,7 @@
     "name": "比武大会",
     "type": "EventType.daily",
     "description": "比武大会举行。",
-    "triggerConditions": {
-      "tournamentStatus": "active"
-    },
+    "triggerConditions": {},
     "choices": [
       {
         "id": "choice_participate",
@@ -3122,10 +3038,7 @@
         "id": "choice_entrust",
         "text": "转赠给家族",
         "requirements": {},
-        "effects": {
-          "reputation": 8,
-          "relations.family_head": 10
-        },
+        "effects": {},
         "narrative": "你把剑献给家族大厅，悬在祖先画像之下，族人们对你刮目相看。"
       },
       {
@@ -3173,13 +3086,8 @@
       {
         "id": "choice_borrow",
         "text": "向领主借马",
-        "requirements": {
-          "relations.lord": 20
-        },
-        "effects": {
-          "relations.lord": -5,
-          "reputation": 3
-        },
+        "requirements": {},
+        "effects": {},
         "narrative": "领主借你一匹白马，但代价是你在比武场上必须替他的旗帜争光。"
       },
       {
@@ -3414,11 +3322,7 @@
         "requirements": {
           "gold": 40
         },
-        "effects": {
-          "gold": -40,
-          "reputation": 3,
-          "relations.merchant_leader": 10
-        },
+        "effects": {},
         "narrative": "你出钱雇了一队雇佣兵替商队开路。虽然没有亲自上阵，商队老板仍记住了你的名字。"
       },
       {
@@ -3477,13 +3381,8 @@
       {
         "id": "choice_report",
         "text": "向领主告发",
-        "requirements": {
-          "relations.lord": 15
-        },
-        "effects": {
-          "relations.lord": 5,
-          "reputation": 8
-        },
+        "requirements": {},
+        "effects": {},
         "narrative": "你把证据呈给领主。领主当众杖责了那几个奸商，并赏了你一枚银质徽章。"
       },
       {
@@ -3630,11 +3529,7 @@
         "id": "choice_join_watch",
         "text": "加入守夜人",
         "requirements": {},
-        "effects": {
-          "flags.sworn_brother": 1,
-          "reputation": 10,
-          "relations.castle_black": 15
-        },
+        "effects": {},
         "narrative": "你放下一切，走向长城。黑城堡的弟兄们为你披上黑衣——从此你与过去再无瓜葛。"
       },
       {

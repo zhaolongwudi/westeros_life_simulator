@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 
+import '../core/event_trigger_eval.dart';
 import '../models/event.dart';
 import '../models/player.dart';
 
@@ -26,89 +27,17 @@ class EventProvider extends ChangeNotifier {
 
   /// 检查事件是否可触发。
   /// [season] 可选：当前季节（如 'winter'），用于支持季节触发条件。
+  ///
+  /// 【Batch 10-104】门槛判定已抽到 `core/event_trigger_eval.dart`
+  /// 单一真相，本方法只保留「一次性事件是否已完成」这一条 provider
+  /// 私有状态校验。与 `EventService.checkTriggerConditions` 共用同一
+  /// 判定实现，杜绝第五次双通道漂移（见该文件头的前四次事故记录）。
   bool canTrigger(GameEvent event, Player player, {String? season}) {
     // 检查一次性事件是否已完成
     if (event.isOneTime && _completedEventIds.contains(event.id)) {
       return false;
     }
-
-    // 检查触发条件
-    for (final entry in event.triggerConditions.entries) {
-      final key = entry.key;
-      final value = entry.value;
-
-      if (key == 'locationId' && player.locationId != value) {
-        return false;
-      }
-      if (key == 'season' && season != value) {
-        return false;
-      }
-      if (key == 'familyId' && player.familyId != value) {
-        return false;
-      }
-      if (key == 'identity' && player.identity.name != value) {
-        return false;
-      }
-      if (key == 'minAge' && player.age < int.parse(value)) {
-        return false;
-      }
-      if (key == 'maxAge' && player.age > int.parse(value)) {
-        return false;
-      }
-      if (key == 'minGold' && player.gold < int.parse(value)) {
-        return false;
-      }
-      if (key == 'minReputation' && player.reputation < int.parse(value)) {
-        return false;
-      }
-      if (key == 'minHealth' && player.health < int.parse(value)) {
-        return false;
-      }
-      if (key == 'maxHealth' && player.health > int.parse(value)) {
-        return false;
-      }
-      if (key == 'minEnergy' && player.energy < int.parse(value)) {
-        return false;
-      }
-      if (key == 'maxEnergy' && player.energy > int.parse(value)) {
-        return false;
-      }
-      if (key == 'maxHunger' && player.hunger > int.parse(value)) {
-        return false;
-      }
-      if (key == 'minHunger' && player.hunger < int.parse(value)) {
-        return false;
-      }
-      if (key.startsWith('hasItem.')) {
-        final itemId = key.substring(8);
-        final needCount = int.parse(value);
-        final haveCount = player.inventory.where((i) => i == itemId).length;
-        if (haveCount < needCount) return false;
-      }
-      if (key == 'flag' && !(player.flags[value] ?? false)) {
-        return false;
-      }
-      if (key == 'noFlag' && (player.flags[value] ?? false)) {
-        return false;
-      }
-      if (key.startsWith('skills.')) {
-        final skillName = key.substring(7);
-        final requiredLevel = int.parse(value);
-        final currentLevel = player.skills[skillName] ?? 0;
-        if (currentLevel < requiredLevel) return false;
-      }
-      if (key.startsWith('attributes.')) {
-        final attrName = key.substring(11);
-        final requiredValue = int.parse(value);
-        final currentValue = player.attributes[attrName] ?? 0;
-        if (currentValue < requiredValue) return false;
-      }
-      if (key == 'isAlive' && value == 'true' && !(player.flags['isAlive'] ?? false)) {
-        return false;
-      }
-    }
-
-    return true;
+    return eventTriggersSatisfied(event, player, season: season);
   }
 
   /// 获取可触发事件列表。[season] 可选，用于季节触发条件。
