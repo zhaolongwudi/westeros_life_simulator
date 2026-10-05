@@ -22,10 +22,10 @@ import 'package:westeros_life_simulator/services/save_service.dart';
 /// 构造一个按给定响应分发请求的 mock Dio。
 ///
 /// [onPost]：chat/completions 的处理（返回 (statusCode, data) 或抛异常）。
-/// [onGet]：/models 的处理。
+/// [onGet]：/models 的处理。data 用 dynamic 以兼容各种响应形态（Batch 10-107）。
 (Dio, List<String>) _captureDio({
   (int, Map<String, dynamic>)? Function()? onPost,
-  (int, Map<String, dynamic>)? Function()? onGet,
+  (int, dynamic)? Function()? onGet,
 }) {
   final usedKeys = <String>[];
   final dio = Dio();
