@@ -336,6 +336,53 @@ void main() {
     test('fetchModels 未配 Key 短路返回空', () async {
       expect(await _serviceNoKey().fetchModels(), isEmpty);
     });
+
+    test('fetchModels 顶层直接是数组也能解析', () async {
+      final (dio, _) = _captureDio(
+        onGet: () => (200, <dynamic>[
+          <String, dynamic>{'id': 'm1'},
+          'm2',
+          <String, dynamic>{'id': ''}, // 空 id 跳过
+        ]),
+      );
+      final service = AiService(
+        apiKeys: const <String>['key_a'],
+        dio: dio,
+        baseUrl: 'https://mock.example.com/v1',
+      );
+      expect(await service.fetchModels(), <String>['m1', 'm2']);
+    });
+
+    test('fetchModels 兼容 models 键 + name 字段变体', () async {
+      final (dio, _) = _captureDio(
+        onGet: () => (200, <String, dynamic>{
+          'object': 'list',
+          'models': <dynamic>[
+            <String, dynamic>{'name': 'model-x'},
+            <String, dynamic>{'model': 'model-y'},
+            <String, dynamic>{'id': 123}, // 非字符串 id 跳过
+          ],
+        }),
+      );
+      final service = AiService(
+        apiKeys: const <String>['key_a'],
+        dio: dio,
+        baseUrl: 'https://mock.example.com/v1',
+      );
+      expect(await service.fetchModels(), <String>['model-x', 'model-y']);
+    });
+
+    test('fetchModels 响应结构未知返回空列表', () async {
+      final (dio, _) = _captureDio(
+        onGet: () => (200, <String, dynamic>{'foo': 'bar'}),
+      );
+      final service = AiService(
+        apiKeys: const <String>['key_a'],
+        dio: dio,
+        baseUrl: 'https://mock.example.com/v1',
+      );
+      expect(await service.fetchModels(), isEmpty);
+    });
   });
 }
 

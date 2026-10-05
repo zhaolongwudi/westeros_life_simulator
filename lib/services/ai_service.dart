@@ -212,13 +212,16 @@ class AiService {
   ///
   /// 返回解析出的模型 id 列表；请求失败时返回空列表（调用方兜底）。
   /// 走主 Key（池中第一个），不触发轮换。
+  /// 解析兼容厂商响应差异（Batch 10-107）：
+  /// - OpenAI 标准：`{"object":"list","data":[{"id":...},...]}`（顶层 Map）
+  /// - 顶层直接是数组：`[{"id":"m1"}, "m2"]`
+  /// - 列表键变体：`{"models":[{"name":...}]}`
+  /// - data/models 内条目 id 字段变体：`id` / `name` / `model`
   Future<List<String>> fetchModels() async {
     if (_apiKeys.isEmpty) return <String>[];
     final key = _apiKeys.first;
     try {
-      // OpenAI 兼容接口返回 {"object":"list","data":[{"id":...},...]}，
-      // 顶层是 Map，data 才是 List。
-      final response = await _dio.get<Map<String, dynamic>>(
+      final response = await _dio.get<dynamic>(
         '$baseUrl/models',
         options: Options(
           headers: {
@@ -230,19 +233,41 @@ class AiService {
         ),
       );
       if (response.statusCode != 200) return <String>[];
-      final data = response.data?['data'];
-      if (data is! List) return <String>[];
-      final models = <String>[];
-      for (final item in data) {
-        if (item is Map) {
-          final id = item['id'];
-          if (id is String && id.isNotEmpty) models.add(id);
-        }
-      }
-      return models;
+      return _extractModelIds(response.data);
     } catch (_) {
       return <String>[];
     }
+  }
+
+  /// 从 /models 响应中提取模型 id，兼容多种厂商形态（Batch 10-107）。
+  ///
+  /// 不刻意去重——调用方（设置页并入自定义列表）已有去重逻辑。
+  static List<String> _extractModelIds(dynamic raw) {
+    final models = <String>[];
+    void take(Object? item) {
+      if (item is String && item.isNotEmpty) {
+        models.add(item);
+        return;
+      }
+      if (item is Map) {
+        final id = item['id'] ?? item['name'] ?? item['model'];
+        if (id is String && id.isNotEmpty) models.add(id);
+      }
+    }
+
+    if (raw is List) {
+      for (final item in raw) {
+        take(item);
+      }
+    } else if (raw is Map) {
+      final data = raw['data'] ?? raw['models'];
+      if (data is List) {
+        for (final item in data) {
+          take(item);
+        }
+      }
+    }
+    return models;
   }
 
   /// 发起一次 chat/completions 请求并解析。
