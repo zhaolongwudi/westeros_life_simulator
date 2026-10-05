@@ -69,8 +69,20 @@ EventChoice _aiChoice(Map<String, int> effects, {String narrative = ''}) {
 
 /// 挂载玩家面板（沿用 `batch10_19_panel_ai_test` 的注入引擎写法，
 /// 避免无参构造新建引擎把传入玩家数据重置，坑 23）。
+///
+/// 【为什么要设 1080x4000 高视口】面板是 `ListView`（惰性构建），关系区
+/// 排在属性/技能/装备之后，**默认测试视口下根本没被 build**，断言
+/// `find.text` 必然 0 命中。既有 `batch10_19_panel_ai_test`（1080x4000）
+/// 与 `m5_responsive_test`（1200x2000）都显式设高视口，本组沿用同一写法。
 Widget _wrap(GameEngine engine) =>
     MaterialApp(home: PlayerPanelScreen(engine: engine));
+
+/// 撑高视口，让惰性 ListView 把关系区构建出来。
+void _tallView(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1080, 4000);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+}
 
 void main() {
   group('Batch 10-99 relations. 键守卫 · 单一真相', () {
@@ -283,6 +295,7 @@ void main() {
 
   group('Batch 10-100 玩家面板关系区中文名', () {
     testWidgets('真实 NPC id 渲染中文名，不显示裸英文 id', (tester) async {
+      _tallView(tester);
       final engine = GameEngine()..startNewGame();
       engine.updatePlayer(
         engine.applyEffects(
@@ -297,6 +310,7 @@ void main() {
     });
 
     testWidgets('旧档幽灵键回退显示原 id（不空白、不抛错）', (tester) async {
+      _tallView(tester);
       final engine = GameEngine()..startNewGame();
       // 直接构造玩家绕过写侧守卫，模拟「10-99 之前已积累幽灵键的旧存档」
       engine.updatePlayer(
