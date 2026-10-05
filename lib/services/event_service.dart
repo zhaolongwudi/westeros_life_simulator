@@ -177,10 +177,21 @@ class EventService {
             applied[key] = value;
           } else if (key.startsWith('flags.')) {
             final flagName = key.substring(6);
-            final newFlags = Map<String, bool>.from(newPlayer.flags);
-            newFlags[flagName] = value != 0;
-            newPlayer = newPlayer.copyWith(flags: newFlags);
-            applied[key] = value;
+            // Batch 10-97：状态标记键分层白名单守卫，与
+            // `GameStateProvider.applyEffects` 的同名分支对齐（那边已加，
+            // 本通道一直漏了——与 10-95 修 `max(0, ...)` 同型）。
+            // 静态键集 26 个 + 5 个受限动态前缀（装备槽位/已故子女/
+            // 已接·已完成任务/已触发人物故事），其余拒收。
+            // 本通道有 `failedEffects` 语义（金币不足即走这条路），
+            // 故不合规键登记进 `failed` 而非静默丢弃。
+            if (!BalanceData.isPlayerFlagKeyValid(flagName)) {
+              failed[key] = value;
+            } else {
+              final newFlags = Map<String, bool>.from(newPlayer.flags);
+              newFlags[flagName] = value != 0;
+              newPlayer = newPlayer.copyWith(flags: newFlags);
+              applied[key] = value;
+            }
           } else if (key.startsWith('inventory.')) {
             final itemId = key.substring(10);
             // Batch 10-91：物品 id 白名单守卫——`itemById(id) == null` 即拒绝。

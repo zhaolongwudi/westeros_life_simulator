@@ -245,17 +245,19 @@ class GameStateProvider extends ChangeNotifier {
   /// 将效果 Map 应用到玩家身上，返回新玩家。
   ///
   /// 支持键：gold / reputation / skills.<name> / attributes.<name> /
-  /// relations.<npcId> / flags.<flagName>（value>0 置真，<=0 清除）/
+  /// relations.<npcId> / flags.<flagName>（value>0 置真，<=0 清除，
+  /// 键名须合法，见 [BalanceData.isPlayerFlagKeyValid]）/
   /// inventory.<itemId>（value>0 获得，<0 消耗）。
   /// 供事件选项（[applyChoice]）与 AI 生成选项共用。
   ///
-  /// 【键名白名单，Batch 10-91/92】`skills.` / `attributes.` 的键须在
+  /// 【键名白名单，Batch 10-91/92/97】`skills.` / `attributes.` 的键须在
   /// `BalanceData.kPlayerSkillKeys` / `kPlayerAttributeKeys` 内，
-  /// `inventory.` 的 id 须能被 `itemById` 解析；不合规的键**跳过落盘**，
-  /// 并登记进 [lastRejectedEffectKeys]（Batch 10-94：供 `applyAiChoice`
-  /// 提示，让「叙事写了但状态没变」的脱节对玩家可见）。
-  /// 与 `event_service.applyEffects` 的同名分支判定完全一致，
-  /// 区别仅在失败如何上报（那边登记进 `failedEffects`）。
+  /// `flags.` 的键须通过 [BalanceData.isPlayerFlagKeyValid]（分层：静态
+  /// 键集 + 受限动态前缀），`inventory.` 的 id 须能被 `itemById` 解析；
+  /// 不合规的键**跳过落盘**，并登记进 [lastRejectedEffectKeys]
+  /// （Batch 10-94：供 `applyAiChoice` 提示，让「叙事写了但状态没变」
+  /// 的脱节对玩家可见）。与 `event_service.applyEffects` 的同名分支
+  /// 判定完全一致，区别仅在失败如何上报（那边登记进 `failedEffects`）。
   Player applyEffects(Player player, Map<String, int> effects) {
     var newPlayer = player;
     // Batch 10-94：每次调用入口清空，避免上一回合的拒绝记录被误读。
@@ -314,6 +316,19 @@ class GameStateProvider extends ChangeNotifier {
         newPlayer = newPlayer.copyWith(attributes: newAttrs);
       } else if (key.startsWith('flags.')) {
         final flagName = key.substring(6);
+        // Batch 10-97：状态标记键分层白名单守卫——静态键集
+        // `BalanceData.kPlayerFlagKeys`（26 键）+ 受限动态前缀
+        // `kPlayerFlagPrefixes`（5 个），其余拒收。此前本分支
+        // **完全不校验键名**，是五类效果键里唯一未设防的一类：
+        // AI 每回合都能新增一个永不存在的标记，① 玩家面板「状态标记」
+        // 区块直接显示裸键名，② 状态段（10-88，预算 8）白占预算位把
+        // 真实状态挤出窗口，③ 存档逐回合序列化整个 map，只增不减。
+        // 本方法无 `failedEffects` 通道，故不落盘并登记进
+        // [lastRejectedEffectKeys]（10-94 机制），脱节对玩家可见。
+        if (!BalanceData.isPlayerFlagKeyValid(flagName)) {
+          rejected.add(key);
+          continue;
+        }
         final newFlags = Map<String, bool>.from(newPlayer.flags);
         newFlags[flagName] = value > 0;
         newPlayer = newPlayer.copyWith(flags: newFlags);

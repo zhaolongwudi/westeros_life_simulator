@@ -500,6 +500,95 @@ class BalanceData {
     'willpower', // 意志
     'perception', // 感知
   };
+  // ==================== Batch 10-97 效果键分层白名单（flags.） ====================
+  /// 玩家状态标记的**静态**合法键集（`flags.<key>` 中不含点号的部分）。
+  ///
+  /// 【为什么需要】`flags.` 分支历史上**完全不校验键名**，是
+  /// `inventory.`/`skills.`/`attributes.`/`relations.` 四类键全部治理完之后
+  /// **唯一未设防的一类**。幽灵标记键的后果与 10-92 的幽灵技能键同构：
+  ///  1. `player_panel_screen` 的「状态标记」区块遍历 `flags.entries`
+  ///     直接把键名显示给玩家，AI 自造的键会以裸英文/中文键名出现在面板上；
+  ///  2. `ai_service._flagDesc`（10-88）只按插入序取前 8 项输出到 prompt，
+  ///     幽灵键会**白占预算位**并把真实状态挤出窗口；
+  ///  3. 存档（`Player.toJson`）逐回合序列化整个 `flags` map，
+  ///     幽灵键只增不减 → 存档体积与状态段 token 同步无界增长。
+  ///
+  /// 【键集来源】两条真实写入通道的全量**静态**键 = 26 个，拆两处：
+  ///  - 内容事件字面量键 17 个（注意 `event_data` 的 `flags.` 键共 21 个，
+  ///    其中 4 个是 `equipped.<物品 id>` 动态键，已归入下方前缀集）；
+  ///  - 引擎系统键 9 个：`isAlive` / `isInjured` / `negotiated` / `isMarried` /
+  ///    `divorceYear` / `widowed` / `isExiled` / `generation` / `inherited`。
+  /// 取全集而非仅事件键：系统键一旦被守卫拒收，`mixin_life` 的死亡判定与
+  /// `mixin_generation` 的世代数会**静默失真**——比幽灵键泄漏更严重；
+  /// 且既有测试已在走这条路（`batch3_event_service_test` 写 `flags.isMarried`、
+  /// `batch9_ai_deep_test` 写 `flags.isAlive: 0`）。
+  static const Set<String> kPlayerFlagKeys = <String>{
+    // —— 内容事件 17 键（event_data.dart 的字面量键）——
+    'honor_pledge', // 荣誉誓约
+    'hasShelter', // 寻得庇护
+    'hasDirewolf', // 驯服恐狼
+    'hasBlessing', // 神明庇佑
+    'hasVision', // 幻视
+    'hasCandleVision', // 烛中幻象
+    'hasCometRecord', // 彗星异象
+    'hasWarned', // 已示警
+    'hasFrozenVision', // 冰境幻视
+    'guild_ally', // 商会盟友
+    'guild_secret', // 商会秘闻
+    'guild_enemy', // 商会敌对
+    'sworn_brother', // 义兄弟
+    'watch_friend', // 守夜人友人
+    'market_hero', // 集市传奇
+    'market_intel', // 集市情报
+    'lord_favor', // 领主赏识
+    // —— 引擎系统键 9 个（mixin 层）——
+    'isAlive', // 存活（死亡判定唯一真相）
+    'isInjured', // 负伤（GameLifeMixin.isInjured 唯一真相）
+    'negotiated', // 今日已议价（议价冷却）
+    'isMarried', // 已婚（家族树第 73 行读）
+    'divorceYear', // 离婚当年（次年清除）
+    'widowed', // 丧偶
+    'isExiled', // 流放中（传承时重置）
+    'generation', // 已传承（currentGeneration 唯一真相）
+    'inherited', // 已继承家主之位
+  };
+
+  /// 玩家状态标记的**受限动态前缀**集（`flags.<前缀><动态部分>`）。
+  ///
+  /// 【为什么纯白名单不可行】`flags.` 与其他四类键的本质差异在于
+  /// **存在 5 个由引擎在运行时拼出的合法动态键前缀**——它们的键名
+  /// 含 NPC id / 物品 id / 中文人名，无法静态枚举（详见各条注释）。
+  /// 纯白名单会把这些内容数据全部拒收（每代传承丢一个 `house.childDead.*`，
+  /// 家谱筛选立刻失真）。
+  ///
+  /// 【为什么不做「自由键开关」】HANDOVER 遗留候选里提过的兜底方案是把未知
+  /// 键直接放行，那等于放弃本次治理。分层是唯一既治幽灵键又不破内容
+  /// 数据的形态：静态 26 键 + 5 前缀，其余拒收。
+  static const List<String> kPlayerFlagPrefixes = <String>[
+    'equipped.', // 装备槽位：mixin_life.equip/unequip 穿脱时写（33 个物品 id）
+    'house.childDead.', // 已故子女：mixin_generation:146 每代传承写入继承人名
+    'npc_task.', // 已接任务：mixin_npc_interact:250 接任务时写「npcId.任务标题」
+    'npc_task_done.', // 已完成任务：mixin_npc_interact:267 完成时写
+    'npc_story.', // 已触发人物故事：mixin_npc_interact:203 写「npcId.关系档位」
+  ];
+
+  // **刻意不收的前缀**：`house.childExiled.`（`mixin_generation:58` 读取）。
+  // 该前缀全库**只有读取、没有写入**，属预留语义键。不开前缀反而是对的：
+  // 一旦放行，AI 写 `flags.house.childExiled.罗柏` 就会让家谱第 58 行把
+  // 罗柏判为「已逐出」、从继承人候选中剔除——一个从未接线的键不该
+  // 拥有改变家谱的能力。
+  /// `flags.<key>` 键名合法性判定（10-97 分层白名单的单一真相）。
+  ///
+  /// 合法 = 静态白名单 [kPlayerFlagKeys] 命中，或以 [kPlayerFlagPrefixes]
+  /// 任一前缀开头。两条 `applyEffects` 通道（事件/AI）共用本方法，
+  /// 与 `kPlayerSkillKeys`/`kPlayerAttributeKeys` 的 `contains` 判定同风格。
+  static bool isPlayerFlagKeyValid(String flagName) {
+    if (kPlayerFlagKeys.contains(flagName)) return true;
+    for (final prefix in kPlayerFlagPrefixes) {
+      if (flagName.startsWith(prefix)) return true;
+    }
+    return false;
+  }
   // ==================== 便捷派生 ====================
 
   /// 夫妻感情等级标签。

@@ -624,7 +624,7 @@ $seasonGuide
 - 技能：skills.技能名（如 skills.sword；可用键：sword 剑术 / archery 弓术 / riding 骑术 / speech 口才 / alchemy 炼金）
 - 属性：attributes.属性名（如 attributes.strength；可用键：strength 力量 / agility 敏捷 / intelligence 智识 / charisma 魅力 / willpower 意志 / perception 感知）
 - 关系：relations.NPC标识（正数加好感，负数降好感，如 relations.npc_tyrion: 10；NPC标识见上文「关系」行 [id=...] 标注）
-- 世界状态：flags.标记名（正值设置标记，如 flags.honor_pledge: 1；0 或负值清除标记）
+- 世界状态：flags.标记名（正值设置标记，如 flags.honor_pledge: 1；0 或负值清除标记；可用键仅限上文「状态」段已列出的键名，或 equipped./house.childDead./npc_task./npc_task_done./npc_story. 这 5 个动态前缀开头——其余键名一律无效，不要自创）
 - 生存状态：health / energy / hunger（如 health: 10 回血，energy: -15 耗精力，hunger: 20 进食）
 - 物品：inventory.物品ID（正数获得物品，如 inventory.item_bread: 1；负数消耗/丢弃）
 - 数值范围：单次技能/属性 ±1~3、关系 ±5~20、好感/恶感累计不超过 ±100（超出按边界截断）
