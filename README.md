@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
-**2026-10-05 · fix(batch10-97): require non-empty suffix for prefix match**（`ab642de`）
+**2026-10-05 · fix(batch10-100): assert chip text with textContaining, not find.text**（`3b36026`）
 
-**2026-10-05 · fix(batch10-97): 物品集符号名纠正 allItems -> kItems（CI 37270034492 undefined_identifier）**（`55764e7`）
+**2026-10-05 · fix(batch10-100): tall viewport so lazy ListView builds relation section**（`ba9270b`）
 
-**2026-10-05 · feat(batch10-97/98): flags. 效果键分层白名单 + prompt 契约同步（效果落盘轴收官）**（`e9a5949`）
+**2026-10-05 · feat(batch10-99/100): relations. effect key write guard + relation panel Chinese names**（`b3b13ce`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
