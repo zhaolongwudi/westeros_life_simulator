@@ -399,8 +399,8 @@ void main() {
   group('10-97 equipped.* 前缀与物品 id 的口径', () {
     test('全部物品 id 拼出的 equipped.<id> 都是合法键', () {
       final bad = <String>[];
-      for (final item in allItems) {
-        final key = 'equipped.${item.id}';
+      for (final id in kItems.keys) {
+        final key = 'equipped.$id';
         if (!BalanceData.isPlayerFlagKeyValid(key)) bad.add(key);
       }
       expect(bad, isEmpty,
