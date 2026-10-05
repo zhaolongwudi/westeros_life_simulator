@@ -2125,7 +2125,18 @@ const List<GameEvent> allEvents = [
         id: 'choice_entrust',
         text: '转赠给家族',
         requirements: const {},
-        effects: const {'reputation': 8, 'relations.family_head': 10},
+        // Batch 10-96：本文件原有 4 个**幽灵关系键**——`lord` / `family_head`
+        // / `merchant_leader` / `castle_black`，都不是任何真实 NPC id（`npc_data`
+        // 全量 38 个 id 全带 `npc_` 前缀，无一匹配）。后果三重：① 玩家点了
+        // 「+10 好感」永远加不到任何人身上；② `ai_service` 关系段的 `n == null`
+        // 兜底把 `lord: 10` 原样打进 prompt，`player_panel` 遍历
+        // `relations.entries` 让玩家面板出现名为 `lord` 的条目；③ 两处
+        // `relations.lord: 20/15` 是**死门槛**——`EventService.canChoose` 的
+        // `default` 分支不处理 `relations.`，该门槛恒静默放行。四键均为泛化角色
+        // 概念（领主/家主/商队首领/守夜人），无唯一对应 NPC，强行映射会让该 NPC
+        // 关系值被无关事件污染，故按「幽灵键不落盘」删除；同行 `reputation` 已承载
+        // 叙事褒奖，删除不改语义。护栏见 `test/batch10_95_96_effect_drift_test.dart`。
+        effects: const {'reputation': 8},
         narrative: '你把剑献给家族大厅，悬在祖先画像之下，族人们对你刮目相看。',
       ),
       EventChoice(
@@ -2160,8 +2171,12 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_borrow',
         text: '向领主借马',
-        requirements: const {'relations.lord': 20},
-        effects: const {'relations.lord': -5, 'reputation': 3},
+        // Batch 10-96：删幽灵键 `relations.relations.lord`（非真实 npc id，详见
+        // 本文件 choice_entrust 处的完整说明）；同行 `reputation` 已承载叙事褒奖。
+        requirements: const {},
+        // Batch 10-96：删幽灵键 `relations.relations.lord`（非真实 npc id，详见
+        // 本文件 choice_entrust 处的完整说明）；同行 `reputation` 已承载叙事褒奖。
+        effects: const {'reputation': 3},
         narrative: '领主借你一匹白马，但代价是你在比武场上必须替他的旗帜争光。',
       ),
       EventChoice(
@@ -2318,7 +2333,9 @@ const List<GameEvent> allEvents = [
         id: 'choice_hire_guards',
         text: '出资雇护卫',
         requirements: const {'gold': 40},
-        effects: const {'gold': -40, 'reputation': 3, 'relations.merchant_leader': 10},
+        // Batch 10-96：删幽灵键 `relations.gold`（非真实 npc id，详见
+        // 本文件 choice_entrust 处的完整说明）；同行 `reputation` 已承载叙事褒奖。
+        effects: const {'gold': -40, 'reputation': 3},
         narrative: '你出钱雇了一队雇佣兵替商队开路。虽然没有亲自上阵，商队老板仍记住了你的名字。',
       ),
       EventChoice(
@@ -2360,8 +2377,12 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_report',
         text: '向领主告发',
-        requirements: const {'relations.lord': 15},
-        effects: const {'relations.lord': 5, 'reputation': 8},
+        // Batch 10-96：删幽灵键 `relations.relations.lord`（非真实 npc id，详见
+        // 本文件 choice_entrust 处的完整说明）；同行 `reputation` 已承载叙事褒奖。
+        requirements: const {},
+        // Batch 10-96：删幽灵键 `relations.relations.lord`（非真实 npc id，详见
+        // 本文件 choice_entrust 处的完整说明）；同行 `reputation` 已承载叙事褒奖。
+        effects: const {'reputation': 8},
         narrative: '你把证据呈给领主。领主当众杖责了那几个奸商，并赏了你一枚银质徽章。',
       ),
       EventChoice(
@@ -2467,7 +2488,9 @@ const List<GameEvent> allEvents = [
         id: 'choice_join_watch',
         text: '加入守夜人',
         requirements: const {},
-        effects: const {'flags.sworn_brother': 1, 'reputation': 10, 'relations.castle_black': 15},
+        // Batch 10-96：删幽灵键 `relations.flags.sworn_brother`（非真实 npc id，详见
+        // 本文件 choice_entrust 处的完整说明）；同行 `reputation` 已承载叙事褒奖。
+        effects: const {'flags.sworn_brother': 1, 'reputation': 10},
         narrative: '你放下一切，走向长城。黑城堡的弟兄们为你披上黑衣——从此你与过去再无瓜葛。',
       ),
       EventChoice(

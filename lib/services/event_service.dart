@@ -1,6 +1,8 @@
 /// 事件服务：事件触发条件检查、效果计算、存档。
 library;
 
+import 'dart:math' show max;
+
 import '../data/balance_data.dart';
 // Batch 10-91：`applyEffects` 的 `inventory.<id>` 分支要 `itemById` 校验
 // 物品 id 是否真实存在（与 `mixin_life.addItem` 的既有校验对齐）。
@@ -141,7 +143,12 @@ class EventService {
               failed[key] = value;
             } else {
               final newSkills = Map<String, int>.from(newPlayer.skills);
-              newSkills[skillName] = (newSkills[skillName] ?? 0) + value;
+              // Batch 10-95：`max(0, ...)` 防负等级——与
+              // `GameStateProvider.applyEffects` 的同名分支对齐（那边
+              // 10-90 已加，本通道一直漏了）。技能是「等级」，负等级在
+              // `train` 的门槛判定（`currentLevel < requiredLevel`）与
+              // prompt 展示里都无意义，且会让负值继续累积。
+              newSkills[skillName] = max(0, (newSkills[skillName] ?? 0) + value);
               newPlayer = newPlayer.copyWith(skills: newSkills);
               applied[key] = value;
             }
@@ -152,7 +159,8 @@ class EventService {
               failed[key] = value;
             } else {
               final newAttrs = Map<String, int>.from(newPlayer.attributes);
-              newAttrs[attrName] = (newAttrs[attrName] ?? 0) + value;
+              // Batch 10-95：同上，属性键也走 `max(0, ...)`。
+              newAttrs[attrName] = max(0, (newAttrs[attrName] ?? 0) + value);
               newPlayer = newPlayer.copyWith(attributes: newAttrs);
               applied[key] = value;
             }
