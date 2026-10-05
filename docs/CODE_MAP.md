@@ -1,5 +1,5 @@
 # 维斯特洛人生模拟器 · 代码地图（CODE_MAP）
-> **本文件是代码结构导航索引**（v5.27 · Batch 10-108 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
+> **本文件是代码结构导航索引**（v5.28 · Batch 10-110 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
 > 再读本文件快速定位「哪个功能在哪个文件、哪个方法」。避免盲目翻代码。
 >
 > 定位三步法：
@@ -72,7 +72,7 @@ lib/
 │   ├── player_panel_screen.dart   # 玩家详情（含家谱区块，Batch 10-14）
 │   ├── npc_panel_screen.dart      # NPC 关系面板（Batch 10-15 新增）
 │   ├── family_screen.dart         # 家族面板
-│   ├── family_tree_screen.dart    # 家族树可视化（Batch 10-20 新增；历代家主详情弹层 Batch 10-46；谱系继承连线 Batch 10-49；横版继承关系图 Batch 10-51；当代支脉横版图 Batch 10-57）
+│   ├── family_tree_screen.dart    # 家族树可视化（Batch 10-20 新增；历代家主详情弹层 Batch 10-46；谱系继承连线 Batch 10-49；横版继承关系图 Batch 10-51；当代支脉横版图 Batch 10-57；继承顺位卡片 Batch 10-109；当代支脉子女培养档案 Batch 10-110）
 │   ├── map_screen.dart            # 地图
 │   ├── events_screen.dart         # 事件面板
 │   ├── letters_screen.dart        # 信件面板（Batch 10-29 · M3b 起只 import models/letter.dart，不再 import mixin_letter）
@@ -175,6 +175,8 @@ GameEngine extends GameProviderBase with:
 | **金饰化主题基建 / 公共装饰组件** | theme/westeros_theme.dart（「铁与火 · 羊皮纸与黄金」17 类主题，Batch 10-60）· widgets/theme/ornate.dart（ParchmentBackground/GildedCard/OrnateHeader/StatPill/WesterosDivider/WesterosScaffold/SectionDivider，Batch 10-60） |
 | **横版继承关系图（谱系概览）** | screens/family_tree_screen.dart（`_LineageOverview`/`_LineageNode`/`_LineageArrow`：「继承谱系」历代家主迷你卡片横向串联至当代徽章，Batch 10-51） |
 | **当代支脉横版图** | screens/family_tree_screen.dart（`_CurrentFamilyOverview`：当代家主 + 配偶（偶徽章）+ 子女（子徽章）横向血脉快照，箭头指示亲缘方向；有配偶或子女时显示；`_LineageNode` 增 `badge` 参数，Batch 10-57） |
+| **继承顺位卡片** | screens/family_tree_screen.dart（`_InheritanceOrderCard`：按出生顺序列出子女顺位（第一/第二顺位）+ `_rearingBrief` 培养档案短述 + 继承人「👑 继承人」徽章（heirName：长子在世→长子，childDead 跳过），Batch 10-109） |
+| **当代支脉子女培养档案** | screens/family_tree_screen.dart（`_CurrentFamilyOverview` 子女 `_LineageNode` 增 `subtitle: _rearingBrief`；`_rearingBrief` 顶层函数与 `_childRearingText` 同源，去姓名前缀，Batch 10-110） |
 | NPC 多步骤任务列表 | mixin_npc_task.dart（availableTasksOf/formatNpcTaskPanelV2，Batch 10-18） |
 | NPC 接任务 | mixin_npc_task.dart（acceptNpcTaskV2，Batch 10-18） |
 | NPC 任务推进/期限 | mixin_npc_task.dart（advanceNpcTasks/checkNpcTaskDeadlines，探索+过月挂载，Batch 10-18；按时完成关系加成 + 逾期扣声望关系惩罚，Batch 10-40） |
@@ -340,6 +342,7 @@ GameEngine extends GameProviderBase with:
 | batch10_44_coop_expand_test | **多 NPC 协作任务扩充**（10-44，9 用例）：4 新协作模板数据校验（存在/指向真实 NPC/同地点/非同一人）+ 君临协作可接过滤（双方关系达标出现/同伴不足隐藏）+ 接取标注协作 + 完成双关系奖励 + 面板标注 + ID 唯一 |
 | batch10_45_ai_world_event_test | **AI 注入本月世界局势**（10-45，4 用例）：top2 注入（名称+描述，第 3 条不出现在世界局势段落）/ 空态兜底 / 相关度最高事件排第一（冰封湖面双命中）/ 既有注入不回归 |
 | batch10_46_family_tree_detail_test | **历代家主详情弹层**（10-46，4 用例）：点击谱系节点弹出详情（世代徽章/头衔/在位/成就/传承寄语）/ 成就为空「暂无显著功绩」/ 关闭按钮收起/ 无谱系无入口 |
+| batch10_109_inheritance_order_test | **继承顺位卡片**（10-109，3 用例）：有子女显示顺位+👑继承人徽章 / 培养档案随子女行展示（Key 锚定 Text.data 断言）/ 长子已亡徽章落次子 |
 | batch10_47_task_expand_test | **NPC 任务模板扩充**（10-47，5 用例）：总量 54 / 协作 8 / solo 46 / 新模板存在且指向真实 NPC（泰温·凯岩城·调查西境矿脉 / 艾莉亚·临冬城·猎杀袭击商队的狼群）/ ID·标题唯一 / 泰温不在场仅模板可见性（断言「不在这里」）/ 艾莉亚指定 taskId 全流程完成结算 |
 | batch10_53_task_expand_test | **NPC 任务模板扩充**（10-53，7 用例）：总量 58 / 协作仍 8 / solo 50 / 4 新模板存在且指向真实 NPC（卢斯·波顿·黑城堡 / 拉姆斯·波顿·黑城堡 / 席恩·派克城 / 霍斯特·奔流城）/ ID·标题唯一 / 4 位 NPC 可接列表含新模板 + 不在场接取提示「不在这里」 |
 | batch10_54_npc_royce_tarth_test | **新增 NPC 实体 + 任务模板扩充**（10-54，8 用例）：2 新 NPC 实体字段完整（约恩·罗伊斯·谷地·鹰巢城 / 布蕾妮·塔斯·风暴地·塔斯岛）/ 3 新模板指向真实 NPC（solo ×2 + 约恩×琼恩·艾林协作）/ 协作对同地点 / 约恩协作可接过滤 + 接取标注 / 布蕾妮不在场提示 |
