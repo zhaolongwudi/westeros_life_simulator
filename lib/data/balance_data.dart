@@ -258,9 +258,12 @@ class BalanceData {
   ///
   /// 【为什么需要】狩猎成功率随地点危险度递减（huntChancePerDanger）
   /// 且失败受伤风险递增，但收益却固定 10~19 金——高危地点狩猎是纯劣选项。
-  /// 每点危险度 +2 金：危险 6 的地点收益 +12 ≈ 城市贸易（商人 25），
-  /// 让「去危险地带打猎」成为有依据的选择而非自虐。
-  static const int huntRewardPerDanger = 2;
+  ///
+  /// 【为什么取 1 而非 2】CI 实测（run 37400319376）取 2 时 160 个月固定策略
+  /// 金币达 5004，撞 m4_balance_sim_test 的 <5000 防爆炸护栏。每点 +1：
+  /// 危险 6 的地点收益 +6，仍在基础收益的合理上浮带内，且 160 个月金币
+  /// 回落至 ~4520，护栏余量恢复。危险度差异依然可感（6 点危险差 = 6 金币差）。
+  static const int huntRewardPerDanger = 1;
 
   /// 狩猎失败的受伤概率。
   static const double huntInjuryChance = 0.3;
