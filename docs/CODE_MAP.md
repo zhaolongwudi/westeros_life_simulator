@@ -1,5 +1,5 @@
 # 维斯特洛人生模拟器 · 代码地图（CODE_MAP）
-> **本文件是代码结构导航索引**（v5.29 · Batch 10-112 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
+> **本文件是代码结构导航索引**（v5.30 · Batch 10-113/114 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
 > 再读本文件快速定位「哪个功能在哪个文件、哪个方法」。避免盲目翻代码。
 >
 > 定位三步法：
@@ -30,7 +30,7 @@ lib/
 │   ├── system_data.dart           # 74 系统
 │   ├── item_data.dart             # 34 物品
 │   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节；seasonWorldTrend 季节世界动向 Batch 10-50；regionWorldTrend 地区风土人情 Batch 10-52；seasonFarmTrend 时节农事 Batch 10-56；localMarketTrend 本地集市行情 Batch 10-58；locationLore 所在地名人轶事·历史典故 Batch 10-69）
-│   ├── balance_data.dart           # ⭐ 数值配置集中（初始值/生存消耗/每日上限/头衔阶梯/活动经济/婚姻与世代阈值，Batch 10-30 · M4a；**好感度护栏 kRelationClamp=100**，Batch 10-90；**技能/属性键白名单 kPlayerSkillKeys(13)/kPlayerAttributeKeys(6)**，Batch 10-92，键集与 `labels` 标签表同源；**日常经济收口 17 常量：workEnergyCost/huntEnergyCost/tradeEnergyCost/workBaseIncome(10 身份)/workSkillBonusDivisor/tradeMerchantBase/tradeCommonerBase/tradeSpeechGain/tradeProfitVariance/restHungerGain/huntRewardPerDanger**，Batch 10-111/112；AI prompt 各段预算常量亦收口于此 Batch 10-82~88；无 import 依赖的叶子模块）
+│   ├── balance_data.dart           # ⭐ 数值配置集中（初始值/生存消耗/每日上限/头衔阶梯/活动经济/婚姻与世代阈值，Batch 10-30 · M4a；**好感度护栏 kRelationClamp=100**，Batch 10-90；**技能/属性键白名单 kPlayerSkillKeys(13)/kPlayerAttributeKeys(6)**，Batch 10-92，键集与 `labels` 标签表同源；**日常经济收口 17 常量：workEnergyCost/huntEnergyCost/tradeEnergyCost/workBaseIncome(10 身份)/workSkillBonusDivisor/tradeMerchantBase/tradeCommonerBase/tradeSpeechGain/tradeProfitVariance/restHungerGain/huntRewardPerDanger**，Batch 10-111/112；**NPC 交互经济收口 24 常量：npcChatGainBase/Variance、npcFavorCostBase/Divisor/Min/Max、escortFeeBase/Variance、merchantShareBase/Variance、assassinFeeBase/Variance、taskRewardBase/taskRewardRelation/taskAcceptRelation、reputationSmallGain、wildlingGiftGold、priestHealHealth、secretRelationGain、chatRelationGain、nobleReferReputation、supernaturalReputationGain、scholarTeachChance**，Batch 10-113；**冒险/旅行经济收口 14 常量：travelCostBase/Variance、exploreEnergyCost、exploreGoldBase/DangerMult/VarianceBase、banditLossBase/DangerMult、beastGainBase/DangerMult、beastHungerGain、beastInjuryHealth、merchantProfitBase/Variance**，Batch 10-114；AI prompt 各段预算常量亦收口于此 Batch 10-82~88；无 import 依赖的叶子模块）
 │   └── npc_task_data.dart         # NPC 多步骤任务模板（72 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯/奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈/卢斯·波顿/拉姆斯·波顿/席恩/霍斯特/约恩·罗伊斯/布蕾妮·塔斯/杰奥·莫尔蒙/艾德慕·徒利/瓦德·佛雷/莱莎·艾林/乔佛瑞/托曼/琼恩·艾林/弥赛拉/雷加/韦赛里斯，Batch 10-18 起逐步扩充，10-39 扩至 44，10-41 协作任务扩至 48，10-44 协作任务扩至 52（君临×2/高庭/派克城），10-47 扩至 54（泰温+艾莉亚各 +1 solo），10-53 扩至 58（卢斯·波顿/拉姆斯·波顿/席恩/霍斯特各 +1 solo），10-54 扩至 61（约恩·罗伊斯/布蕾妮·塔斯各 +1 solo + 约恩×琼恩·艾林协作），10-55 扩至 67（杰奥/艾德慕/瓦德/莱莎/乔佛瑞/托曼各 +1 solo），10-61 扩至 71（琼恩·艾林/弥赛拉/雷加/韦赛里斯各 +1 solo），10-62 扩至 72（琼恩·艾林×莱莎·艾林谷地协作）；协作任务含 coNpcId）
 │
 ├── models/                        # 【模型层】不可变实体（copyWith + toJson/fromJson）
@@ -344,6 +344,8 @@ GameEngine extends GameProviderBase with:
 | batch10_46_family_tree_detail_test | **历代家主详情弹层**（10-46，4 用例）：点击谱系节点弹出详情（世代徽章/头衔/在位/成就/传承寄语）/ 成就为空「暂无显著功绩」/ 关闭按钮收起/ 无谱系无入口 |
 | batch10_111_daily_economy_constants_test | **日常活动经济常量契约**（10-111，7 用例）：能量消耗 15/20/10 与旧实现一致 / workBaseIncome 覆盖 10 身份且与旧 switch 逐字一致 / 排序护栏（商人>士兵>学者>神职>平民）/ 工作浮动 5 + 技能除 2 / 贸易 25/8 差 17（regression 锁定）+ 口才 3 + 浮动 15 / 休息饱食 10 / 全部新常量正值 |
 | batch10_112_hunt_danger_reward_test | **狩猎收益挂钩地点危险度**（10-112，4 用例）：每点危险度 +1 金常量契约 / 危险 6 比危险 1 多 5 金纯逻辑 / 危险 3 满技能收益区间 43~52 / 行为分支不回归（城市拒·野外可猎）。**CI 实测收敛**：取 2 撞 sim <5000 金币护栏（5004），改 1 回落 ~4520 |
+| batch10_113_npc_interact_economy_test | **NPC 交互经济常量契约**（10-113，6 用例）：深聊/示好好感公式（3 + speech~/2 + rnd(3)）/ 示好礼金四边界（costOf(0)=10/100=5/200=3/-100=12）/ 熟识四类报酬（护送 15+rnd10 / 合股 10+rnd10 / 刺客 20+rnd15）/ 任务结算 20+rel~/2 + 关系 5 + 接取 2 / 通用小奖励（声望 2/野人 5/神职 5/秘密 3/挚友 2/引荐 4/超自然 3/学者 0.4）/ 全部新常量正值 |
+| batch10_114_adventure_economy_test | **冒险/旅行经济常量契约**（10-114，7 用例）：旅费公式常量（2 + 危险度 + rnd(4)）/ 探索公式（精力 15 / 收益 3 + rnd(10 + 危险度*2)）/ 遭遇公式（强盗 5+危险度*2 / 野兽 8+危险度*2 / 商人 5+rnd(10)）/ 旅费区间 [base+danger, base+danger+variance-1] 纯逻辑推导 / 探索收益区间上限随危险度右移 / 强盗/野兽/商人确定性部分与浮动均不越界 / 全部新常量正值 |
 | batch10_109_inheritance_order_test | **继承顺位卡片**（10-109，3 用例）：有子女显示顺位+👑继承人徽章 / 培养档案随子女行展示（Key 锚定 Text.data 断言）/ 长子已亡徽章落次子 |
 | batch10_47_task_expand_test | **NPC 任务模板扩充**（10-47，5 用例）：总量 54 / 协作 8 / solo 46 / 新模板存在且指向真实 NPC（泰温·凯岩城·调查西境矿脉 / 艾莉亚·临冬城·猎杀袭击商队的狼群）/ ID·标题唯一 / 泰温不在场仅模板可见性（断言「不在这里」）/ 艾莉亚指定 taskId 全流程完成结算 |
 | batch10_53_task_expand_test | **NPC 任务模板扩充**（10-53，7 用例）：总量 58 / 协作仍 8 / solo 50 / 4 新模板存在且指向真实 NPC（卢斯·波顿·黑城堡 / 拉姆斯·波顿·黑城堡 / 席恩·派克城 / 霍斯特·奔流城）/ ID·标题唯一 / 4 位 NPC 可接列表含新模板 + 不在场接取提示「不在这里」 |
@@ -447,7 +449,7 @@ GameEngine extends GameProviderBase with:
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
 
 ---
-*文档版本：v5.29（Batch 10-111/112 日常经济收口 + 狩猎危险度收益）· 最后更新：2026-10-06*
+*文档版本：v5.30（Batch 10-113/114 NPC 交互 + 冒险/旅行经济收口）· 最后更新：2026-10-06*
 ## 八、构建 APK 与直发邮箱（临时任务脚本，2026-10-02 新增）
 
 用户临时需求：构建出的 APK 直接发到邮箱（附件优先，失败降级 nightly.link 链接发邮箱）。
@@ -479,4 +481,4 @@ GameEngine extends GameProviderBase with:
   - **只保留最近 3 次**：Cleanup 步骤按 created_at 倒序删多余 `v0.0.x` release（v 版本序列，旧 apk-<sha8> 一并清理）
 - **已知验证**：run `36958877137` ✅（手动触发 CI 验证 changelog 链路，analyze/test 全绿 + auto-update 幂等跳过）；run `37007321396` ✅（release-publish 全步骤 success）；run `37004310167` ❌（auto-update push 非快进被拒 → 已加 pull --rebase 容错）；run `37048376650` ✅（head fcbd46f，fix readme 收尾闭环，analyze-test 全绿）
 ---
-*文档版本：v5.29（Batch 10-111/112 日常经济收口 + 狩猎危险度收益）· 最后更新：2026-10-06*
+*文档版本：v5.30（Batch 10-113/114 NPC 交互 + 冒险/旅行经济收口）· 最后更新：2026-10-06*
