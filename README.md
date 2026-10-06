@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-06 · feat(batch10-114): consolidate adventure/travel economy magic numbers into balance_data**（`3a5ae7b`）
+
+**2026-10-06 · feat(batch10-113): consolidate npc interact economy magic numbers into balance_data**（`433bdcd`）
+
 **2026-10-06 · fix(batch10-112): lower hunt danger reward to 1 to stay under sim gold cap**（`ce21b89`）
-
-**2026-10-06 · feat(batch10-111/112): consolidate daily economy magic numbers into balance_data; hunt reward scales with location danger**（`3a846d4`）
-
-**2026-10-05 · fix(batch10-109): assert card rearing text via Text.data keyed lookup**（`2d69f27`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
