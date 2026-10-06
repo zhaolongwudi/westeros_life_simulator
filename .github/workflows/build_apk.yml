@@ -3,8 +3,10 @@ name: Build APK
 on:
   workflow_dispatch:
     inputs:
+      # S1-4：版本名**固定取 version.txt**（见 Build APK 步骤），本 input 已不再使用，
+      # 保留仅为兼容旧的手动触发方式。真相源只有一个：version.txt。
       version_name:
-        description: '版本名（可选，默认取 pubspec version）'
+        description: '（已废弃，保留兼容）版本固定取 version.txt'
         required: false
         default: ''
 

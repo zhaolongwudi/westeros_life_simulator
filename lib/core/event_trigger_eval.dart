@@ -125,8 +125,10 @@ bool _atMost(int actual, String raw) {
 
 /// 判定事件的全部触发门槛是否满足。
 ///
-/// [season] 为 null 时不施加季节限制（与 `canTrigger` 既有行为一致：
-/// 未传季节则 `season` 类门槛一律放行）。
+/// [season] 为 null 时**不放行**季节门槛（fail-closed），与 `canTrigger` 的原语义一致：
+/// 原实现 `season != value` 在 season 为 null 时恒成立 → 季节门槛事件被判为不可触发。
+/// 取 fail-open 会让「调用方忘记传季节」静默变成「门槛全放行」，掩盖 bug 而非暴露它。
+/// 两个生产调用方（事件面板 / 月度事件浮现）都传了真实季节，故此处不受影响。
 /// [context] 供 `EventService` 传入的上下文覆盖层；生产调用方不传。
 bool eventTriggersSatisfied(
   GameEvent event,

@@ -24,11 +24,11 @@ lib/
 │
 ├── data/                          # 【静态数据层】世界常量数据
 │   ├── family_data.dart           # 27 家族
-│   ├── location_data.dart         # 68 地点
+│   ├── location_data.dart         # 69 地点
 │   ├── npc_data.dart              # 38 NPC（含 Batch 10-15 任务链 tasks/mood；Batch 10-54 新增约恩·罗伊斯/布蕾妮·塔斯）
 │   ├── event_data.dart            # 72 事件（60 + 12 复合）
 │   ├── system_data.dart           # 74 系统
-│   ├── item_data.dart             # 34 物品
+│   ├── item_data.dart             # 33 物品
 │   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节；seasonWorldTrend 季节世界动向 Batch 10-50；regionWorldTrend 地区风土人情 Batch 10-52；seasonFarmTrend 时节农事 Batch 10-56；localMarketTrend 本地集市行情 Batch 10-58；locationLore 所在地名人轶事·历史典故 Batch 10-69）
 │   ├── balance_data.dart           # ⭐ 数值配置集中（初始值/生存消耗/每日上限/头衔阶梯/活动经济/婚姻与世代阈值，Batch 10-30 · M4a；**好感度护栏 kRelationClamp=100**，Batch 10-90；**技能/属性键白名单 kPlayerSkillKeys(13)/kPlayerAttributeKeys(6)**，Batch 10-92，键集与 `labels` 标签表同源；**日常经济收口 17 常量：workEnergyCost/huntEnergyCost/tradeEnergyCost/workBaseIncome(10 身份)/workSkillBonusDivisor/tradeMerchantBase/tradeCommonerBase/tradeSpeechGain/tradeProfitVariance/restHungerGain/huntRewardPerDanger**，Batch 10-111/112；**NPC 交互经济收口 24 常量：npcChatGainBase/Variance、npcFavorCostBase/Divisor/Min/Max、escortFeeBase/Variance、merchantShareBase/Variance、assassinFeeBase/Variance、taskRewardBase/taskRewardRelation/taskAcceptRelation、reputationSmallGain、wildlingGiftGold、priestHealHealth、secretRelationGain、chatRelationGain、nobleReferReputation、supernaturalReputationGain、scholarTeachChance**，Batch 10-113；**冒险/旅行经济收口 14 常量：travelCostBase/Variance、exploreEnergyCost、exploreGoldBase/DangerMult/VarianceBase、banditLossBase/DangerMult、beastGainBase/DangerMult、beastHungerGain、beastInjuryHealth、merchantProfitBase/Variance**，Batch 10-114；AI prompt 各段预算常量亦收口于此 Batch 10-82~88；无 import 依赖的叶子模块）
 │   └── npc_task_data.dart         # NPC 多步骤任务模板（72 个：艾德/提利昂/丹妮莉丝/琼恩/瑟曦/奥莲娜/凯特琳/罗柏/玛格丽/泰温/珊莎/艾莉亚/布兰/詹姆/劳勃/史坦尼斯/奥柏伦/巴隆/雅拉/瑞肯/洛拉斯/卓戈/卢斯·波顿/拉姆斯·波顿/席恩/霍斯特/约恩·罗伊斯/布蕾妮·塔斯/杰奥·莫尔蒙/艾德慕·徒利/瓦德·佛雷/莱莎·艾林/乔佛瑞/托曼/琼恩·艾林/弥赛拉/雷加/韦赛里斯，Batch 10-18 起逐步扩充，10-39 扩至 44，10-41 协作任务扩至 48，10-44 协作任务扩至 52（君临×2/高庭/派克城），10-47 扩至 54（泰温+艾莉亚各 +1 solo），10-53 扩至 58（卢斯·波顿/拉姆斯·波顿/席恩/霍斯特各 +1 solo），10-54 扩至 61（约恩·罗伊斯/布蕾妮·塔斯各 +1 solo + 约恩×琼恩·艾林协作），10-55 扩至 67（杰奥/艾德慕/瓦德/莱莎/乔佛瑞/托曼各 +1 solo），10-61 扩至 71（琼恩·艾林/弥赛拉/雷加/韦赛里斯各 +1 solo），10-62 扩至 72（琼恩·艾林×莱莎·艾林谷地协作）；协作任务含 coNpcId）
@@ -51,7 +51,7 @@ lib/
 │   └── game_provider_base.dart    # ⭐ 基类：世界静态数据 + 公共能力（身份/金币/关系/标记/rng）
 │
 ├── mixins/                        # 【逻辑层】玩法能力（按领域拆分）
-│   ├── mixin_life.dart            # 生存状态 + 物品 + 贸易 + 装备 + 头衔 + 月度结算（769 行，最大）
+│   ├── mixin_life.dart            # 生存状态 + 物品 + 贸易 + 装备 + 头衔 + 月度结算（约 880 行，最大）
 │   ├── mixin_play.dart            # 日常玩法：训练/工作/休息/狩猎/贸易/过月 + 死亡传承
 │   ├── mixin_systems.dart         # 74 系统挂载 + 月度演进 + 系统面板
 │   ├── mixin_adventure.dart       # 旅行/探索/遭遇（探索含 NPC 任务结算）
@@ -443,7 +443,7 @@ GameEngine extends GameProviderBase with:
 ## 七、文件写入约定（复用 HANDOVER 第二节）
 
 1. 不要用 heredoc 传中文（shell 破坏 UTF-8）→ 用 create_file/edit_file 工具
-2. 单文件不要太大（用户偏好，便于维护）；mixin_life 已 769 行，新功能优先拆新文件
+2. 单文件不要太大（用户偏好，便于维护）；mixin_life 已约 880 行，新功能优先拆新文件
    （Batch 10-17/10-18 新功能全部拆独立文件：mixin_marriage 245 行 / mixin_npc_task 221 行）
 3. 每次改完先括号检查（python 脚本），再 commit → push → CI → 绿后更新 HANDOVER + README
 4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复

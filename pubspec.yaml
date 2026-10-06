@@ -1,7 +1,9 @@
 name: westeros_life_simulator
 description: WesterosLige - 维斯特洛AI人生模拟器
 publish_to: 'none'
-version: 0.1.0+1
+# 版本真相源是 version.txt（build_apk.yml 取它做 --build-name，构建成功后自动递增）。
+# 此处仅作 pub 元数据，构建时被覆盖，改动后请与 version.txt 保持一致。
+version: 0.0.5+1
 
 environment:
   sdk: '>=3.12.0 <4.0.0'
