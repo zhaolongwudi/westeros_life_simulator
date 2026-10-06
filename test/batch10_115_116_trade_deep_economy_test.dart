@@ -51,7 +51,7 @@ void main() {
           scoreMin(power, riding, merchant) + BalanceData.convoyScoreVariance - 1;
       // 默认开局（sword 3 → power≈6 + 属性 +0，riding 0）非商人：下限 12
       expect(scoreMin(6, 0, false), 12);
-      expect(scoreMin(6, 0, false) + BalanceData.convoyScoreVariance - 1, 31);
+      expect(scoreMax(6, 0, false), 31);
       // 商人 + 高战斗值：必达全额档
       expect(scoreMin(18, 2, true), 18 * 2 + 2 * 2 + 5);
       expect(scoreMin(18, 2, true), greaterThanOrEqualTo(BalanceData.convoySuccessThreshold));
@@ -126,6 +126,8 @@ void main() {
       expect(chanceMin(0, false), lessThan(BalanceData.negotiateSuccessThreshold));
       // 商人加成 = 20（与旧实现一致）
       expect(chanceMin(0, true) - chanceMin(0, false), 20);
+      // 上限：口才 3 商人 44 + rnd(20) 上限 19
+      expect(chanceMax(3, true), 44 + BalanceData.negotiateChanceVariance - 1);
     });
 
     test('议价折扣公式区间纯逻辑推导（5 + rnd(15) + 口才(clamp 0~3)*2）', () {
