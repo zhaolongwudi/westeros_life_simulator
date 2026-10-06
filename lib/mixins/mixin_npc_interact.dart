@@ -3,7 +3,7 @@
 /// 在既有 NPC 数据（36 NPC + relations）之上提供：
 /// - 关系等级（敌对/陌生/相识/熟识/信任/挚友）
 /// - 深度互动：按关系等级解锁 寒暄/倾诉/请求/秘密/结盟
-/// - 示好送礼：每日限次，提升好感
+/// - 示好送礼：每月限次，提升好感
 /// - 好感度事件链：关系突破阈值触发专属剧情（一次性 flag）
 library;
 
@@ -172,7 +172,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
     if (npc.locationId != player.locationId) {
       return '${npc.name}不在这里。';
     }
-    if (!_canFavor()) return '你今天示好的次数已经用完了。';
+    if (!_canFavor()) return '你本月示好的次数已经用完了。';
 
     final rnd = rng();
     final speech = skillLevel('speech');
@@ -282,7 +282,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
   ///
   /// 按心情与关系产出叙事；提升好感。
   String npcChat(String npcId) {
-    if (!_canChat()) return '你今天已经聊得够多了。';
+    if (!_canChat()) return '你本月已经聊得够多了。';
     final npc = npcById(npcId);
     if (npc == null) return '没有叫「$npcId」的人。';
     if (!npc.isAlive) return '${npc.name}已经不在了。';
@@ -368,7 +368,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
         order: 25,
         requiredArgCount: 1,
         missingArgsHint: '向谁示好？如「示好 提利昂」或「送礼 npc_tyrion」。',
-        helpLine: '示好 / favor [名字]   向在场 NPC 示好送礼（每日 3 次）',
+        helpLine: '示好 / favor [名字]   向在场 NPC 示好送礼（每月 3 次）',
         handler: (args) => CommandResult(text: npcFavor(normalizeNpcAlias(this, args))),
       ),
     );
@@ -378,7 +378,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
         order: 26,
         requiredArgCount: 1,
         missingArgsHint: '和谁深聊？如「深聊 提利昂」。输入「在场」看谁在这里。',
-        helpLine: '深聊 / chat [名字]    与 NPC 深聊（相识以上，每日 3 次，更深入）',
+        helpLine: '深聊 / chat [名字]    与 NPC 深聊（相识以上，每月 3 次，更深入）',
         handler: (args) => CommandResult(text: npcChat(normalizeNpcAlias(this, args))),
       ),
     );

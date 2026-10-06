@@ -139,7 +139,10 @@ void main() {
       expect(BalanceData.hungerDecayPerMonth, 12);
       expect(BalanceData.starvationHealthPenalty, 8);
       expect(BalanceData.dailyLimits['work'], 2);
-      expect(BalanceData.dailyLimits['rest'], 99);
+      // S2-2：rest 上限由装饰性的 99 改为真实闸口 10（rest() 此前从不读该键）。
+      // 该值改动会改变「每月可休息次数」，若仿真曲线因此漂移，请先看
+      // regression_simulation 再调，而不是把这里改回 99 了事。
+      expect(BalanceData.dailyLimits['rest'], 10);
     });
   });
 }

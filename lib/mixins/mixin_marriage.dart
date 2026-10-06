@@ -89,10 +89,10 @@ mixin GameMarriageMixin
         '声望 ${origin.reputationBonus > 0 ? '+' : ''}${origin.reputationBonus}。从此不再孤身一人。';
   }
 
-  /// 配偶互动（每日 1 次）：按身世与结婚年数产出叙事，恢复精力/心情。
+  /// 配偶互动（每月 1 次，计数按「年-月」重置）：按身世与结婚年数产出叙事，恢复精力/心情。
   String spouseInteract() {
     if (!isMarried) return '你尚未成婚，何谈与配偶共处？先「求婚 平民」吧。';
-    if (!_canSpouseDaily()) return '你今天已经与配偶相处够久了。';
+    if (!_canSpouseDaily()) return '你本月已经与配偶相处够久了。';
     _recordSpouseDaily();
     final spouse = player.spouse!;
     final years = progress.year - spouse.marriedYear;
@@ -231,7 +231,7 @@ mixin GameMarriageMixin
     return buf.toString().trim();
   }
 
-  // ==================== 每日配偶互动计数（独立于其它 mixin，坑 16） ====================
+  // ==================== 每月配偶互动计数（独立于其它 mixin，坑 16） ====================
   static const int kSpouseDailyLimit = BalanceData.spouseDailyLimit;
   int _spouseDailyCount = 0;
   String? _spouseDailyMonth;
@@ -257,7 +257,7 @@ mixin GameMarriageMixin
   /// 离婚补偿金（防无限再婚刷声望：每次离婚耗金币且当年不可再婚）。
   static const int kDivorceCost = BalanceData.divorceCost;
 
-  /// 配偶谈心每日次数上限。
+  /// 配偶谈心每月次数上限。
   static const int kSpouseChatDailyLimit = BalanceData.spouseChatDailyLimit;
 
   /// 夫妻感情等级标签。
@@ -329,10 +329,10 @@ mixin GameMarriageMixin
   /// 配偶谈心：按身世 × 话题给出回应，增进夫妻感情。
   ///
   /// 话题可选：'朝局' / '家业' / '江湖' / '家常'（缺省随机）。
-  /// 每日限 [kSpouseChatDailyLimit] 次。恩爱加成（好感 +5，否则 +3）。
+  /// 每月限 [kSpouseChatDailyLimit] 次。恩爱加成（好感 +5，否则 +3）。
   String spouseChat([String? topic]) {
     if (!isMarried) return '你尚未成婚。先去「求婚 平民」找个知心人吧。';
-    if (!_canSpouseChat()) return '你们今天已经说了很多知心话。改日再聊吧。';
+    if (!_canSpouseChat()) return '你们本月已经说了很多知心话。下月再聊吧。';
     _recordSpouseChat();
     final s = player.spouse!;
     final t = topic?.trim();
@@ -394,7 +394,7 @@ mixin GameMarriageMixin
     };
   }
 
-  // ==================== 谈心每日计数（独立前缀 _b1025，坑 16） ====================
+  // ==================== 谈心每月计数（独立前缀 _b1025，坑 16） ====================
 
   int _b1025ChatCount = 0;
   String? _b1025ChatMonth;
@@ -531,7 +531,7 @@ mixin GameMarriageMixin
       CommandSpec(
         aliases: const ['配偶', '共处', 'spouse'],
         order: 35,
-        helpLine: '配偶 / spouse       与配偶共处（每日 1 次，恢复精力）',
+        helpLine: '配偶 / spouse       与配偶共处（每月 1 次，恢复精力）',
         handler: (args) => CommandResult(text: spouseInteract()),
       ),
     );
@@ -547,7 +547,7 @@ mixin GameMarriageMixin
       CommandSpec(
         aliases: const ['私语', '谈心', 'chatspouse'],
         order: 37,
-        helpLine: '私语 / chatspouse [话题]  与配偶谈心（每日 2 次，增进感情）',
+        helpLine: '私语 / chatspouse [话题]  与配偶谈心（每月 2 次，增进感情）',
         handler: (args) => CommandResult(text: spouseChat(args.isEmpty ? null : args)),
       ),
     );

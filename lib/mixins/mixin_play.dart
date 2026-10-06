@@ -43,7 +43,7 @@ mixin GamePlayMixin
   /// 消耗精力（疲惫时成功率减半）；返回叙事文本；每天最多 [kDailyLimits] 次。
   String train(String skillName) {
     if (!_canDoDaily('train')) {
-      return '你今天已经练得够多了。身体的每一块肌肉都在抗议——明天再来吧。';
+      return '你本月已经练得够多了。身体的每一块肌肉都在抗议——下月再来吧。';
     }
     if (!player.skills.containsKey(skillName)) {
       return '你从未学过「$skillName」，无从练起。';
@@ -77,13 +77,20 @@ mixin GamePlayMixin
   }
 
   /// 休息：恢复精力与少量健康，消耗少量金币。
+  ///
+  /// S2-2：接入每月闸口（[BalanceData.dailyLimits]['rest']）——此前该键为 99 且
+  /// `rest()` 从不读取，等于「每月上限」表里有一个永不生效的装饰值。
   String rest() {
+    if (!_canDoDaily('rest')) {
+      return '你本月已经歇得够久了。再躺下去，旅店老板都要赶人了。';
+    }
     if (player.gold < BalanceData.restInnCost) {
       return '你太穷了，连一顿像样的饭都吃不起。找个地方蜷缩着睡了一夜。';
     }
     gainGold(-BalanceData.restInnCost);
     adjustEnergy(GameLifeMixin.kRestEnergyRecovery);
     adjustHunger(BalanceData.restHungerGain);
+    _recordDaily('rest');
     // 受伤时休息恢复更快
     final healText = isInjured ? ' 伤口似乎也舒缓了一些。' : '';
     return '你在旅店歇了一晚，吃了顿热饭，花去 ${BalanceData.restInnCost} 金币。精力恢复 ${GameLifeMixin.kRestEnergyRecovery}。$healText';
@@ -92,7 +99,7 @@ mixin GamePlayMixin
   /// 工作：按身份/技能赚取金币（消耗精力）。
   String work() {
     if (!_canDoDaily('work')) {
-      return '今天的活计已经干完了。';
+      return '本月的活计已经干完了。';
     }
     if (!canAffordEnergy(BalanceData.workEnergyCost)) {
       return '你实在太累了，干不动活了。先去休息吧。';
@@ -115,7 +122,7 @@ mixin GamePlayMixin
   /// 狩猎：按剑术/弓箭技能赚取金币，有失败风险（消耗精力）。
   String hunt() {
     if (!_canDoDaily('hunt')) {
-      return '今天的猎物已经够多了。';
+      return '本月的猎物已经够多了。';
     }
     if (!canAffordEnergy(BalanceData.huntEnergyCost)) {
       return '你实在太累了，拉不开弓。先去休息吧。';
@@ -161,7 +168,7 @@ mixin GamePlayMixin
   /// 贸易：按地点类型/商人身份赚取金币（消耗精力）。
   String trade() {
     if (!_canDoDaily('trade')) {
-      return '今天的集市已经散了。';
+      return '本月的集市已经散了。';
     }
     if (!canAffordEnergy(BalanceData.tradeEnergyCost)) {
       return '你精疲力竭，无心讨价还价。先去休息吧。';
@@ -318,10 +325,13 @@ mixin GamePlayMixin
   String get _today => '${progress.year}-${progress.month}';
 
   /// 是否还能进行某活动。
+  ///
+  /// 上限表里查不到时用 1 兜底（S2-2：原为 `kDailyLimits[activity]!` 强制解包，
+  /// 新增一种活动却忘了配上限就会运行时崩溃）。
   bool _canDoDaily(String activity) {
     _rollDaily();
     final count = _dailyCount[activity] ?? 0;
-    return count < kDailyLimits[activity]!;
+    return count < (kDailyLimits[activity] ?? 1);
   }
 
   /// 记录一次活动。

@@ -316,7 +316,7 @@ mixin GameLifeMixin on GameProviderBase {
   /// 本次议价折扣（0-100 的百分比）。议价成功后生效，跨日重置。
   int _negotiatedDiscount = 0;
 
-  /// 新增贸易活动的每日次数上限（自包含，避免依赖 GamePlayMixin 私有状态）。
+  /// 新增贸易活动的每月次数上限（自包含，避免依赖 GamePlayMixin 私有状态）。
   static const Map<String, int> kNewDailyLimits = <String, int>{
     'trade_specialty': 2,
     'negotiate': 1,
@@ -328,7 +328,7 @@ mixin GameLifeMixin on GameProviderBase {
 
   String get _b1011Today => '${progress.year}-${progress.month}';
 
-  /// 跨月重置新增活动的每日计数，并清除议价折扣。
+  /// 跨月重置新增活动的每月计数，并清除议价折扣。
   void _b1011RollDaily() {
     if (_b1011DailyMonth != _b1011Today) {
       _b1011DailyMonth = _b1011Today;
@@ -391,7 +391,7 @@ mixin GameLifeMixin on GameProviderBase {
   /// 消耗精力，按「是否在特产产地」与随机波动决定利润。
   String tradeSpecialty() {
     if (!_b1011CanDo('trade_specialty')) {
-      return '你今天的商路已经跑完了。';
+      return '你本月的商路已经跑完了。';
     }
     if (!canAffordEnergy(BalanceData.tradeSpecialtyEnergyCost)) {
       return '你精疲力竭，无力再跑商路。先去休息吧。';
@@ -437,7 +437,7 @@ mixin GameLifeMixin on GameProviderBase {
   /// 议价有冷却（每回合一次），成功后本回合买卖价获得折扣/加成。
   String negotiate() {
     if (!_b1011CanDo('negotiate')) {
-      return '你今天的议价机会已经用过了。';
+      return '你本月的议价机会已经用过了。';
     }
     if (!canAffordEnergy(BalanceData.negotiateEnergyCost)) {
       return '你口干舌燥，无力再费口舌。';
@@ -478,7 +478,7 @@ mixin GameLifeMixin on GameProviderBase {
   /// 消耗精力，成功得金币与声望，失败可能受伤。
   String convoy() {
     if (!_b1011CanDo('convoy')) {
-      return '今天没有商队愿意等你。';
+      return '本月没有商队愿意等你。';
     }
     if (!canAffordEnergy(BalanceData.convoyEnergyCost)) {
       return '你太累了，护不了商队。';
@@ -765,7 +765,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['议价', 'negotiate'],
         order: 14,
-        helpLine: '议价 / negotiate    商人议价：口才决定买卖折价（每日 1 次）',
+        helpLine: '议价 / negotiate    商人议价：口才决定买卖折价（每月 1 次）',
         handler: (args) => CommandResult(text: negotiate()),
       ),
     );
@@ -773,7 +773,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['商队', '护送', 'convoy'],
         order: 15,
-        helpLine: '商队 / convoy       商队护送：按战斗值判定报酬与风险（每日 1 次）',
+        helpLine: '商队 / convoy       商队护送：按战斗值判定报酬与风险（每月 1 次）',
         handler: (args) => CommandResult(text: convoy()),
       ),
     );
