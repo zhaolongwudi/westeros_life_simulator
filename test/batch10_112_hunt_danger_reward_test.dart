@@ -52,7 +52,7 @@ GameEngine _engineAt(int danger) {
 
 void main() {
   group('Batch 10-112 狩猎危险度挂钩收益', () {
-    test('收益常量契约：每点危险度 +2 金（与旧基础公式兼容）', () {
+    test('收益常量契约：每点危险度 +1 金（与旧基础公式兼容）', () {
       expect(BalanceData.huntRewardPerDanger, 1);
       expect(BalanceData.huntRewardBase, 10);
       expect(BalanceData.huntRewardPerSkill, 3);
