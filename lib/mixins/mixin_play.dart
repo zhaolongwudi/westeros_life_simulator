@@ -83,7 +83,7 @@ mixin GamePlayMixin
     }
     gainGold(-BalanceData.restInnCost);
     adjustEnergy(GameLifeMixin.kRestEnergyRecovery);
-    adjustHunger(10);
+    adjustHunger(BalanceData.restHungerGain);
     // 受伤时休息恢复更快
     final healText = isInjured ? ' 伤口似乎也舒缓了一些。' : '';
     return '你在旅店歇了一晚，吃了顿热饭，花去 ${BalanceData.restInnCost} 金币。精力恢复 ${GameLifeMixin.kRestEnergyRecovery}。$healText';
@@ -94,26 +94,19 @@ mixin GamePlayMixin
     if (!_canDoDaily('work')) {
       return '今天的活计已经干完了。';
     }
-    if (!canAffordEnergy(15)) {
+    if (!canAffordEnergy(BalanceData.workEnergyCost)) {
       return '你实在太累了，干不动活了。先去休息吧。';
     }
-    adjustEnergy(-15);
+    adjustEnergy(-BalanceData.workEnergyCost);
     _recordDaily('work');
     final rnd = rng();
 
-    // 基础收入按身份浮动（枚举匹配，避免字符串魔法值）
-    final base = switch (player.identity) {
-      PlayerIdentity.merchant => 20,
-      PlayerIdentity.soldier => 15, // 士兵/骑士
-      PlayerIdentity.scholar || PlayerIdentity.maester => 10,
-      PlayerIdentity.priest => 8,
-      PlayerIdentity.commoner => 5,
-      _ => 12, // noble / adventurer / assassin / wildling
-    };
+    // 基础收入按身份浮动（数值集中在 BalanceData.workBaseIncome，单一真相）
+    final base = BalanceData.workBaseIncome[player.identity.name] ?? 12;
     // 技能加成
-    final speechBonus = skillLevel('speech') ~/ 2;
-    final swordBonus = skillLevel('sword') ~/ 2;
-    final total = base + speechBonus + swordBonus + rnd.nextInt(5);
+    final speechBonus = skillLevel('speech') ~/ BalanceData.workSkillBonusDivisor;
+    final swordBonus = skillLevel('sword') ~/ BalanceData.workSkillBonusDivisor;
+    final total = base + speechBonus + swordBonus + rnd.nextInt(BalanceData.workIncomeVariance);
     gainGold(total);
     return '你忙碌了一天，挣得 $total 金币。（${identityLabel(player.identity)}，'
         '技能加成 ${speechBonus + swordBonus}）';
@@ -124,10 +117,10 @@ mixin GamePlayMixin
     if (!_canDoDaily('hunt')) {
       return '今天的猎物已经够多了。';
     }
-    if (!canAffordEnergy(20)) {
+    if (!canAffordEnergy(BalanceData.huntEnergyCost)) {
       return '你实在太累了，拉不开弓。先去休息吧。';
     }
-    adjustEnergy(-20);
+    adjustEnergy(-BalanceData.huntEnergyCost);
     _recordDaily('hunt');
     final rnd = rng();
     final loc = currentLocation;
@@ -149,6 +142,7 @@ mixin GamePlayMixin
     if (rnd.nextDouble() < successChance) {
       final reward = BalanceData.huntRewardBase +
           skill * BalanceData.huntRewardPerSkill +
+          danger * BalanceData.huntRewardPerDanger +
           rnd.nextInt(BalanceData.huntRewardVariance);
       gainGold(reward);
       // 顺便补充食物
@@ -169,10 +163,10 @@ mixin GamePlayMixin
     if (!_canDoDaily('trade')) {
       return '今天的集市已经散了。';
     }
-    if (!canAffordEnergy(10)) {
+    if (!canAffordEnergy(BalanceData.tradeEnergyCost)) {
       return '你精疲力竭，无心讨价还价。先去休息吧。';
     }
-    adjustEnergy(-10);
+    adjustEnergy(-BalanceData.tradeEnergyCost);
     _recordDaily('trade');
     final loc = currentLocation;
     if (loc == null ||
@@ -183,7 +177,9 @@ mixin GamePlayMixin
     final rnd = rng();
     final isMerchant = isIdentity(PlayerIdentity.merchant);
     // 商人加成大
-    final profit = (isMerchant ? 25 : 8) + skillLevel('speech') * 3 + rnd.nextInt(15);
+    final profit = (isMerchant ? BalanceData.tradeMerchantBase : BalanceData.tradeCommonerBase) +
+        skillLevel('speech') * BalanceData.tradeSpeechGain +
+        rnd.nextInt(BalanceData.tradeProfitVariance);
     gainGold(profit);
     return '你在${loc.name}做成一笔买卖，净赚 $profit 金币。'
         '${isMerchant ? '（商人的眼光果然毒辣）' : ''}';

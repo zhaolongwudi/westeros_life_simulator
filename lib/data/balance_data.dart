@@ -254,6 +254,13 @@ class BalanceData {
 
   /// 狩猎收益随机浮动上限。
   static const int huntRewardVariance = 10;
+  /// 狩猎收益：地点危险度每点加成（Batch 10-112，高危=高回报）。
+  ///
+  /// 【为什么需要】狩猎成功率随地点危险度递减（huntChancePerDanger）
+  /// 且失败受伤风险递增，但收益却固定 10~19 金——高危地点狩猎是纯劣选项。
+  /// 每点危险度 +2 金：危险 6 的地点收益 +12 ≈ 城市贸易（商人 25），
+  /// 让「去危险地带打猎」成为有依据的选择而非自虐。
+  static const int huntRewardPerDanger = 2;
 
   /// 狩猎失败的受伤概率。
   static const double huntInjuryChance = 0.3;
@@ -266,6 +273,44 @@ class BalanceData {
 
   /// 旅店住宿花费。
   static const int restInnCost = 2;
+
+  // ==================== Batch 10-111 日常活动经济 ====================
+  /// 工作消耗的精力（work）。
+  static const int workEnergyCost = 15;
+  /// 狩猎消耗的精力（hunt）。
+  static const int huntEnergyCost = 20;
+  /// 贸易消耗的精力（trade）。
+  static const int tradeEnergyCost = 10;
+  /// 工作基础收入按身份浮动（switch 各分支的基准值，身份排序：商人 > 士兵 > 其他 > 学者 > 神职 > 平民）。
+  ///
+  /// 数值与旧实现逐字一致（20/15/12/10/8/5），收入排序护栏见 regression_identity_branch_test。
+  ///
+  /// 键为 `PlayerIdentity.name`（本文件是无 import 叶子模块，用 String 而非枚举）。
+  static const Map<String, int> workBaseIncome = <String, int>{
+    'merchant': 20,
+    'soldier': 15,
+    'noble': 12,
+    'adventurer': 12,
+    'assassin': 12,
+    'wildling': 12,
+    'scholar': 10,
+    'maester': 10,
+    'priest': 8,
+    'commoner': 5,
+  };
+  /// 工作收入的随机浮动上限（rnd.nextInt 的上界）。
+  static const int workIncomeVariance = 5;
+  /// 工作技能加成：口才/剑术每 2 级 +1 金币（`~/ 2` 的系数）。
+  static const int workSkillBonusDivisor = 2;
+  /// 贸易基础利润：商人 vs 平民（差值恒 17，被 regression_identity_branch_test 锁定）。
+  static const int tradeMerchantBase = 25;
+  static const int tradeCommonerBase = 8;
+  /// 贸易口才加成：每级口才 +3 金币。
+  static const int tradeSpeechGain = 3;
+  /// 贸易利润随机浮动上限。
+  static const int tradeProfitVariance = 15;
+  /// 休息的饱食恢复量。
+  static const int restHungerGain = 10;
 
   // ==================== 婚姻与世代 ====================
 
