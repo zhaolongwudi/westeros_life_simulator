@@ -969,7 +969,7 @@
   },
   {
     "id": "npc_olenna_tyrell",
-    "name": "奥伦·提利尔",
+    "name": "奥莲娜·提利尔",
     "type": "NpcType.noble",
     "age": 60,
     "gender": "female",

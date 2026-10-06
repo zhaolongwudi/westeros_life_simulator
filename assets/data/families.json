@@ -30,7 +30,7 @@
   {
     "id": "family_bolton",
     "name": "波顿",
-    "motto": "我们播种",
+    "motto": "",
     "seat": "location_castle_black",
     "scale": "FamilyScale.great",
     "population": 3000,
@@ -525,7 +525,7 @@
   {
     "id": "family_greyjoy",
     "name": "葛雷乔伊",
-    "motto": "我们播种",
+    "motto": "",
     "seat": "location_pike",
     "scale": "FamilyScale.great",
     "population": 5000,

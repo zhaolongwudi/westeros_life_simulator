@@ -567,7 +567,7 @@
   },
   {
     "id": "location_eastwatch",
-    "name": "东watch",
+    "name": "东海望",
     "type": "LocationType.fort",
     "region": "北境",
     "dangerLevel": 5,

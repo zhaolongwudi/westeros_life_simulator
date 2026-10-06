@@ -31,7 +31,9 @@ const List<Family> allFamilies = [
   Family(
     id: 'family_bolton',
     name: '波顿',
-    motto: '我们播种',
+    // S1-1：原为「我们播种」（误抄葛雷乔伊族语）。波顿族语按项目内叙事
+    // 文本（narrative_templates location_castle_black）统一为「我们的刀锋锋利」。
+    motto: '我们的刀锋锋利',
     seat: 'location_castle_black',
     scale: FamilyScale.great,
     population: 3000,
@@ -124,6 +126,11 @@ const List<Family> allFamilies = [
     secrets: const [],
     traits: const ['家族利益', '政治联姻', '政治'],
   ),
+  // S1-1 说明：本条与下一条的 **id 与 name 是错位的**（family_bracken 实为
+  // 布莱伍德 Blackwood、family_brocken 实为布雷肯 Bracken，且 brocken 系拼写错误）。
+  // 但 name 与 seat 一一自洽（布莱伍德↔鸦树城 / 布雷肯↔石篱城），交换 name 反而会
+  // 让「布雷肯家族住在布莱伍德家堡」。存档兼容要求 id 不动，故保留现状并在此标注，
+  // 仅修正 docs/02 里的英文名（见 03-审查接力 S1-1）。
   Family(
     id: 'family_bracken',
     name: '布莱伍德',
@@ -292,6 +299,11 @@ const List<Family> allFamilies = [
     secrets: const [],
     traits: const ['荣誉', '战斗'],
   ),
+  // S1-1 说明：本 id 的**语义锁定为塔斯（Tarth）**——name、seat（塔斯岛，
+  // location_data 中 features 为「塔斯家族领地」）与 npc_brienne_tarth 三者
+  // 已完全自洽，改名为「塔贝克」会连锁破坏布蕾妮的家族/地点归属与既有测试。
+  // 真正的塔贝克家族（Tarbeck，西境，卡斯特梅邻邦）目前无数据，若需补立
+  // 应另起 id（如 family_tarbeck_hall），不在本次改动范围内。
   Family(
     id: 'family_tarbeck',
     name: '塔斯',
@@ -419,7 +431,8 @@ const List<Family> allFamilies = [
   Family(
     id: 'family_greyjoy',
     name: '葛雷乔伊',
-    motto: '我们播种',
+    // S1-1：原著 We Do Not Sow，原「我们播种」语义恰好相反。
+    motto: '我们不播种',
     seat: 'location_pike',
     scale: FamilyScale.great,
     population: 5000,

@@ -20,6 +20,10 @@ const List<Location> allLocations = [
     connectedTo: const ['location_white_harbor', 'location_barrowtowns'],
     description: '史塔克家族世代居住的城堡，北境之王驻地。',
   ),
+  // S1-1 说明：本 id 的**语义锁定为恐怖堡（Dreadfort）**——name/features/
+  // governor（npc_roose_bolton）与波顿父子的 locationId 完全自洽。
+  // 「黑城堡」是守夜人总部（Castle Black），当前 69 个地点中**尚未收录**，
+  // 守夜人相关 NPC 暂挂在 location_the_wall。id 因存档兼容不动。
   Location(
     id: 'location_castle_black',
     name: '恐怖堡',
@@ -424,7 +428,7 @@ const List<Location> allLocations = [
   ),
   Location(
     id: 'location_eastwatch',
-    name: '东watch',
+    name: '东海望',
     type: LocationType.fort,
     region: '北境',
     dangerLevel: 5,

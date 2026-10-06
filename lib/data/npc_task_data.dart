@@ -933,12 +933,12 @@ const List<NpcTaskTemplate> allNpcTaskTemplates = [
   NpcTaskTemplate(
     id: 'task_roose_ledger',
     npcId: 'npc_roose_bolton',
-    title: '清点黑城堡的军需账册',
+    title: '清点恐怖堡的军需账册',
     type: NpcTaskType.investigate,
     difficulty: 3,
     deadlineMonths: 4,
     steps: [
-      NpcTaskStep(description: '取来黑城堡近年的军需账册，逐页比对', turnsRequired: 1),
+      NpcTaskStep(description: '取来恐怖堡近年的军需账册，逐页比对', turnsRequired: 1),
       NpcTaskStep(description: '查出征用物资与库存的出入', turnsRequired: 2),
       NpcTaskStep(description: '把账册与疑点呈给卢斯·波顿', turnsRequired: 1),
     ],

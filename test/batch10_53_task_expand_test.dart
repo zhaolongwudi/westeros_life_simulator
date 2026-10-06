@@ -35,7 +35,7 @@ void main() {
       final titles = allNpcTaskTemplates.map((t) => t.title).toSet();
       expect(titles.length, allNpcTaskTemplates.length);
       // 新标题不与既有任何模板重复
-      expect(titles, contains('清点黑城堡的军需账册'));
+      expect(titles, contains('清点恐怖堡的军需账册'));
       expect(titles, contains('追捕脱逃的俘虏'));
       expect(titles, contains('试探父亲的联姻意向'));
       expect(titles, contains('护送家书至鹰巢城'));
@@ -50,7 +50,7 @@ void main() {
         ),
       );
       final tasks = engine.availableTasksOf('npc_roose_bolton');
-      expect(tasks.map((t) => t.title), contains('清点黑城堡的军需账册'));
+      expect(tasks.map((t) => t.title), contains('清点恐怖堡的军需账册'));
       final result = engine.acceptNpcTaskV2('npc_roose_bolton');
       expect(result, contains('不在这里'));
     });

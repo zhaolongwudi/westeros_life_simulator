@@ -1264,13 +1264,13 @@
   {
     "id": "task_roose_ledger",
     "npcId": "npc_roose_bolton",
-    "title": "清点黑城堡的军需账册",
+    "title": "清点恐怖堡的军需账册",
     "type": "NpcTaskType.investigate",
     "difficulty": 3,
     "deadlineMonths": 4,
     "steps": [
       {
-        "description": "取来黑城堡近年的军需账册，逐页比对",
+        "description": "取来恐怖堡近年的军需账册，逐页比对",
         "turnsRequired": 1
       },
       {

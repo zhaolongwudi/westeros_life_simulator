@@ -636,7 +636,7 @@ const List<Npc> allNpcs = [
   // ==================== 河湾地：提利尔家族 ====================
   Npc(
     id: 'npc_olenna_tyrell',
-    name: '奥伦·提利尔',
+    name: '奥莲娜·提利尔',
     type: NpcType.noble,
     age: 60,
     gender: 'female',
