@@ -383,6 +383,29 @@ class BalanceData {
   static const int merchantProfitVariance = 10;
   /// 学者教学概率（0.4）。
   static const double scholarTeachChance = 0.4;
+
+  // ==================== S2-4 探索/遭遇概率带（原为裸数字） ====================
+  /// 探索结果分档（`roll < x`）：金币 → 物品 → 遭遇 → 一无所获。
+  static const double exploreGoldBand = 0.4;
+  static const double exploreItemBand = 0.62;
+  static const double exploreEncounterBand = 0.85;
+  /// 遭遇触发概率 = 地点危险度 × 本系数。
+  static const double encounterChancePerDanger = 0.12;
+  /// 遭遇类型分档（`roll < x`）：强盗 → 野兽 → 商人 → 神秘事件。
+  static const double encounterBanditBand = 0.35;
+  static const double encounterBeastBand = 0.7;
+  static const double encounterMerchantBand = 0.85;
+  /// 遭遇·强盗：剑术不足时的击退概率。
+  static const double banditRepelChance = 0.5;
+  /// 遭遇·野兽：逃脱概率 / 逃脱失败的受伤概率。
+  static const double beastEscapeChance = 0.6;
+  static const double beastInjuryChance = 0.3;
+  /// 遭遇·商人：议价成功的额外利润概率。
+  static const double merchantHaggleChance = 0.4;
+  /// 遭遇·神秘：非超自然地点触发神秘事件的概率。
+  static const double supernaturalEncounterChance = 0.1;
+  /// 探索掉落物品的概率闸门（1 - 本值 = 掉落率）。
+  static const double exploreItemDropGate = 0.6;
   // ==================== Batch 10-115 商队护送经济 ====================
   /// 商队护送消耗的精力。
   static const int convoyEnergyCost = 15;

@@ -358,6 +358,12 @@ class AiService {
     String season,
     int currentYear,
   ) {
+    // S2-4（P2-04）：技能键清单由 kPlayerSkillKeys 现场生成，
+    // 此前 prompt 只列 5 键，而白名单放行 13 键——AI 永远无法合法使用其余 8 键。
+    final skillKeyHint = BalanceData.kPlayerSkillKeys
+        .map((k) => '$k ${skillLabel(k)}')
+        .join(' / ');
+
     final selectedEvents = selectEventsForPrompt(
       availableEvents,
       player: player,
@@ -749,7 +755,7 @@ $seasonGuide
 效果键约定（键名后的 id 必须与上文列出的一致，原样复制，不要自行翻译或简写）：
 - 金币：gold
 - 声望：reputation
-- 技能：skills.技能名（如 skills.sword；可用键：sword 剑术 / archery 弓术 / riding 骑术 / speech 口才 / alchemy 炼金）
+- 技能：skills.技能名（如 skills.sword；可用键：$skillKeyHint）
 - 属性：attributes.属性名（如 attributes.strength；可用键：strength 力量 / agility 敏捷 / intelligence 智识 / charisma 魅力 / willpower 意志 / perception 感知）
 - 关系：relations.NPC标识（正数加好感，负数降好感，如 relations.npc_tyrion: 10；NPC标识见上文「关系」行 [id=...] 标注）
 - 世界状态：flags.标记名（正值设置标记，如 flags.honor_pledge: 1；0 或负值清除标记；可用键仅限上文「状态」段已列出的键名，或 equipped./house.childDead./npc_task./npc_task_done./npc_story. 这 5 个动态前缀开头——其余键名一律无效，不要自创）
@@ -1405,7 +1411,7 @@ $seasonGuide
 - 叙事文本 200-500 字，用具体的场景、对话、气味、天气来营造氛围
 - 不要写“你感到危险”，要写“守夜人的火炬在风中摇晃，墙外的狼嚎断断续续”
 - 选项要体现代价与机会：有的选项让玩家变强但树敌，有的选项需要放弃某些东西
-- 效果键必须严格遵循约定，数值要合理（技能+1~3，属性+1~2，关系±5~20，好感/恶感累计不超过±100）
+- 效果键必须严格遵循约定，数值要合理（技能±1~3，属性±1~3，关系±5~20，好感/恶感累计不超过±100）
 - 关系键与物品键必须原样使用提示词中列出的 id（如 relations.npc_tyrion / inventory.item_bread），不要自行翻译成英文单词或简写
 - 保持维斯特洛世界观一致性：季节、家族、地点、历史事件都要准确
 ''';

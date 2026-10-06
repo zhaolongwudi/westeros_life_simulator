@@ -49,7 +49,10 @@ import 'package:westeros_life_simulator/services/ai_service.dart';
 /// = CI 实测 3664 留约 60% 余量。预算全部失效时的规模参考（说明本上界
 /// 仍有区分力）：关系段 38 位（1 处）+1178、在场 NPC 8 位且模板全量 +479、
 /// 事件全量 72 条 +2000 → 合计 ≈ 7300 字符，远超 5900。
-const int kMaxPromptChars = 5900;
+/// S2-4：技能键清单由 5 键扩到 13 键（prompt 里白名单放行的键要列全，
+/// 否则 AI 永远用不到另外 8 个键），prompt 实测 3664 → 约 3725，
+/// 上界同步 5900 → 6000（仍远低于预算失效后的 ≈7300，护栏区分力不变）。
+const int kMaxPromptChars = 6000;
 
 /// user prompt 下界（字符）。防止「误删整段注入」静默通过。
 ///

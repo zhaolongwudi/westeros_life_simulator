@@ -77,11 +77,11 @@ mixin GameAdventureMixin
     final roll = rnd.nextDouble();
     final buf = StringBuffer()..writeln('🔍 你在${loc.name}四处探索……');
 
-    if (roll < 0.4) {
+    if (roll < BalanceData.exploreGoldBand) {
       final found = BalanceData.exploreGoldBase + rnd.nextInt(BalanceData.exploreGoldVarianceBase + danger * BalanceData.exploreGoldDangerMult);
       gainGold(found);
       buf.writeln('你找到了一些有用的东西，价值 $found 金币。');
-    } else if (roll < 0.62) {
+    } else if (roll < BalanceData.exploreItemBand) {
       // 物品掉落：按地点类型
       final item = _findItemFor(loc, rnd);
       if (item != null) {
@@ -90,7 +90,7 @@ mixin GameAdventureMixin
       } else {
         buf.writeln('你找到了一些散落的零钱，聊胜于无。');
       }
-    } else if (roll < 0.85) {
+    } else if (roll < BalanceData.exploreEncounterBand) {
       final encounter = _maybeEncounter(loc, rnd, force: true);
       if (encounter != null) {
         buf.writeln(encounter);
@@ -129,35 +129,40 @@ mixin GameAdventureMixin
     };
     final pool = poolByType[loc.type];
     if (pool == null || pool.isEmpty) return null;
-    if (rnd.nextDouble() < 0.6) return null; // 60% 不出物品
+    if (rnd.nextDouble() < BalanceData.exploreItemDropGate) {
+      return null; // 60% 不出物品
+    }
     return pool[rnd.nextInt(pool.length)];
   }
 
   /// 可能触发一次遭遇（危险度越高概率越大）。
   String? _maybeEncounter(Location loc, Random rnd, {bool force = false}) {
     final danger = loc.dangerLevel;
-    if (!force && rnd.nextDouble() > danger * 0.12) return null;
+    if (!force &&
+        rnd.nextDouble() > danger * BalanceData.encounterChancePerDanger) {
+      return null;
+    }
 
     final roll = rnd.nextDouble();
     // 遭遇类型：强盗/野兽/商人/神秘事件
-    if (roll < 0.35) {
+    if (roll < BalanceData.encounterBanditBand) {
       // 强盗：损失金币或战斗
       final sword = skillLevel('sword');
-      if (sword >= 4 || rnd.nextDouble() < 0.5) {
+      if (sword >= 4 || rnd.nextDouble() < BalanceData.banditRepelChance) {
         adjustReputation(2);
         return '⚔️ 你遭遇了一伙强盗，凭借身手击退了他们。声望 +2。';
       }
       final loss = BalanceData.banditLossBase + danger * BalanceData.banditLossDangerMult;
       gainGold(-loss);
       return '🥷 你遭遇了一伙强盗，被抢走了 $loss 金币。';
-    } else if (roll < 0.7) {
+    } else if (roll < BalanceData.encounterBeastBand) {
       // 野兽：猎获或受伤
-      if (skillLevel('archery') >= 3 || rnd.nextDouble() < 0.6) {
+      if (skillLevel('archery') >= 3 || rnd.nextDouble() < BalanceData.beastEscapeChance) {
         final gain = BalanceData.beastGainBase + danger * BalanceData.beastGainDangerMult;
         gainGold(gain);
         adjustHunger(BalanceData.beastHungerGain);
         // 小概率获得皮革
-        if (rnd.nextDouble() < 0.3) {
+        if (rnd.nextDouble() < BalanceData.beastInjuryChance) {
           addItem('item_leather');
           return '🐗 你猎到一头野兽，获得 $gain 金币和一张皮革。';
         }
@@ -166,19 +171,20 @@ mixin GameAdventureMixin
       setFlag('isInjured', true);
       adjustHealth(-BalanceData.beastInjuryHealth);
       return '🐺 你被野兽抓伤，狼狈逃回。（受伤，健康 -8）';
-    } else if (roll < 0.85) {
+    } else if (roll < BalanceData.encounterMerchantBand) {
       // 商人
       final profit = BalanceData.merchantProfitBase + rnd.nextInt(BalanceData.merchantProfitVariance);
       gainGold(profit);
       // 商人偶售补给
-      if (rnd.nextDouble() < 0.4) {
+      if (rnd.nextDouble() < BalanceData.merchantHaggleChance) {
         addItem('item_bread');
         return '🛒 你遇到一位行商，做成了一笔小买卖，+$profit 金币，还得了些干粮。';
       }
       return '🛒 你遇到一位行商，做成了一笔小买卖，+$profit 金币。';
     } else {
       // 神秘事件（超自然地点概率更高）
-      if (loc.type == LocationType.supernatural || rnd.nextDouble() < 0.1) {
+      if (loc.type == LocationType.supernatural ||
+          rnd.nextDouble() < BalanceData.supernaturalEncounterChance) {
         adjustReputation(3);
         return '🌫️ 迷雾中你仿佛看到了不属于这个时代的东西。说不清是福是祸，但你的名字开始被人提起。声望 +3。';
       }
