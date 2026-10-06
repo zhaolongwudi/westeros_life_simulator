@@ -39,6 +39,10 @@ jobs:
         run: flutter test --coverage
       - name: Content sync check (M4c)
         run: python3 scripts/check_content_sync.py --quiet
+      - name: Docs sync check (S3-2)
+        # 百科文档 ↔ assets/data 名称覆盖对账 + 脚本生成区块一致性。
+        # 防止「文档写 100+、实际 38」这类注水，以及实体漏写复发。
+        run: python3 scripts/check_docs_sync.py --quiet
       - name: Upload coverage
         if: always()
         uses: actions/upload-artifact@v4
