@@ -45,6 +45,11 @@ const List<GameSystem> allSystems = [
     description: '学城的大学士体系。',
     rules: const ['大学士领导', '学士网络', '知识传承'],
     features: const ['大学士', '学士网络', '知识传承'],
+    // S4-1（P1-09）：学城挂载 → 每月领学士津贴 +5 金，抄录典籍消耗 3 精力。
+    // 选+5 而非更高：开局金币 100（player.dart:129），这是一笔稳定但不
+    // 足以「不干活」的被动收入；学城线的正反馈本来应该来自委托任务，
+    // 那属新增玩法维度，不在本批次内。
+    monthlyEffects: const {'gold': 5, 'energy': -3},
   ),
 
   // ==================== 守夜人体系（1） ====================
@@ -55,6 +60,11 @@ const List<GameSystem> allSystems = [
     description: '长城守夜人的组织体系。',
     rules: const ['总司令领导', '守夜人誓言', '长城防御'],
     features: const ['总司令', '守夜人誓言', '长城防御'],
+    // S4-1（P1-09）：守夜人誓约「不领薪酬」，故不给金币，只给体力代价
+    // -10 精力。量级依据：`sleptWellChance 0.7` ×（`sleepEnergyBase 15` +
+    // 均值 `sleepEnergyVariance 7.5`）≈ 每回合净回 15 精力，扣 10 后仍净
+    // +5，不会把守夜人路线锁死。
+    monthlyEffects: const {'energy': -10},
   ),
 
   // ==================== 雇佣兵体系（1） ====================
@@ -371,6 +381,18 @@ const List<GameSystem> allSystems = [
     description: '维斯特洛的铁金库体系。',
     rules: const ['铁金库规则', '铁金库代价', '铁金库传承'],
     features: const ['铁金库规则', '铁金库代价', '铁金库传承'],
+    // S4-1（P1-09）**刻意留空**：铁金库语汇是「借贷」，但取证结论是
+    // 全库**不存在持久化债务状态**——`event_iron_bank_debt` /
+    // `event_iron_bank_crisis` 的 `gold: -500` 只是「选择偿还」这个
+    // **动作本身**的即时扣款，没有任何地方记录「玩家欠着 500 金」。
+    // 而本系统的挂载条件是 `isAtType(city) || isAtType(market)`
+    // （mixin_systems.dart:57），几乎全员命中。若在此挂 `gold: -N`，
+    // 效果就是「每个进城的玩家每月凭空被扣钱，且永远还不清」——
+    // 这是凭空加惩罚，比留空更糟。
+    //
+    // 解锁前置：需要先有债务本体（借贷命令 / `flags.debt_ironbank` /
+    // 月度计息），属新增玩法维度，留 S4-2 之后的独立批次，不在本批次内硬塞。
+    monthlyEffects: const {},
   ),
   GameSystem(
     id: 'system_dothraki',

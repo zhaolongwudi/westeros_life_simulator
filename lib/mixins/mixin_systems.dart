@@ -1,6 +1,9 @@
-/// 系统混入：挂载世界 74 个系统，执行月度演进与系统查询。
+/// 系统混入：挂载世界 73 个系统，执行月度演进与系统查询。
 ///
 /// 参考 docs/05_系统百科.md 与 docs/08_玩法设计.md「月度循环」。
+///
+/// S4-1（P1-09）：系统不再只是文案——`GameSystem.monthlyEffects` 挂载
+/// 后由 [applyMonthlySystems] 第5 步按月结算。
 library;
 
 import '../models/family.dart';
@@ -91,6 +94,11 @@ mixin GameSystemsMixin on GameProviderBase {
       if (s.features.isNotEmpty) {
         buf.writeln('  特性：${s.features.take(3).join('、')}');
       }
+      // S4-1（P1-09）：只有挂了 monthlyEffects 的系统才真的每月改变状态，
+      // 不标出来玩家只能靠猜哪个系统「真的有用」。
+      if (s.hasMonthlyEffects) {
+        buf.writeln('  月度结算：${_formatMonthlyEffects(s.monthlyEffects)}');
+      }
     }
     if (avail.length > 12) {
       buf.writeln('… 等共 ${avail.length} 个系统');
@@ -142,11 +150,102 @@ mixin GameSystemsMixin on GameProviderBase {
       }
     }
 
+    // 5. S4-1（P1-09）：系统月度效果结算。
+    //
+    // 【为什么放最后】前4 步都是「世界层面的既定事实」（家族收成、危险、
+    // 季节），本步是「玩家身上某个系统生效」—— 放最后可以让输出读起来
+    // 符合叙事顺序：先讲世界，再讲你的组织对你做了什么。
+    //
+    // 【为什么复用 applyEffects 而不是手写 setter】效果键的合法集合、边界
+    // 钳制（gold 下限 0 / 生存值 0~100 / 好感度 ±100）、五类幽灵键守卫
+    // 全都在 `game_state_provider.applyEffects` 里实装过了。手写一套等于
+    // 再开一条会漂移的通道（batch10-90 / 10-95 的老教训）。
+    final monthlyLines = _settleMonthlySystemEffects();
+    for (final line in monthlyLines) {
+      buf.writeln(line);
+    }
+
     final text = buf.toString().trim();
     if (text.isNotEmpty) {
       notifyListeners();
     }
     return text;
+  }
+
+  /// S4-1（P1-09）：结算所有已挂载系统的 `monthlyEffects`，返回可读文本。
+  ///
+  /// 复用 `applyEffects`（`GameProviderBase` 继承 `GameStateProvider`，
+  /// 故本 mixin 可直接调用），因此效果键校验与钳制行为与事件/AI 通道
+  /// **完全一致**——这也意味着无效键会被拒收并落进
+  /// `lastRejectedEffectKeys`，不会静默生效。
+  List<String> _settleMonthlySystemEffects() {
+    final lines = <String>[];
+    for (final s in availableSystems()) {
+      final effects = s.monthlyEffects;
+      if (effects.isEmpty) continue;
+      // 效果键校验：拒收不该在这里发生（数据侧保证），但真发生了也不能
+      // 让applyEffects 的空转被当成「结算成功」写进叙事，故前后比对状态。
+      final before = player;
+      updatePlayer(applyEffects(before, effects));
+      final after = player;
+
+      final deltas = <String>[];
+      if (after.gold != before.gold) {
+        final d = after.gold - before.gold;
+        deltas.add('${d > 0 ? '+' : ''}$d 金币');
+      }
+      for (final v in const ['health', 'energy', 'hunger']) {
+        final b = _vitalOf(before, v);
+        final a = _vitalOf(after, v);
+        if (a != b) {
+          final d = a - b;
+          deltas.add('${_vitalLabel(v)} ${d > 0 ? '+' : ''}$d');
+        }
+      }
+      if (after.reputation != before.reputation) {
+        final d = after.reputation - before.reputation;
+        deltas.add('声望 ${d > 0 ? '+' : ''}$d');
+      }
+      if (deltas.isEmpty) {
+        // 键全部被拒收，或效果被边界钳制吃掉（如已满 100 再 +5）。
+        // 前者是真 bug 信号（数据侧写了无效键），后者属正常边界——
+        // 两种都不该对玩家宣称「结算了」。
+        final rejected = lastRejectedEffectKeys;
+        if (rejected.isNotEmpty) {
+          lines.add('⚠️ ${s.name}月度结算含无效效果键：${rejected.join('、')}（已忽略）');
+        }
+        continue;
+      }
+      lines.add('📜 ${s.name}·本月：${deltas.join('，')}');
+    }
+    return lines;
+  }
+
+  /// 取生存类字段值（health / energy / hunger 三者同为 0~100）。
+  int _vitalOf(Player p, String field) {
+    return switch (field) {
+      'health' => p.health,
+      'energy' => p.energy,
+      _ => p.hunger,
+    };
+  }
+
+  /// 生存类字段的展示名。
+  String _vitalLabel(String field) {
+    return switch (field) {
+      'health' => '健康',
+      'energy' => '精力',
+      _ => '饱食',
+    };
+  }
+
+  /// S4-1（P1-09）：把月度效果 map 格式化成面板可读文本。
+  String _formatMonthlyEffects(Map<String, int> effects) {
+    final parts = effects.entries.map((e) {
+      final d = e.value;
+      return '${e.key} ${d > 0 ? '+' : ''}$d';
+    }).toList();
+    return parts.join('，');
   }
 
   /// 各系统分类的世界动态文案池。

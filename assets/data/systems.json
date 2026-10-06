@@ -13,7 +13,8 @@
       "等级制度",
       "效忠关系",
       "领地授予"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_family",
@@ -29,7 +30,8 @@
       "家族继承",
       "家族联姻",
       "家族秘密"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_church",
@@ -45,7 +47,8 @@
       "总主教",
       "红袍祭司",
       "教会审判"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_citadel",
@@ -61,7 +64,11 @@
       "大学士",
       "学士网络",
       "知识传承"
-    ]
+    ],
+    "monthlyEffects": {
+      "gold": 5,
+      "energy": -3
+    }
   },
   {
     "id": "system_nightswatch",
@@ -77,7 +84,10 @@
       "总司令",
       "守夜人誓言",
       "长城防御"
-    ]
+    ],
+    "monthlyEffects": {
+      "energy": -10
+    }
   },
   {
     "id": "system_mercenary",
@@ -93,7 +103,8 @@
       "雇佣兵合同",
       "雇佣兵纪律",
       "雇佣兵报酬"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_trade",
@@ -109,7 +120,8 @@
       "贸易路线",
       "贸易关税",
       "贸易保护"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_religion",
@@ -125,7 +137,8 @@
       "七神信仰",
       "旧神信仰",
       "异端审判"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_magic",
@@ -141,7 +154,8 @@
       "魔法稀有",
       "魔法代价",
       "魔法传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_green_seer",
@@ -157,7 +171,8 @@
       "绿先知预言",
       "绿先知传承",
       "绿先知代价"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_skinchanger",
@@ -173,7 +188,8 @@
       "易形者变形",
       "易形者传承",
       "易形者代价"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_blood_magic",
@@ -189,7 +205,8 @@
       "血魔法诅咒",
       "血魔法代价",
       "血魔法传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_prophecy",
@@ -205,7 +222,8 @@
       "预言应验",
       "预言代价",
       "预言传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_wolf_dream",
@@ -221,7 +239,8 @@
       "狼梦梦境",
       "狼梦代价",
       "狼梦传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_dragon_dream",
@@ -237,7 +256,8 @@
       "龙梦梦境",
       "龙梦代价",
       "龙梦传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_war",
@@ -253,7 +273,8 @@
       "战争规则",
       "战争代价",
       "战争传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_siege",
@@ -269,7 +290,8 @@
       "城堡防御",
       "城堡进攻",
       "城堡代价"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_army",
@@ -285,7 +307,8 @@
       "军队编制",
       "军队纪律",
       "军队报酬"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_trial",
@@ -301,7 +324,8 @@
       "审判规则",
       "审判代价",
       "审判传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_trial_by_combat",
@@ -317,7 +341,8 @@
       "比武规则",
       "比武代价",
       "比武传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_marriage",
@@ -333,7 +358,8 @@
       "婚姻规则",
       "婚姻代价",
       "婚姻传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_succession",
@@ -349,7 +375,8 @@
       "继承规则",
       "继承代价",
       "继承传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_women",
@@ -365,7 +392,8 @@
       "女性地位",
       "女性代价",
       "女性传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_economy",
@@ -381,7 +409,8 @@
       "经济规则",
       "经济代价",
       "经济传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_currency",
@@ -397,7 +426,8 @@
       "货币规则",
       "货币代价",
       "货币传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_education",
@@ -413,7 +443,8 @@
       "教育规则",
       "教育代价",
       "教育传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_language",
@@ -429,7 +460,8 @@
       "语言规则",
       "语言代价",
       "语言传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_festival",
@@ -445,7 +477,8 @@
       "节日规则",
       "节日代价",
       "节日传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_family_life",
@@ -461,7 +494,8 @@
       "家庭规则",
       "家庭代价",
       "家庭传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_lands",
@@ -477,7 +511,8 @@
       "领地规则",
       "领地代价",
       "领地传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_cities",
@@ -493,7 +528,8 @@
       "城市规则",
       "城市代价",
       "城市传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_intelligence",
@@ -509,7 +545,8 @@
       "情报规则",
       "情报代价",
       "情报传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_travel",
@@ -525,7 +562,8 @@
       "旅行规则",
       "旅行代价",
       "旅行传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_adventure",
@@ -541,7 +579,8 @@
       "冒险规则",
       "冒险代价",
       "冒险传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_relic",
@@ -557,7 +596,8 @@
       "神器规则",
       "神器代价",
       "神器传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_legendary_weapon",
@@ -573,7 +613,8 @@
       "武器规则",
       "武器代价",
       "武器传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_valyrian_steel",
@@ -589,7 +630,8 @@
       "瓦钢规则",
       "瓦钢代价",
       "瓦钢传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_dragon",
@@ -605,7 +647,8 @@
       "龙规则",
       "龙代价",
       "龙传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_white_walker",
@@ -621,7 +664,8 @@
       "异鬼规则",
       "异鬼代价",
       "异鬼传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_faceless",
@@ -637,7 +681,8 @@
       "无面者规则",
       "无面者代价",
       "无面者传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_red_priest",
@@ -653,7 +698,8 @@
       "红袍规则",
       "红袍代价",
       "红袍传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_iron_bank",
@@ -669,7 +715,8 @@
       "铁金库规则",
       "铁金库代价",
       "铁金库传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_dothraki",
@@ -685,7 +732,8 @@
       "无垢者规则",
       "无垢者代价",
       "无垢者传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_dothraki_culture",
@@ -701,7 +749,8 @@
       "多斯拉克规则",
       "多斯拉克代价",
       "多斯拉克传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_wildling",
@@ -717,7 +766,8 @@
       "野人规则",
       "野人代价",
       "野人传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_ironborn",
@@ -733,7 +783,8 @@
       "铁民规则",
       "铁民代价",
       "铁民传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_law",
@@ -749,7 +800,8 @@
       "法律规则",
       "法律代价",
       "法律传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_identity",
@@ -765,7 +817,8 @@
       "身份规则",
       "身份代价",
       "身份传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_bastard",
@@ -781,7 +834,8 @@
       "私生子规则",
       "私生子代价",
       "私生子传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_death",
@@ -797,7 +851,8 @@
       "死亡规则",
       "死亡代价",
       "死亡传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_multigeneration",
@@ -813,7 +868,8 @@
       "多世代规则",
       "多世代代价",
       "多世代传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_history_memory",
@@ -829,7 +885,8 @@
       "历史规则",
       "历史代价",
       "历史传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_world_history",
@@ -845,7 +902,8 @@
       "史书规则",
       "史书代价",
       "史书传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_reality_protection",
@@ -861,7 +919,8 @@
       "现实性规则",
       "现实性代价",
       "现实性传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_magic_protection",
@@ -877,7 +936,8 @@
       "魔法保护规则",
       "魔法保护代价",
       "魔法保护传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_god_protection",
@@ -893,7 +953,8 @@
       "神明保护规则",
       "神明保护代价",
       "神明保护传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_dragon_protection",
@@ -909,7 +970,8 @@
       "龙保护规则",
       "龙保护代价",
       "龙保护传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_walker_protection",
@@ -925,7 +987,8 @@
       "异鬼保护规则",
       "异鬼保护代价",
       "异鬼保护传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_information_protection",
@@ -941,7 +1004,8 @@
       "信息保护规则",
       "信息保护代价",
       "信息保护传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_ai_freedom",
@@ -957,7 +1021,8 @@
       "AI 自由规则",
       "AI 自由代价",
       "AI 自由传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_causality",
@@ -973,7 +1038,8 @@
       "因果规则",
       "因果代价",
       "因果传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_opportunity",
@@ -989,7 +1055,8 @@
       "机缘规则",
       "机缘代价",
       "机缘传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_adventure_meaning",
@@ -1005,7 +1072,8 @@
       "冒险意义规则",
       "冒险意义代价",
       "冒险意义传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_overcrowding_protection",
@@ -1021,7 +1089,8 @@
       "过度热闹规则",
       "过度热闹代价",
       "过度热闹传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_protagonist_protection",
@@ -1037,7 +1106,8 @@
       "主角光环规则",
       "主角光环代价",
       "主角光环传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_number_protection",
@@ -1053,7 +1123,8 @@
       "数值刷子规则",
       "数值刷子代价",
       "数值刷子传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_economy_protection",
@@ -1069,7 +1140,8 @@
       "经济漏洞规则",
       "经济漏洞代价",
       "经济漏洞传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_rule_update",
@@ -1085,7 +1157,8 @@
       "规则更新规则",
       "规则更新代价",
       "规则更新传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_version_patch",
@@ -1101,7 +1174,8 @@
       "版本补丁规则",
       "版本补丁代价",
       "版本补丁传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_save",
@@ -1117,7 +1191,8 @@
       "存档规则",
       "存档代价",
       "存档传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_restore",
@@ -1133,7 +1208,8 @@
       "恢复规则",
       "恢复代价",
       "恢复传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_ai_identity",
@@ -1149,7 +1225,8 @@
       "AI 身份规则",
       "AI 身份代价",
       "AI 身份传承"
-    ]
+    ],
+    "monthlyEffects": {}
   },
   {
     "id": "system_ultimate_principle",
@@ -1165,6 +1242,7 @@
       "终极原则规则",
       "终极原则代价",
       "终极原则传承"
-    ]
+    ],
+    "monthlyEffects": {}
   }
 ]

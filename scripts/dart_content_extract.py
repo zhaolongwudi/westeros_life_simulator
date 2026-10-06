@@ -374,6 +374,12 @@ def extract_systems(text):
             'description': _clean(args.get('description', '')),
             'rules': _clean_list(args.get('rules', '[]')),
             'features': _clean_list(args.get('features', '[]')),
+            # S4-1（P1-09）：系统月度效果字段。
+            # 绝大多数系统写作 `monthlyEffects: const {}`，`_clean_map` 会
+            # 返回 {} —— 这是**有意的诚实标注**（无月度结算），不能因为
+            # 「空」就省掉键：省掉后 `GameSystem.fromJson` 读到的 json
+            # 缺该键，`toJson()` 仍会写出 `{}`，往返比对即失配。
+            'monthlyEffects': _clean_map(args.get('monthlyEffects', '{}')),
         })
     return out
 
