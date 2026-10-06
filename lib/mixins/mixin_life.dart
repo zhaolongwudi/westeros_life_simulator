@@ -393,12 +393,12 @@ mixin GameLifeMixin on GameProviderBase {
     if (!_b1011CanDo('trade_specialty')) {
       return '你今天的商路已经跑完了。';
     }
-    if (!canAffordEnergy(12)) {
+    if (!canAffordEnergy(BalanceData.tradeSpecialtyEnergyCost)) {
       return '你精疲力竭，无力再跑商路。先去休息吧。';
     }
     final loc = currentLocation;
     if (loc == null) return '你不在任何已知地点。';
-    adjustEnergy(-12);
+    adjustEnergy(-BalanceData.tradeSpecialtyEnergyCost);
     _b1011Record('trade_specialty');
 
     final specialties = kRegionSpecialties[loc.region] ?? const <String>[];
@@ -410,21 +410,25 @@ mixin GameLifeMixin on GameProviderBase {
     final item = itemById(itemId);
     if (item == null) return '这里看似有特产，却无人识货。';
     final isMerchant = isIdentity(PlayerIdentity.merchant);
-    // 收购 2 件特产
-    final buy = buyPriceOf(itemId) * 2;
+    // 收购特产（件数收口 BalanceData.tradeSpecialtyQty）
+    final qty = BalanceData.tradeSpecialtyQty;
+    final buy = buyPriceOf(itemId) * qty;
     if (player.gold < buy) {
-      return '你买不起 2 件「${item.name}」（需 $buy 金币）。先攒点本钱吧。';
+      return '你买不起 $qty 件「${item.name}」（需 $buy 金币）。先攒点本钱吧。';
     }
     gainGold(-buy);
-    for (var i = 0; i < 2; i++) {
+    for (var i = 0; i < qty; i++) {
       addItem(itemId);
     }
     // 商人加成 + 口才加成
-    final premium = (isMerchant ? 0.35 : 0.15) + skillLevel('speech') * 0.03;
-    final sellEstimate = (sellPriceOf(itemId) * 2 * (1 + premium)).round();
+    final premium = (isMerchant
+            ? BalanceData.tradeSpecialtyMerchantPremium
+            : BalanceData.tradeSpecialtyCommonerPremium) +
+        skillLevel('speech') * BalanceData.tradeSpecialtySpeechGain;
+    final sellEstimate = (sellPriceOf(itemId) * qty * (1 + premium)).round();
     final profit = sellEstimate - buy;
     final mood = profit >= 0 ? '这是一笔不错的买卖。' : '本钱压住了，得找更大的市场出手。';
-    return '你在${loc.name}（${loc.region}）收购 2 件「${item.name}」'
+    return '你在${loc.name}（${loc.region}）收购 $qty 件「${item.name}」'
         '（花 $buy 金币）。按异地行情估算可卖 $sellEstimate 金币（利润约 $profit）。$mood';
   }
 
@@ -435,10 +439,10 @@ mixin GameLifeMixin on GameProviderBase {
     if (!_b1011CanDo('negotiate')) {
       return '你今天的议价机会已经用过了。';
     }
-    if (!canAffordEnergy(5)) {
+    if (!canAffordEnergy(BalanceData.negotiateEnergyCost)) {
       return '你口干舌燥，无力再费口舌。';
     }
-    adjustEnergy(-5);
+    adjustEnergy(-BalanceData.negotiateEnergyCost);
     _b1011Record('negotiate');
     final loc = currentLocation;
     if (loc == null ||
@@ -452,12 +456,16 @@ mixin GameLifeMixin on GameProviderBase {
     final speech = skillLevel('speech');
     final isMerchant = isIdentity(PlayerIdentity.merchant);
     // 议价成功率：口才 * 8% + 商人加成 20% + 随机
-    final baseChance = speech * 8 + (isMerchant ? 20 : 0) + rnd.nextInt(20);
-    if (baseChance < 40) {
+    final baseChance = speech * BalanceData.negotiateSpeechChanceMult +
+        (isMerchant ? BalanceData.negotiateMerchantBonus : 0) +
+        rnd.nextInt(BalanceData.negotiateChanceVariance);
+    if (baseChance < BalanceData.negotiateSuccessThreshold) {
       return '你费尽口舌，商贩油盐不进，一分钱都不肯让。';
     }
-    // 议价幅度：5% ~ 20%（口才越高让利越多）
-    final discount = 5 + rnd.nextInt(15) + speech.clamp(0, 3) * 2;
+    // 议价幅度：口才越高让利越多（基础 + 随机浮动 + 口才加成）
+    final discount = BalanceData.negotiateDiscountBase +
+        rnd.nextInt(BalanceData.negotiateDiscountVariance) +
+        speech.clamp(0, 3) * BalanceData.negotiateDiscountPerSpeech;
     setFlag('negotiated', true);
     _negotiatedDiscount = discount;
     notifyListeners();
@@ -472,10 +480,10 @@ mixin GameLifeMixin on GameProviderBase {
     if (!_b1011CanDo('convoy')) {
       return '今天没有商队愿意等你。';
     }
-    if (!canAffordEnergy(15)) {
+    if (!canAffordEnergy(BalanceData.convoyEnergyCost)) {
       return '你太累了，护不了商队。';
     }
-    adjustEnergy(-15);
+    adjustEnergy(-BalanceData.convoyEnergyCost);
     _b1011Record('convoy');
     final loc = currentLocation;
     if (loc == null) return '你不在任何已知地点。';
@@ -483,20 +491,25 @@ mixin GameLifeMixin on GameProviderBase {
     final power = combatPower();
     final isMerchant = isIdentity(PlayerIdentity.merchant);
     // 战斗判定：战斗值 + 骑术加成 + 商人议价（商人更懂行价）
-    final score = power * 2 + skillLevel('riding') * 2 + (isMerchant ? 5 : 0) + rnd.nextInt(20);
-    final baseFee = 30 + power * 2 + rnd.nextInt(20);
-    if (score >= 40) {
+    final score = power * BalanceData.convoyScorePowerMult +
+        skillLevel('riding') * BalanceData.convoyScoreRidingMult +
+        (isMerchant ? BalanceData.convoyMerchantBonus : 0) +
+        rnd.nextInt(BalanceData.convoyScoreVariance);
+    final baseFee = BalanceData.convoyBaseFee +
+        power * BalanceData.convoyFeePowerMult +
+        rnd.nextInt(BalanceData.convoyFeeVariance);
+    if (score >= BalanceData.convoySuccessThreshold) {
       gainGold(baseFee);
-      adjustReputation(3);
+      adjustReputation(BalanceData.convoyReputationGain);
       return '你一路护送商队穿越${loc.region}，击退两拨匪徒。商队老板付你 $baseFee 金币，还替你扬了名。';
     }
-    if (score >= 25) {
-      gainGold((baseFee * 0.6).round());
-      return '商队遇上几伙小毛贼，你有惊无险地护了过去。拿到 ${(baseFee * 0.6).round()} 金币。';
+    if (score >= BalanceData.convoyPartialThreshold) {
+      gainGold((baseFee * BalanceData.convoyPartialRate).round());
+      return '商队遇上几伙小毛贼，你有惊无险地护了过去。拿到 ${(baseFee * BalanceData.convoyPartialRate).round()} 金币。';
     }
     // 失败：受伤但保住货物
-    adjustHealth(-10);
-    return '商队在路口遭了埋伏，你奋力搏杀才护住货物，自己却挂了彩（健康 -10）。商队付你 ${(baseFee * 0.3).round()} 金币聊表谢意。';
+    adjustHealth(-BalanceData.convoyInjuryHealth);
+    return '商队在路口遭了埋伏，你奋力搏杀才护住货物，自己却挂了彩（健康 -${BalanceData.convoyInjuryHealth}）。商队付你 ${(baseFee * BalanceData.convoyFailRate).round()} 金币聊表谢意。';
   }
 
   // ==================== 装备系统（Batch 10-4） ====================

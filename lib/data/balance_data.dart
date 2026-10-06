@@ -376,6 +376,56 @@ class BalanceData {
   static const int merchantProfitVariance = 10;
   /// 学者教学概率（0.4）。
   static const double scholarTeachChance = 0.4;
+  // ==================== Batch 10-115 商队护送经济 ====================
+  /// 商队护送消耗的精力。
+  static const int convoyEnergyCost = 15;
+  /// 护送判定分数：战斗值/骑术每点加成。
+  static const int convoyScorePowerMult = 2;
+  static const int convoyScoreRidingMult = 2;
+  /// 护送判定：商人身份的额外加成。
+  static const int convoyMerchantBonus = 5;
+  /// 护送判定随机浮动上限。
+  static const int convoyScoreVariance = 20;
+  /// 护送报酬基础值。
+  static const int convoyBaseFee = 30;
+  /// 护送报酬：战斗值每点加成。
+  static const int convoyFeePowerMult = 2;
+  /// 护送报酬随机浮动上限。
+  static const int convoyFeeVariance = 20;
+  /// 护送判定档位阈值（全额 / 部分）。
+  static const int convoySuccessThreshold = 40;
+  static const int convoyPartialThreshold = 25;
+  /// 护送部分成功/失败的报酬比例。
+  static const double convoyPartialRate = 0.6;
+  static const double convoyFailRate = 0.3;
+  /// 护送失败的健康损失。
+  static const int convoyInjuryHealth = 10;
+  /// 护送全额成功的声望奖励。
+  static const int convoyReputationGain = 3;
+  // ==================== Batch 10-116 巡游/议价经济 ====================
+  /// 地区特产巡游消耗的精力。
+  static const int tradeSpecialtyEnergyCost = 12;
+  /// 地区特产巡游每次收购件数。
+  static const int tradeSpecialtyQty = 2;
+  /// 特产异地溢价：商人/平民基础加成。
+  static const double tradeSpecialtyMerchantPremium = 0.35;
+  static const double tradeSpecialtyCommonerPremium = 0.15;
+  /// 特产异地溢价：每级口才加成。
+  static const double tradeSpecialtySpeechGain = 0.03;
+  /// 商人议价消耗的精力。
+  static const int negotiateEnergyCost = 5;
+  /// 议价成功率：每级口才的百分数加成。
+  static const int negotiateSpeechChanceMult = 8;
+  /// 议价成功率：商人身份的额外加成。
+  static const int negotiateMerchantBonus = 20;
+  /// 议价成功率随机浮动上限。
+  static const int negotiateChanceVariance = 20;
+  /// 议价成功阈值。
+  static const int negotiateSuccessThreshold = 40;
+  /// 议价折扣：基础 5% + rnd(15) + 口才(clamp 0~3)*2。
+  static const int negotiateDiscountBase = 5;
+  static const int negotiateDiscountVariance = 15;
+  static const int negotiateDiscountPerSpeech = 2;
 
   // ==================== 婚姻与世代 ====================
 
