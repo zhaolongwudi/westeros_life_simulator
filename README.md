@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
-**2026-10-06 · feat(batch10-114): consolidate adventure/travel economy magic numbers into balance_data**（`3a5ae7b`）
+**2026-10-07 · test(review): 修复 CI Analyze 基线红灯（S1-1 附带）**（`9c43f19`）
 
-**2026-10-06 · feat(batch10-113): consolidate npc interact economy magic numbers into balance_data**（`433bdcd`）
+**2026-10-07 · fix(review): S1-1 数据名称层修复（P1-07 / P3-03）**（`15a9047`）
 
-**2026-10-06 · fix(batch10-112): lower hunt danger reward to 1 to stay under sim gold cap**（`ce21b89`）
+**2026-10-06 · ui(batch10-115): game_screen parchment bg + narrative bubble polish**（`89ad54a`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
