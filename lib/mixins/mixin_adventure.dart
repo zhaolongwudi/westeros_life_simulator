@@ -4,6 +4,7 @@
 library;
 
 import 'dart:math';
+import '../data/balance_data.dart';
 import '../data/item_data.dart';
 import '../models/location.dart';
 import '../core/command_registry.dart';
@@ -38,7 +39,7 @@ mixin GameAdventureMixin
 
     final rnd = rng();
     // 旅行消耗金币（路程越远/危险度越高越贵）
-    final cost = 2 + target.dangerLevel + rnd.nextInt(4);
+    final cost = BalanceData.travelCostBase + target.dangerLevel + rnd.nextInt(BalanceData.travelCostVariance);
     if (player.gold < cost) {
       return '你付不起前往 ${target.name} 的旅费（需 $cost 金币）。';
     }
@@ -64,10 +65,10 @@ mixin GameAdventureMixin
     if (!isGameActive || isGameOver) return '游戏尚未开始。';
     final loc = currentLocation;
     if (loc == null) return '你在一片虚无中，无从探索。';
-    if (!canAffordEnergy(15)) {
+    if (!canAffordEnergy(BalanceData.exploreEnergyCost)) {
       return '你精疲力竭，连脚步都迈不动。先去休息吧。';
     }
-    adjustEnergy(-15);
+    adjustEnergy(-BalanceData.exploreEnergyCost);
 
     final rnd = rng();
     final danger = loc.dangerLevel;
@@ -77,7 +78,7 @@ mixin GameAdventureMixin
     final buf = StringBuffer()..writeln('🔍 你在${loc.name}四处探索……');
 
     if (roll < 0.4) {
-      final found = 3 + rnd.nextInt(10 + danger * 2);
+      final found = BalanceData.exploreGoldBase + rnd.nextInt(BalanceData.exploreGoldVarianceBase + danger * BalanceData.exploreGoldDangerMult);
       gainGold(found);
       buf.writeln('你找到了一些有用的东西，价值 $found 金币。');
     } else if (roll < 0.62) {
@@ -146,15 +147,15 @@ mixin GameAdventureMixin
         adjustReputation(2);
         return '⚔️ 你遭遇了一伙强盗，凭借身手击退了他们。声望 +2。';
       }
-      final loss = 5 + danger * 2;
+      final loss = BalanceData.banditLossBase + danger * BalanceData.banditLossDangerMult;
       gainGold(-loss);
       return '🥷 你遭遇了一伙强盗，被抢走了 $loss 金币。';
     } else if (roll < 0.7) {
       // 野兽：猎获或受伤
       if (skillLevel('archery') >= 3 || rnd.nextDouble() < 0.6) {
-        final gain = 8 + danger * 2;
+        final gain = BalanceData.beastGainBase + danger * BalanceData.beastGainDangerMult;
         gainGold(gain);
-        adjustHunger(10);
+        adjustHunger(BalanceData.beastHungerGain);
         // 小概率获得皮革
         if (rnd.nextDouble() < 0.3) {
           addItem('item_leather');
@@ -163,11 +164,11 @@ mixin GameAdventureMixin
         return '🐗 你猎到一头野兽，获得 $gain 金币。';
       }
       setFlag('isInjured', true);
-      adjustHealth(-8);
+      adjustHealth(-BalanceData.beastInjuryHealth);
       return '🐺 你被野兽抓伤，狼狈逃回。（受伤，健康 -8）';
     } else if (roll < 0.85) {
       // 商人
-      final profit = 5 + rnd.nextInt(10);
+      final profit = BalanceData.merchantProfitBase + rnd.nextInt(BalanceData.merchantProfitVariance);
       gainGold(profit);
       // 商人偶售补给
       if (rnd.nextDouble() < 0.4) {

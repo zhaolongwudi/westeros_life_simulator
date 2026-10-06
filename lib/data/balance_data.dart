@@ -353,6 +353,27 @@ class BalanceData {
   static const int nobleReferReputation = 4;
   /// 熟识请求·超自然低语声望奖励。
   static const int supernaturalReputationGain = 3;
+  // ==================== Batch 10-114 冒险/旅行经济 ====================
+  /// 旅费公式：基础 2 + 目的地危险度 + rnd(4)。
+  static const int travelCostBase = 2;
+  static const int travelCostVariance = 4;
+  /// 探索消耗的精力。
+  static const int exploreEnergyCost = 15;
+  /// 探索收益公式：基础 3 + rnd(10 + 危险度*2)。
+  static const int exploreGoldBase = 3;
+  static const int exploreGoldDangerMult = 2;
+  static const int exploreGoldVarianceBase = 10;
+  /// 遭遇·强盗损失公式：基础 5 + 危险度*2。
+  static const int banditLossBase = 5;
+  static const int banditLossDangerMult = 2;
+  /// 遭遇·野兽收益公式：基础 8 + 危险度*2，附饱食恢复与受伤健康损失。
+  static const int beastGainBase = 8;
+  static const int beastGainDangerMult = 2;
+  static const int beastHungerGain = 10;
+  static const int beastInjuryHealth = 8;
+  /// 遭遇·商人利润：基础 5 + rnd(10)。
+  static const int merchantProfitBase = 5;
+  static const int merchantProfitVariance = 10;
   /// 学者教学概率（0.4）。
   static const double scholarTeachChance = 0.4;
 
