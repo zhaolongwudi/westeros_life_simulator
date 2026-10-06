@@ -58,14 +58,14 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_suppress',
         text: '镇压叛乱',
-        requirements: const {'army': 500},
+        requirements: const {},
         effects: const {'gold': -100, 'reputation': 10, 'political': 15},
         narrative: '你率军镇压叛乱，恢复秩序。',
       ),
       EventChoice(
         id: 'choice_negotiate',
         text: '谈判',
-        requirements: const {'diplomacy': 5},
+        requirements: const {},
         effects: const {'gold': -30, 'reputation': 5},
         narrative: '你与叛军谈判，达成妥协。',
       ),
@@ -105,7 +105,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_suppress_coup',
         text: '镇压政变',
-        requirements: const {'army': 300},
+        requirements: const {},
         effects: const {'gold': -80, 'reputation': 15},
         narrative: '你率军镇压政变，保住旧王。',
       ),
@@ -145,7 +145,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_propose',
         text: '提出建议',
-        requirements: const {'diplomacy': 5},
+        requirements: const {},
         effects: const {'reputation': 5, 'political': 8},
         narrative: '你提出建议，获得国王赏识。',
       ),
@@ -310,7 +310,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_negotiate',
         text: '谈判',
-        requirements: const {'diplomacy': 5},
+        requirements: const {},
         effects: const {'gold': -100, 'reputation': 3},
         narrative: '你与铁金库谈判，达成妥协。',
       ),
@@ -378,7 +378,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_negotiate',
         text: '谈判',
-        requirements: const {'diplomacy': 5},
+        requirements: const {},
         effects: const {'reputation': 3, 'familyRelation': 5},
         narrative: '你与对方谈判，达成妥协。',
       ),
@@ -628,7 +628,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_revenge',
         text: '复仇',
-        requirements: const {'army': 300},
+        requirements: const {},
         effects: const {'gold': -100, 'reputation': 5, 'familyRelation': -20},
         narrative: '你复仇，家族仇恨加深。',
       ),
@@ -696,7 +696,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_fight',
         text: '参战',
-        requirements: const {'army': 500},
+        requirements: const {},
         effects: const {'gold': -100, 'reputation': 15, 'military': 20},
         narrative: '你参战，赢得胜利。',
       ),
@@ -710,7 +710,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_negotiate',
         text: '谈判',
-        requirements: const {'diplomacy': 5},
+        requirements: const {},
         effects: const {'gold': -30, 'reputation': 5},
         narrative: '你谈判，达成妥协。',
       ),
@@ -729,7 +729,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_defend',
         text: '守城',
-        requirements: const {'army': 300},
+        requirements: const {},
         effects: const {'gold': -80, 'reputation': 15, 'military': 15},
         narrative: '你守城，赢得胜利。',
       ),
@@ -743,7 +743,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_escape',
         text: '突围',
-        requirements: const {'military': 5},
+        requirements: const {},
         effects: const {'gold': -30, 'reputation': 5},
         narrative: '你突围，保住军队。',
       ),
@@ -762,7 +762,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_revenge',
         text: '复仇',
-        requirements: const {'army': 300},
+        requirements: const {},
         effects: const {'gold': -100, 'reputation': 5, 'military': 15},
         narrative: '你复仇，赢得胜利。',
       ),
@@ -795,14 +795,14 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_investigate',
         text: '调查',
-        requirements: const {'diplomacy': 5},
+        requirements: const {},
         effects: const {'gold': -30, 'reputation': 10},
         narrative: '你调查，找到凶手。',
       ),
       EventChoice(
         id: 'choice_revenge',
         text: '复仇',
-        requirements: const {'army': 100},
+        requirements: const {},
         effects: const {'gold': -50, 'reputation': 5, 'military': 10},
         narrative: '你复仇，赢得胜利。',
       ),
@@ -828,7 +828,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_fight',
         text: '参战',
-        requirements: const {'military': 5},
+        requirements: const {},
         effects: const {'gold': -30, 'reputation': 15, 'military': 10},
         narrative: '你参战，赢得胜利。',
       ),
@@ -863,7 +863,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_defend',
         text: '辩护',
-        requirements: const {'diplomacy': 5},
+        requirements: const {},
         effects: const {'gold': -30, 'reputation': 10, 'faith': 10},
         narrative: '你辩护，赢得胜利。',
       ),
@@ -929,7 +929,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_purge',
         text: '清除异端',
-        requirements: const {'army': 100},
+        requirements: const {},
         effects: const {'gold': -50, 'reputation': 10, 'faith': 15},
         narrative: '你清除异端，教会兴盛。',
       ),
@@ -1176,7 +1176,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_negotiate',
         text: '谈判',
-        requirements: const {'diplomacy': 5},
+        requirements: const {},
         effects: const {'gold': -100, 'reputation': 3},
         narrative: '你与铁金库谈判，达成妥协。',
       ),
@@ -1197,14 +1197,14 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_claim',
         text: '认领龙',
-        requirements: const {'magic': 5},
+        requirements: const {},
         effects: const {'reputation': 20, 'magic': 30},
         narrative: '你认领龙，家族兴盛。',
       ),
       EventChoice(
         id: 'choice_fight',
         text: '战斗',
-        requirements: const {'military': 5},
+        requirements: const {},
         effects: const {'gold': -100, 'reputation': 15, 'military': 20},
         narrative: '你战斗，赢得胜利。',
       ),
@@ -1230,7 +1230,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_fight',
         text: '战斗',
-        requirements: const {'army': 500},
+        requirements: const {},
         effects: const {'gold': -200, 'reputation': 20, 'military': 30},
         narrative: '你战斗，赢得胜利。',
       ),
@@ -1244,7 +1244,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_negotiate',
         text: '谈判',
-        requirements: const {'diplomacy': 5},
+        requirements: const {},
         effects: const {'gold': -30, 'reputation': 5},
         narrative: '你谈判，达成妥协。',
       ),
@@ -1296,7 +1296,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_use',
         text: '使用血魔法',
-        requirements: const {'magic': 5},
+        requirements: const {},
         effects: const {'reputation': -10, 'magic': 20},
         narrative: '你使用血魔法，家族兴盛。',
       ),
@@ -1329,7 +1329,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_follow',
         text: '跟随绿先知',
-        requirements: const {'magic': 5},
+        requirements: const {},
         effects: const {'reputation': 10, 'magic': 20},
         narrative: '你跟随绿先知，家族兴盛。',
       ),
@@ -1463,7 +1463,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_participate',
         text: '参加',
-        requirements: const {'military': 5},
+        requirements: const {},
         effects: const {'gold': -30, 'reputation': 15, 'military': 10},
         narrative: '你参加比武，赢得胜利。',
       ),
@@ -1791,7 +1791,7 @@ const List<GameEvent> allEvents = [
       EventChoice(
         id: 'choice_hunt',
         text: '狩猎',
-        requirements: const {'military': 3},
+        requirements: const {},
         effects: const {'gold': 20, 'reputation': 5, 'happiness': 10},
         narrative: '你狩猎，赢得胜利。',
       ),

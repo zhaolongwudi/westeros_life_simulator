@@ -34,6 +34,46 @@ def _clean(s):
     return s.strip()
 
 
+def _clean_nullable(s):
+    """可空字符串字段：Dart 侧写 `null` 时导出 JSON null，而不是字符串 "null"。
+
+    【为什么单开一个函数】`_clean('null')` 会得到 Python 字符串 `'null'`，
+    写进 JSON 就是 `"governorId": "null"`。运行时不读 JSON 所以没人发现，
+    但 `Location.fromJson`（`json['governorId'] as String?`）会拿到长度 4 的
+    字符串，两个消费点 `ai_service:1190 / :1239` 判的是
+    `== null || isEmpty`——一旦 S4-4 把 JSON 变成真数据源，56 个无治主地点
+    会全部走进「治主数据缺失（null），地方权力真空」分支。
+    S3-1 把它列为镜像字段契约第 3 条（前两条是 S1-2 的 mood / tasks）。
+    """
+    s = s.strip()
+    if s in ("null", "''", '""', ""):
+        return None
+    return _clean(s)
+
+
+def _clean_enum(s):
+    """枚举字段：剥掉 `EventType.` 这类类名前缀，只留裸枚举名。
+
+    【为什么必须剥】Dart 源码里写的是 `EventType.economic`，直接导出会变成
+    JSON 里的 `"EventType.economic"`。而模型的反序列化全部按**裸名**取值：
+
+      - `GameEvent.fromJson` → `safeEnum(EventType.values, json['type'], ...)`
+        比对的是 `value.name`（= `economic`），前缀形式匹配不上 →
+        **72 个事件全部静默回落成 `EventType.daily`**；
+      - `Family.fromJson` → `FamilyScale.values.byName(json['scale'])`，
+        `Location.fromJson` / `Npc.fromJson` 同理用 `byName`——
+        **`byName` 对未知名直接抛 ArgumentError**，不是回落！
+
+    也就是说：带前缀的镜像**根本无法被任何模型的 fromJson 反序列化**。
+    运行时不读 JSON 所以一直没人发现（S1-2 之前的 mood/tasks 漂移同理）。
+    S3-1 把它列为镜像字段契约第 4 条，是 S4-4「JSON 是否外置」的前置条件。
+    """
+    s = _clean(s)
+    if "." in s:
+        s = s.rsplit(".", 1)[-1]
+    return s.strip()
+
+
 def _clean_list(s):
     """解析 const ['a','b'] / ['a', 'b'] 为 python list。"""
     s = s.strip()
@@ -84,6 +124,44 @@ def _clean_map(s):
     return out
 
 
+def _clean_string_map(s):
+    """解析 `Map<String, String>` 型 map：带引号的值**保持字符串**，不转 int。
+
+    【为什么单开一个】`GameEvent.triggerConditions` 是 `Map<String, String>`，
+    事件里写的全是 `{'minGold': '20', 'season': 'winter'}` 这种**数字字符串**。
+    `_clean_map` 会把它转成 int → JSON 里变成 `"minGold": 20`（数字），
+    而 `GameEvent.fromJson` 用的是 `safeStringMap`，**非字符串元素直接跳过**
+    → 15 个数值门槛在反序列化后**整条消失**，事件变成无门槛。
+
+    这是「镜像不可反序列化」的第 5 个实例，同样由 batch10_121 的全字段
+    往返比对逼出来（S3-1）。
+    """
+    s = s.strip()
+    if s.startswith("const "):
+        s = s[len("const "):].strip()
+    if s.startswith("<") and ">" in s:
+        s = s[s.index(">") + 1:].strip()
+    if not s.startswith("{"):
+        return {}
+    inner = s[1:s.rfind("}")]
+    out = {}
+    for p in _split_top_level(inner):
+        p = p.strip()
+        if ":" not in p:
+            continue
+        k, v = p.split(":", 1)
+        k = _clean(k)
+        raw = v.strip()
+        # 带引号 → 原样保留字符串语义（哪怕内容是数字）
+        if (raw.startswith("'") and raw.endswith("'")) or (
+            raw.startswith('"') and raw.endswith('"')
+        ):
+            out[k] = _clean(raw)
+        else:
+            out[k] = _clean(raw)
+    return out
+
+
 def _split_top_level(s):
     """按逗号切分，忽略 {}  []  ()  <> 泛型 与引号内的逗号。"""
     parts = []
@@ -124,9 +202,15 @@ def _split_top_level(s):
     return parts
 
 
-def _find_blocks(text, prefix, open_ch='(', close_ch=')'):
+def _find_blocks(text, prefix, open_ch='(', close_ch=')', skip_constructors=True):
     """找到所有以 prefix 开头、配平括号的完整块。返回块内部内容。
     prefix 可含可不含 open_ch（自动剥离）。
+
+    [skip_constructors]（S3-1）：跳过**构造函数声明**——`const Item({` 里的
+    形参列表（`this.id`、`required this.name`…）同样以 `Item(` 开头，会被当成
+    一条 id 为空的实体。过去靠 `load_entities` 的 id 前缀过滤兜住，于是
+    「构造函数」只是被静默丢弃；S3-1 的 checklist 1 会比对过滤前后条数，
+    这才把它暴露出来。判据是块内含 `this.`（只有构造函数/初始化形参会写）。
     """
     if prefix.endswith(open_ch):
         prefix = prefix[:-1]
@@ -168,6 +252,9 @@ def _find_blocks(text, prefix, open_ch='(', close_ch=')'):
                 depth -= 1
             j += 1
         inner = text[start:j-1]
+        if skip_constructors and "this." in inner:
+            i = j
+            continue
         blocks.append(inner)
         i = j
     return blocks
@@ -184,7 +271,7 @@ def extract_families(text):
             'name': _clean(args.get('name', '')),
             'motto': _clean(args.get('motto', '')),
             'seat': _clean(args.get('seat', '')),
-            'scale': _clean(args.get('scale', '')),
+            'scale': _clean_enum(args.get('scale', '')),
             'population': _to_int(args.get('population', '0')),
             'army': _to_int(args.get('army', '0')),
             'goldReserve': _to_int(args.get('goldReserve', '0')),
@@ -204,12 +291,12 @@ def extract_locations(text):
         loc = {
             'id': _clean(args.get('id', '')),
             'name': _clean(args.get('name', '')),
-            'type': _clean(args.get('type', '')),
+            'type': _clean_enum(args.get('type', '')),
             'region': _clean(args.get('region', '')),
             'dangerLevel': _to_int(args.get('dangerLevel', '0')),
             'population': _to_int(args.get('population', '0')),
             'features': _clean_list(args.get('features', '[]')),
-            'governorId': _clean(args.get('governorId', '')),
+            'governorId': _clean_nullable(args.get('governorId', 'null')),
             'connectedTo': _clean_list(args.get('connectedTo', '[]')),
             'description': _clean(args.get('description', '')),
         }
@@ -224,7 +311,7 @@ def extract_npcs(text):
         npc = {
             'id': _clean(args.get('id', '')),
             'name': _clean(args.get('name', '')),
-            'type': _clean(args.get('type', '')),
+            'type': _clean_enum(args.get('type', '')),
             'age': _to_int(args.get('age', '0')),
             'gender': _clean(args.get('gender', '')),
             'familyId': _clean(args.get('familyId', '')),
@@ -264,9 +351,9 @@ def extract_events(text):
         evt = {
             'id': _clean(args.get('id', '')),
             'name': _clean(args.get('name', '')),
-            'type': _clean(args.get('type', '')),
+            'type': _clean_enum(args.get('type', '')),
             'description': _clean(args.get('description', '')),
-            'triggerConditions': _clean_map(args.get('triggerConditions', '{}')),
+            'triggerConditions': _clean_string_map(args.get('triggerConditions', '{}')),
             'choices': choices,
             'narrative': _clean(args.get('narrative', '')),
             'tags': _clean_list(args.get('tags', '[]')),
@@ -298,7 +385,7 @@ def extract_items(text):
         out.append({
             'id': _clean(args.get('id', '')),
             'name': _clean(args.get('name', '')),
-            'category': _clean(args.get('category', '')),
+            'category': _clean_enum(args.get('category', '')),
             'value': _to_int(args.get('value', '0')),
             'description': _clean(args.get('description', '')),
             'stackable': args.get('stackable', 'true').strip() == 'true',
@@ -324,7 +411,7 @@ def extract_npc_tasks(text):
             'id': _clean(args.get('id', '')),
             'npcId': _clean(args.get('npcId', '')),
             'title': _clean(args.get('title', '')),
-            'type': _clean(args.get('type', '')),
+            'type': _clean_enum(args.get('type', '')),
             'difficulty': _to_int(args.get('difficulty', '1')),
             'deadlineMonths': _to_int(args.get('deadlineMonths', '1')),
             'steps': steps,
@@ -340,8 +427,60 @@ def extract_npc_tasks(text):
 
 # ---------- 通用 ----------
 
+def _strip_line_comments(s):
+    """剥掉行注释（`//` 到行尾），但不动字符串字面量里的 `//`。
+
+    【为什么必须剥】数据块里的注释会被 `_split_top_level` + `split(':', 1)`
+    当成**键名的一部分**——例如：
+
+        features: const ['守夜人军团'],
+        // S3-1：原为 'npc_jeor_mormont'（全库无此 id）
+        governorId: 'npc_geor_mormont',
+
+    切片后第二个 part 是 `"// S3-1：...\n    governorId"`，于是字典里的键变成
+    那整串注释，`governorId` 这个键**消失**，导出时回落默认值（null/''）。
+    更糟的是这种损坏**不会触发任何告警**：check_content_sync 的第 3 项比对的是
+    「JSON vs 现场解析的 Dart」，两边走同一个解析器，一起错、一起对得上。
+    S3-1 靠「镜像可被模型 fromJson 反序列化」的 Dart 测试（batch10_121）
+    才把它逼出来。
+
+    【为什么不整文件剥】只剥进到块内部的内容即可；`_find_blocks` 的配平扫描
+    本身能容忍注释（注释里的括号也会被计入深度，但本文件注释不含括号）。
+    """
+    out = []
+    i = 0
+    n = len(s)
+    in_str = False
+    quote = None
+    while i < n:
+        ch = s[i]
+        if in_str:
+            out.append(ch)
+            if ch == quote and (i == 0 or s[i - 1] != "\\"):
+                in_str = False
+            i += 1
+            continue
+        if ch in ("'", '"'):
+            in_str = True
+            quote = ch
+            out.append(ch)
+            i += 1
+            continue
+        if ch == "/" and i + 1 < n and s[i + 1] == "/":
+            # 跳到行尾
+            j = s.find("\n", i)
+            if j == -1:
+                break
+            i = j  # 保留换行，避免把下一行粘上来
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
 def _parse_named_args(inner):
     """把 'id: "x", name: "y", relations: const {...}' 切成 {name: raw_value}。"""
+    inner = _strip_line_comments(inner)
     args = {}
     for part in _split_top_level(inner):
         part = part.strip()

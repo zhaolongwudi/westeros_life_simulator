@@ -2,7 +2,7 @@
   {
     "id": "event_king_death",
     "name": "国王死亡",
-    "type": "EventType.political",
+    "type": "political",
     "description": "国王驾崩，王位继承危机爆发。",
     "triggerConditions": {},
     "choices": [
@@ -58,16 +58,14 @@
   {
     "id": "event_rebellion",
     "name": "叛乱",
-    "type": "EventType.political",
+    "type": "political",
     "description": "领主不满，叛乱爆发。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_suppress",
         "text": "镇压叛乱",
-        "requirements": {
-          "army": 500
-        },
+        "requirements": {},
         "effects": {
           "gold": -100,
           "reputation": 10,
@@ -78,9 +76,7 @@
       {
         "id": "choice_negotiate",
         "text": "谈判",
-        "requirements": {
-          "diplomacy": 5
-        },
+        "requirements": {},
         "effects": {
           "gold": -30,
           "reputation": 5
@@ -119,7 +115,7 @@
   {
     "id": "event_coup",
     "name": "政变",
-    "type": "EventType.political",
+    "type": "political",
     "description": "宫廷政变，王位更替。",
     "triggerConditions": {},
     "choices": [
@@ -136,9 +132,7 @@
       {
         "id": "choice_suppress_coup",
         "text": "镇压政变",
-        "requirements": {
-          "army": 300
-        },
+        "requirements": {},
         "effects": {
           "gold": -80,
           "reputation": 15
@@ -167,7 +161,7 @@
   {
     "id": "event_small_council",
     "name": "御前会议",
-    "type": "EventType.political",
+    "type": "political",
     "description": "御前会议召开，讨论国事。",
     "triggerConditions": {},
     "choices": [
@@ -193,9 +187,7 @@
       {
         "id": "choice_propose",
         "text": "提出建议",
-        "requirements": {
-          "diplomacy": 5
-        },
+        "requirements": {},
         "effects": {
           "reputation": 5,
           "political": 8
@@ -214,7 +206,7 @@
   {
     "id": "event_hand_change",
     "name": "国王之手更替",
-    "type": "EventType.political",
+    "type": "political",
     "description": "国王之手职位更替。",
     "triggerConditions": {},
     "choices": [
@@ -259,7 +251,7 @@
   {
     "id": "event_high_septon_change",
     "name": "总主教更替",
-    "type": "EventType.political",
+    "type": "political",
     "description": "七神教会总主教更替。",
     "triggerConditions": {},
     "choices": [
@@ -304,7 +296,7 @@
   {
     "id": "event_maester_change",
     "name": "大学士更替",
-    "type": "EventType.political",
+    "type": "political",
     "description": "学城大学士更替。",
     "triggerConditions": {},
     "choices": [
@@ -348,7 +340,7 @@
   {
     "id": "event_castle_black_change",
     "name": "长城总司令更替",
-    "type": "EventType.political",
+    "type": "political",
     "description": "长城守夜人总司令更替。",
     "triggerConditions": {},
     "choices": [
@@ -392,7 +384,7 @@
   {
     "id": "event_iron_bank_crisis",
     "name": "铁金库债务危机",
-    "type": "EventType.political",
+    "type": "political",
     "description": "铁金库债务危机爆发。",
     "triggerConditions": {},
     "choices": [
@@ -421,9 +413,7 @@
       {
         "id": "choice_negotiate",
         "text": "谈判",
-        "requirements": {
-          "diplomacy": 5
-        },
+        "requirements": {},
         "effects": {
           "gold": -100,
           "reputation": 3
@@ -442,7 +432,7 @@
   {
     "id": "event_free_cities_war",
     "name": "自由贸易城邦战争",
-    "type": "EventType.political",
+    "type": "political",
     "description": "自由贸易城邦之间爆发战争。",
     "triggerConditions": {},
     "choices": [
@@ -488,7 +478,7 @@
   {
     "id": "event_family_marriage",
     "name": "家族联姻",
-    "type": "EventType.family",
+    "type": "family",
     "description": "家族之间联姻。",
     "triggerConditions": {},
     "choices": [
@@ -515,9 +505,7 @@
       {
         "id": "choice_negotiate",
         "text": "谈判",
-        "requirements": {
-          "diplomacy": 5
-        },
+        "requirements": {},
         "effects": {
           "reputation": 3,
           "familyRelation": 5
@@ -536,7 +524,7 @@
   {
     "id": "event_family_succession",
     "name": "家族继承",
-    "type": "EventType.family",
+    "type": "family",
     "description": "家族继承危机。",
     "triggerConditions": {},
     "choices": [
@@ -582,7 +570,7 @@
   {
     "id": "event_family_intrigue",
     "name": "家族内斗",
-    "type": "EventType.family",
+    "type": "family",
     "description": "家族内部斗争。",
     "triggerConditions": {},
     "choices": [
@@ -627,7 +615,7 @@
   {
     "id": "event_family_secret",
     "name": "家族秘密揭露",
-    "type": "EventType.family",
+    "type": "family",
     "description": "家族秘密被揭露。",
     "triggerConditions": {},
     "choices": [
@@ -674,7 +662,7 @@
   {
     "id": "event_family_curse",
     "name": "家族诅咒",
-    "type": "EventType.family",
+    "type": "family",
     "description": "家族被诅咒。",
     "triggerConditions": {},
     "choices": [
@@ -721,7 +709,7 @@
   {
     "id": "event_family_prophecy",
     "name": "家族预言",
-    "type": "EventType.family",
+    "type": "family",
     "description": "家族预言应验。",
     "triggerConditions": {},
     "choices": [
@@ -766,7 +754,7 @@
   {
     "id": "event_family_relic",
     "name": "家族神器",
-    "type": "EventType.family",
+    "type": "family",
     "description": "家族神器现世。",
     "triggerConditions": {},
     "choices": [
@@ -812,7 +800,7 @@
   {
     "id": "event_family_bloodline",
     "name": "家族血脉",
-    "type": "EventType.family",
+    "type": "family",
     "description": "家族血脉危机。",
     "triggerConditions": {},
     "choices": [
@@ -859,16 +847,14 @@
   {
     "id": "event_family_grudge",
     "name": "家族仇恨",
-    "type": "EventType.family",
+    "type": "family",
     "description": "家族仇恨爆发。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_revenge",
         "text": "复仇",
-        "requirements": {
-          "army": 300
-        },
+        "requirements": {},
         "effects": {
           "gold": -100,
           "reputation": 5,
@@ -907,7 +893,7 @@
   {
     "id": "event_family_extinction",
     "name": "家族灭亡",
-    "type": "EventType.family",
+    "type": "family",
     "description": "家族灭亡危机。",
     "triggerConditions": {},
     "choices": [
@@ -954,16 +940,14 @@
   {
     "id": "event_battle",
     "name": "战役",
-    "type": "EventType.war",
+    "type": "war",
     "description": "大规模战役爆发。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_fight",
         "text": "参战",
-        "requirements": {
-          "army": 500
-        },
+        "requirements": {},
         "effects": {
           "gold": -100,
           "reputation": 15,
@@ -984,9 +968,7 @@
       {
         "id": "choice_negotiate",
         "text": "谈判",
-        "requirements": {
-          "diplomacy": 5
-        },
+        "requirements": {},
         "effects": {
           "gold": -30,
           "reputation": 5
@@ -1005,16 +987,14 @@
   {
     "id": "event_siege",
     "name": "围城",
-    "type": "EventType.war",
+    "type": "war",
     "description": "城堡被围城。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_defend",
         "text": "守城",
-        "requirements": {
-          "army": 300
-        },
+        "requirements": {},
         "effects": {
           "gold": -80,
           "reputation": 15,
@@ -1035,9 +1015,7 @@
       {
         "id": "choice_escape",
         "text": "突围",
-        "requirements": {
-          "military": 5
-        },
+        "requirements": {},
         "effects": {
           "gold": -30,
           "reputation": 5
@@ -1056,16 +1034,14 @@
   {
     "id": "event_betrayal",
     "name": "背叛",
-    "type": "EventType.war",
+    "type": "war",
     "description": "盟友背叛。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_revenge",
         "text": "复仇",
-        "requirements": {
-          "army": 300
-        },
+        "requirements": {},
         "effects": {
           "gold": -100,
           "reputation": 5,
@@ -1104,16 +1080,14 @@
   {
     "id": "event_assassination",
     "name": "刺杀",
-    "type": "EventType.war",
+    "type": "war",
     "description": "重要人物被刺杀。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_investigate",
         "text": "调查",
-        "requirements": {
-          "diplomacy": 5
-        },
+        "requirements": {},
         "effects": {
           "gold": -30,
           "reputation": 10
@@ -1123,9 +1097,7 @@
       {
         "id": "choice_revenge",
         "text": "复仇",
-        "requirements": {
-          "army": 100
-        },
+        "requirements": {},
         "effects": {
           "gold": -50,
           "reputation": 5,
@@ -1154,16 +1126,14 @@
   {
     "id": "event_trial_by_combat",
     "name": "比武审判",
-    "type": "EventType.war",
+    "type": "war",
     "description": "比武审判开始。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_fight",
         "text": "参战",
-        "requirements": {
-          "military": 5
-        },
+        "requirements": {},
         "effects": {
           "gold": -30,
           "reputation": 15,
@@ -1205,16 +1175,14 @@
   {
     "id": "event_religious_trial",
     "name": "宗教审判",
-    "type": "EventType.religious",
+    "type": "religious",
     "description": "宗教审判开始。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_defend",
         "text": "辩护",
-        "requirements": {
-          "diplomacy": 5
-        },
+        "requirements": {},
         "effects": {
           "gold": -30,
           "reputation": 10,
@@ -1254,7 +1222,7 @@
   {
     "id": "event_miracle",
     "name": "神迹",
-    "type": "EventType.religious",
+    "type": "religious",
     "description": "神迹显现。",
     "triggerConditions": {},
     "choices": [
@@ -1299,16 +1267,14 @@
   {
     "id": "event_heresy",
     "name": "异端",
-    "type": "EventType.religious",
+    "type": "religious",
     "description": "异端出现。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_purge",
         "text": "清除异端",
-        "requirements": {
-          "army": 100
-        },
+        "requirements": {},
         "effects": {
           "gold": -50,
           "reputation": 10,
@@ -1347,7 +1313,7 @@
   {
     "id": "event_church_split",
     "name": "教会分裂",
-    "type": "EventType.religious",
+    "type": "religious",
     "description": "教会分裂。",
     "triggerConditions": {},
     "choices": [
@@ -1392,7 +1358,7 @@
   {
     "id": "event_high_septon_change_religious",
     "name": "总主教更替（宗教）",
-    "type": "EventType.religious",
+    "type": "religious",
     "description": "总主教更替。",
     "triggerConditions": {},
     "choices": [
@@ -1437,7 +1403,7 @@
   {
     "id": "event_harvest",
     "name": "丰收",
-    "type": "EventType.economic",
+    "type": "economic",
     "description": "丰收之年。",
     "triggerConditions": {
       "season": "autumn"
@@ -1488,7 +1454,7 @@
   {
     "id": "event_famine",
     "name": "饥荒",
-    "type": "EventType.economic",
+    "type": "economic",
     "description": "饥荒之年。",
     "triggerConditions": {
       "season": "winter"
@@ -1538,7 +1504,7 @@
   {
     "id": "event_trade_boom",
     "name": "贸易繁荣",
-    "type": "EventType.economic",
+    "type": "economic",
     "description": "贸易繁荣。",
     "triggerConditions": {},
     "choices": [
@@ -1585,7 +1551,7 @@
   {
     "id": "event_trade_crisis",
     "name": "贸易危机",
-    "type": "EventType.economic",
+    "type": "economic",
     "description": "贸易危机。",
     "triggerConditions": {},
     "choices": [
@@ -1632,7 +1598,7 @@
   {
     "id": "event_iron_bank_debt",
     "name": "铁金库债务",
-    "type": "EventType.economic",
+    "type": "economic",
     "description": "铁金库债务。",
     "triggerConditions": {},
     "choices": [
@@ -1661,9 +1627,7 @@
       {
         "id": "choice_negotiate",
         "text": "谈判",
-        "requirements": {
-          "diplomacy": 5
-        },
+        "requirements": {},
         "effects": {
           "gold": -100,
           "reputation": 3
@@ -1682,16 +1646,14 @@
   {
     "id": "event_dragon_appears",
     "name": "龙出现",
-    "type": "EventType.magical",
+    "type": "magical",
     "description": "龙出现。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_claim",
         "text": "认领龙",
-        "requirements": {
-          "magic": 5
-        },
+        "requirements": {},
         "effects": {
           "reputation": 20,
           "magic": 30
@@ -1701,9 +1663,7 @@
       {
         "id": "choice_fight",
         "text": "战斗",
-        "requirements": {
-          "military": 5
-        },
+        "requirements": {},
         "effects": {
           "gold": -100,
           "reputation": 15,
@@ -1732,16 +1692,14 @@
   {
     "id": "event_white_walkers",
     "name": "异鬼南下",
-    "type": "EventType.magical",
+    "type": "magical",
     "description": "异鬼南下。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_fight",
         "text": "战斗",
-        "requirements": {
-          "army": 500
-        },
+        "requirements": {},
         "effects": {
           "gold": -200,
           "reputation": 20,
@@ -1762,9 +1720,7 @@
       {
         "id": "choice_negotiate",
         "text": "谈判",
-        "requirements": {
-          "diplomacy": 5
-        },
+        "requirements": {},
         "effects": {
           "gold": -30,
           "reputation": 5
@@ -1783,7 +1739,7 @@
   {
     "id": "event_prophecy",
     "name": "预言",
-    "type": "EventType.magical",
+    "type": "magical",
     "description": "预言应验。",
     "triggerConditions": {},
     "choices": [
@@ -1828,16 +1784,14 @@
   {
     "id": "event_blood_magic",
     "name": "血魔法",
-    "type": "EventType.magical",
+    "type": "magical",
     "description": "血魔法出现。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_use",
         "text": "使用血魔法",
-        "requirements": {
-          "magic": 5
-        },
+        "requirements": {},
         "effects": {
           "reputation": -10,
           "magic": 20
@@ -1875,16 +1829,14 @@
   {
     "id": "event_green_seer",
     "name": "绿先知",
-    "type": "EventType.magical",
+    "type": "magical",
     "description": "绿先知出现。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_follow",
         "text": "跟随绿先知",
-        "requirements": {
-          "magic": 5
-        },
+        "requirements": {},
         "effects": {
           "reputation": 10,
           "magic": 20
@@ -1922,7 +1874,7 @@
   {
     "id": "event_festival",
     "name": "节日",
-    "type": "EventType.daily",
+    "type": "daily",
     "description": "节日到来。",
     "triggerConditions": {},
     "choices": [
@@ -1970,7 +1922,7 @@
   {
     "id": "event_wedding",
     "name": "婚礼",
-    "type": "EventType.daily",
+    "type": "daily",
     "description": "婚礼举行。",
     "triggerConditions": {},
     "choices": [
@@ -2022,7 +1974,7 @@
   {
     "id": "event_funeral",
     "name": "葬礼",
-    "type": "EventType.daily",
+    "type": "daily",
     "description": "葬礼举行。",
     "triggerConditions": {},
     "choices": [
@@ -2071,16 +2023,14 @@
   {
     "id": "event_tournament",
     "name": "比武大会",
-    "type": "EventType.daily",
+    "type": "daily",
     "description": "比武大会举行。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_participate",
         "text": "参加",
-        "requirements": {
-          "military": 5
-        },
+        "requirements": {},
         "effects": {
           "gold": -30,
           "reputation": 15,
@@ -2121,7 +2071,7 @@
   {
     "id": "event_wound_fester",
     "name": "伤口恶化",
-    "type": "EventType.adventure",
+    "type": "adventure",
     "description": "你身上未愈的伤口开始红肿发炎，需要及时处理。",
     "triggerConditions": {
       "flag": "isInjured"
@@ -2173,7 +2123,7 @@
   {
     "id": "event_food_shortage",
     "name": "粮食短缺",
-    "type": "EventType.economic",
+    "type": "economic",
     "description": "收成欠佳，市场上的粮食价格飞涨，饥饿正在逼近。",
     "triggerConditions": {
       "season": "autumn"
@@ -2225,7 +2175,7 @@
   {
     "id": "event_winter_sickness",
     "name": "冬日寒疫",
-    "type": "EventType.daily",
+    "type": "daily",
     "description": "凛冬的寒气带来了一场寒疫，你开始咳嗽发烧。",
     "triggerConditions": {
       "season": "winter"
@@ -2275,10 +2225,10 @@
   {
     "id": "event_road_bandits",
     "name": "路遇匪帮",
-    "type": "EventType.adventure",
+    "type": "adventure",
     "description": "商路上出现一伙匪帮，正拦路劫掠过往行人。",
     "triggerConditions": {
-      "minGold": 20
+      "minGold": "20"
     },
     "choices": [
       {
@@ -2337,7 +2287,7 @@
   {
     "id": "event_wild_beasts",
     "name": "野兽袭营",
-    "type": "EventType.adventure",
+    "type": "adventure",
     "description": "一群饿狼在营地外游荡，盯着你的干粮与坐骑。",
     "triggerConditions": {
       "season": "autumn",
@@ -2389,7 +2339,7 @@
   {
     "id": "event_stray_direwolf",
     "name": "落单的冰原狼",
-    "type": "EventType.adventure",
+    "type": "adventure",
     "description": "一头受伤的冰原狼幼崽倒在雪地里，奄奄一息。",
     "triggerConditions": {
       "season": "winter"
@@ -2438,10 +2388,10 @@
   {
     "id": "event_trade_opportunity",
     "name": "商路良机",
-    "type": "EventType.economic",
+    "type": "economic",
     "description": "一支来自自由贸易城邦的商队经过，带来稀有货物。",
     "triggerConditions": {
-      "minGold": 50
+      "minGold": "50"
     },
     "choices": [
       {
@@ -2499,7 +2449,7 @@
   {
     "id": "event_ship_wreck",
     "name": "沉船遗宝",
-    "type": "EventType.adventure",
+    "type": "adventure",
     "description": "海边冲上来一艘沉船的残骸，货物散落在沙滩上。",
     "triggerConditions": {
       "locationId": "location_white_harbor"
@@ -2551,7 +2501,7 @@
   {
     "id": "event_hunt",
     "name": "狩猎",
-    "type": "EventType.daily",
+    "type": "daily",
     "description": "狩猎活动。",
     "triggerConditions": {
       "season": "autumn"
@@ -2560,9 +2510,7 @@
       {
         "id": "choice_hunt",
         "text": "狩猎",
-        "requirements": {
-          "military": 3
-        },
+        "requirements": {},
         "effects": {
           "gold": 20,
           "reputation": 5,
@@ -2601,10 +2549,10 @@
   {
     "id": "event_ghost_road",
     "name": "鬼影之路",
-    "type": "EventType.supernatural",
+    "type": "supernatural",
     "description": "深夜的旧道上，你看到一个穿着破旧战甲的身影，若隐若现。",
     "triggerConditions": {
-      "maxEnergy": 30,
+      "maxEnergy": "30",
       "season": "winter"
     },
     "choices": [
@@ -2651,10 +2599,10 @@
   {
     "id": "event_dream_omen",
     "name": "梦兆",
-    "type": "EventType.supernatural",
+    "type": "supernatural",
     "description": "你连续三夜做同一个梦：一条被寒冰冻结的巨龙，在长城之上盘旋。",
     "triggerConditions": {
-      "minReputation": 30
+      "minReputation": "30"
     },
     "choices": [
       {
@@ -2703,10 +2651,10 @@
   {
     "id": "event_red_comet",
     "name": "血色彗星",
-    "type": "EventType.supernatural",
+    "type": "supernatural",
     "description": "夜空中出现一颗血红彗星，七国上下议论纷纷，视为凶兆或吉兆。",
     "triggerConditions": {
-      "minAge": 15
+      "minAge": "15"
     },
     "choices": [
       {
@@ -2753,10 +2701,10 @@
   {
     "id": "event_glass_candle",
     "name": "玻璃蜡烛",
-    "type": "EventType.magical",
+    "type": "magical",
     "description": "学城送来一支玻璃蜡烛，据说点燃者能看见千里之外的景象。",
     "triggerConditions": {
-      "hasItem.item_glass_candle": 1
+      "hasItem.item_glass_candle": "1"
     },
     "choices": [
       {
@@ -2800,7 +2748,7 @@
   {
     "id": "event_white_walker_sighting",
     "name": "长城外的影子",
-    "type": "EventType.supernatural",
+    "type": "supernatural",
     "description": "守夜人传来消息：长城之外出现了不该存在的生物，冰蓝色的眼睛在夜里闪烁。",
     "triggerConditions": {
       "locationId": "location_the_wall"
@@ -2850,7 +2798,7 @@
   {
     "id": "event_frozen_lake",
     "name": "冰封湖面",
-    "type": "EventType.supernatural",
+    "type": "supernatural",
     "description": "北境的湖面一夜之间结上厚冰，冰层下隐约可见许多面孔。",
     "triggerConditions": {
       "season": "winter",
@@ -2900,11 +2848,11 @@
   {
     "id": "event_market_surplus",
     "name": "集市丰收",
-    "type": "EventType.economic",
+    "type": "economic",
     "description": "今年的收成格外丰盛，集市上货物堆积如山，价格低廉。",
     "triggerConditions": {
       "season": "summer",
-      "minGold": 20
+      "minGold": "20"
     },
     "choices": [
       {
@@ -2965,10 +2913,10 @@
   {
     "id": "event_armor_merchant",
     "name": "行脚甲胄商",
-    "type": "EventType.economic",
+    "type": "economic",
     "description": "一名行脚商人带来一批精良甲胄，声称来自河湾地的铁匠坊，要价不菲。",
     "triggerConditions": {
-      "minGold": 50
+      "minGold": "50"
     },
     "choices": [
       {
@@ -3017,10 +2965,10 @@
   {
     "id": "event_sword_inheritance",
     "name": "家传之剑",
-    "type": "EventType.family",
+    "type": "family",
     "description": "一位远亲临终前托人送来一把剑，说是你们家族代代相传的旧物。",
     "triggerConditions": {
-      "minReputation": 30
+      "minReputation": "30"
     },
     "choices": [
       {
@@ -3038,7 +2986,9 @@
         "id": "choice_entrust",
         "text": "转赠给家族",
         "requirements": {},
-        "effects": {},
+        "effects": {
+          "reputation": 8
+        },
         "narrative": "你把剑献给家族大厅，悬在祖先画像之下，族人们对你刮目相看。"
       },
       {
@@ -3063,11 +3013,11 @@
   {
     "id": "event_tournament_mount",
     "name": "比武大会的坐骑",
-    "type": "EventType.war",
+    "type": "war",
     "description": "比武大会在即，你的战马又老又乏，一匹良驹将决定你在赛场上的成败。",
     "triggerConditions": {
-      "minGold": 70,
-      "skills.riding": 3
+      "minGold": "70",
+      "skills.riding": "3"
     },
     "choices": [
       {
@@ -3087,7 +3037,9 @@
         "id": "choice_borrow",
         "text": "向领主借马",
         "requirements": {},
-        "effects": {},
+        "effects": {
+          "reputation": 3
+        },
         "narrative": "领主借你一匹白马，但代价是你在比武场上必须替他的旗帜争光。"
       },
       {
@@ -3112,10 +3064,10 @@
   {
     "id": "event_septon_armor",
     "name": "圣武士的请求",
-    "type": "EventType.religious",
+    "type": "religious",
     "description": "一名伤痕累累的圣武士请求你资助他修复破损的盔甲，好继续北上讨伐异端。",
     "triggerConditions": {
-      "minGold": 40,
+      "minGold": "40",
       "season": "summer"
     },
     "choices": [
@@ -3165,11 +3117,11 @@
   {
     "id": "event_guild_tooling",
     "name": "行会的秘密锻炉",
-    "type": "EventType.economic",
+    "type": "economic",
     "description": "铁匠行会的老匠人请你投资一座秘密锻炉，据说能打出比肩瓦雷利亚的利刃。",
     "triggerConditions": {
-      "minGold": 120,
-      "skills.alchemy": 2
+      "minGold": "120",
+      "skills.alchemy": "2"
     },
     "choices": [
       {
@@ -3229,7 +3181,7 @@
   {
     "id": "event_lord_levies_gear",
     "name": "征召令与军械",
-    "type": "EventType.war",
+    "type": "war",
     "description": "领主下达征召令，要求你自备武器甲胄随军出征。你的装备将决定你在军中的地位。",
     "triggerConditions": {
       "season": "summer"
@@ -3295,11 +3247,11 @@
   {
     "id": "event_trade_convoy",
     "name": "商队护送",
-    "type": "EventType.economic",
+    "type": "economic",
     "description": "一支满载货物的商队想雇佣护卫穿过河间地，报酬丰厚，但沿途匪患猖獗。",
     "triggerConditions": {
-      "minGold": 10,
-      "minEnergy": 30
+      "minGold": "10",
+      "minEnergy": "30"
     },
     "choices": [
       {
@@ -3322,7 +3274,10 @@
         "requirements": {
           "gold": 40
         },
-        "effects": {},
+        "effects": {
+          "gold": -40,
+          "reputation": 3
+        },
         "narrative": "你出钱雇了一队雇佣兵替商队开路。虽然没有亲自上阵，商队老板仍记住了你的名字。"
       },
       {
@@ -3346,10 +3301,10 @@
   {
     "id": "event_market_cartel",
     "name": "市场垄断",
-    "type": "EventType.economic",
+    "type": "economic",
     "description": "几名大户联手哄抬物价，想在粮食上大捞一笔。小贩们敢怒不敢言。",
     "triggerConditions": {
-      "minGold": 100,
+      "minGold": "100",
       "season": "autumn"
     },
     "choices": [
@@ -3382,7 +3337,9 @@
         "id": "choice_report",
         "text": "向领主告发",
         "requirements": {},
-        "effects": {},
+        "effects": {
+          "reputation": 8
+        },
         "narrative": "你把证据呈给领主。领主当众杖责了那几个奸商，并赏了你一枚银质徽章。"
       },
       {
@@ -3404,11 +3361,11 @@
   {
     "id": "event_trade_fair",
     "name": "自由贸易集市",
-    "type": "EventType.economic",
+    "type": "economic",
     "description": "一年一度的自由贸易集市开张了，来自厄索斯的商船停满了码头，奇货可居。",
     "triggerConditions": {
       "season": "summer",
-      "minGold": 50
+      "minGold": "50"
     },
     "choices": [
       {
@@ -3468,10 +3425,10 @@
   {
     "id": "event_title_ceremony",
     "name": "授勋典礼",
-    "type": "EventType.political",
+    "type": "political",
     "description": "领主决定举行一场盛大典礼，表彰有功之人。据说任何人都有机会获得正式头衔。",
     "triggerConditions": {
-      "minReputation": 55
+      "minReputation": "55"
     },
     "choices": [
       {
@@ -3519,7 +3476,7 @@
   {
     "id": "event_knight_night_watch",
     "name": "守夜人的邀请",
-    "type": "EventType.war",
+    "type": "war",
     "description": "一名守夜人游骑兵路过，向你讲述了长城外的黑暗。他暗示：长城需要更多人手。",
     "triggerConditions": {
       "season": "winter"
@@ -3529,7 +3486,10 @@
         "id": "choice_join_watch",
         "text": "加入守夜人",
         "requirements": {},
-        "effects": {},
+        "effects": {
+          "flags.sworn_brother": 1,
+          "reputation": 10
+        },
         "narrative": "你放下一切，走向长城。黑城堡的弟兄们为你披上黑衣——从此你与过去再无瓜葛。"
       },
       {
@@ -3566,10 +3526,10 @@
   {
     "id": "event_maester_commission",
     "name": "学城的委托",
-    "type": "EventType.religious",
+    "type": "religious",
     "description": "一位学士捎来学城的委托：护送一卷载有上古知识的羊皮卷前往旧镇，报酬是知识的授予。",
     "triggerConditions": {
-      "minReputation": 40
+      "minReputation": "40"
     },
     "choices": [
       {

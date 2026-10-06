@@ -422,7 +422,10 @@ const List<Location> allLocations = [
     dangerLevel: 6,
     population: 1000,
     features: const ['守夜人军团', '700 英尺高', '300 英里长'],
-    governorId: 'npc_jeor_mormont',
+    // S3-1：原为 'npc_jeor_mormont'——全库无此 id（NPC 表里的杰奥是
+    // `npc_geor_mormont`）。悬空引用会让 ai_service 的治主段走
+    // 「治主数据缺失（npc_jeor_mormont），地方权力真空」分支。
+    governorId: 'npc_geor_mormont',
     connectedTo: const ['location_winterfell'],
     description: '分隔北境与永冬之地的巨墙。',
   ),

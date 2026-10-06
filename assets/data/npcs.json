@@ -2,7 +2,7 @@
   {
     "id": "npc_nev",
     "name": "艾德·史塔克",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 42,
     "gender": "male",
     "familyId": "family_stark",
@@ -47,7 +47,7 @@
   {
     "id": "npc_catelyn",
     "name": "凯特琳·史塔克",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 38,
     "gender": "female",
     "familyId": "family_stark",
@@ -85,7 +85,7 @@
   {
     "id": "npc_robb",
     "name": "罗柏·史塔克",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 19,
     "gender": "male",
     "familyId": "family_stark",
@@ -123,7 +123,7 @@
   {
     "id": "npc_sansa",
     "name": "珊莎·史塔克",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 18,
     "gender": "female",
     "familyId": "family_stark",
@@ -161,7 +161,7 @@
   {
     "id": "npc_arya",
     "name": "艾莉亚·史塔克",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 13,
     "gender": "female",
     "familyId": "family_stark",
@@ -199,7 +199,7 @@
   {
     "id": "npc_bran",
     "name": "布兰·史塔克",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 11,
     "gender": "male",
     "familyId": "family_stark",
@@ -239,7 +239,7 @@
   {
     "id": "npc_rickon",
     "name": "瑞肯·史塔克",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 5,
     "gender": "male",
     "familyId": "family_stark",
@@ -272,7 +272,7 @@
   {
     "id": "npc_jon_snow",
     "name": "琼恩·雪诺",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 19,
     "gender": "male",
     "familyId": "family_stark",
@@ -316,7 +316,7 @@
   {
     "id": "npc_roose_bolton",
     "name": "卢斯·波顿",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 55,
     "gender": "male",
     "familyId": "family_bolton",
@@ -351,7 +351,7 @@
   {
     "id": "npc_ramsay_bolton",
     "name": "拉姆斯·波顿",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 25,
     "gender": "male",
     "familyId": "family_bolton",
@@ -386,7 +386,7 @@
   {
     "id": "npc_geor_mormont",
     "name": "杰奥·莫尔蒙",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 60,
     "gender": "male",
     "familyId": "family_mormont",
@@ -419,7 +419,7 @@
   {
     "id": "npc_hoster_tully",
     "name": "霍斯特·徒利",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 55,
     "gender": "male",
     "familyId": "family_tully",
@@ -453,7 +453,7 @@
   {
     "id": "npc_edmure_tully",
     "name": "艾德慕·徒利",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 30,
     "gender": "male",
     "familyId": "family_tully",
@@ -487,7 +487,7 @@
   {
     "id": "npc_walder_frey",
     "name": "瓦德·佛雷",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 70,
     "gender": "male",
     "familyId": "family_frey",
@@ -518,7 +518,7 @@
   {
     "id": "npc_lys_arryn",
     "name": "卢斯·艾林",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 10,
     "gender": "male",
     "familyId": "family_arryn",
@@ -546,7 +546,7 @@
   {
     "id": "npc_jon_arryn",
     "name": "琼恩·艾林",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 55,
     "gender": "male",
     "familyId": "family_arryn",
@@ -579,7 +579,7 @@
   {
     "id": "npc_tywin_lannister",
     "name": "泰温·兰尼斯特",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 55,
     "gender": "male",
     "familyId": "family_lannister",
@@ -614,7 +614,7 @@
   {
     "id": "npc_cersei",
     "name": "瑟曦·兰尼斯特",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 35,
     "gender": "female",
     "familyId": "family_lannister",
@@ -658,7 +658,7 @@
   {
     "id": "npc_jaime",
     "name": "詹姆·兰尼斯特",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 38,
     "gender": "male",
     "familyId": "family_lannister",
@@ -695,7 +695,7 @@
   {
     "id": "npc_tyrion",
     "name": "提利昂·兰尼斯特",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 30,
     "gender": "male",
     "familyId": "family_lannister",
@@ -733,7 +733,7 @@
   {
     "id": "npc_robert_baratheon",
     "name": "劳勃·拜拉席恩",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 40,
     "gender": "male",
     "familyId": "family_baratheon",
@@ -769,7 +769,7 @@
   {
     "id": "npc_joffrey",
     "name": "乔佛瑞·拜拉席恩",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 16,
     "gender": "male",
     "familyId": "family_baratheon",
@@ -807,7 +807,7 @@
   {
     "id": "npc_tommen",
     "name": "托曼·拜拉席恩",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 10,
     "gender": "male",
     "familyId": "family_baratheon",
@@ -840,7 +840,7 @@
   {
     "id": "npc_myrcella",
     "name": "弥赛拉·拜拉席恩",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 6,
     "gender": "female",
     "familyId": "family_baratheon",
@@ -873,7 +873,7 @@
   {
     "id": "npc_rhaegar",
     "name": "雷加·坦格利安",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 35,
     "gender": "male",
     "familyId": "family_targaryen",
@@ -909,7 +909,7 @@
   {
     "id": "npc_viserys",
     "name": "韦赛里斯·坦格利安",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 25,
     "gender": "male",
     "familyId": "family_targaryen",
@@ -943,7 +943,7 @@
   {
     "id": "npc_daenerys",
     "name": "丹妮莉丝·坦格利安",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 16,
     "gender": "female",
     "familyId": "family_targaryen",
@@ -982,7 +982,7 @@
   {
     "id": "npc_stannis_baratheon",
     "name": "史坦尼斯·拜拉席恩",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 45,
     "gender": "male",
     "familyId": "family_baratheon_storm",
@@ -1013,7 +1013,7 @@
   {
     "id": "npc_olenna_tyrell",
     "name": "奥莲娜·提利尔",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 60,
     "gender": "female",
     "familyId": "family_tyrell",
@@ -1050,7 +1050,7 @@
   {
     "id": "npc_margaery",
     "name": "玛格丽·提利尔",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 18,
     "gender": "female",
     "familyId": "family_tyrell",
@@ -1084,7 +1084,7 @@
   {
     "id": "npc_loras",
     "name": "洛拉斯·提利尔",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 20,
     "gender": "male",
     "familyId": "family_tyrell",
@@ -1118,7 +1118,7 @@
   {
     "id": "npc_oberon_martell",
     "name": "奥柏伦·马泰尔",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 40,
     "gender": "male",
     "familyId": "family_martell",
@@ -1149,7 +1149,7 @@
   {
     "id": "npc_balon_greyjoy",
     "name": "巴隆·葛雷乔伊",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 55,
     "gender": "male",
     "familyId": "family_greyjoy",
@@ -1183,7 +1183,7 @@
   {
     "id": "npc_theon",
     "name": "席恩·葛雷乔伊",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 20,
     "gender": "male",
     "familyId": "family_greyjoy",
@@ -1217,7 +1217,7 @@
   {
     "id": "npc_yara",
     "name": "亚拉·葛雷乔伊",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 18,
     "gender": "female",
     "familyId": "family_greyjoy",
@@ -1251,7 +1251,7 @@
   {
     "id": "npc_drogo",
     "name": "多拉科·卡奥",
-    "type": "NpcType.wildling",
+    "type": "wildling",
     "age": 35,
     "gender": "male",
     "familyId": "",
@@ -1282,7 +1282,7 @@
   {
     "id": "npc_royce",
     "name": "约恩·罗伊斯",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 55,
     "gender": "male",
     "familyId": "family_royce",
@@ -1318,7 +1318,7 @@
   {
     "id": "npc_brienne_tarth",
     "name": "布蕾妮·塔斯",
-    "type": "NpcType.noble",
+    "type": "noble",
     "age": 22,
     "gender": "female",
     "familyId": "family_tarbeck",

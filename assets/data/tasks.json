@@ -3,7 +3,7 @@
     "id": "task_nev_escort",
     "npcId": "npc_nev",
     "title": "护送北境信使至君临",
-    "type": "NpcTaskType.escort",
+    "type": "escort",
     "difficulty": 3,
     "deadlineMonths": 6,
     "steps": [
@@ -28,7 +28,7 @@
     "id": "task_nev_wildling",
     "npcId": "npc_nev",
     "title": "调查野人踪迹",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 2,
     "deadlineMonths": 4,
     "steps": [
@@ -49,7 +49,7 @@
     "id": "task_tyrion_gossip",
     "npcId": "npc_tyrion",
     "title": "收集君临流言",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 2,
     "deadlineMonths": 3,
     "steps": [
@@ -70,7 +70,7 @@
     "id": "task_tyrion_ledger",
     "npcId": "npc_tyrion",
     "title": "寻找失窃的账册",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 4,
     "deadlineMonths": 5,
     "steps": [
@@ -95,7 +95,7 @@
     "id": "task_dany_dragon",
     "npcId": "npc_daenerys",
     "title": "寻找龙蛋的线索",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 4,
     "deadlineMonths": 6,
     "steps": [
@@ -120,7 +120,7 @@
     "id": "task_dany_support",
     "npcId": "npc_daenerys",
     "title": "召集支持者",
-    "type": "NpcTaskType.diplomacy",
+    "type": "diplomacy",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -141,7 +141,7 @@
     "id": "task_jon_watch",
     "npcId": "npc_jon_snow",
     "title": "长城巡逻与补给",
-    "type": "NpcTaskType.escort",
+    "type": "escort",
     "difficulty": 2,
     "deadlineMonths": 4,
     "steps": [
@@ -162,7 +162,7 @@
     "id": "task_jon_ghost",
     "npcId": "npc_jon_snow",
     "title": "寻找失踪的冰原狼",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 3,
     "deadlineMonths": 4,
     "steps": [
@@ -183,7 +183,7 @@
     "id": "task_cersei_spy",
     "npcId": "npc_cersei",
     "title": "揪出宫中的叛徒",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -204,7 +204,7 @@
     "id": "task_cersei_rumor",
     "npcId": "npc_cersei",
     "title": "散布王后的流言",
-    "type": "NpcTaskType.diplomacy",
+    "type": "diplomacy",
     "difficulty": 4,
     "deadlineMonths": 6,
     "steps": [
@@ -229,7 +229,7 @@
     "id": "task_olenna_wine",
     "npcId": "npc_olenna_tyrell",
     "title": "运一批高庭红酒至君临",
-    "type": "NpcTaskType.delivery",
+    "type": "delivery",
     "difficulty": 2,
     "deadlineMonths": 3,
     "steps": [
@@ -250,7 +250,7 @@
     "id": "task_olenna_marriage",
     "npcId": "npc_olenna_tyrell",
     "title": "为玛格丽物色夫婿",
-    "type": "NpcTaskType.diplomacy",
+    "type": "diplomacy",
     "difficulty": 3,
     "deadlineMonths": 6,
     "steps": [
@@ -271,7 +271,7 @@
     "id": "task_catelyn_escort",
     "npcId": "npc_catelyn",
     "title": "护送信使前往奔流城",
-    "type": "NpcTaskType.escort",
+    "type": "escort",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -296,7 +296,7 @@
     "id": "task_catelyn_children",
     "npcId": "npc_catelyn",
     "title": "打探孩子们的安危",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 4,
     "deadlineMonths": 6,
     "steps": [
@@ -321,7 +321,7 @@
     "id": "task_robb_recruit",
     "npcId": "npc_robb",
     "title": "召集北境封臣",
-    "type": "NpcTaskType.diplomacy",
+    "type": "diplomacy",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -346,7 +346,7 @@
     "id": "task_robb_wolf",
     "npcId": "npc_robb",
     "title": "追猎偷羊的狼群",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 2,
     "deadlineMonths": 3,
     "steps": [
@@ -367,7 +367,7 @@
     "id": "task_margaery_supper",
     "npcId": "npc_margaery",
     "title": "筹办高庭的晚宴",
-    "type": "NpcTaskType.delivery",
+    "type": "delivery",
     "difficulty": 2,
     "deadlineMonths": 3,
     "steps": [
@@ -388,7 +388,7 @@
     "id": "task_margaery_support",
     "npcId": "npc_margaery",
     "title": "争取王领贵族的支持",
-    "type": "NpcTaskType.diplomacy",
+    "type": "diplomacy",
     "difficulty": 4,
     "deadlineMonths": 6,
     "steps": [
@@ -413,7 +413,7 @@
     "id": "task_tywin_escort",
     "npcId": "npc_tywin_lannister",
     "title": "护送金库账册至君临",
-    "type": "NpcTaskType.escort",
+    "type": "escort",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -438,7 +438,7 @@
     "id": "task_tywin_house",
     "npcId": "npc_tywin_lannister",
     "title": "调查西境领主的私通",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 4,
     "deadlineMonths": 6,
     "steps": [
@@ -463,7 +463,7 @@
     "id": "task_sansa_needlework",
     "npcId": "npc_sansa",
     "title": "为珊莎采买上等丝绸",
-    "type": "NpcTaskType.delivery",
+    "type": "delivery",
     "difficulty": 1,
     "deadlineMonths": 3,
     "steps": [
@@ -484,7 +484,7 @@
     "id": "task_sansa_court",
     "npcId": "npc_sansa",
     "title": "打探君临宫廷的礼数",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -505,7 +505,7 @@
     "id": "task_arya_sword",
     "npcId": "npc_arya",
     "title": "陪艾莉亚练剑",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 2,
     "deadlineMonths": 3,
     "steps": [
@@ -526,7 +526,7 @@
     "id": "task_arya_sneak",
     "npcId": "npc_arya",
     "title": "掩护艾莉亚溜出城",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 3,
     "deadlineMonths": 4,
     "steps": [
@@ -551,7 +551,7 @@
     "id": "task_bran_climb",
     "npcId": "npc_bran",
     "title": "带布兰登高看鹰巢",
-    "type": "NpcTaskType.escort",
+    "type": "escort",
     "difficulty": 1,
     "deadlineMonths": 2,
     "steps": [
@@ -572,7 +572,7 @@
     "id": "task_bran_stories",
     "npcId": "npc_bran",
     "title": "为布兰收集古堡传说",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 2,
     "deadlineMonths": 4,
     "steps": [
@@ -593,7 +593,7 @@
     "id": "task_jaime_sword",
     "npcId": "npc_jaime",
     "title": "与詹姆切磋剑术",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 4,
     "deadlineMonths": 4,
     "steps": [
@@ -618,7 +618,7 @@
     "id": "task_jaime_letter",
     "npcId": "npc_jaime",
     "title": "为詹姆送一封密信",
-    "type": "NpcTaskType.delivery",
+    "type": "delivery",
     "difficulty": 2,
     "deadlineMonths": 3,
     "steps": [
@@ -639,7 +639,7 @@
     "id": "task_robert_hunt",
     "npcId": "npc_robert_baratheon",
     "title": "陪劳勃国王狩猎",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 3,
     "deadlineMonths": 3,
     "steps": [
@@ -660,7 +660,7 @@
     "id": "task_robert_mead",
     "npcId": "npc_robert_baratheon",
     "title": "为国王搜罗佳酿",
-    "type": "NpcTaskType.delivery",
+    "type": "delivery",
     "difficulty": 2,
     "deadlineMonths": 3,
     "steps": [
@@ -681,7 +681,7 @@
     "id": "task_stannis_ship",
     "npcId": "npc_stannis_baratheon",
     "title": "修缮龙石岛的舰队",
-    "type": "NpcTaskType.escort",
+    "type": "escort",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -702,7 +702,7 @@
     "id": "task_stannis_loyalty",
     "npcId": "npc_stannis_baratheon",
     "title": "摸清诸侯的忠诚",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 4,
     "deadlineMonths": 6,
     "steps": [
@@ -727,7 +727,7 @@
     "id": "task_oberon_poison",
     "npcId": "npc_oberon_martell",
     "title": "追查毒药的来路",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 4,
     "deadlineMonths": 6,
     "steps": [
@@ -752,7 +752,7 @@
     "id": "task_oberon_duel",
     "npcId": "npc_oberon_martell",
     "title": "寻觅可疑的剑术高手",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 3,
     "deadlineMonths": 4,
     "steps": [
@@ -777,7 +777,7 @@
     "id": "task_balon_fleet",
     "npcId": "npc_balon_greyjoy",
     "title": "重建铁岛的长船队",
-    "type": "NpcTaskType.escort",
+    "type": "escort",
     "difficulty": 4,
     "deadlineMonths": 8,
     "steps": [
@@ -802,7 +802,7 @@
     "id": "task_balon_raid",
     "npcId": "npc_balon_greyjoy",
     "title": "侦察西境海岸的守备",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -827,7 +827,7 @@
     "id": "task_yara_helm",
     "npcId": "npc_yara",
     "title": "夺回被扣的战利船",
-    "type": "NpcTaskType.escort",
+    "type": "escort",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -852,7 +852,7 @@
     "id": "task_yara_prize",
     "npcId": "npc_yara",
     "title": "猎捕一艘商船",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 2,
     "deadlineMonths": 4,
     "steps": [
@@ -873,7 +873,7 @@
     "id": "task_rickon_play",
     "npcId": "npc_rickon",
     "title": "陪瑞肯玩捉迷藏",
-    "type": "NpcTaskType.delivery",
+    "type": "delivery",
     "difficulty": 1,
     "deadlineMonths": 2,
     "steps": [
@@ -894,7 +894,7 @@
     "id": "task_rickon_shaggydog",
     "npcId": "npc_rickon",
     "title": "找回走失的毛毛狗",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 2,
     "deadlineMonths": 3,
     "steps": [
@@ -915,7 +915,7 @@
     "id": "task_loras_tourney",
     "npcId": "npc_loras",
     "title": "筹备高庭的比武大会",
-    "type": "NpcTaskType.escort",
+    "type": "escort",
     "difficulty": 3,
     "deadlineMonths": 4,
     "steps": [
@@ -936,7 +936,7 @@
     "id": "task_loras_rose",
     "npcId": "npc_loras",
     "title": "送出玫瑰信物",
-    "type": "NpcTaskType.delivery",
+    "type": "delivery",
     "difficulty": 2,
     "deadlineMonths": 3,
     "steps": [
@@ -957,7 +957,7 @@
     "id": "task_drogo_stallion",
     "npcId": "npc_drogo",
     "title": "驯服一匹野马驹",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 3,
     "deadlineMonths": 4,
     "steps": [
@@ -982,7 +982,7 @@
     "id": "task_drogo_raid",
     "npcId": "npc_drogo",
     "title": "参加多斯拉克掠袭",
-    "type": "NpcTaskType.escort",
+    "type": "escort",
     "difficulty": 4,
     "deadlineMonths": 6,
     "steps": [
@@ -1007,7 +1007,7 @@
     "id": "task_nev_cat_winter_store",
     "npcId": "npc_nev",
     "title": "筹备冬季粮仓",
-    "type": "NpcTaskType.delivery",
+    "type": "delivery",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -1033,7 +1033,7 @@
     "id": "task_robb_jon_wall",
     "npcId": "npc_robb",
     "title": "替长城换防送信",
-    "type": "NpcTaskType.delivery",
+    "type": "delivery",
     "difficulty": 4,
     "deadlineMonths": 6,
     "steps": [
@@ -1059,7 +1059,7 @@
     "id": "task_sansa_arya_sword",
     "npcId": "npc_sansa",
     "title": "找回失窃的传家佩剑",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 3,
     "deadlineMonths": 4,
     "steps": [
@@ -1085,7 +1085,7 @@
     "id": "task_bran_rickon_watch",
     "npcId": "npc_bran",
     "title": "调查守夜人失踪案",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 2,
     "deadlineMonths": 3,
     "steps": [
@@ -1111,7 +1111,7 @@
     "id": "task_cersei_jaime_traitor",
     "npcId": "npc_cersei",
     "title": "彻查御林铁卫的叛徒",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 4,
     "deadlineMonths": 5,
     "steps": [
@@ -1137,7 +1137,7 @@
     "id": "task_tyrion_cersei_rumor",
     "npcId": "npc_tyrion",
     "title": "追查王后身边的奸细",
-    "type": "NpcTaskType.diplomacy",
+    "type": "diplomacy",
     "difficulty": 3,
     "deadlineMonths": 4,
     "steps": [
@@ -1163,7 +1163,7 @@
     "id": "task_olenna_margaery_match",
     "npcId": "npc_olenna_tyrell",
     "title": "为玛格丽操办玫瑰舞会",
-    "type": "NpcTaskType.diplomacy",
+    "type": "diplomacy",
     "difficulty": 3,
     "deadlineMonths": 6,
     "steps": [
@@ -1189,7 +1189,7 @@
     "id": "task_balon_yara_pirate",
     "npcId": "npc_balon_greyjoy",
     "title": "清剿铁群岛海盗",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 4,
     "deadlineMonths": 5,
     "steps": [
@@ -1215,7 +1215,7 @@
     "id": "task_tywin_mine",
     "npcId": "npc_tywin_lannister",
     "title": "调查西境矿脉枯竭的谣言",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 4,
     "deadlineMonths": 5,
     "steps": [
@@ -1240,7 +1240,7 @@
     "id": "task_arya_wolfpack",
     "npcId": "npc_arya",
     "title": "猎杀袭击商队的狼群",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 3,
     "deadlineMonths": 4,
     "steps": [
@@ -1265,7 +1265,7 @@
     "id": "task_roose_ledger",
     "npcId": "npc_roose_bolton",
     "title": "清点恐怖堡的军需账册",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 3,
     "deadlineMonths": 4,
     "steps": [
@@ -1290,7 +1290,7 @@
     "id": "task_ramsay_escapee",
     "npcId": "npc_ramsay_bolton",
     "title": "追捕脱逃的俘虏",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 4,
     "deadlineMonths": 5,
     "steps": [
@@ -1315,7 +1315,7 @@
     "id": "task_theon_father",
     "npcId": "npc_theon",
     "title": "试探父亲的联姻意向",
-    "type": "NpcTaskType.diplomacy",
+    "type": "diplomacy",
     "difficulty": 2,
     "deadlineMonths": 4,
     "steps": [
@@ -1340,7 +1340,7 @@
     "id": "task_hoster_message",
     "npcId": "npc_hoster_tully",
     "title": "护送家书至鹰巢城",
-    "type": "NpcTaskType.delivery",
+    "type": "delivery",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -1365,7 +1365,7 @@
     "id": "task_royce_clan",
     "npcId": "npc_royce",
     "title": "清剿月门的山岳部族",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 4,
     "deadlineMonths": 5,
     "steps": [
@@ -1390,7 +1390,7 @@
     "id": "task_royce_arryn_border",
     "npcId": "npc_royce",
     "title": "排查谷地边境的部族异动",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 4,
     "deadlineMonths": 6,
     "steps": [
@@ -1416,7 +1416,7 @@
     "id": "task_brienne_escort",
     "npcId": "npc_brienne_tarth",
     "title": "护送塔斯岛使节至风息堡",
-    "type": "NpcTaskType.escort",
+    "type": "escort",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -1441,7 +1441,7 @@
     "id": "task_geor_wildling_scout",
     "npcId": "npc_geor_mormont",
     "title": "清剿长城外的野人侦察",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 4,
     "deadlineMonths": 5,
     "steps": [
@@ -1466,7 +1466,7 @@
     "id": "task_edmure_levy",
     "npcId": "npc_edmure_tully",
     "title": "征募河间地民兵",
-    "type": "NpcTaskType.diplomacy",
+    "type": "diplomacy",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -1491,7 +1491,7 @@
     "id": "task_walder_toll",
     "npcId": "npc_walder_frey",
     "title": "护送过桥税银至奔流城",
-    "type": "NpcTaskType.escort",
+    "type": "escort",
     "difficulty": 3,
     "deadlineMonths": 4,
     "steps": [
@@ -1516,7 +1516,7 @@
     "id": "task_lys_hawk",
     "npcId": "npc_lys_arryn",
     "title": "寻觅稀有的白色猎隼",
-    "type": "NpcTaskType.hunt",
+    "type": "hunt",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -1541,7 +1541,7 @@
     "id": "task_joffrey_tourney",
     "npcId": "npc_joffrey",
     "title": "筹备御前比武大会",
-    "type": "NpcTaskType.diplomacy",
+    "type": "diplomacy",
     "difficulty": 4,
     "deadlineMonths": 6,
     "steps": [
@@ -1566,7 +1566,7 @@
     "id": "task_tommen_books",
     "npcId": "npc_tommen",
     "title": "收集七大王国的史书",
-    "type": "NpcTaskType.delivery",
+    "type": "delivery",
     "difficulty": 2,
     "deadlineMonths": 5,
     "steps": [
@@ -1591,7 +1591,7 @@
     "id": "task_jon_arryn_border",
     "npcId": "npc_jon_arryn",
     "title": "巡查血门补给线",
-    "type": "NpcTaskType.escort",
+    "type": "escort",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -1616,7 +1616,7 @@
     "id": "task_myrcella_doll",
     "npcId": "npc_myrcella",
     "title": "寻找遗失的金发布偶",
-    "type": "NpcTaskType.investigate",
+    "type": "investigate",
     "difficulty": 1,
     "deadlineMonths": 3,
     "steps": [
@@ -1641,7 +1641,7 @@
     "id": "task_rhaegar_music",
     "npcId": "npc_rhaegar",
     "title": "寻回失落的高庭竖琴",
-    "type": "NpcTaskType.delivery",
+    "type": "delivery",
     "difficulty": 3,
     "deadlineMonths": 5,
     "steps": [
@@ -1666,7 +1666,7 @@
     "id": "task_viserys_treaty",
     "npcId": "npc_viserys",
     "title": "向潘托斯总督递送求援信",
-    "type": "NpcTaskType.diplomacy",
+    "type": "diplomacy",
     "difficulty": 3,
     "deadlineMonths": 4,
     "steps": [
@@ -1691,7 +1691,7 @@
     "id": "task_jon_arryn_lys_coop",
     "npcId": "npc_jon_arryn",
     "title": "重整月门商路的秩序",
-    "type": "NpcTaskType.diplomacy",
+    "type": "diplomacy",
     "difficulty": 4,
     "deadlineMonths": 5,
     "steps": [
