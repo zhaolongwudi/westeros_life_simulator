@@ -1386,7 +1386,11 @@ $seasonGuide
     }
   }
 
-  /// System Prompt（参考 docs/07_AI提示词.md）。
+  /// System Prompt（S3-3：设计说明见 `docs/07_AI提示词.md` §二，本常量即该节全文）。
+  ///
+  /// ⚠️ 改这段只改本常量，**不要**去改 docs/07 —— 那份文档已从「可直接使用的
+  /// System Prompt」改写为「AI Prompt 设计说明」，与本文冲突时**以本常量为准**。
+  /// 逐条改动理由见 docs/03-审查接力.md 的 S3-3 执行记录。
   static const String systemPrompt = '''
 你是【维斯特洛世界模拟系统】。
 

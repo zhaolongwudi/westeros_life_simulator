@@ -293,7 +293,7 @@ lib/screens/game_screen.dart（游戏主界面，StatefulWidget）
 | `analysis_options.yaml` | `errors: todo: ignore` | 分析器配置将 todo 级忽略，代码无 TODO 告警 |
 | `lib/screens/game_screen.dart:164` | 注释 `// 移除占位行` | 运行时代码：移除「（AI 思考中…）」文本行，非未实现占位 |
 | `lib/services/ai_service.dart` 头注释 | 「简化版：单 Key、无重试、无多 Key 轮换。后续 Batch 可扩展为多 Key 池 + 429 退避」 | 已声明的能力缺口：多 Key 池、429 退避轮换当前未实现（该文件当前重试为指数退避 3 次，无 Key 池） |
-| `docs/07_AI提示词.md:689-704` | `【时间】XXX 年·XXX 月`、`XXXX` 等 16 处占位符 | 文档内 AI 提示词模板示例占位，非代码 |
+| `docs/07_AI提示词.md:935-955` | `【时间】XXX 年·XXX 月`、`XXXX` 等 16 处占位符 | 文档内 AI 提示词模板示例占位，非代码；S3-3 已把这 144 节标为「背景知识库，不进 prompt」 |
 
 - 代码内 **无** `TODO` / `FIXME` / `XXX` / `HACK` 标记。
 - 代码内 **无** `UnimplementedError` / `not implemented` / 空函数体（grep 全 lib+test+scripts+docs 无命中）。
