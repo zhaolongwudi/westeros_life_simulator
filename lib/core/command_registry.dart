@@ -14,13 +14,27 @@ typedef CommandHandler = CommandResult Function(String args);
 
 /// 指令执行结果。
 class CommandResult {
-  const CommandResult({required this.text, this.consumedTurn = false});
+  const CommandResult({
+    required this.text,
+    this.consumedTurn = false,
+    bool? needsTimeAdvance,
+  }) : needsTimeAdvance = needsTimeAdvance ?? consumedTurn;
 
   /// 响应文本。
   final String text;
 
-  /// 是否消耗了一个回合（时间推进）。
+  /// 是否消耗了一个回合（**语义：时间是否推进了**）。
+  ///
+  /// 注意这只是「事实陈述」，不代表调度方要替它推进时间——
+  /// 推进动作看 [needsTimeAdvance]。
   final bool consumedTurn;
+
+  /// 调度方（如 `GameScreen._submitCommand`）是否需要在指令返回后调用 `advanceMonth()`。
+  ///
+  /// 默认等于 [consumedTurn]。自行推进时间的指令（如「过月」，handler 内部已调用
+  /// `advanceMonth()`）必须显式传 `false`，否则会出现「过月推进两次」。
+  /// Batch 10-117（S2-1）之前 `consumedTurn` 全库无人消费，「探索」因此零时间成本。
+  final bool needsTimeAdvance;
 }
 
 /// 一条指令的注册描述。
@@ -47,7 +61,10 @@ class CommandSpec {
   /// 帮助文本与注册顺序（跨领域分组时靠 order 复原历史顺序）。
   final int order;
 
-  /// 执行后是否消耗一个回合。
+  /// 执行后是否消耗一个回合（**声明性**：供帮助文本/测试/契约检查读取）。
+  ///
+  /// 真正的推进动作以 handler 返回的 `CommandResult.needsTimeAdvance` 为准——
+  /// 两条通道必须一致，否则「声明消耗了但没推进」这类 bug 又会静默溜走。
   final bool consumedTurn;
 
   /// 参数不足时的提示文案（null 表示不校验参数）。

@@ -421,7 +421,13 @@ mixin GamePlayMixin
         order: 45,
         consumedTurn: true,
         helpLine: '过月 / advance      推进一个月',
-        handler: (args) => CommandResult(text: advanceMonth(), consumedTurn: true),
+        // handler 内部已自行 advanceMonth()，故 needsTimeAdvance=false：
+        // 调度方若再推进一次就会「过月推两个月」。
+        handler: (args) => CommandResult(
+              text: advanceMonth(),
+              consumedTurn: true,
+              needsTimeAdvance: false,
+            ),
       ),
     );
   }

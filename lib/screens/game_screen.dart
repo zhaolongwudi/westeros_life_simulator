@@ -127,6 +127,11 @@ class _GameScreenState extends State<GameScreen> {
     final result = _engine.resolveCommand(input);
     _appendLine('> $input');
     _appendLine(result.text);
+    // S2-1（P1-04）：consumedTurn 契约在此消费——消耗回合的指令推进一个月。
+    // 「过月」handler 已自推进（needsTimeAdvance=false），不会双推进。
+    if (result.needsTimeAdvance) {
+      _appendLine(_engine.advanceMonth());
+    }
   }
 
   /// 执行一次 AI 行动：编排下沉到引擎（runAiAction），本方法只渲染结果。
