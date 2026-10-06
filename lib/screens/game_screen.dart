@@ -22,6 +22,7 @@ import '../widgets/game/nav_grid.dart';
 import '../widgets/game/quick.dart';
 import '../widgets/game/responsive.dart';
 import '../widgets/game/status.dart';
+import '../widgets/theme/ornate.dart';
 import 'events_screen.dart';
 import 'family_screen.dart';
 import 'family_tree_screen.dart';
@@ -270,46 +271,48 @@ class _GameScreenState extends State<GameScreen> {
         ],
       ),
       body: SafeArea(
-        child: AdaptiveFrame(
-          maxWidth: 700,
-          child: Column(
-            children: <Widget>[
-              // 玩家状态摘要条
-              StatusBar(engine: _engine),
-              // 快捷指令
-              QuickCommandBar(
-                commands: _quickCommands,
-                onTap: _submitCommand,
-              ),
-              // AI 模式开关
-              AiModeToggle(
-                aiMode: _aiMode,
-                aiLoading: _aiLoading,
-                onToggle: (v) => setState(() {
-                  _aiMode = v;
-                  _aiChoices = <EventChoice>[];
-                }),
-              ),
-              // 叙事输出区
-              Expanded(
-                child: NarrativeView(
-                  lines: _lines,
-                  scrollController: _scrollController,
-                  engine: _engine,
-                  onOpenPanel: _openScreen,
-                  aiChoices: _aiChoices,
-                  onChooseAi: _chooseAiOption,
+        child: ParchmentBackground(
+          child: AdaptiveFrame(
+            maxWidth: 700,
+            child: Column(
+              children: <Widget>[
+                // 玩家状态摘要条
+                StatusBar(engine: _engine),
+                // 快捷指令
+                QuickCommandBar(
+                  commands: _quickCommands,
+                  onTap: _submitCommand,
                 ),
-              ),
-              // 指令输入区
-              CommandInputBar(
-                controller: _inputController,
-                onSubmitted: _submitCommand,
-                hintText: _aiMode
-                    ? 'AI 模式：描述你的行动…'
-                    : '输入指令（如 工作 / 训练 sword / 过月）',
-              ),
-            ],
+                // AI 模式开关
+                AiModeToggle(
+                  aiMode: _aiMode,
+                  aiLoading: _aiLoading,
+                  onToggle: (v) => setState(() {
+                    _aiMode = v;
+                    _aiChoices = <EventChoice>[];
+                  }),
+                ),
+                // 叙事输出区
+                Expanded(
+                  child: NarrativeView(
+                    lines: _lines,
+                    scrollController: _scrollController,
+                    engine: _engine,
+                    onOpenPanel: _openScreen,
+                    aiChoices: _aiChoices,
+                    onChooseAi: _chooseAiOption,
+                  ),
+                ),
+                // 指令输入区
+                CommandInputBar(
+                  controller: _inputController,
+                  onSubmitted: _submitCommand,
+                  hintText: _aiMode
+                      ? 'AI 模式：描述你的行动…'
+                      : '输入指令（如 工作 / 训练 sword / 过月）',
+                ),
+              ],
+            ),
           ),
         ),
       ),

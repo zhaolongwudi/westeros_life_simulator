@@ -150,11 +150,12 @@ class NarrativeView extends StatelessWidget {
                       child: Text(
                         segments[i],
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          fontFamily: isCommand ? null : 'monospace',
-                          height: 1.45,
+                          fontFamily: isCommand ? null : 'serif',
+                          letterSpacing: isCommand ? null : 0.3,
+                          height: 1.6,
                           color: isCommand
-                              ? WesterosColors.goldBright
-                              : WesterosColors.parchment,
+                             ? WesterosColors.goldBright
+                             : WesterosColors.parchment,
                         ),
                       ),
                     ),
@@ -239,9 +240,10 @@ class AiChoiceCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        choice.text,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: WesterosColors.goldBright,
+                            choice.text,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontFamily: 'serif', letterSpacing: 0.4, height: 1.35,
+                            color: WesterosColors.goldBright,
                         ),
                       ),
                       if (choice.narrative.isNotEmpty) ...[
