@@ -223,11 +223,22 @@ class GameStateProvider extends ChangeNotifier {
   }
 
   /// 应用事件选项效果。
-  void applyChoice(EventChoice choice) {
-    if (!_isGameActive || _isGameOver) return;
+  ///
+  /// 返回结算文本（目前只有「N 项效果未生效」这一类提示，无提示时为空串）。
+  /// S2-3（P1-03 阶段一）：与 `applyAiChoice` 对齐——后者早在 Batch 10-94/101
+  /// 就把幽灵键做成玩家可见的提示行，事件通道此前返回 void、完全无反馈。
+  /// 返回 String 不破坏既有调用方（Dart 允许忽略返回值）。
+  String applyChoice(EventChoice choice) {
+    if (!_isGameActive || _isGameOver) return '';
 
     // 应用效果
     _player = applyEffects(_player, choice.effects);
+    final buf = StringBuffer();
+    final rejected = _lastRejectedEffectKeys;
+    if (rejected.isNotEmpty) {
+      buf.writeln(
+          '（其中 ${rejected.length} 项效果未生效：${rejected.join('、')}）');
+    }
 
     // 记录历史（经 _appendHistory 执行环形截断）
     final pending = _currentEvent;
@@ -243,6 +254,7 @@ class GameStateProvider extends ChangeNotifier {
     _checkGameOver();
 
     notifyListeners();
+    return buf.toString();
   }
 
   /// 将效果 Map 应用到玩家身上，返回新玩家。
