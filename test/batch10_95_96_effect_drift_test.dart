@@ -227,8 +227,8 @@ void main() {
       expect(dead, isEmpty);
     });
 
-    test('事件库总量仍是 72（未误删事件）', () {
-      expect(allEvents.length, 72);
+    test('事件库总量 71（S3-4 有意删除 1 条重复事件）', () {
+      expect(allEvents.length, 71);
     });
   });
 }

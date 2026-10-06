@@ -438,14 +438,10 @@ const List<GameSystem> allSystems = [
     rules: const ['死亡规则', '死亡代价', '死亡传承'],
     features: const ['死亡规则', '死亡代价', '死亡传承'],
   ),
-  GameSystem(
-    id: 'system_succession_law',
-    name: '继承系统',
-    category: '继承',
-    description: '维斯特洛的继承法律体系。',
-    rules: const ['继承规则', '继承代价', '继承传承'],
-    features: const ['继承规则', '继承代价', '继承传承'],
-  ),
+  // S3-4（P2-09 #5）：删除原 `system_succession_law`（name 也是「继承系统」，
+  // rules/features/description 与 `system_succession` 仅差一个「法律」二字，
+  // 而 74 个系统的 rules/features 全是「XX规则/XX代价/XX传承」占位、无任何逻辑消费，
+  // 故这是零信息量的纯重复，删除对行为零影响。系统总数 74 → 73。
   GameSystem(
     id: 'system_multigeneration',
     name: '多世代模式',

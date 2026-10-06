@@ -7,9 +7,9 @@ import 'package:westeros_life_simulator/models/player.dart';
 
 void main() {
   group('GameSystemsMixin', () {
-    test('系统总数 74', () {
+    test('系统总数 73（S3-4 删除重复的 system_succession_law）', () {
       final engine = GameEngine()..startNewGame();
-      expect(engine.systemCount, 74);
+      expect(engine.systemCount, 73);
     });
 
     test('systemsByCategory 按分类查询', () {

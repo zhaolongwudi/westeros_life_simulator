@@ -800,22 +800,6 @@
     ]
   },
   {
-    "id": "system_succession_law",
-    "name": "继承系统",
-    "category": "继承",
-    "description": "维斯特洛的继承法律体系。",
-    "rules": [
-      "继承规则",
-      "继承代价",
-      "继承传承"
-    ],
-    "features": [
-      "继承规则",
-      "继承代价",
-      "继承传承"
-    ]
-  },
-  {
     "id": "system_multigeneration",
     "name": "多世代模式",
     "category": "继承",

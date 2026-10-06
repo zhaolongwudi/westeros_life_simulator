@@ -6,8 +6,8 @@ import 'package:westeros_life_simulator/data/system_data.dart';
 
 void main() {
   group('系统数据', () {
-    test('allSystems 包含 74 个系统', () {
-      expect(allSystems.length, 74);
+    test('allSystems 包含 73 个系统（S3-4 删除重复的 system_succession_law）', () {
+      expect(allSystems.length, 73);
     });
 
     test('所有系统 ID 唯一', () {

@@ -7,8 +7,8 @@ import 'package:westeros_life_simulator/models/event.dart';
 
 void main() {
   group('事件数据', () {
-    test('allEvents 包含 72 个事件', () {
-      expect(allEvents.length, 72);
+    test('allEvents 包含 71 个事件（S3-4 删除重复的 event_high_septon_change_religious）', () {
+      expect(allEvents.length, 71);
     });
 
     test('所有事件 ID 唯一', () {
@@ -59,9 +59,9 @@ void main() {
       final war = eventsByType(EventType.war);
       expect(war.length, 8);
     });
-    test('宗教事件数量正确', () {
+    test('宗教事件数量正确（S3-4 删除重复的「总主教更替（宗教）」后为 6）', () {
       final religious = eventsByType(EventType.religious);
-      expect(religious.length, 7);
+      expect(religious.length, 6);
     });
     test('经济事件数量正确', () {
       final economic = eventsByType(EventType.economic);

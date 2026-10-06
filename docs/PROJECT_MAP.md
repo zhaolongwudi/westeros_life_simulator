@@ -1,10 +1,42 @@
 # 维斯特洛人生模拟器 · 项目地图（PROJECT_MAP）
 
-> 生成日期：2026-09-28 · 本地 HEAD `ef46220`（batch10-25 婚姻系统二轮，婚姻/丧偶/谈心/月度事件/婚姻面板）
-> 生成方式：通读 `/root/westeros_life_simulator` 全量代码后整理的事实性结论，与 `docs/CODE_MAP.md` 并存（CODE_MAP 偏定位索引，本文件偏全景地图）
+> 生成日期：2026-09-28 · 当时 HEAD `ef46220`（batch10-25 婚姻系统二轮）
+> 生成方式：通读全量代码后整理的事实性结论，与 `docs/CODE_MAP.md` 并存（CODE_MAP 偏定位索引，本文件偏全景地图）
 > 范围：仅 `lib/` + `test/` + `scripts/` + `docs/` + 根配置文件；不含第三方依赖源码
-> 规模：`lib/` 共 16080 行；`test/` 共 6614 行（43 个测试文件）
 > 约束：本文档只陈述事实，不含修改建议
+
+---
+
+> # ⚠️ 过期横幅（S3-4 添加，对应 P2-06）
+>
+> **本文档的目录树与行数快照停在 2026-09-28 / batch10-25，已严重过期。**
+>
+> | 项 | 快照值（2026-09-28） | 当前实测（S3-4） |
+> |---|---|---|
+> | `lib/` 行数 | 16080 | **25320** |
+> | `lib/` 文件数 | — | **73** |
+> | `test/` 行数 | 6614 | **21094** |
+> | `test/` 文件数 | 43 | **122** |
+> | `scripts/` 文件数 | — | **11** |
+> | `docs/` md 文件数 | 9 | **16**（S3-2 新建 `09_物品百科.md`，S3-1 新建 `specs/content-schema.md`） |
+> | `docs/` md 行数 | ~6700 | **9778** |
+> | 测试用例 | 458+ | **1260** 全绿 |
+>
+> **已知的结构性缺失**（快照时还没有的目录/文件）：
+> `lib/core/`（含 `command_registry.dart`、`event_trigger_eval.dart`、`json_safe.dart` 的同级工具）、
+> `lib/widgets/`、`lib/theme/`、`lib/utils/`、`scripts/check_docs_sync.py`、
+> `scripts/gen_family_relations_doc.py`、`scripts/gen_item_catalog_doc.py`、
+> `test/batch10_*.dart`（batch 10-13 ~ 10-121 共 100+ 个文件）。
+>
+> **怎么用这份文档**：
+> - ❌ 不要相信任何行数、文件数、数量断言（包括本横幅里的——它们也会再次过期）。
+> - ✅ 只把它当**架构地图与依赖方向说明**看，这部分仍然有效。
+> - ✅ 当前真实状态看 `docs/03-审查接力.md`（实时问题状态表 + 各 Sprint 执行记录）。
+> - ✅ 真实行数自己跑 `find lib test scripts -name '*.dart' -o -name '*.py' | xargs wc -l`。
+>
+> 刷新本快照是独立批次（需重通读全量代码），已登记在接力文档的待办里。
+
+---
 
 ## 1. 完整目录树（含行数）
 
@@ -104,7 +136,7 @@
 - `lib/game_engine.dart`：引擎宿主 `GameEngine`，`GameProviderBase` 基类混入 11 个 mixin（含混入顺序）。
 
 ### data/（静态数据，const 常量）
-- `event_data.dart`：72 个事件模板常量 `allEvents`（含 218 处 EventChoice）。
+- `event_data.dart`：71 个事件模板常量 `allEvents`（含 223 处 EventChoice）。
 - `family_data.dart`：26 个贵族家族常量 `allFamilies`。
 - `location_data.dart`：68 个地点常量 `allLocations`。
 - `npc_data.dart`：36 个 NPC 常量 `allNpcs`。
@@ -124,7 +156,7 @@
 - `mixin_npc_interact.dart`：NPC 深度交互（关系等级/互动/示好/事件链）。
 - `mixin_npc_task.dart`：NPC 多步骤任务链二轮（接单/推进/期限/奖励结算）。
 - `mixin_play.dart`：日常玩法（训练/工作/休息/狩猎/贸易/月度循环）。
-- `mixin_systems.dart`：挂载 74 个系统、月度演进与系统查询。
+- `mixin_systems.dart`：挂载 73 个系统、月度演进与系统查询。
 
 ### models/
 - `event.dart`：事件与事件模板模型（GameEvent / EventChoice / EventType）。
@@ -315,11 +347,11 @@ lib/screens/game_screen.dart（游戏主界面，StatefulWidget）
 ### 数据文件（均为 Dart 源码 const 字面量，位于 `lib/data/`，非独立 JSON/文本）
 | 文件 | 内容规模 | 格式 |
 |---|---|---|
-| `event_data.dart` | 72 个事件、218 处 EventChoice | `const List<GameEvent> allEvents = [...]`（模型构造字面量） |
+| `event_data.dart` | 71 个事件、223 处 EventChoice | `const List<GameEvent> allEvents = [...]`（模型构造字面量） |
 | `family_data.dart` | 26 家族 | `const List<Family> allFamilies` |
 | `location_data.dart` | 68 地点 | `const List<Location> allLocations` |
 | `npc_data.dart` | 36 NPC | `const List<Npc> allNpcs` |
-| `system_data.dart` | 74 系统 | `const List<GameSystem> allSystems` |
+| `system_data.dart` | 73 系统 | `const List<GameSystem> allSystems` |
 | `item_data.dart` | 物品词典（34 物品） | const 物品定义 + 标签映射 |
 | `narrative_templates.dart` | 10 身份/12 区域/5 季节引导 | const 模板表 |
 | `npc_task_data.dart` | 32 个任务模板 | const 模板列表 |

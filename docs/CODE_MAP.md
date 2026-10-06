@@ -26,8 +26,8 @@ lib/
 │   ├── family_data.dart           # 27 家族
 │   ├── location_data.dart         # 69 地点
 │   ├── npc_data.dart              # 38 NPC（含 Batch 10-15 任务链 tasks/mood；Batch 10-54 新增约恩·罗伊斯/布蕾妮·塔斯）
-│   ├── event_data.dart            # 72 事件（60 + 12 复合）
-│   ├── system_data.dart           # 74 系统
+│   ├── event_data.dart            # 71 事件（原 72，S3-4 删重复的总主教更替（宗教））
+│   ├── system_data.dart           # 73 系统
 │   ├── item_data.dart             # 33 物品
 │   ├── narrative_templates.dart   # 差异化叙事引导（10 身份/12 区域/5 季节；seasonWorldTrend 季节世界动向 Batch 10-50；regionWorldTrend 地区风土人情 Batch 10-52；seasonFarmTrend 时节农事 Batch 10-56；localMarketTrend 本地集市行情 Batch 10-58；locationLore 所在地名人轶事·历史典故 Batch 10-69）
 │   ├── balance_data.dart           # ⭐ 数值配置集中（初始值/生存消耗/每日上限/头衔阶梯/活动经济/婚姻与世代阈值，Batch 10-30 · M4a；**好感度护栏 kRelationClamp=100**，Batch 10-90；**技能/属性键白名单 kPlayerSkillKeys(13)/kPlayerAttributeKeys(6)**，Batch 10-92，键集与 `labels` 标签表同源；**日常经济收口 17 常量：workEnergyCost/huntEnergyCost/tradeEnergyCost/workBaseIncome(10 身份)/workSkillBonusDivisor/tradeMerchantBase/tradeCommonerBase/tradeSpeechGain/tradeProfitVariance/restHungerGain/huntRewardPerDanger**，Batch 10-111/112；**NPC 交互经济收口 24 常量：npcChatGainBase/Variance、npcFavorCostBase/Divisor/Min/Max、escortFeeBase/Variance、merchantShareBase/Variance、assassinFeeBase/Variance、taskRewardBase/taskRewardRelation/taskAcceptRelation、reputationSmallGain、wildlingGiftGold、priestHealHealth、secretRelationGain、chatRelationGain、nobleReferReputation、supernaturalReputationGain、scholarTeachChance**，Batch 10-113；**冒险/旅行经济收口 14 常量：travelCostBase/Variance、exploreEnergyCost、exploreGoldBase/DangerMult/VarianceBase、banditLossBase/DangerMult、beastGainBase/DangerMult、beastHungerGain、beastInjuryHealth、merchantProfitBase/Variance**，Batch 10-114；AI prompt 各段预算常量亦收口于此 Batch 10-82~88；无 import 依赖的叶子模块）
@@ -53,7 +53,7 @@ lib/
 ├── mixins/                        # 【逻辑层】玩法能力（按领域拆分）
 │   ├── mixin_life.dart            # 生存状态 + 物品 + 贸易 + 装备 + 头衔 + 月度结算（约 880 行，最大）
 │   ├── mixin_play.dart            # 日常玩法：训练/工作/休息/狩猎/贸易/过月 + 死亡传承
-│   ├── mixin_systems.dart         # 74 系统挂载 + 月度演进 + 系统面板
+│   ├── mixin_systems.dart         # 73 系统挂载 + 月度演进 + 系统面板
 │   ├── mixin_adventure.dart       # 旅行/探索/遭遇（探索含 NPC 任务结算）
 │   ├── mixin_letter.dart          # NPC 来信/回信/关系培养
 │   ├── mixin_npc_interact.dart    # NPC 深度交互：关系等级/互动/示好/事件链 + 任务链/深聊/关系面板

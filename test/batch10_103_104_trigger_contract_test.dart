@@ -98,14 +98,15 @@ void main() {
       }
     });
 
-    test('事件总量未变（72），且 ID 唯一', () {
-      expect(allEvents.length, 72);
-      expect(allEvents.map((e) => e.id).toSet().length, 72);
+    test('事件总量 71（S3-4 删除重复事件），且 ID 唯一', () {
+      expect(allEvents.length, 71);
+      expect(allEvents.map((e) => e.id).toSet().length, 71);
     });
 
-    test('清空门槛的 41 个事件仍保留选项与叙事', () {
+    test('清空门槛的 40 个事件仍保留选项与叙事', () {
       // 删门槛不能顺手删内容——这些事件仍是玩法内容。
-      // 清单 = 10-103 取证的 41 个纯死键事件（逐个实证，非凭印象）。
+      // 清单 = 10-103 取证的 41 个纯死键事件（逐个实证，非凭印象），
+      // 其中 `event_high_septon_change_religious` 已于 S3-4 作为重复项删除（-1 → 40）。
       const clearedIds = <String>[
         'event_king_death', 'event_rebellion', 'event_coup',
         'event_small_council', 'event_hand_change', 'event_high_septon_change',
@@ -118,14 +119,13 @@ void main() {
         'event_siege', 'event_betrayal', 'event_assassination',
         'event_trial_by_combat', 'event_religious_trial', 'event_miracle',
         'event_heresy', 'event_church_split',
-        'event_high_septon_change_religious',
         'event_trade_boom', 'event_trade_crisis', 'event_iron_bank_debt',
         'event_dragon_appears', 'event_white_walkers', 'event_prophecy',
         'event_blood_magic', 'event_green_seer', 'event_wedding',
         'event_funeral', 'event_tournament',
       ];
-      expect(clearedIds.length, 41);
-      expect(clearedIds.toSet().length, 41, reason: '清单内不得有重复 id');
+      expect(clearedIds.length, 40);
+      expect(clearedIds.toSet().length, 40, reason: '清单内不得有重复 id');
       for (final id in clearedIds) {
         final e = eventById(id);
         expect(e, isNotNull, reason: '事件 $id 不应被删掉');

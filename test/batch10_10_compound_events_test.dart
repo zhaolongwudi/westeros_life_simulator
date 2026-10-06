@@ -29,8 +29,8 @@ void main() {
   ];
 
   group('Batch 10-10 数据完整性', () {
-    test('事件库总量为 72', () {
-      expect(allEvents.length, 72);
+    test('事件库总量为 71（S3-4 删除重复事件）', () {
+      expect(allEvents.length, 71);
     });
 
     test('12 个新复合事件全部存在', () {

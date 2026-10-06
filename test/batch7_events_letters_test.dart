@@ -25,9 +25,9 @@ void main() {
       expect(available, isNotEmpty);
     });
 
-    test('事件库总量 72', () {
+    test('事件库总量 71', () {
       final engine = GameEngine()..startNewGame();
-      expect(engine.eventTemplates.length, 72);
+      expect(engine.eventTemplates.length, 71);
     });
 
     testWidgets('事件面板可构建（两个 Tab）', (tester) async {

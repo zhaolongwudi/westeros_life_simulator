@@ -1356,51 +1356,6 @@
     "isOneTime": false
   },
   {
-    "id": "event_high_septon_change_religious",
-    "name": "总主教更替（宗教）",
-    "type": "religious",
-    "description": "总主教更替。",
-    "triggerConditions": {},
-    "choices": [
-      {
-        "id": "choice_support_new",
-        "text": "支持新总主教",
-        "requirements": {},
-        "effects": {
-          "reputation": 5,
-          "faith": 10
-        },
-        "narrative": "你支持新总主教，教会兴盛。"
-      },
-      {
-        "id": "choice_oppose_new",
-        "text": "反对新总主教",
-        "requirements": {},
-        "effects": {
-          "reputation": -5,
-          "faith": -5
-        },
-        "narrative": "你反对新总主教，教会衰败。"
-      },
-      {
-        "id": "choice_neutral",
-        "text": "保持中立",
-        "requirements": {},
-        "effects": {
-          "reputation": 0
-        },
-        "narrative": "你按兵不动，教会关系恶化。"
-      }
-    ],
-    "narrative": "总主教更替，教会一触即发。",
-    "tags": [
-      "religious",
-      "septon",
-      "church"
-    ],
-    "isOneTime": false
-  },
-  {
     "id": "event_harvest",
     "name": "丰收",
     "type": "economic",

@@ -852,7 +852,14 @@ const List<GameEvent> allEvents = [
     isOneTime: false,
   ),
 
-  // ==================== 宗教事件（5） ====================
+  // S3-4（P2-09 #6）：本段原为「宗教事件（7）」，现为 6 条 ——
+  // 删除 `event_high_septon_change_religious`（「总主教更替（宗教）」）。
+  // 它与 `event_high_septon_change`（「总主教更替」）是同一题材的两条事件：
+  // 三选项（支持/反对/中立）id 完全相同，唯一差异是 `faith` 幽灵键的数值
+  // （10 vs 8）——而 `faith` 是 S2-3 已锁定的幽灵键，**无任何效果实现**，
+  // 故两条事件的实际行为差异为零，却会在同一月各以 30% 概率各触发一次，
+  // 玩家可能连续看到内容近乎相同的「总主教更替」。删重复项，事件总数 72 → 71。
+  // ==================== 宗教事件（6） ====================
   GameEvent(
     id: 'event_religious_trial',
     name: '宗教审判',
@@ -983,39 +990,6 @@ const List<GameEvent> allEvents = [
     ],
     narrative: '教会分裂，教会一触即发。',
     tags: const ['religious', 'split', 'church'],
-    isOneTime: false,
-  ),
-  GameEvent(
-    id: 'event_high_septon_change_religious',
-    name: '总主教更替（宗教）',
-    type: EventType.religious,
-    description: '总主教更替。',
-    triggerConditions: const {},
-    choices: const [
-      EventChoice(
-        id: 'choice_support_new',
-        text: '支持新总主教',
-        requirements: const {},
-        effects: const {'reputation': 5, 'faith': 10},
-        narrative: '你支持新总主教，教会兴盛。',
-      ),
-      EventChoice(
-        id: 'choice_oppose_new',
-        text: '反对新总主教',
-        requirements: const {},
-        effects: const {'reputation': -5, 'faith': -5},
-        narrative: '你反对新总主教，教会衰败。',
-      ),
-      EventChoice(
-        id: 'choice_neutral',
-        text: '保持中立',
-        requirements: const {},
-        effects: const {'reputation': 0},
-        narrative: '你按兵不动，教会关系恶化。',
-      ),
-    ],
-    narrative: '总主教更替，教会一触即发。',
-    tags: const ['religious', 'septon', 'church'],
     isOneTime: false,
   ),
 

@@ -17,15 +17,15 @@ import 'package:westeros_life_simulator/services/event_service.dart';
 
 void main() {
   group('Batch 10-2 事件库扩充', () {
-    test('事件总数 72 且类型分布正确', () {
-      expect(allEvents.length, 72);
+    test('事件总数 71 且类型分布正确', () {
+      expect(allEvents.length, 71);
       expect(eventsByType(EventType.political).length, 11);
       expect(eventsByType(EventType.family).length, 11);
       expect(eventsByType(EventType.economic).length, 13);
       expect(eventsByType(EventType.magical).length, 6);
       expect(eventsByType(EventType.daily).length, 6);
       expect(eventsByType(EventType.war).length, 8);
-      expect(eventsByType(EventType.religious).length, 7);
+      expect(eventsByType(EventType.religious).length, 6); // S3-4 删除重复的总主教更替（宗教）
       expect(eventsByType(EventType.adventure).length, 5);
       expect(eventsByType(EventType.supernatural).length, 5);
     });
