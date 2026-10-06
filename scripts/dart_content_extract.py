@@ -237,7 +237,11 @@ def extract_npcs(text):
             'skills': _clean_map(args.get('skills', '{}')),
             'faith': _clean(args.get('faith', '')),
             'isAlive': args.get('isAlive', 'true').strip() == 'true',
-            'mood': _to_int(args.get('mood', '0')),
+            # S1-3：mood 是 String（Npc.mood / fromJson 的 json['mood'] as String?），
+            # 旧实现走 _to_int 把「沉稳」解析成 0，镜像与模型类型不符。
+            'mood': _clean(args.get('mood', '')),
+            # S1-3：补上此前完全未映射的 tasks 字段。
+            'tasks': _clean_list(args.get('tasks', '[]')),
         }
         out.append(npc)
     return out
