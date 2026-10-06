@@ -314,6 +314,47 @@ class BalanceData {
   static const int tradeProfitVariance = 15;
   /// 休息的饱食恢复量。
   static const int restHungerGain = 10;
+  // ==================== Batch 10-113 NPC 交互经济 ====================
+  /// 深聊/示好的好感基础值（speech 每 2 级 +1，随机浮动 [npcFavorGainVariance)）。
+  static const int npcChatGainBase = 3;
+  /// 深聊/示好好感随机浮动上限。
+  static const int npcChatGainVariance = 3;
+  /// 示好礼金公式：基础 5 + (100 - 关系)~/20，钳制 [npcFavorCostMin, npcFavorCostMax]。
+  static const int npcFavorCostBase = 5;
+  static const int npcFavorCostDivisor = 20;
+  static const int npcFavorCostMin = 3;
+  static const int npcFavorCostMax = 12;
+  /// 熟识请求·护送报酬：基础 15 + 关系 + rnd(10)。
+  static const int escortFeeBase = 15;
+  static const int escortFeeVariance = 10;
+  /// 熟识请求·商人合股红利：基础 10 + 关系~/2 + rnd(10)。
+  static const int merchantShareBase = 10;
+  static const int merchantShareVariance = 10;
+  /// 熟识请求·刺客委托报酬：基础 20 + 关系 + rnd(15)。
+  static const int assassinFeeBase = 20;
+  static const int assassinFeeVariance = 15;
+  /// 任务结算奖励：基础 20 + 关系~/2。
+  static const int taskRewardBase = 20;
+  /// 任务结算/接取的关系奖励。
+  static const int taskRewardRelation = 5;
+  /// 任务接取时的关系奖励。
+  static const int taskAcceptRelation = 2;
+  /// 任务/声望类小奖励（声望 +N 通用档）。
+  static const int reputationSmallGain = 2;
+  /// 熟识请求·野人谢礼金币。
+  static const int wildlingGiftGold = 5;
+  /// 熟识请求·神职治疗健康恢复。
+  static const int priestHealHealth = 5;
+  /// 亲密交谈·秘密共享的关系奖励。
+  static const int secretRelationGain = 3;
+  /// 亲密交谈·普通/挚友的关系奖励。
+  static const int chatRelationGain = 2;
+  /// 熟识请求·贵族引荐声望奖励。
+  static const int nobleReferReputation = 4;
+  /// 熟识请求·超自然低语声望奖励。
+  static const int supernaturalReputationGain = 3;
+  /// 学者教学概率（0.4）。
+  static const double scholarTeachChance = 0.4;
 
   // ==================== 婚姻与世代 ====================
 

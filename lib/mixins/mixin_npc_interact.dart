@@ -7,6 +7,7 @@
 /// - 好感度事件链：关系突破阈值触发专属剧情（一次性 flag）
 library;
 
+import '../data/balance_data.dart';
 import '../models/npc.dart';
 import '../core/command_registry.dart';
 import '../core/monthly_pipeline.dart';
@@ -94,15 +95,15 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
     }
     if (rel < 80) {
       if (npc.secrets.isNotEmpty) {
-        adjustRelation(npc.id, 3);
+        adjustRelation(npc.id, BalanceData.secretRelationGain);
         return '🍂 ${npc.name}压低声音：「我可以信任你——」一个秘密浮出水面：${npc.secrets.first}。关系 +3。';
       }
-      adjustRelation(npc.id, 2);
+      adjustRelation(npc.id, BalanceData.chatRelationGain);
       return '${npc.name}与你共饮，谈起过往与来路，毫不避讳。关系 +2。';
     }
     // 挚友：结盟
-    adjustRelation(npc.id, 2);
-    adjustReputation(2);
+    adjustRelation(npc.id, BalanceData.chatRelationGain);
+    adjustReputation(BalanceData.reputationSmallGain);
     return '⚔️ ${npc.name}拍着你的肩膀：「只要我活着，就是你的人。」你们结为挚友。声望 +2，关系 +2。';
   }
 
@@ -112,51 +113,51 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
     switch (npc.type) {
       case NpcType.noble:
         if (rel >= 50 && rnd.nextDouble() < 0.5) {
-          adjustReputation(4);
+          adjustReputation(BalanceData.nobleReferReputation);
           return '🏛️ ${npc.name}把你引荐给封臣们，谈起你的名字时语气郑重。你感到自己的地位在上升。声望 +4。';
         }
-        adjustRelation(npc.id, 2);
+        adjustRelation(npc.id, BalanceData.chatRelationGain);
         return '🏰 ${npc.name}向你请教对时局的看法。你说得有理有据，他/她频频点头。关系 +2。';
       case NpcType.soldier:
       case NpcType.adventurer:
-        final fee = 15 + rel + rnd.nextInt(10);
+        final fee = BalanceData.escortFeeBase + rel + rnd.nextInt(BalanceData.escortFeeVariance);
         gainGold(fee);
-        adjustReputation(2);
+        adjustReputation(BalanceData.reputationSmallGain);
         return '🛡️ ${npc.name}请你护送一件要事：「事成之后，$fee 金币不会少你的。」你答应了。报酬 $fee 金币，声望 +2。';
       case NpcType.merchant:
-        final profit = 10 + rel ~/ 2 + rnd.nextInt(10);
+        final profit = BalanceData.merchantShareBase + rel ~/ 2 + rnd.nextInt(BalanceData.merchantShareVariance);
         gainGold(profit);
-        adjustRelation(npc.id, 2);
+        adjustRelation(npc.id, BalanceData.chatRelationGain);
         return '💰 ${npc.name}想与你合股走一趟商路：「本钱我出，你出人脉。」第一笔红利 $profit 金币到手。关系 +2。';
       case NpcType.priest:
-        adjustHealth(5);
-        adjustRelation(npc.id, 3);
+        adjustHealth(BalanceData.priestHealHealth);
+        adjustRelation(npc.id, BalanceData.secretRelationGain);
         return '⛪ ${npc.name}为你向七神祈祷，洒下圣水：「愿诸神护佑你的路。」你感到心神安泰。健康 +5，关系 +3。';
       case NpcType.scholar:
       case NpcType.maester:
-        if (npc.skills.isNotEmpty && rnd.nextDouble() < 0.4) {
+        if (npc.skills.isNotEmpty && rnd.nextDouble() < BalanceData.scholarTeachChance) {
           final skill = npc.skills.keys.first;
           final newSkills = Map<String, int>.from(player.skills);
           newSkills[skill] = (newSkills[skill] ?? 0) + 1;
           updatePlayer(player.copyWith(skills: newSkills));
           return '📜 ${npc.name}递给你一卷羊皮纸：「读读这个。」你学到了一些${skill}心得（$skill +1）。';
         }
-        adjustRelation(npc.id, 2);
+        adjustRelation(npc.id, BalanceData.chatRelationGain);
         return '📖 ${npc.name}与你畅谈历史与学问，你听得津津有味。关系 +2。';
       case NpcType.assassin:
         if (rel >= 50) {
-          final fee = 20 + rel + rnd.nextInt(15);
+          final fee = BalanceData.assassinFeeBase + rel + rnd.nextInt(BalanceData.assassinFeeVariance);
           gainGold(fee);
           return '🗡️ ${npc.name}交给你一个信封：「有笔生意，办成了这 $fee 金币归你。」你接下委托。';
         }
         return '🌑 ${npc.name}在阴影里打量着你：「还不是时候。等你更可信一些，再说。」';
       case NpcType.wildling:
       case NpcType.commoner:
-        gainGold(5);
-        adjustReputation(2);
+        gainGold(BalanceData.wildlingGiftGold);
+        adjustReputation(BalanceData.reputationSmallGain);
         return '🔥 ${npc.name}请你为村落说句话。你出面周旋，村民感激不尽。+5 金币谢礼，声望 +2。';
       case NpcType.supernatural:
-        adjustReputation(3);
+        adjustReputation(BalanceData.supernaturalReputationGain);
         return '🌫️ ${npc.name}低语着不属于这个时代的词句。你感到命运之线被轻轻拨动。声望 +3。';
     }
   }
@@ -177,13 +178,13 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
     final speech = skillLevel('speech');
     final rel = npcRelation(npc.id);
     // 礼金：基础 5 + (100-关系)/20，随好感递减
-    final cost = (5 + (100 - rel) ~/ 20).clamp(3, 12);
+    final cost = (BalanceData.npcFavorCostBase + (100 - rel) ~/ BalanceData.npcFavorCostDivisor).clamp(BalanceData.npcFavorCostMin, BalanceData.npcFavorCostMax);
     if (player.gold < cost) {
       return '你想备一份薄礼，却囊中羞涩（需 $cost 金币）。';
     }
     _recordFavor();
     gainGold(-cost);
-    final gain = 3 + speech ~/ 2 + rnd.nextInt(3);
+    final gain = BalanceData.npcChatGainBase + speech ~/ 2 + rnd.nextInt(BalanceData.npcChatGainVariance);
     adjustRelation(npc.id, gain);
     final level = npcRelationLabel(npcRelation(npc.id));
     return '🎁 你与${npc.name}深谈，并备了一份薄礼（花 $cost 金币）。他/她的态度明显软化。关系 +$gain（${level}）。';
@@ -252,7 +253,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
       return '你已经接下「$task」，${npc.name}在等你带回消息。';
     }
     setFlag(flagKey, true);
-    adjustRelation(npc.id, 2);
+    adjustRelation(npc.id, BalanceData.taskAcceptRelation);
     return '📜 你接下${npc.name}的委托：「$task」。他/她郑重道：「事成之后，不会亏待你。」关系 +2。';
   }
   /// 任务进度检查：已接任务在探索/过月后结算。
@@ -268,10 +269,10 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
         // 模拟结算：直接完成（探索时调用，概率在外层控制）
         setFlag('npc_task_done.${n.id}.$task', true);
         setFlag(flagKey, false);
-        final reward = 20 + npcRelation(n.id) ~/ 2;
+        final reward = BalanceData.taskRewardBase + npcRelation(n.id) ~/ 2;
         gainGold(reward);
-        adjustRelation(n.id, 5);
-        adjustReputation(2);
+        adjustRelation(n.id, BalanceData.taskRewardRelation);
+        adjustReputation(BalanceData.reputationSmallGain);
         buf.writeln('✅ 你完成了${n.name}的委托：「$task」。获得 $reward 金币，关系 +5，声望 +2。');
       }
     }
@@ -292,7 +293,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
     final moodText = npc.mood.isEmpty ? '' : '（${npc.mood}）';
     final topic = npc.goals.isNotEmpty ? npc.goals.first : '往事';
     final rnd = rng();
-    final gain = 3 + skillLevel('speech') ~/ 2 + rnd.nextInt(3);
+    final gain = BalanceData.npcChatGainBase + skillLevel('speech') ~/ 2 + rnd.nextInt(BalanceData.npcChatGainVariance);
     adjustRelation(npc.id, gain);
     final level = npcRelationLabel(npcRelation(npc.id));
     return '🍻 你与${npc.name}$moodText 深聊起「$topic」。'
