@@ -15,7 +15,6 @@ import '../utils/command_alias.dart';
 import '../utils/labels.dart';
 import 'mixin_generation.dart';
 import 'mixin_life.dart';
-import 'mixin_letter.dart';
 import 'mixin_marriage.dart';
 import 'mixin_npc_interact.dart';
 import 'mixin_npc_task.dart';
@@ -26,8 +25,13 @@ import 'mixin_systems.dart';
 /// [GameLifeMixin.applyMonthlyLife] 与 [GameNpcInteractMixin.maybeNpcStoryEvent]、
 /// [GameGenerationMixin.maybeSuccessionStory]、[GameMarriageMixin.maybeFamilyEvent]、
 /// [GameNpcTaskMixin.advanceNpcTasks/checkNpcTaskDeadlines]，
-/// [GameLetterMixin.registerLetterMonthlyHooks]，
-/// 因此 on 约束中列出七者。
+/// 因此 on 约束中列出六者。
+///
+/// S12-10：信件钩子**不在**这里注册。`GamePlayMixin` 的 on 约束不能加
+/// `GameLetterMixin` —— 它在 `game_engine.dart` 的 `with` 列表里排在
+/// `GamePlayMixin` **之后**，Dart 会报
+/// `mixin_application_not_implemented_interface`（见简报 S12-10 踩坑记录）。
+/// 改由 `GameLetterMixin.registerLetterMonthlyHooks` 自注册，见该文件。
 mixin GamePlayMixin
     on
         GameProviderBase,
@@ -36,8 +40,7 @@ mixin GamePlayMixin
         GameNpcInteractMixin,
         GameGenerationMixin,
         GameMarriageMixin,
-        GameNpcTaskMixin,
-        GameLetterMixin {
+        GameNpcTaskMixin {
   // 数值统一收口在 lib/data/balance_data.dart（Batch 10-30 · M4a）。
   /// 每日活动次数上限（防数值刷子，参考 docs/08 玩法限制）。
   static const Map<String, int> kDailyLimits = BalanceData.dailyLimits;
@@ -234,10 +237,11 @@ mixin GamePlayMixin
     registerGenerationMonthlyHooks(pipeline);
     registerMarriageMonthlyHooks(pipeline);
     registerNpcTaskMonthlyHooks(pipeline);
-    // S12-10：信件此前只挂在 AI 路径（mixin_ai.applyAiChoice），
-    // 普通玩家用「过月」推进时**永远收不到信** ⇒ 信件面板/回信形同摆设。
-    // 补上管线钩子后，非 AI 路径同样会按月触发 NPC 来信。
-    registerLetterMonthlyHooks(pipeline);
+    // S12-10：跑各 mixin 通过 `monthlyHookRegistrars` 追加的延迟注册
+    // （目前是信件，见 `GameLetterMixin.registerLetterMonthlyHooks`）。
+    for (final register in monthlyHookRegistrars) {
+      register(pipeline);
+    }
     _monthly = pipeline;
     return pipeline;
   }

@@ -19,6 +19,7 @@ import '../models/location.dart';
 import '../models/npc.dart';
 import '../models/player.dart';
 import '../models/system.dart';
+import '../core/monthly_pipeline.dart';
 import '../utils/labels.dart';
 import 'event_provider.dart';
 import 'game_state_provider.dart';
@@ -53,6 +54,21 @@ abstract class GameProviderBase extends GameStateProvider {
 
   /// 事件提供者（组合复用，供事件面板浏览/触发）。
   final EventProvider eventProvider;
+
+  // ---------------------------------------------------------------------------
+  // S12-10：月度管线的**延迟注册点**。
+  //
+  // 【为什么需要这个口子】各领域的月度钩子本来都写在 `mixin_play` 的
+  // `monthlyPipeline` 里逐个调用，但 `GamePlayMixin` 的 `on` 约束**加不进**
+  // `GameLetterMixin` —— 它在 `game_engine.dart` 的 `with` 列表里排在
+  // `GamePlayMixin` 之后，Dart 会报
+  // `mixin_application_not_implemented_interface`（已实测）。
+  //
+  // 【做法】允许各 mixin 把自己的注册函数追加到这里，由 `monthlyPipeline`
+  // 在构建时统一执行。这样注册方与被依赖方不必共享 `on` 约束，
+  // 也不必调整 `with` 顺序（那会连带影响其它 mixin 的约束校验）。
+  final List<void Function(MonthlyPipeline)> monthlyHookRegistrars =
+      <void Function(MonthlyPipeline)>[];
 
   // ---------------------------------------------------------------------------
   // S8-1：一次性事件的完成集合在**存档的两个边界**上同步。
