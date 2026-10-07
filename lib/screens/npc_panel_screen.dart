@@ -6,6 +6,7 @@ library;
 
 import 'package:flutter/material.dart';
 import '../game_engine.dart';
+import '../models/npc.dart';
 import '../theme/westeros_theme.dart';
 import '../widgets/theme/ornate.dart';
 
@@ -44,71 +45,11 @@ class NpcPanelScreen extends StatelessWidget {
                       style: TextStyle(color: WesterosColors.inkDim),
                     )
                   else
-                    ...onSite.map((n) {
-                      final rel = e.npcRelation(n.id);
-                      return ListTile(
-                        dense: true,
-                        leading: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: const LinearGradient(
-                              colors: <Color>[
-                                WesterosColors.goldDark,
-                                WesterosColors.gold,
-                              ],
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              n.name.substring(0, 1),
-                              style: const TextStyle(
-                                color: WesterosColors.barkDeep,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        title: Text(
-                          n.name,
-                          style: const TextStyle(
-                            color: WesterosColors.parchment,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        subtitle: Text(
-                          '${e.npcRelationLabel(rel)}（$rel）'
-                          '${n.mood.isEmpty ? '' : ' · ${n.mood}'}'
-                          '${n.tasks.isEmpty ? '' : ' · 任务 ${n.tasks.length}'}',
-                          style: const TextStyle(color: WesterosColors.inkDim),
-                        ),
-                        trailing: Wrap(
-                          spacing: 4,
-                          children: <Widget>[
-                            _ActionPill(
-                              label: '互动',
-                              onTap: () =>
-                                  _showResult(context, e.npcInteract(n.id)),
-                            ),
-                            _ActionPill(
-                              label: '深聊',
-                              onTap: () => _showResult(context, e.npcChat(n.id)),
-                            ),
-                            _ActionPill(
-                              label: '示好',
-                              onTap: () => _showResult(context, e.npcFavor(n.id)),
-                            ),
-                            if (n.tasks.isNotEmpty)
-                              _ActionPill(
-                                label: '任务',
-                                onTap: () =>
-                                    _showResult(context, e.acceptNpcTask(n.id)),
-                              ),
-                          ],
-                        ),
-                      );
-                    }),
+                    ...onSite.map((n) => _NpcInteractRow(
+                          npc: n,
+                          engine: e,
+                          onResult: (text) => _showResult(context, text),
+                        )),
                 ],
               ),
             ),
@@ -254,6 +195,119 @@ class NpcPanelScreen extends StatelessWidget {
   void _showResult(BuildContext context, String text) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(text), duration: const Duration(seconds: 4)),
+    );
+  }
+}
+
+/// 在场 NPC 的单行（头像 + 姓名 + 关系 + 独立按钮行）。
+///
+/// 【S12-5 为什么不再是 `ListTile(trailing: Wrap(...))`】
+/// 旧写法把互动/深聊/示好/任务 4 个胶囊塞进 `ListTile.trailing`，
+/// 而 `trailing` 是**无宽度约束**的：`Wrap` 抢占全部可用宽度，
+/// 把 title/subtitle 压到一两字宽 ⇒ NPC 名**每字换行呈竖排**，
+/// 按钮也被挤变形/看不见（用户实装截图现象）。
+/// 现改为 `Column`：姓名与关系独占整行，按钮另起一行且**可横向滚动**，
+/// 窄屏下 4 个按钮一个都不会被裁掉，长名字也不再被压成竖排。
+class _NpcInteractRow extends StatelessWidget {
+  const _NpcInteractRow({
+    required this.npc,
+    required this.engine,
+    required this.onResult,
+  });
+
+  final Npc npc;
+  final GameEngine engine;
+  final void Function(String text) onResult;
+
+  @override
+  Widget build(BuildContext context) {
+    final rel = engine.npcRelation(npc.id);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: <Color>[
+                      WesterosColors.goldDark,
+                      WesterosColors.gold,
+                    ],
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    npc.name.substring(0, 1),
+                    style: const TextStyle(
+                      color: WesterosColors.barkDeep,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              // 姓名独占剩余宽度：长名换行而不是被挤成竖排
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      npc.name,
+                      style: const TextStyle(
+                        color: WesterosColors.parchment,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${engine.npcRelationLabel(rel)}（$rel）'
+                      '${npc.mood.isEmpty ? '' : ' · ${npc.mood}'}'
+                      '${npc.tasks.isEmpty ? '' : ' · 任务 ${npc.tasks.length}'}',
+                      style: const TextStyle(color: WesterosColors.inkDim),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          // 按钮独立一行：横向滚动 ⇒ 窄屏也不裁
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: <Widget>[
+                _ActionPill(
+                  label: '互动',
+                  onTap: () => onResult(engine.npcInteract(npc.id)),
+                ),
+                const SizedBox(width: 6),
+                _ActionPill(
+                  label: '深聊',
+                  onTap: () => onResult(engine.npcChat(npc.id)),
+                ),
+                const SizedBox(width: 6),
+                _ActionPill(
+                  label: '示好',
+                  onTap: () => onResult(engine.npcFavor(npc.id)),
+                ),
+                if (npc.tasks.isNotEmpty) ...<Widget>[
+                  const SizedBox(width: 6),
+                  _ActionPill(
+                    label: '任务',
+                    onTap: () => onResult(engine.acceptNpcTask(npc.id)),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

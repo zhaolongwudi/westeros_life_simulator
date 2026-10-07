@@ -452,8 +452,8 @@ mixin GamePlayMixin
       ..writeln('· 地点：${loc?.name ?? p.locationId}（${loc?.region ?? ''}）')
       ..writeln('· 金币：${p.gold}｜声望：${p.reputation}')
       ..writeln('· 生命：${p.health}/100｜精力：${p.energy}/100｜饱食：${p.hunger}/100')
-      ..writeln('· 属性：${p.attributes.entries.map((e) => '${e.key} ${e.value}').join(' ')}')
-      ..writeln('· 技能：${p.skills.entries.map((e) => '${e.key} ${e.value}').join(' ')}');
+      ..writeln('· 属性：${p.attributes.entries.map((e) => '${attributeLabel(e.key)} ${e.value}').join(' ')}')
+      ..writeln('· 技能：${p.skills.entries.map((e) => '${skillLabel(e.key)} ${e.value}').join(' ')}');
     if (p.title.isNotEmpty) {
       buf.writeln('· 头衔：${p.title}');
     }

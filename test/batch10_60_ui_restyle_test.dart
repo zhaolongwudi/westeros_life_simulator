@@ -128,10 +128,13 @@ void main() {
     });
 
     testWidgets('设置面板：标题 + 保存按钮 + 空存档态', (tester) async {
+      // S12-7：设置页在**有引擎**时（游戏内进入）才显示存档按钮；
+      // 无引擎（首页进入）不再隐式开局，故此处传引擎以覆盖「游戏内设置」路径。
       await tester.pumpWidget(
         MaterialApp(
           theme: westerosTheme(),
           home: SettingsScreen(
+            engine: GameEngine()..startNewGame(),
             saveService: _MemorySaveService(),
           ),
         ),

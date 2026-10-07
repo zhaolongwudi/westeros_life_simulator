@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../data/family_data.dart';
 import '../game_engine.dart';
 import '../models/family.dart';
 import '../theme/westeros_theme.dart';
@@ -180,7 +181,7 @@ class _FamilyCard extends StatelessWidget {
                           .map(
                             (e) => Chip(
                               label: Text(
-                                '${e.key} ${e.value}',
+                                '${familyById(e.key)?.name ?? e.key} ${e.value}',
                                 style: const TextStyle(color: WesterosColors.parchment),
                               ),
                               visualDensity: VisualDensity.compact,

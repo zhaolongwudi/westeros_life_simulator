@@ -63,9 +63,11 @@ void main() {
     });
 
     testWidgets('设置面板可构建', (tester) async {
+      // S12-7：设置页在**有引擎**时（游戏内进入）才显示存档按钮。
       await tester.pumpWidget(
         MaterialApp(
           home: SettingsScreen(
+            engine: GameEngine()..startNewGame(),
             saveService: _MemorySaveService(),
           ),
         ),

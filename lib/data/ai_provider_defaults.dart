@@ -30,8 +30,39 @@ class AiProviderDefaults {
   final String baseUrl;
 
   /// 便捷：转换为「含 /v1 的完整 chat/base 路径」。
-  String get chatBaseUrl =>
-      baseUrl.endsWith('/v1') ? baseUrl : '$baseUrl/v1';
+  String get chatBaseUrl => normalizeOpenAiBaseUrl(baseUrl);
+}
+
+/// 把用户/预设填的 BaseURL 归一化成 OpenAI 兼容的 `<host>/v1` 形式（无尾斜杠）。
+///
+/// 【为什么需要它】本项目曾有 **4 份** `baseUrl.endsWith('/v1') ? baseUrl : '$baseUrl/v1'`
+/// （`ai_config.dart` / `ai_provider_defaults.dart` / `settings_screen.dart` ×2），
+/// 逻辑相同但都只认「恰好以 `/v1` 结尾」：
+/// - `https://x/v1/`（用户最常见的粘贴形态，带尾斜杠）⇒ 拼成 `https://x/v1//v1` ⇒ **必 404**
+/// - `https://x/` ⇒ `https://x//v1` ⇒ 多半 404
+/// - `https://x/v1/chat/completions`（用户直接粘完整端点）⇒ `.../chat/completions/v1` ⇒ 404
+///
+/// 【本函数的契约】输入任意形态 → 输出「恰好一个 `/v1`、无尾斜杠」的 host 形式。
+/// 已是 `/v1`（含尾斜杠）原样保留；否则先去掉所有尾斜杠，再判断是否已含 `/v1`
+/// 前缀（含 `/v1` 的更长路径如 `/v1/chat/completions` 会被裁到 `/v1`——因为本项目
+/// 的 [AiService] 自己会在 base 后面拼 `/chat/completions` 与 `/models`）。
+String normalizeOpenAiBaseUrl(String raw) {
+  var s = raw.trim();
+  if (s.isEmpty) return s;
+  // 去掉尾斜杠（可能有多个）
+  while (s.endsWith('/')) {
+    s = s.substring(0, s.length - 1);
+  }
+  // 若用户粘了完整的 /chat/completions 或 /models 端点，裁回 host
+  s = s.replaceFirst(RegExp(r'/chat/completions$'), '');
+  s = s.replaceFirst(RegExp(r'/models$'), '');
+  while (s.endsWith('/')) {
+    s = s.substring(0, s.length - 1);
+  }
+  if (s.isEmpty) return s;
+  // 判是否已含 /v1 路径段（结尾或被 / 跟随）
+  if (RegExp(r'/v1(/|$)').hasMatch(s)) return s;
+  return '$s/v1';
 }
 
 /// 内置 AI 提供商预设。

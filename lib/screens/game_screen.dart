@@ -10,11 +10,14 @@
 /// 本文件只做「接线」：所有业务逻辑在引擎侧，所有展示在 widgets/ 侧。
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../game_engine.dart';
 import '../models/ai_turn.dart';
 import '../models/event.dart';
+import '../services/save_service.dart';
 import '../widgets/game/ai_toggle.dart';
 import '../widgets/game/input.dart';
 import '../widgets/game/narrative.dart';
@@ -47,10 +50,13 @@ const List<QuickCommand> _quickCommands = <QuickCommand>[
 
 /// 游戏主界面。
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key, this.engine});
+  const GameScreen({super.key, this.engine, this.saveService});
 
   /// 可选：传入已初始化的引擎（开局界面使用）；默认新建。
   final GameEngine? engine;
+
+  /// 可选：注入存档服务（S12-7 自动存档用；测试可注入假实现）。
+  final SaveService? saveService;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -73,6 +79,24 @@ class _GameScreenState extends State<GameScreen> {
   /// AI 是否正在请求中。
   bool _aiLoading = false;
 
+  // ============ S12-7 自动存档 ============
+  //
+  // 【为什么需要】此前**全项目零自动存档**：`saveGame` 的唯一调用方是设置页的
+  // 「保存」按钮 ⇒ 玩到一半退出/崩溃 = 全部进度丢失，且玩家很可能根本不知道
+  // 要去设置页点一下。这是「功能形同虚设」的典型。
+  //
+  // 【存档槽 id 用 player.id】`start_screen` 给新玩家分配
+  // `player_<millisecondsSinceEpoch>`，且 `player.id` 经 `toJson`/`applyState`
+  // 原样往返 ⇒ 同一局人生读档后仍是同一个 id ⇒ 自动存档**覆盖同一槽**，
+  // 不会像手动保存那样每次新建一个槽（那正是 ② 号缺陷）。
+  late final String _saveSlotId = _engine.player.id;
+  // 【必须 late】非 late 的实例字段初始化器不能引用 `widget`（编译错误）。
+  late final SaveService _saveService = widget.saveService ?? SaveService();
+  Timer? _autoSaveTimer;
+
+  /// 上次自动存档时的「年·月」，用于只在跨月时落盘。
+  String _lastSavedMonth = '';
+
   @override
   void initState() {
     super.initState();
@@ -86,15 +110,43 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   void dispose() {
+    _autoSaveTimer?.cancel();
     _engine.removeListener(_onEngineChanged);
     _inputController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
-  /// 引擎变化（金币/时间/地点等）→ 刷新界面。
+  /// 引擎变化 → 刷新界面；跨月时触发去抖自动存档。
   void _onEngineChanged() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    setState(() {});
+    _maybeAutoSave();
+  }
+
+  /// 月份变化即安排一次去抖自动存档（2 秒）。
+  ///
+  /// 【为什么挂在 notifyListeners 而不是逐条指令后】
+  /// 月度推进、事件抉择、AI 抉择、系统结算……都会 notify，
+  /// 挂在这里能覆盖**所有**改动路径，漏一条就丢一次进度；
+  /// 而去抖 + 只看「年月变化」又把 IO 压到每局最多几十次。
+  void _maybeAutoSave() {
+    if (!_engine.isGameActive) return;
+    final stamp = '${_engine.progress.year}-${_engine.progress.month}';
+    if (stamp == _lastSavedMonth) return;
+    _lastSavedMonth = stamp;
+    _autoSaveTimer?.cancel();
+    _autoSaveTimer = Timer(const Duration(seconds: 2), _doAutoSave);
+  }
+
+  /// 真正落盘（失败静默：自动存档不该用弹窗打断玩家）。
+  Future<void> _doAutoSave() async {
+    if (!mounted) return;
+    try {
+      await _saveService.saveGame(_engine, saveId: _saveSlotId);
+    } on Object {
+      // 存档失败（如磁盘满/权限）不阻断游戏；手动保存仍可走设置页。
+    }
   }
 
   /// 追加一行叙事，并滚动到底部。

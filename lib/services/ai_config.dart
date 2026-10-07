@@ -80,7 +80,7 @@ class AiConfig {
   /// 解析后的 BaseURL（空则回落到 provider 默认；带 /v1）。
   String get resolvedBaseUrl {
     if (baseUrl.isNotEmpty) {
-      return baseUrl.endsWith('/v1') ? baseUrl : '$baseUrl/v1';
+      return normalizeOpenAiBaseUrl(baseUrl);
     }
     return providerDefaultsOf(provider).chatBaseUrl;
   }

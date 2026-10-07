@@ -183,7 +183,7 @@ class PlayerPanelScreen extends StatelessWidget {
                   title: '属性',
                   icon: Icons.accessibility_new,
                   entries: p.attributes.entries
-                      .map((e) => _Entry(e.key, '${e.value}'))
+                      .map((e) => _Entry(attributeLabel(e.key), '${e.value}'))
                       .toList(),
                 ),
                 const SizedBox(height: 12),
@@ -192,7 +192,7 @@ class PlayerPanelScreen extends StatelessWidget {
                   title: '技能',
                   icon: Icons.school_outlined,
                   entries: p.skills.entries
-                      .map((e) => _Entry(e.key, '${e.value}'))
+                      .map((e) => _Entry(skillLabel(e.key), '${e.value}'))
                       .toList(),
                 ),
                 // 装备（Batch 10-4：武器/护甲/坐骑 + 战斗值）

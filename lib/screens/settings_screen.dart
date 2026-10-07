@@ -20,7 +20,10 @@ import '../widgets/theme/ornate.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key, this.engine, this.saveService});
 
-  /// 可选：传入共享引擎（默认新建）。
+  /// 可选：传入共享引擎。
+  ///
+  /// S12-7：**为 null 时不再隐式 new 一局**（首页「设置」即为此路径）。
+  /// null 表示「当前没有进行中的游戏」，界面只显示说明卡，不提供存档操作。
   final GameEngine? engine;
 
   /// 可选：注入存档服务（测试用；默认使用系统目录）。
@@ -31,7 +34,15 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late final GameEngine _engine = widget.engine ?? (GameEngine()..startNewGame());
+  /// S12-7：**不再自己 new 一个 `GameEngine()..startNewGame()`**。
+  ///
+  /// 【为什么改】此前本文件在 `engine == null`（从首页「设置」进来）时
+  /// 会隐式开局一局，然后无条件显示「保存/导出/导入/新游戏」——
+  /// 玩家在首页点「设置 → 保存」会把一个**全新空游戏**存成档；
+  /// 而 `继续游戏` 取按时间倒序的 `saves.first`（`home_screen.dart:64`），
+  /// 于是这个空档会把玩家真进度**顶掉**。改为：没有引擎就不提供存档操作。
+  GameEngine? get _engine => widget.engine;
+
   late final SaveService _saveService =
       widget.saveService ?? SaveService();
 
@@ -70,7 +81,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   /// 保存当前游戏。
   Future<void> _saveGame() async {
-    await _saveService.saveGame(_engine);
+    final engine = _engine;
+    if (engine == null) {
+      _showSnack('当前没有进行中的游戏，无法保存');
+      return;
+    }
+    await _saveService.saveGame(engine);
     _showSnack('已保存');
     await _refreshSaves();
   }
@@ -80,7 +96,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   /// 失败语义（M1 存档契约）：
   /// - 坏档 → service 返回 null，文件已被隔离为 .corrupted，提示「已损坏」。
   /// - 版本过高 → service 抛 [UnsupportedSaveVersionException]，提示「请升级游戏」。
+  /// - 无引擎（从首页进设置）→ 提示玩家回游戏内操作，不静默丢弃。
   Future<void> _loadGame(String saveId) async {
+    final engine = _engine;
+    if (engine == null) {
+      _showSnack('请先进入游戏，再从「继续游戏」载入');
+      return;
+    }
     GameStateProvider? result;
     try {
       result = await _saveService.loadGame(saveId);
@@ -97,7 +119,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
     // 用加载的 state 重置引擎（保留世界静态数据；默认引擎携带世界数据）
     setState(() {
-      _engine.applyState(state);
+      engine.applyState(state);
     });
     _showSnack('存档已加载：${state.player.name}');
     await _refreshSaves();
@@ -105,7 +127,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   /// 导出当前存档为 JSON 字符串。
   void _exportSave() {
-    final content = _saveService.exportSave(_engine);
+    final engine = _engine;
+    if (engine == null) {
+      _showSnack('当前没有进行中的游戏，无法导出');
+      return;
+    }
+    final content = _saveService.exportSave(engine);
     // 复制到剪贴板
     Clipboard.setData(ClipboardData(text: content));
     _showSnack('存档已复制到剪贴板（${content.length} 字符）');
@@ -133,7 +160,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
     // 用加载的 state 重置引擎（保留世界静态数据；默认引擎携带世界数据）
     setState(() {
-      _engine.applyState(state);
+      _engine?.applyState(state);
     });
     _showSnack('存档已导入：${state.player.name}');
     await _refreshSaves();
@@ -482,7 +509,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         : baseUrlController.text.trim();
     final service = AiService(
       apiKeys: keys,
-      baseUrl: baseUrl.endsWith('/v1') ? baseUrl : '$baseUrl/v1',
+      baseUrl: normalizeOpenAiBaseUrl(baseUrl),
       model: 'ping',
     );
     final models = await service.fetchModels();
@@ -574,7 +601,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         : baseUrlController.text.trim();
     final service = AiService(
       apiKeys: keys,
-      baseUrl: baseUrl.endsWith('/v1') ? baseUrl : '$baseUrl/v1',
+      baseUrl: normalizeOpenAiBaseUrl(baseUrl),
       model: model,
     );
     final (ok, msg) = await service.testConnection(model: model);
@@ -587,8 +614,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   /// 新游戏（重置引擎）。
   void _newGame() {
+    final engine = _engine;
+    if (engine == null) {
+      _showSnack('当前没有进行中的游戏');
+      return;
+    }
     setState(() {
-      _engine.startNewGame();
+      engine.startNewGame();
     });
     _showSnack('已开始新游戏');
   }
@@ -640,57 +672,79 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: ListView(
           padding: const EdgeInsets.all(12),
           children: <Widget>[
-            // 当前玩家信息
-            GildedCard(
-              child: ListTile(
-                leading: const Icon(
-                  Icons.person_outline,
-                  color: WesterosColors.goldBright,
-                ),
-                title: Text(
-                  _engine.player.name,
-                  style: const TextStyle(
-                    color: WesterosColors.parchment,
-                    fontWeight: FontWeight.bold,
+            // 当前玩家信息（S12-7：无引擎=从首页进来，不展示假玩家/存档按钮）
+            if (_engine == null)
+              GildedCard(
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.info_outline,
+                    color: WesterosColors.goldBright,
+                  ),
+                  title: const Text(
+                    '尚未开始游戏',
+                    style: TextStyle(
+                      color: WesterosColors.parchment,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    '存档相关的保存、导出与导入操作需在游戏内进行。开始或继续一局后，这里会出现对应按钮。',
+                    style: TextStyle(color: WesterosColors.inkDim),
                   ),
                 ),
-                subtitle: Text(
-                  '${_engine.progress.year}年${_engine.progress.month}月 · '
-                  '回合 ${_engine.progress.turnCount} · '
-                  '${_engine.player.gold} 金币',
-                  style: const TextStyle(color: WesterosColors.inkDim),
+              )
+            else ...<Widget>[
+              GildedCard(
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.person_outline,
+                    color: WesterosColors.goldBright,
+                  ),
+                  title: Text(
+                    _engine!.player.name,
+                    style: const TextStyle(
+                      color: WesterosColors.parchment,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '${_engine!.progress.year}年${_engine!.progress.month}月 · '
+                    '回合 ${_engine!.progress.turnCount} · '
+                    '${_engine!.player.gold} 金币',
+                    style: const TextStyle(color: WesterosColors.inkDim),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            // 操作按钮
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: <Widget>[
-                _GoldButton(
-                  icon: Icons.save_outlined,
-                  label: '保存',
-                  filled: true,
-                  onPressed: _saveGame,
-                ),
-                _GoldButton(
-                  icon: Icons.upload_file_outlined,
-                  label: '导出',
-                  onPressed: _exportSave,
-                ),
-                _GoldButton(
-                  icon: Icons.download_outlined,
-                  label: '导入',
-                  onPressed: _importSave,
-                ),
-                _GoldButton(
-                  icon: Icons.refresh,
-                  label: '新游戏',
-                  onPressed: _newGame,
-                ),
-              ],
-            ),
+              const SizedBox(height: 8),
+              // 操作按钮
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: <Widget>[
+                  _GoldButton(
+                    icon: Icons.save_outlined,
+                    label: '保存',
+                    filled: true,
+                    onPressed: _saveGame,
+                  ),
+                  _GoldButton(
+                    icon: Icons.upload_file_outlined,
+                    label: '导出',
+                    onPressed: _exportSave,
+                  ),
+                  _GoldButton(
+                    icon: Icons.download_outlined,
+                    label: '导入',
+                    onPressed: _importSave,
+                  ),
+                  _GoldButton(
+                    icon: Icons.refresh,
+                    label: '新游戏',
+                    onPressed: _newGame,
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 16),
             // AI 配置卡片
             GildedCard(

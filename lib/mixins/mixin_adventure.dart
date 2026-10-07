@@ -9,6 +9,7 @@ import '../data/item_data.dart';
 import '../models/location.dart';
 import '../core/command_registry.dart';
 import '../providers/game_provider_base.dart';
+import '../utils/command_alias.dart';
 import 'mixin_life.dart';
 import 'mixin_npc_interact.dart';
 import 'mixin_npc_task.dart';
@@ -233,8 +234,9 @@ mixin GameAdventureMixin
           if (args.isEmpty) {
             return CommandResult(text: formatTravelPanel());
           }
+          // 【S12-3】玩家照着面板上的中文名输（「旅行 白港」），不能只认 id。
           final from = player.locationId;
-          final text = travel(args);
+          final text = travel(normalizeLocationAlias(args));
           final moved = player.locationId != from;
           return CommandResult(text: text, consumedTurn: moved);
         },

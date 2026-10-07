@@ -75,6 +75,28 @@ jobs:
           # 打印关键配置供排查
           grep -nE "namespace|applicationId|minSdk|targetSdk|compileSdk" "$GRADLE" | head -10
 
+      - name: Ensure INTERNET permission in RELEASE manifest (S12-6)
+        # 【为什么必须有这一步】Flutter 模板只在 android/app/src/debug/ 与
+        # android/app/src/profile/ 里放 INTERNET 权限，**main（release）没有**。
+        # 本仓库不含 android/（CI 现场 flutter create），若不在此处补，
+        # release APK 将**完全没有联网权限** ⇒ AI 行动模式在正式包里必然全废
+        # （用户报告「AI 怎么填都不可用」）。此处幂等插入并回显自证。
+        run: |
+          set -e
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          test -f "$MANIFEST" || { echo "ERROR: $MANIFEST not found"; exit 1; }
+          if grep -q "android.permission.INTERNET" "$MANIFEST"; then
+            echo "INTERNET already present in main manifest"
+          else
+            sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <application#' "$MANIFEST"
+            echo "Inserted INTERNET permission into main manifest"
+          fi
+          # 自证：把改动后的 manifest 打印进 CI 日志（先证实再谈绿）
+          echo "----- $MANIFEST -----"
+          cat "$MANIFEST"
+          echo "--------------------------"
+          grep -q "android.permission.INTERNET" "$MANIFEST" || { echo "ERROR: INTERNET insert failed"; exit 1; }
+
       - name: Pub get
         run: flutter pub get
 
