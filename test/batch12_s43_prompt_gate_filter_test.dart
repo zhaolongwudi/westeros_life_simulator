@@ -306,14 +306,14 @@ void main() {
 
     test('各季节注入的事件都不含该季节不可能的门槛', () {
       final player = Player.defaultPlayer();
-      final winterOnly = <String>[
+      final winterOnly = <String>{
         'event_frozen_lake',
         'event_ghost_road',
         'event_famine',
         'event_winter_sickness',
         'event_stray_direwolf',
         'event_knight_night_watch',
-      ];
+      };
       final summerResult =
           selectEventsForPrompt(allEvents, player: player, season: 'summer');
       expect(
