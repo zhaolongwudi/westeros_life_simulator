@@ -15,6 +15,7 @@ import '../utils/command_alias.dart';
 import '../utils/labels.dart';
 import 'mixin_generation.dart';
 import 'mixin_life.dart';
+import 'mixin_letter.dart';
 import 'mixin_marriage.dart';
 import 'mixin_npc_interact.dart';
 import 'mixin_npc_task.dart';
@@ -25,7 +26,8 @@ import 'mixin_systems.dart';
 /// [GameLifeMixin.applyMonthlyLife] 与 [GameNpcInteractMixin.maybeNpcStoryEvent]、
 /// [GameGenerationMixin.maybeSuccessionStory]、[GameMarriageMixin.maybeFamilyEvent]、
 /// [GameNpcTaskMixin.advanceNpcTasks/checkNpcTaskDeadlines]，
-/// 因此 on 约束中列出六者。
+/// [GameLetterMixin.registerLetterMonthlyHooks]，
+/// 因此 on 约束中列出七者。
 mixin GamePlayMixin
     on
         GameProviderBase,
@@ -34,7 +36,8 @@ mixin GamePlayMixin
         GameNpcInteractMixin,
         GameGenerationMixin,
         GameMarriageMixin,
-        GameNpcTaskMixin {
+        GameNpcTaskMixin,
+        GameLetterMixin {
   // 数值统一收口在 lib/data/balance_data.dart（Batch 10-30 · M4a）。
   /// 每日活动次数上限（防数值刷子，参考 docs/08 玩法限制）。
   static const Map<String, int> kDailyLimits = BalanceData.dailyLimits;
