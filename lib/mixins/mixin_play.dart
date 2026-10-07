@@ -369,17 +369,25 @@ mixin GamePlayMixin
   String chooseWorldEventChoice(EventChoice choice) {
     final event = pendingEvent;
     if (event == null) return '当前没有待抉择的事件。';
-    if (!event.choices.contains(choice)) {
+    // 【按 id 匹配，不用 `choices.contains`】`EventChoice` 没有重写 `==`，
+    // `contains` 走身份相等：UI 路径下玩家点的就是 `pendingEvent.choices[i]`
+    // 故身份一致，但**存档往返**后 fromJson 会构造新实例，同一选项会被
+    // 误判为「不是本事件的可选项」——读档后待决事件成了点不动的死卡片。
+    // 按 id 匹配对两条路径都成立，并顺带锁死「只能选本事件声明的选项」。
+    final matched = event.choices.where((c) => c.id == choice.id).toList();
+    if (matched.isEmpty) {
       return '「${choice.text}」不是「${event.name}」的可选项。';
     }
+    // 用事件自身的选项对象落盘，避免调用方传入的等价副本带来分歧
+    final picked = matched.first;
     // 供 applyChoice 记录历史用（它读 currentEvent）
     setCurrentEvent(event);
     final before = player;
-    final rejectedText = applyChoice(choice, advanceClock: false);
+    final rejectedText = applyChoice(picked, advanceClock: false);
     setPendingEvent(null);
     final buf = StringBuffer();
-    if (choice.narrative.isNotEmpty) {
-      buf.writeln(choice.narrative);
+    if (picked.narrative.isNotEmpty) {
+      buf.writeln(picked.narrative);
     }
     // 摘要与 AI 通道共用同一份实现（见 GameProviderBase.effectSummary）
     buf.write(effectSummary(before, includeRejected: false));
