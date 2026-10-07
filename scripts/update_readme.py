@@ -121,7 +121,7 @@ def build_changelog_block():
         lines.append(f"**{date} · {subject}**（`{sha}`）")
         lines.append("")
     lines += [
-        "> 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。",
+        "> 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/03-审查接力.md。",
         "<!-- CHANGELOG:END -->",
     ]
     return "\n".join(lines)

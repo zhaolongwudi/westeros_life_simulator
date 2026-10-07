@@ -110,7 +110,7 @@
 - `mixin_commands` 注册表（改）：输入防护——超长截断、空白/符号输入统一兜底
 - `lib/utils/labels.dart`（改）：文案集中层改可替换资源接口（仍中文，仅隔离）
 - `test/regression/`（新建）：跨批次回归套件（旧档加载/身份分支/注册表完整性/仿真曲线/长会话）
-- `docs/CODE_MAP.md` + `docs/PROJECT_MAP.md`（同步）；`docs/HANDOVER.md`（记录新坑）
+- `docs/CODE_MAP.md` + `docs/PROJECT_MAP.md`（同步）；`docs/03-审查接力.md`（记录新坑）
 
 **依赖**：M1~M5 全部之后。
 

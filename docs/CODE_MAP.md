@@ -1,5 +1,5 @@
 # 维斯特洛人生模拟器 · 代码地图（CODE_MAP）
-> **本文件是代码结构导航索引**（v5.30 · Batch 10-113/114 同步）：下个对话/工具接手时，先读 HANDOVER.md 了解进度，
+> **本文件是代码结构导航索引**（v5.30 · Batch 10-113/114 同步）：下个对话/工具接手时，先读 `docs/03-审查接力.md` 了解进度，
 > 再读本文件快速定位「哪个功能在哪个文件、哪个方法」。避免盲目翻代码。
 >
 > 定位三步法：
@@ -409,7 +409,7 @@ GameEngine extends GameProviderBase with:
 > **坑（M4c-1）：改 lib/data/*.dart 数据后必须重跑 `python3 scripts/dart_content_extract.py` 再提交，
 > 否则 CI 的 Content sync check 步骤直接红。**
 
-## 六、已踩坑速查（详细原因见 HANDOVER 第三、四节）
+## 六、已踩坑速查（详细原因见 `docs/03-审查接力.md` 第 4 节与本文件下方条目）
 
 - **测试用 `||` 组合 Matcher** → non_bool_operand，改用 `anyOf`（坑 18）
 - **mixin 增 on 依赖** → 必须同步宿主 with 顺序（被依赖在前）+ import（坑 18）
@@ -438,15 +438,15 @@ GameEngine extends GameProviderBase with:
 - **改共享行为不要只改调用方** → 本轮 3 个缺陷：未用 import（CI 红）、shared_preferences mock 键前缀靠猜（静默假绿）、UI 断言文本写错（假绿）——**共享层要同时给注入点（`runAiAction(service:)`）与可断言常量**
 - **校验脚本本身要有回归** → `scripts/check_brackets_selftest.py` 17 条合成用例（raw string / 三引号 / 嵌套插值 / 嵌套块注释 / 转义），改脚本先跑自检
 - **SharedPreferences mock 别猜键名** → 用 `AiConfig().save()` 写入，键前缀猜错会静默走「未配置」分支变成假绿（坑 34）
-- **HANDOVER.md 已 gitignore** → 只本地更新；README 正常推送
+- **历史 HANDOVER.md 已废弃**（本地 gitignore、从未入库）→ 跨对话进度统一看 `docs/03-审查接力.md`；README 正常推送
 
-## 七、文件写入约定（复用 HANDOVER 第二节）
+## 七、文件写入约定（原 HANDOVER 第二节，HANDOVER 已废弃，内容保留于本节）
 
 1. 不要用 heredoc 传中文（shell 破坏 UTF-8）→ 用 create_file/edit_file 工具
 2. 单文件不要太大（用户偏好，便于维护）；mixin_life 已约 880 行，新功能优先拆新文件
    （Batch 10-17/10-18 新功能全部拆独立文件：mixin_marriage 245 行 / mixin_npc_task 221 行）
-3. 每次改完先括号检查（python 脚本），再 commit → push → CI → 绿后更新 HANDOVER + README
-4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）见 HANDOVER 第二节「工具使用」，本节不重复
+3. 每次改完先括号检查（python 脚本），再 commit → push → CI → 绿后更新 `docs/03-审查接力.md` + README
+4. **上下文预算 7 条硬规则**（分段写 / 先 wc -l 再读 / 短命令+脚本 / grep 重定向 / 不贴 PAT / CI 单次长 sleep / 回显黑名单）——原记于 HANDOVER 第二节「工具使用」，该文件从未入库、已废弃，细则待补入本文件
 
 ---
 *文档版本：v5.30（Batch 10-113/114 NPC 交互 + 冒险/旅行经济收口）· 最后更新：2026-10-06*
