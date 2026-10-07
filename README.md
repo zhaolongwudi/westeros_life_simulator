@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-07 · fix(review): S8-1 一次性事件的完成集合进存档（L1 关闭）**（`9c45c51`）
+
 **2026-10-07 · fix(review): S5-2 关闭 P1-03 —— 删除 74 处幽灵效果键（方案 C 诚实关闭）**（`cff504b`）
 
 **2026-10-07 · fix(review): S4-3c train 未知技能用例换样本（magic 已是初始技能）**（`0e4be1e`）
-
-**2026-10-07 · feat(review): S4-3c 26 处死门槛接真实门槛（diplomacy→speech / army·military→reputation 档 / magic→skills.magic）**（`b16965a`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/03-审查接力.md。
 <!-- CHANGELOG:END -->
