@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-07 · fix(review): S5-1 幽灵键死选项清理（2 处 happiness→energy）**（`cd849c5`）
+
 **2026-10-07 · fix(review): S4-1 系统机制化 monthlyEffects（P1-09）**（`f74fb89`）
 
 **2026-10-07 · feat(review): S2-4 prompt 口径统一 + 概率带收口（P2-04 / P2-08）**（`f84376d`）
-
-**2026-10-07 · feat(review): S2-3 幽灵效果键可见化 + 防新增闸门（P1-03 阶段一）**（`3f42a51`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
