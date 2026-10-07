@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
-**2026-10-07 · fix(review): S4-3 补修测试类型错误（intersection 需 Set 非 List）**（`cec4b94`）
+**2026-10-07 · fix(review): S4-6 测试确定化（CI run 37579653539 失败：300 回合零命中）**（`ad602ac`）
 
-**2026-10-07 · fix(review): S4-3 prompt 事件门槛过滤 + 删虚构概率表（P2-03 / P1-10 双关闭）**（`c543cdf`）
+**2026-10-07 · fix(review): S4-6 补修 1 处 unused_import（CI 首推失败）+ docs/03 补S4-6 卡片**（`91f1b31`）
 
-**2026-10-07 · fix(review): S4-2 补修 7 处过期测试断言（CI 首推失败）**（`71104ea`）
+**2026-10-07 · fix(review): S4-6 一次性事件门禁真正生效（P1-11 关闭）**（`c8c14e7`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
