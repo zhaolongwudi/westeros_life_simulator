@@ -73,7 +73,8 @@ void main() {
     });
 
     test('带空格的输入被 trim', () {
-      expect(normalizeOpenAiBaseUrl('  https://api.example.com  '), expected);
+      expect(normalizeOpenAiBaseUrl('  https://api.example.com  '),
+          'https://api.example.com/v1');
     });
   });
 
