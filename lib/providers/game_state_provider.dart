@@ -110,7 +110,12 @@ class GameStateProvider extends ChangeNotifier {
     int droppedHistoryCount = 0,
   })  : _player = player ?? Player.defaultPlayer(),
         _progress = progress ?? GameProgress.defaultProgress(),
-        _history = history ?? <GameEvent>[],
+        // 【必须拷贝】`history` getter 返回 `List.unmodifiable(_history)`，
+        // 若直接存下调用方传入的列表，「读档 → 用 loaded.history 构造引擎」
+        // 会拿到不可变视图，之后 `_appendHistory` 抛
+        // `Cannot add to an unmodifiable list`。与 `applyState` 的 `List.from`
+        // 保持一致：`_history` 恒为本实例独占的可变列表。
+        _history = List<GameEvent>.from(history ?? const <GameEvent>[]),
         _currentEvent = currentEvent,
         _pendingEvent = pendingEvent,
         _isGameActive = isGameActive,

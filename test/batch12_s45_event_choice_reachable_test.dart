@@ -244,6 +244,30 @@ void main() {
           reason: '还原出的待决事件无法正常抉择');
     });
 
+    test('读档链路（用 loaded.history 构造引擎）抉择世界事件不崩', () {
+      // 【CI run 37604763686 回归锁】`history` getter 返回 List.unmodifiable，
+      // 而构造函数曾直接存下传入的列表 → 「读档 → 构造引擎 → 抉择事件」时
+      // `_appendHistory` 抛 Cannot add to an unmodifiable list。
+      // 这条是**真实生产路径**（S4-5 之前 append 分支是死的，故未暴露）。
+      final engine = _engineAwaitingEvent();
+      final loaded = GameStateProvider.fromJson(engine.toJson());
+      final revived = GameEngine(
+        player: loaded.player,
+        progress: loaded.progress,
+        history: loaded.history, // ← 这里是 unmodifiable 视图
+        currentEvent: loaded.currentEvent,
+        pendingEvent: loaded.pendingEvent,
+        isGameActive: loaded.isGameActive,
+        isGameOver: loaded.isGameOver,
+      );
+      final sell = _swordEvent.choices.firstWhere((c) => c.id == 'choice_sell');
+      // 不应抛异常
+      final text = revived.chooseWorldEventChoice(sell);
+      expect(text, isNotEmpty);
+      expect(revived.history.length, loaded.history.length + 1,
+          reason: '抉择后事件应能追加进 history（而非因不可变列表崩溃）');
+    });
+
     test('旧存档缺 pendingEvent 键 → 回落 null，不崩', () {
       final engine = _engineAwaitingEvent();
       final json = engine.toJson()..remove('pendingEvent');
