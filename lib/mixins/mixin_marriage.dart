@@ -14,6 +14,7 @@ import '../models/marital.dart';
 import '../core/command_registry.dart';
 import '../core/monthly_pipeline.dart';
 import '../providers/game_provider_base.dart';
+import '../utils/command_alias.dart';
 import '../utils/labels.dart';
 import 'mixin_generation.dart';
 import 'mixin_life.dart';
@@ -135,24 +136,33 @@ mixin GameMarriageMixin
   /// 为一名子女指定培养方向。
   ///
   /// 必须在子女列表中；方向限 sword/politics/speech/riding。
+  ///
+  /// 【S12-12】此前**只认英文键**、且把英文键回显给玩家：
+  /// 玩家在技能面板看到的是「权谋」，照着输「培养 罗柏 权谋」却被拒
+  /// （`valid.contains('权谋')` 恒 false），报错还写
+  /// 「培养方向可选：sword / politics / speech / riding」。
+  /// 与「旅行 白港」「训练 魔法」「使用 多恩红葡萄酒」同型。
+  /// 现：入参走 [normalizeSkillAlias]（中英皆可），出参一律 [skillLabel]。
   String rearChild(String childName, String focus) {
     if (!player.children.contains(childName)) {
       return '「$childName」不是你的子女。';
     }
     const valid = {'sword', 'politics', 'speech', 'riding'};
-    if (!valid.contains(focus)) {
-      return '培养方向可选：sword / politics / speech / riding。';
+    final picked = normalizeSkillAlias(focus);
+    if (!valid.contains(picked)) {
+      final names = valid.map(skillLabel).join(' / ');
+      return '培养方向可选：$names。';
     }
     final index = player.childRearing.indexWhere((c) => c.name == childName);
     final records = List<ChildRearing>.from(player.childRearing);
     final cur = index >= 0 ? records[index] : ChildRearing(name: childName);
     if (index >= 0) {
-      records[index] = cur.copyWith(focus: focus);
+      records[index] = cur.copyWith(focus: picked);
     } else {
-      records.add(cur.copyWith(focus: focus));
+      records.add(cur.copyWith(focus: picked));
     }
     updatePlayer(player.copyWith(childRearing: records));
-    return '🎓 你为「$childName」定下培养方向：$focus。日后必成大器。';
+    return '🎓 你为「$childName」定下培养方向：${skillLabel(picked)}。日后必成大器。';
   }
 
   /// 亲自督导一名子女（一次性，声望 +3，关系叙事）。
@@ -211,7 +221,7 @@ mixin GameMarriageMixin
       for (final c in p.children) {
         final rearing = p.childRearing.where((r) => r.name == c).toList();
         final focus = rearing.isNotEmpty && rearing.first.focus.isNotEmpty
-            ? '·方向 ${rearing.first.focus}'
+            ? '·方向 ${skillLabel(rearing.first.focus)}'
             : '';
         final school = rearing.isNotEmpty && rearing.first.sentToSchool ? '·进修' : '';
         buf.writeln('  - $c$focus$school');
@@ -503,7 +513,7 @@ mixin GameMarriageMixin
         buf.writeln('· 培养档案：');
         for (final r in rearing) {
           final bits = <String>[];
-          if (r.focus.isNotEmpty) bits.add('方向 ${r.focus}');
+          if (r.focus.isNotEmpty) bits.add('方向 ${skillLabel(r.focus)}');
           if (r.tutored) bits.add('已督导');
           if (r.sentToSchool) bits.add('在学城/骑士团进修');
           buf.writeln('  - ${r.name}${bits.isEmpty ? '' : '（${bits.join('、')}）'}');
@@ -572,8 +582,8 @@ mixin GameMarriageMixin
         aliases: const ['培养', 'rear'],
         order: 40,
         requiredArgCount: 2,
-        missingArgsHint: '培养谁、往哪个方向？如「培养 罗柏 sword」。方向：sword/politics/speech/riding。',
-        helpLine: '培养 / rear [子女] [方向] 为子女定培养方向（sword/politics/speech/riding）',
+        missingArgsHint: '培养谁、往哪个方向？如「培养 罗柏 剑术」。方向：剑术 / 权谋 / 口才 / 骑术。',
+        helpLine: '培养 / rear [子女] [方向] 为子女定培养方向（剑术/权谋/口才/骑术）',
         handler: (args) {
           final parts = args.split(RegExp(r'\s+'));
           return CommandResult(text: rearChild(parts.first, parts[1]));

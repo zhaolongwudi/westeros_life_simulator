@@ -139,6 +139,14 @@ class Player {
         // `skills.magic: 5` 门槛的选项会因此**永久不可选**。
         // 与 alchemy 同先例：初始 0 级、可训练成长。
         'magic': 0,
+        // S12-12：`stealth` 同理必须在初始技能表内。取证：
+        // `event_data.dart` 的 `event_road_bandits` / `choice_sneak_past`
+        // （「绕道潜行」）门槛是 `skills.stealth: 2`，而 `train()` 对
+        // `skills` 表里没有的键一律回「你从未学过」，且全库**没有任何
+        // 事件或指令会给予 stealth**（`grep stealth lib/` 只命中白名单、
+        // 标签表和该门槛本身）⇒ 该选项此前**永久不可选**，纯摆设。
+        // 初始 0 级 + 可训练，与 magic/alchemy 完全同构。
+        'stealth': 0,
       },
       attributes: const {
         'strength': 5,
