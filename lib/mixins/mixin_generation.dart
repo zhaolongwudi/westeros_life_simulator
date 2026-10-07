@@ -70,7 +70,11 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
     final buf = StringBuffer()
       ..writeln('【家谱】${houseName}家')
       ..writeln('· 家主：${p.name}（${identityLabel(p.identity)}，${p.age}岁）');
-    buf.writeln('· 婚姻：${flagOf('isMarried') ? '已婚' : '未婚'}');
+    // S13-1②：与 `GameMarriageMixin.isMarried` 的**单真相源**对齐（该 getter
+    // 已收敛为 `player.spouse != null`）。本 mixin 的 `on` 约束不含 marriage、
+    // 取不到该 getter，故直接读同一真相源，避免「已婚但无配偶」的矛盾态
+    // 在家谱上仍被显示成「已婚」。
+    buf.writeln('· 婚姻：${p.spouse != null ? '已婚' : '未婚'}');
     if (p.children.isEmpty) {
       buf.writeln('· 子女：尚无子嗣');
     } else {
@@ -130,6 +134,13 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
         ...p.flags,
         'isAlive': true,
         'isExiled': false,
+        // S13-1②：配偶（[Player.spouse]）**不随传承下行**——上面既没传
+        // `spouse`，这里就必须把 `isMarried` 一并清掉。`isMarried` getter 是
+        // `spouse != null || flagOf('isMarried')` 的**双真相源**，只带 flags 不带
+        // spouse 会让新家主处于「已婚但无配偶」的矛盾态；次月
+        // `maybeFamilyEvent` 的 `player.spouse!` 即抛 `StateError`，而
+        // `MonthlyPipeline.runPhase` 无 try/catch ⇒ **整局卡死**。
+        'isMarried': false,
         'generation': true, // 已传承，标记多世代
         'inherited': true,
       },

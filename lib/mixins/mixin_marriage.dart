@@ -43,7 +43,18 @@ mixin GameMarriageMixin
   };
 
   /// 是否已婚。
-  bool get isMarried => player.spouse != null || flagOf('isMarried');
+  ///
+  /// 【S13-1② 收敛为单真相源】原为 `player.spouse != null || flagOf('isMarried')`
+  /// ——一个**双真相源**：任一方为真即判已婚，于是「只有标记、没有配偶」的
+  /// 矛盾态也被判成已婚。该态**真实可造**：①修复前的 `advanceGeneration`
+  /// 搬运 `flags` 却不传 `spouse`（写入侧已在本批修掉）；②AI 通道的
+  /// `flags.isMarried` 在白名单内可被写；③修复前导出的旧存档。
+  /// 而全库 **8 处 `player.spouse!` 的守卫一律是 `if (!isMarried)`**，
+  /// 矛盾态必然走到强解包 ⇒ `StateError`，月度管线无 try/catch ⇒ 整局卡死。
+  /// 收敛为「有配偶才算已婚」后，这类崩溃在**全部**调用点同时消失；
+  /// 三处正常写者（`marry`/`divorce`/`spousePassesAway`）本就同步 spouse 与
+  /// flag，故对正常玩法零行为变化。
+  bool get isMarried => player.spouse != null;
 
   /// 配偶详情（可空）。
   SpouseDetail? get spouseDetail => player.spouse;

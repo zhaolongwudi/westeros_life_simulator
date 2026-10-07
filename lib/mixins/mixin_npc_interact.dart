@@ -87,7 +87,14 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
       return '你与${npc.name}寒暄了几句。他/她客气地点点头，保持着礼貌的距离。';
     }
     if (rel < 40) {
-      final topic = npc.goals.isNotEmpty ? npc.goals.first : npc.fears.first;
+      // S13-1③：`goals` 与 `fears` **可能同时为空**（实测 4 个：`npc_rickon`
+      // 就在默认出生地临冬城，另有 `npc_lys_arryn`/`npc_tommen`/`npc_myrcella`），
+      // 此时原先的 `npc.fears.first` 会抛 `StateError`——本分支此前漏了空守卫，
+      // 而紧邻的信任分支（下一条 `secrets.isNotEmpty`）是有守卫的。
+      // 兜底值取「往事」，与 [npcChat] 的同型兜底保持一致。
+      final topic = npc.goals.isNotEmpty
+          ? npc.goals.first
+          : (npc.fears.isNotEmpty ? npc.fears.first : '往事');
       return '${npc.name}向你倾诉：「最近总想着「$topic」。」你认真听着，他/她的目光柔和了些。';
     }
     if (rel < 60) {
