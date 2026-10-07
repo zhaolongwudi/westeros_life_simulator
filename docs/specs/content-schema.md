@@ -157,7 +157,7 @@ assets/data/*.json         ← 单向导出镜像（只读，运行时从不加�
 > 2026-10-07 S3-1 清理：原有 26 处死门槛键（`army`×9 / `diplomacy`×9 /
 > `military`×5 / `magic`×3）已从数据中移除。这 4 个键在 Player 上没有对应字段，
 > 写了等于没写。为"带兵镇压""外交游说""魔法仪式"设计**真实**门槛是设计工作，
-> 已立为 S4-3 任务（清单见 `docs/03-审查接力.md`）。
+> 已立为 S4-3 任务（清单见 `docs/archive/03-审查归档.md`）。
 
 ### 3.1 事件级 `triggerConditions`（`Map<String,String>`）
 
