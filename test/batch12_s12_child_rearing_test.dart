@@ -91,11 +91,14 @@ void main() {
       expect(p.skills.containsKey('magic'), isTrue, reason: 'S4-3c 先例仍在');
     });
 
-    test('「训练 潜行」能真的提升 stealth', () {
+    test('「训练 潜行」能真的提升 stealth（须走指令层，归一化才生效）', () {
       final e = GameEngine()..startNewGame();
-      expect(e.train('潜行'), isNot(contains('从未学过')),
+      // 【坑】`train()` 收到的是**已归一化**的键，归一化在指令层完成
+      // （`mixin_play` 的 `train(normalizeSkillAlias(args))`）。
+      // 直接调 `e.train('潜行')` 会跳过归一化 —— 第一版测试就踩了这个。
+      final r = e.resolveCommand('训练 潜行');
+      expect(r.text, isNot(contains('从未学过')),
           reason: '中文名归一化 + 初始表含 stealth ⇒ 应该能练');
-      // 训练有成功率，故只断言「不是从未学过」且技能键存在
       expect(e.player.skills.containsKey('stealth'), isTrue);
     });
 

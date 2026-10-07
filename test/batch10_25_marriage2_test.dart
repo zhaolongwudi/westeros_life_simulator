@@ -227,7 +227,8 @@ void main() {
       engine.rearChild('罗柏', 'sword');
       final text = engine.formatMarriagePanel();
       expect(text, contains('罗柏'));
-      expect(text, contains('sword'));
+      // S12-12：回显已中文化（原断言锁的是英文键回显这一缺陷本身）。
+      expect(text, contains('剑术'));
     });
   });
 

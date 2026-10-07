@@ -113,7 +113,8 @@ void main() {
       final engine = GameEngine()..startNewGame();
       engine.addChild('罗柏');
       final result = engine.rearChild('罗柏', 'sword');
-      expect(result, contains('sword'));
+      // S12-12：回显已中文化（原断言锁的是英文键回显这一缺陷本身）。
+      expect(result, contains('剑术'));
       expect(engine.player.childRearing.first.focus, 'sword');
     });
     test('rearChild 非子女拒绝', () {
@@ -157,7 +158,8 @@ void main() {
       final text = engine.formatMultiGenTree();
       expect(text, contains('配偶'));
       expect(text, contains('罗柏'));
-      expect(text, contains('sword'));
+      // S12-12：回显已中文化（原断言锁的是英文键回显这一缺陷本身）。
+      expect(text, contains('剑术'));
     });
   });
 
@@ -194,7 +196,8 @@ void main() {
       final engine = GameEngine()..startNewGame();
       engine.addChild('罗柏');
       final result = engine.resolveCommand('培养 罗柏 sword');
-      expect(result.text, contains('sword'));
+      // S12-12：回显已中文化（原断言锁的是英文键回显这一缺陷本身）。
+      expect(result.text, contains('剑术'));
     });
     test('督导指令执行', () {
       final engine = GameEngine()..startNewGame();

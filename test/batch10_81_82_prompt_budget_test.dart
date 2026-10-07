@@ -4,7 +4,7 @@
 /// 10-81 玩家技能与属性中文标签化
 ///  1. 技能行 → 中文键名（剑术/骑术/口才/炼金），无英文裸键
 ///  2. 属性行 → 中文键名（力量/敏捷/智识/魅力/意志/感知）
-///  3. 技能/属性数值全量保留（5 技能 + 6 属性）
+///  3. 技能/属性数值全量保留（技能不设预算、不截断；属性 6 项）
 /// 10-82 在场 NPC 与 NPC 网络预算化
 ///  4. 临冬城 8 位 NPC → 只展开预算内前 5 位 + 「另有 N 位在场未展开」尾注
 ///  5. 被截断的 NPC（第 6 位起）不出现在在场 NPC 段
@@ -118,13 +118,15 @@ void main() {
       }
     });
 
-    test('数值全量保留（技能 6 项 + 属性 6 项，不设预算）', () async {
+    test('数值全量保留（技能 7 项 + 属性 6 项，不设预算）', () async {
       final body = await _promptFor(Player.defaultPlayer());
       final skill = _line(body, '- 技能：');
       final attr = _line(body, '- 属性：');
       // 10-81 只中文化键名，键数不截断
       // S4-3c：技能表新增 magic（初始 0 级），故 5 → 6。
-      expect('、'.allMatches(skill).length + 1, 6);
+      // S12-12：再新增 stealth（初始 0 级，为让 `skills.stealth` 门槛可达），
+      // 故 6 → 7。契约（「不设预算、不截断」）不变。
+      expect('、'.allMatches(skill).length + 1, 7);
       expect('、'.allMatches(attr).length + 1, 6);
       expect(skill.contains('另有'), isFalse);
       expect(attr.contains('另有'), isFalse);
