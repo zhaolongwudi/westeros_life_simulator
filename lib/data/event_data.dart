@@ -1353,7 +1353,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_rest',
         text: '休息',
         requirements: const {},
-        effects: const {'happiness': 10},
+        effects: const {'energy': 10},
         narrative: '你休息，恢复精力。',
       ),
     ],
@@ -1773,7 +1773,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_rest',
         text: '休息',
         requirements: const {},
-        effects: const {'happiness': 5},
+        effects: const {'energy': 5},
         narrative: '你休息，恢复精力。',
       ),
       EventChoice(

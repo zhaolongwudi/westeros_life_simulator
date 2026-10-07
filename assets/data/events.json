@@ -1861,7 +1861,7 @@
         "text": "休息",
         "requirements": {},
         "effects": {
-          "happiness": 10
+          "energy": 10
         },
         "narrative": "你休息，恢复精力。"
       }
@@ -2478,7 +2478,7 @@
         "text": "休息",
         "requirements": {},
         "effects": {
-          "happiness": 5
+          "energy": 5
         },
         "narrative": "你休息，恢复精力。"
       },
