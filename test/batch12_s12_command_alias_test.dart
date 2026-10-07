@@ -114,9 +114,22 @@ void main() {
   group('S12-3 物品归一化未被破坏（不回归）', () {
     test('每个物品都能被自己的中文名归一化回 id', () {
       for (final item in kItems.values) {
-        expect(normalizeItemAlias(item.name), item.id,
+        // 用 Strict 版：switch 别名表是手工维护的，历史上漏过
+        // 「多恩红葡萄酒」「紫杉长弓」两件（UI 显示全名，命令却不认）。
+        expect(normalizeItemAliasStrict(item.name), item.id,
             reason: '物品「${item.name}」应归一化回 ${item.id}');
       }
+    });
+
+    test('已知失配的两件物品：显示名与短别名都能用', () {
+      // 这两条是回归锁：曾经 UI 写「多恩红葡萄酒」而命令只认「葡萄酒」。
+      expect(normalizeItemAliasStrict('多恩红葡萄酒'), 'item_wine');
+      expect(normalizeItemAliasStrict('紫杉长弓'), 'item_bow');
+      // 短别名仍然有效（玩家也可能输简写）。
+      expect(normalizeItemAliasStrict('葡萄酒'), 'item_wine');
+      expect(normalizeItemAliasStrict('长弓'), 'item_bow');
+      // id 直接可用。
+      expect(normalizeItemAliasStrict('item_wine'), 'item_wine');
     });
   });
 }

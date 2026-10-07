@@ -709,7 +709,7 @@ mixin GameLifeMixin on GameProviderBase {
     if (parts.length > 1) {
       quantity = int.tryParse(parts[1]) ?? 1;
     }
-    final itemId = normalizeItemAlias(namePart);
+    final itemId = normalizeItemAliasStrict(namePart);
     if (!isKnownItemId(itemId)) {
       return '这里买不到「$namePart」。输入「行情」看看有什么可买。';
     }
@@ -724,7 +724,7 @@ mixin GameLifeMixin on GameProviderBase {
     if (parts.length > 1) {
       quantity = int.tryParse(parts[1]) ?? 1;
     }
-    final itemId = normalizeItemAlias(namePart);
+    final itemId = normalizeItemAliasStrict(namePart);
     if (!isKnownItemId(itemId)) {
       return '你没有「$namePart」这种东西。';
     }
@@ -750,7 +750,8 @@ mixin GameLifeMixin on GameProviderBase {
         requiredArgCount: 1,
         missingArgsHint: '使用什么？如「使用 黑面包」或「使用 item_meat」。',
         helpLine: '使用 / use [物品]    使用消耗品（如 使用 黑面包）',
-        handler: (args) => CommandResult(text: useItem(normalizeItemAlias(args))),
+        handler: (args) =>
+            CommandResult(text: useItem(normalizeItemAliasStrict(args))),
       ),
     );
     registry.register(
@@ -812,7 +813,7 @@ mixin GameLifeMixin on GameProviderBase {
         requiredArgCount: 1,
         missingArgsHint: '装备什么？如「装备 长剑」或「装备 锁子甲」。',
         helpLine: '装备 / equip [物品]  装备武器/护甲/坐骑（如 装备 长剑）',
-        handler: (args) => CommandResult(text: equip(normalizeItemAlias(args))),
+        handler: (args) => CommandResult(text: equip(normalizeItemAliasStrict(args))),
       ),
     );
     registry.register(
@@ -822,7 +823,7 @@ mixin GameLifeMixin on GameProviderBase {
         requiredArgCount: 1,
         missingArgsHint: '卸下什么？如「卸下 长剑」。',
         helpLine: '卸下 / unequip [物品] 卸下装备',
-        handler: (args) => CommandResult(text: unequip(normalizeItemAlias(args))),
+        handler: (args) => CommandResult(text: unequip(normalizeItemAliasStrict(args))),
       ),
     );
     registry.register(

@@ -122,11 +122,30 @@ void main() {
   });
 
   group('S12-1/2 UI 渲染层（widget）', () {
+    /// 滚到页面底部，确保 `ListView` 的懒构建把目标区块真正 build 出来。
+    ///
+    /// 【坑】`ListView` 只构建可视区的子节点。属性/技能/家族关系都在首屏之下，
+    /// 不滚动时 `find.textContaining(...)` 一律 findsNothing —— 那是
+    /// **测试没滚**，不是 UI 没渲染（第一次写这个测试就踩了）。
+    Future<void> scrollToBottom(WidgetTester tester) async {
+      final list = find.byType(ListView).first;
+      for (var i = 0; i < 8; i++) {
+        await tester.drag(list, const Offset(0, -600));
+        await tester.pumpAndSettle();
+      }
+    }
+
     testWidgets('玩家面板渲染中文属性/技能，不出现英文键', (tester) async {
+      tester.view.physicalSize = const Size(900, 3000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
       await tester.pumpWidget(
         MaterialApp(home: PlayerPanelScreen(engine: _engine())),
       );
       await tester.pumpAndSettle();
+      await scrollToBottom(tester);
+
       final text = find.textContaining(attributeLabel('strength'));
       expect(text, findsWidgets, reason: '面板应显示「力量」');
       final skill = find.textContaining(skillLabel('sword'));
@@ -138,10 +157,16 @@ void main() {
     });
 
     testWidgets('家族面板对外关系显示家族中文名而非 id', (tester) async {
+      tester.view.physicalSize = const Size(900, 3000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
       await tester.pumpWidget(
         MaterialApp(home: FamilyScreen(engine: _engine())),
       );
       await tester.pumpAndSettle();
+      await scrollToBottom(tester);
+
       // 史塔克的对外关系里含兰尼斯特（既有数据：负值敌对）。
       final lannister = familyById('family_lannister')!;
       expect(find.textContaining(lannister.name), findsWidgets,

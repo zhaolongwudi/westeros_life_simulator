@@ -24,6 +24,20 @@ import 'package:westeros_life_simulator/screens/game_screen.dart';
 import 'package:westeros_life_simulator/screens/settings_screen.dart';
 import 'package:westeros_life_simulator/services/save_service.dart';
 
+/// 内存版存档服务（**仅用于 widget 测试**）。
+///
+/// 【为什么设置页的 widget 测试不能用真实 SaveService】
+/// `_SettingsScreenState.initState` 会 `await _saveService.listSaves()`——
+/// 那是**真实文件 IO**，跑在 fake-async 之外，`pumpAndSettle` 永远等不到它
+/// 结束 ⇒ `pumpAndSettle timed out`。既有测试（batch5/batch8/batch10_60）
+/// 一律注入内存版，本文件必须照此约定（顺带也让断言不依赖磁盘）。
+class _MemorySaveService extends SaveService {
+  _MemorySaveService() : super(saveDir: '/tmp/nonexistent_s12_widget_dir');
+
+  @override
+  Future<List<SaveMetadata>> listSaves() async => <SaveMetadata>[];
+}
+
 void main() {
   late Directory tempDir;
   late SaveService service;
@@ -110,7 +124,7 @@ void main() {
   group('S12-7 设置页不再误存空档（③号缺陷）', () {
     testWidgets('engine == null 时不显示保存/导出/导入/新游戏', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(home: SettingsScreen(saveService: service)),
+        MaterialApp(home: SettingsScreen(saveService: _MemorySaveService())),
       );
       await tester.pumpAndSettle();
 
@@ -124,7 +138,7 @@ void main() {
 
     testWidgets('engine == null 时点开也不产生存档', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(home: SettingsScreen(saveService: service)),
+        MaterialApp(home: SettingsScreen(saveService: _MemorySaveService())),
       );
       await tester.pumpAndSettle();
       // 无存档按钮 ⇒ 无从触发保存；目录应保持空
@@ -135,7 +149,7 @@ void main() {
       final engine = GameEngine()..startNewGame();
       await tester.pumpWidget(
         MaterialApp(
-          home: SettingsScreen(engine: engine, saveService: service),
+          home: SettingsScreen(engine: engine, saveService: _MemorySaveService()),
         ),
       );
       await tester.pumpAndSettle();
@@ -149,7 +163,11 @@ void main() {
   group('S12-7 存档槽 id 与 player.id 一致', () {
     test('自动存档用的槽就是玩家 id（读档后不换槽）', () async {
       final player = Player.defaultPlayer().copyWith(id: 'player_fixed_123');
-      final engine = GameEngine(player: player)..startNewGame();
+      // 【坑】必须走 startNewGame(player:) —— 构造函数的 player 参数会被
+      // 无参 startNewGame() 里的 `_player = player ?? Player.defaultPlayer()`
+      // 覆盖掉（game_state_provider.dart:250），结果又变回 player_default。
+      final engine = GameEngine()..startNewGame(player: player);
+      expect(engine.player.id, 'player_fixed_123');
       final id = await service.saveGame(engine, saveId: engine.player.id);
       expect(id, 'player_fixed_123');
 

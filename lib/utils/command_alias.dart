@@ -49,6 +49,26 @@ String normalizeItemAlias(String raw) {
   };
 }
 
+/// 物品显示名 → id 的兜底解析（S12-3 延伸）。
+///
+/// 【为什么需要】[normalizeItemAlias] 的 switch 是**手工维护**的中文别名表，
+/// 而 `item_data` 的显示名可能与别名表不同名。实测 33 件物品里有 2 件失配：
+///   · `多恩红葡萄酒`（别名表只认「葡萄酒」「红酒」）
+///   · `紫杉长弓`（别名表只认「长弓」「弓」）
+/// 两者都**在背包 UI 里显示完整名**，玩家照着输入却被判为无效物品
+/// ——与「旅行 白港」同型。故 switch 之后再按 [kItems] 的真实显示名兜底，
+/// 让「显示什么就能输什么」成为由数据保证的不变量。
+String normalizeItemAliasStrict(String raw) {
+  final s = raw.trim();
+  final direct = normalizeItemAlias(s);
+  if (direct != s) return direct; // switch 命中（含 id）
+  if (kItems.containsKey(s)) return s; // 本身就是 id
+  for (final item in kItems.values) {
+    if (item.name == s) return item.id;
+  }
+  return s;
+}
+
 /// 物品 ID 是否存在于物品表。
 bool isKnownItemId(String id) => kItems.containsKey(id);
 
