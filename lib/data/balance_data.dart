@@ -552,7 +552,7 @@ class BalanceData {
   static const int kAiPromptNpcSkillCount = 2;
   /// 「邻近地点与路途风险」最多逐条展开几个相邻地点（其余给「另有 N 处未列」）。
   ///
-  /// 全库 69 个地点平均 4~5 条 connectedTo；取前 4 个覆盖既有测试的临冬城场景。
+  /// 全库 70 个地点平均 4~5 条 connectedTo；取前 4 个覆盖既有测试的临冬城场景。
   static const int kAiPromptNearbyLocationCount = 4;
   /// 「与你相关的可用事件」最多列出几条。
   ///

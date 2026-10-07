@@ -453,6 +453,22 @@ const List<Location> allLocations = [
     connectedTo: const ['location_the_wall'],
     description: '守夜人前哨站。',
   ),
+  // S1-1 遗留任务（本次补齐）：`location_castle_black` 的 id 被恐怖堡占用，
+  // 守夜人总部「黑城堡（Castle Black）」此前在 69 个地点中**没有独立条目**。
+  // 单独立 id（不改动被占用的 `location_castle_black`，避免破坏旧存档），
+  // 与东海望/影塔同为 `location_the_wall` 的前哨，构成「长城沿线」三据点。
+  Location(
+    id: 'location_castle_black_nightswatch',
+    name: '黑城堡',
+    type: LocationType.fort,
+    region: '北境',
+    dangerLevel: 5,
+    population: 1000,
+    features: const ['守夜人总部', '长城上的城堡'],
+    governorId: 'npc_geor_mormont',
+    connectedTo: const ['location_the_wall'],
+    description: '守夜人军团总部，长城沿线最大的据点。',
+  ),
 
   // ==================== 特殊地区 ====================
   Location(

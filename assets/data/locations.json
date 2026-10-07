@@ -598,6 +598,23 @@
     "description": "守夜人前哨站。"
   },
   {
+    "id": "location_castle_black_nightswatch",
+    "name": "黑城堡",
+    "type": "fort",
+    "region": "北境",
+    "dangerLevel": 5,
+    "population": 1000,
+    "features": [
+      "守夜人总部",
+      "长城上的城堡"
+    ],
+    "governorId": "npc_geor_mormont",
+    "connectedTo": [
+      "location_the_wall"
+    ],
+    "description": "守夜人军团总部，长城沿线最大的据点。"
+  },
+  {
     "id": "location_whispering_wood",
     "name": "鬼影森林",
     "type": "wilderness",

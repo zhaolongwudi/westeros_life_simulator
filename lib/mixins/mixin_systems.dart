@@ -45,6 +45,7 @@ mixin GameSystemsMixin on GameProviderBase {
           isInRegion('北境') &&
               (isAt('location_the_wall') ||
                   isAt('location_castle_black') ||
+                  isAt('location_castle_black_nightswatch') ||
                   isAt('location_eastwatch') ||
                   isAt('location_shadow_tower')) ||
               identity == PlayerIdentity.soldier,
