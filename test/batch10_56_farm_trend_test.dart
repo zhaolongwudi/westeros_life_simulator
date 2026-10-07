@@ -100,11 +100,12 @@ void main() {
       expect(section, contains('高庭的玫瑰园开成花海'));
     });
 
-    test('多恩·永冬注入多恩冬季农事', () async {
+    test('S4-2：多恩·longwinter 已清除，走区域兜底文案', () async {
       final body = await _promptFor('location_sunspear', 'longwinter');
       final section = _farmTrendSection(body);
-      expect(section, contains('多恩永冬反常'));
-      expect(section, contains('丰饶的绿洲开始定量供水'));
+      // 凛冬专属农事段落已随S4-2 删除，应落到 `_ =>` 兜底。
+      expect(section, isNot(contains('多恩永冬反常')));
+      expect(section, contains('多恩靠太阳与绿洲为生'));
     });
 
     test('未知区域兜底文案', () async {

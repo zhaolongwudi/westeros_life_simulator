@@ -76,8 +76,9 @@ void main() {
     test('身份/季节标签函数', () {
       expect(identityLabel(PlayerIdentity.maester), '学士');
       expect(identityLabel(PlayerIdentity.wildling), '野人');
-      expect(seasonLabel('longwinter'), '凛冬');
       expect(seasonLabel('summer'), '夏天');
+      // S4-2：`longwinter` 已从引擎清除，老存档残留值走 `_ =>` 兜底。
+      expect(seasonLabel('longwinter'), 'longwinter');
     });
 
     test('kEras 时代年份映射', () {

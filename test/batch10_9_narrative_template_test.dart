@@ -37,13 +37,22 @@ void main() {
       }
     });
 
-    test('5 个季节全部有非空叙事引导', () {
-      const seasons = <String>['spring', 'summer', 'autumn', 'winter', 'longwinter'];
+    test('4 个季节全部有非空叙事引导', () {
+      // S4-2：引擎季节已收敛为四季，longwinter 分支已删除。
+      const seasons = <String>['spring', 'summer', 'autumn', 'winter'];
       for (final season in seasons) {
         final guide = seasonNarrativeGuide(season);
         expect(guide.isNotEmpty, true, reason: '季节 $season 缺失叙事引导');
         expect(guide.length, greaterThan(10), reason: '季节 $season 引导过短');
       }
+    });
+
+    test('S4-2：已清除的 longwinter 走兜底且非空', () {
+      // 模板 map 的 `_ =>` 必须兜住任何未知季节值，
+      // 否则老存档残留 longwinter 时会拿到空字符串。
+      final guide = seasonNarrativeGuide('longwinter');
+      expect(guide.isNotEmpty, true);
+      expect(guide.length, greaterThan(10));
     });
 
     test('身份引导各不相同（差异化）', () {

@@ -100,11 +100,12 @@ void main() {
       expect(section, contains('种子、农具与婚约是开市谈资'));
     });
 
-    test('多恩·永冬注入多恩永冬集市行情', () async {
+    test('S4-2：多恩·longwinter 已清除，走区域兜底文案', () async {
       final body = await _promptFor('location_sunspear', 'longwinter');
       final section = _marketTrendSection(body);
-      expect(section, contains('多恩永冬反常'));
-      expect(section, contains('集市里水比酒贵'));
+      // 凛冬专属集市段落已随 S4-2 删除，应落到 `_ =>` 兜底。
+      expect(section, isNot(contains('多恩永冬反常')));
+      expect(section, contains('多恩集市四季常开'));
     });
 
     test('未知区域兜底文案', () async {

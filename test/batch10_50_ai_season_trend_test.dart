@@ -1,8 +1,9 @@
 /// Batch 10-50 测试：AI prompt 注入季节世界动向。
 ///
 /// 覆盖：
-/// 1. 五季（spring/summer/autumn/winter/longwinter）各注入对应季节世界动向段落
-/// 2. 未知季节兜底文案
+/// 1. 四季（spring/summer/autumn/winter）各注入对应季节世界动向段落
+///    （S4-2 起引擎只有四季，原longwinter 分支已删除）
+/// 2. 未知季节 / 已清除季节值走兜底文案
 /// 3. 既有注入（本月世界局势 / 可用事件 / 季节叙事引导）不回归
 library;
 
@@ -102,12 +103,14 @@ void main() {
       expect(section, contains('大雪封住隘口'));
     });
 
-    test('longwinter 注入凛冬无期动向', () async {
+    test('S4-2：longwinter 已清除，走兜底文案而非凛冬专属段落', () async {
       final body = await _promptForSeason('longwinter');
       expect(body, contains('季节世界动向：'));
       final section = _seasonTrendSection(body);
-      expect(section, contains('凛冬无期'));
-      expect(section, contains('异鬼传说'));
+      // `longwinter` 不再是合法季节值，模板分支已在 S4-2 删除，
+      // 故应落到 `_ =>` 通用兜底——**不得**再出现凛冬专属叙事。
+      expect(section, isNot(contains('凛冬无期')));
+      expect(section, contains('季节轮转如常'));
     });
 
     test('未知季节兜底文案', () async {

@@ -31,8 +31,10 @@ void main() {
       expect(seasonLabel('summer'), '夏天');
       expect(seasonLabel('autumn'), '秋天');
       expect(seasonLabel('winter'), '冬天');
-      expect(seasonLabel('longwinter'), '凛冬');
       expect(seasonLabel('unknown'), 'unknown');
+      // S4-2：`longwinter` 已从引擎清除。升级前的存档可能仍带该值，
+      // 必须走 `_ =>` 兜底原样返回（不崩、不返回 null）。
+      expect(seasonLabel('longwinter'), 'longwinter');
     });
 
     test('季节短标签（状态条用）', () {
@@ -40,7 +42,7 @@ void main() {
       expect(seasonShortLabel('summer'), '夏');
       expect(seasonShortLabel('autumn'), '秋');
       expect(seasonShortLabel('winter'), '冬');
-      expect(seasonShortLabel('longwinter'), '凛');
+      expect(seasonShortLabel('longwinter'), 'longwinter');
     });
 
     test('事件类型标签', () {

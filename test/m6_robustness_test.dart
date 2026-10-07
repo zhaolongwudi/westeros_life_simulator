@@ -97,7 +97,8 @@ void main() {
       expect(identityLabel(PlayerIdentity.noble), '贵族');
       expect(identityLabel(PlayerIdentity.wildling), '野人');
       expect(seasonLabel('winter'), '冬天');
-      expect(seasonShortLabel('longwinter'), '凛');
+      // S4-2：`longwinter` 已清除，老存档残留值走 `_ =>` 兜底不崩。
+      expect(seasonShortLabel('longwinter'), 'longwinter');
       expect(eventTypeLabel(EventType.political), '政治');
       expect(spouseOriginLabel(SpouseOrigin.noble), '贵族');
       expect(spouseOriginLabel(SpouseOrigin.warrior), '战士');
