@@ -18,8 +18,11 @@
 ///    有人认为「总得给点奖励吧」而擅自填金币，正是这条断言要挡的。
 /// 3. **数值被悄悄改动**：`energy: 10` / `energy: 5` 是照原`happiness` 数值 1:1 迁移的，
 ///    没有重新平衡的依据。若日后有人调成 `energy: 50`，此断言即红。
-/// 4. **幽灵键存量口径漂移**：修复后 `happiness`幽灵键应恰好降到 3 处（混合键，
-///    含有效键故不是死选项），存量清理属独立任务，此断言锁住本批次边界不被扩张。
+/// 4. **幽灵键存量**：S5-1 时本文件锁的是「`happiness` 恰好剩 3 处、总数 74、
+///    种类 10 种」——用意是**锁住边界不被无声扩张**，因为存量清理属独立任务。
+///    **S5-2（2026-10-07）采方案 C 删除了全部 74 处**，故下方该 group 的断言
+///    已随之收紧为「恰好 0 处 + 10 个键名均不再出现 + 不得清空 effects 伪造通过」。
+///    收紧而非放宽。
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -164,10 +167,11 @@ void main() {
     });
   });
 
-  group('S5-1 · 存量边界（本批次只修死选项）', () {
-    test('happiness 幽灵键恰好剩 3 处，且均非死选项', () {
-      // 混合键（同时含有效键）里的 happiness 不该由本批次顺手改，
-      // 存量清理需单独立项。此断言把边界钉死，防止范围无声扩张。
+  group('S5-1 · 存量边界 → S5-2 · 存量已清零', () {
+    test('S5-2 后全库幽灵键为 0（含 happiness 原 3 处）', () {
+      // S5-1 时这里是「恰好剩 3 处混合键 + 总数 74 + 种类 10 种」，
+      // 用意是**锁边界不被无声扩张**。S5-2 采方案 C 删除了全部 74 处，
+      // 边界随之移到 0——断言同步收紧，不是为了让 CI 过而放宽。
       final ghosts = <String, String>{};
       for (final e in allEvents) {
         for (final c in e.choices) {
@@ -178,33 +182,25 @@ void main() {
           }
         }
       }
-      final happiness = ghosts.entries
-          .where((e) => e.value == 'happiness')
-          .map((e) => e.key)
-          .toList()
-        ..sort();
-      expect(happiness, hasLength(3),
-          reason: '修复后 happiness 应恰好剩 3 处（混合键）：${happiness}');
+      expect(ghosts, isEmpty,
+          reason: '幽灵键应已由 S5-2 全部清除；重新出现即为回潮：$ghosts');
     });
 
-    test('修复后幽灵键总处数为 74（76 - 本批次修掉的 2 处）', () {
-      int count = 0;
-      for (final e in allEvents) {
-        for (final c in e.choices) {
-          count += c.effects.keys.where(kGhostEffectKeys.contains).length;
-        }
-      }
-      expect(count, 74);
-    });
-
-    test('幽灵键种类仍是 10 种（未新增、未减少）', () {
+    test('被删的 10 个键名一个都不再出现（不只数个数）', () {
+      // 只断言「总数为 0」可被「换个新幽灵键名」绕过；钉住键名才防得住。
       final kinds = <String>{};
       for (final e in allEvents) {
         for (final c in e.choices) {
           kinds.addAll(c.effects.keys.where(kGhostEffectKeys.contains));
         }
       }
-      expect(kinds, kGhostEffectKeys);
+      expect(kinds, isEmpty, reason: '回潮的幽灵键：$kinds');
+    });
+
+    test('事件/选项总数未因 S5-2 变化（71 / 223）', () {
+      // S5-2 只删效果键条目，不增删事件或选项。总数变了说明改过头了。
+      expect(allEvents, hasLength(71));
+      expect(allEvents.fold<int>(0, (a, e) => a + e.choices.length), 223);
     });
   });
 }

@@ -1,32 +1,31 @@
-/// Batch 10-119 测试：幽灵效果键「防新增」闸门（S2-3 / P1-03 阶段一）。
+/// Batch 10-119 测试：幽灵效果键「防新增」闸门（S2-3 / P1-03 阶段一，
+/// 基线于 S5-2 从「存量锁」改为「零存量锁」）。
 ///
-/// 背景：事件数据里有 **10 个引擎不认识的顶层效果键**（`political` / `faith` /
+/// 背景：事件数据里曾有 **10 个引擎不认识的顶层效果键**（`political` / `faith` /
 /// `military` / `magic` / `familyRelation` / `food` / `happiness` /
 /// `knowledge` / `north` / `allyRelation`）。它们由 `docs/06` 设计、引擎从未实现，
 /// 玩家点了「支持合法继承人」只拿到 reputation，叙事承诺的政治资本变化静默丢弃。
 ///
-/// 本批**不清理存量**（清理会破坏玩法：「转身离开」型选项本就没有收益，是有意设计），
-/// 只做两件事：① 存量基线锁死，新增即红；② 拒收必须对玩家可见。
+/// ## 本文件的闸门性质在 S5-2（2026-10-07）发生了**加强**而非放松
 ///
-/// ## 历史数字更正（S5-1 取证，2026-10-07）
+/// S2-3 建立本文件时是「**存量基线锁**」：`lessThanOrEqualTo(74)` / `lessThanOrEqualTo(39)`，
+/// 意图是「新增即红、清理不强制」。这个上界形同虚设——真实值 76 长期 ≤ 78 上界，
+/// **错误的数字两年没被 CI 发现**（S5-1 实证）。
 ///
-/// 本文件原注释称「共 78 处、覆盖 40/72 事件」与「9 个选项会变成零效果死选项」，
-/// **两处均与代码不符**，S5-1立项时重新扫描真相源（`event_data.dart` 223 个选项）核实：
+/// S5-2 采方案 C 删除了全部 74 处（零行为变化：它们本就一律被拒收，从未落盘），
+/// 故基线从「74 处 / 39 事件 / 10 种」**收紧为「恰好 0」**。
+/// 这是本文件能给出的**最强断言**——上界型断言允许回归，等于没设防。
 ///
-/// | 项 | 原注释 | 实测 |
-/// |---|---|---|
-/// | 幽灵键处数 | 78 | **76**（`happiness` 5 处属实，故总数应为 76） |
-/// | 零效果死选项 | 9 | **2**（`event_festival` / `event_hunt` 的「休息」） |
-/// | 波及事件数 | 40/72 | 39/ 71 |
+/// ## 但「拒收机制」本身必须保留（本文件下半部分仍在守它）
 ///
-/// 那 2 个死选项已在 S5-1 修复（`happiness` → `energy`，是键名笔误而非设计问题），
-/// 故本文件下方的「78 / 40」基线断言实际从未生效于真实值——它们是
-/// `lessThanOrEqualTo` 上界断言，76 ≤ 78 恒过，因此**错误的 78 一直没被 CI发现**。
-/// 现将上界收紧为实测基线，使后续漂移能被捕获。
+/// 静态内容清理干净 ≠ 可以拆掉守卫：**AI 通道的选项是运行时现场生成的**
+/// （`applyAiChoice`），AI 随时可能再次吐出 `political` 之类的不存在键。
+/// 没有守卫就会退回 Batch 10-101 之前的「静默丢弃」。
+/// 故下半部分的「拒收对玩家可见」用例**原样保留**，它守的是机制而非存量。
 ///
 /// 覆盖：
-/// 1. 全量扫描：幽灵键种类/处数/涉及事件 = 基线，新增任何一种或一处都失败
-/// 2. 契约：幽灵键确实不落盘，且被登记进 lastRejectedEffectKeys
+/// 1. 全量扫描：静态内容里的幽灵键**恰好 0 处**，新增任何一种立即红
+/// 2. 契约：未知键确实不落盘，且被登记进 lastRejectedEffectKeys
 /// 3. 可见化：AI 通道与事件通道都会输出「N 项效果未生效」提示行
 library;
 
@@ -86,39 +85,67 @@ int _ghostEventCount(List<GameEvent> events) {
 }
 
 void main() {
-  group('Batch 10-119 存量基线（防新增）', () {
-    test('幽灵键种类恰为已知 10 种，不得新增', () {
+  group('S5-2 · 静态内容零幽灵键（防回潮）', () {
+    test('全库静态事件数据里的幽灵键恰好 0 处', () {
+      // S5-2 把 S2-3 的 `lessThanOrEqualTo(74)` 上界收紧为「恰好 0」。
+      // 上界断言曾让错误的 76 长期存活两年（S5-1 记录），不能再重复。
       final ghosts = _scanGhosts();
       expect(
-        ghosts.keys.toSet(),
-        <String>{
-          'political',
-          'faith',
-          'military',
-          'magic',
-          'familyRelation',
-          'food',
-          'happiness',
-          'knowledge',
-          'north',
-          'allyRelation',
-        },
-        reason: '出现新种类说明有人写了引擎不支持的效果键 —— 要么接线实现，'
-            '要么改用既有键，不要让它静默丢弃。当前明细：$ghosts',
+        ghosts,
+        isEmpty,
+        reason: '静态内容出现了引擎不认识的效果键。'
+            '它们会一律被拒收 ⇒ 玩家点了看到「N 项效果未生效」，叙事与状态脱节。'
+            '要么改用既有键（gold/reputation/skills.*/attributes.*/'
+            'relations.*/flags.*/inventory.*），要么先补齐引擎实现再写数据。'
+            '当前明细：$ghosts',
       );
+      expect(_ghostEventCount(allEvents), 0);
     });
 
-    test('幽灵键处数为 74、涉及事件 39（只减不增）', () {
-      final ghosts = _scanGhosts();
-      final total = ghosts.values.fold<int>(0, (a, b) => a + b);
-      // S5-1：上界由原先错误的 78/40 收紧到实测基线 74/39。
-      // 原上界从未真正约束——76 ≤ 78 恒过，所以错误的 78 才一直没被 CI 发现。
-      expect(total, lessThanOrEqualTo(74),
-          reason: '幽灵键变多了（当前 $total）：$ghosts');
-      expect(_ghostEventCount(allEvents), lessThanOrEqualTo(39));
+    test('S5-2 删除的 10 个键名一个都不许再出现', () {
+      // 比上一条更强：即使有人用「上界型」方式绕过 total 断言，
+      // 只要这 10 个键名回来了就会红。列出键名而非只数个数。
+      const removedKinds = <String>{
+        'political',
+        'faith',
+        'military',
+        'magic',
+        'familyRelation',
+        'food',
+        'happiness',
+        'knowledge',
+        'north',
+        'allyRelation',
+      };
+      final present = <String>{};
+      for (final event in allEvents) {
+        for (final choice in event.choices) {
+          present.addAll(choice.effects.keys.where(removedKinds.contains));
+        }
+      }
+      expect(present, isEmpty,
+          reason: 'S5-2 已删除的幽灵键被重新引入：$present');
+    });
+
+    test('零效果死选项仍为 0（删除幽灵键不得把选项清空）', () {
+      // S5-2 的删除是「删幽灵键条目」，不是「删整个 effects」。
+      // 若有人为了省事把 `{reputation:5, political:10}` 直接写成 `{}`，
+      // 幽灵键是没了，但玩家点了没反应——比原 bug 更糟。此断言挡住它。
+      final dead = <String>[];
+      for (final event in allEvents) {
+        for (final c in event.choices) {
+          if (c.effects.isEmpty) continue;
+          if (c.effects.keys.every((k) => !_isKnown(k))) {
+            dead.add('${event.id}/${c.id}');
+          }
+        }
+      }
+      expect(dead, isEmpty,
+          reason: '这些选项的 effects 非空但全是未知键，玩家点了完全没反应：$dead');
     });
 
     test('幽灵键不落盘：应用含 political 的选项后玩家状态无对应变化', () {
+      // 这条守的是**机制**而非存量：AI 仍可能实时生成 political。
       final engine = GameEngine()..startNewGame();
       final before = engine.player;
       final after = engine.applyEffects(
