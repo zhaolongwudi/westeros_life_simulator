@@ -231,6 +231,10 @@ mixin GamePlayMixin
     registerGenerationMonthlyHooks(pipeline);
     registerMarriageMonthlyHooks(pipeline);
     registerNpcTaskMonthlyHooks(pipeline);
+    // S12-10：信件此前只挂在 AI 路径（mixin_ai.applyAiChoice），
+    // 普通玩家用「过月」推进时**永远收不到信** ⇒ 信件面板/回信形同摆设。
+    // 补上管线钩子后，非 AI 路径同样会按月触发 NPC 来信。
+    registerLetterMonthlyHooks(pipeline);
     _monthly = pipeline;
     return pipeline;
   }

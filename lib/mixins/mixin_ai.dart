@@ -1,7 +1,8 @@
 /// AI 回合混入：编排一次 AI 行动 + 应用 AI 生成的选项效果并推进世界。
 ///
-/// 依赖 [GamePlayMixin]（advanceMonth）与 [GameLetterMixin]（maybeTriggerLetter），
-/// 宿主混入这两个 mixin 后即可调用 [runAiAction] / [applyAiChoice]。
+/// 依赖 [GamePlayMixin]（advanceMonth，内含月度管线，信件由管线钩子触发）；
+/// 宿主混入 [GamePlayMixin] 后即可调用 [runAiAction] / [applyAiChoice]。
+/// S12-10 起不再直接依赖 [GameLetterMixin] 的 `maybeTriggerLetter`。
 ///
 /// Batch 10-29 · M3b：新增 [runAiAction]，把「读配置 → 拼上下文 → 请求 → 装配结果」
 /// 这条编排链从 `screens/game_screen.dart` 下沉到本混入层；
@@ -116,13 +117,14 @@ mixin GameAiMixin
     // 与事件通道（`mixin_play.chooseWorldEventChoice`）**共用同一份**——
     // 本项目已发生五次双通道漂移，不能再抄第六份。
     buf.write(effectSummary(before));
-    // 3. 月度推进（系统结算 + 时间）
+    // 3. 月度推进（系统结算 + 时间 + **NPC 来信**）
+    //
+    // S12-10：信件已改为挂在月度管线上（`registerLetterMonthlyHooks`），
+    // 而 [advanceMonth] 就会跑完管线 —— 故这里**不再**单独调
+    // `maybeTriggerLetter`。此前那条单独调用是「AI 路径才有信」的成因；
+    // 保留它会与管线钩子重复调用同一函数（靠 `_lastLetterMonth` 冷却
+    // 侥幸不双触发，但那是隐式契约、极易再次踩坑）。
     buf.writeln(advanceMonth());
-    // 4. NPC 主动来信（月度触发）
-    final letter = maybeTriggerLetter(seed: progress.turnCount);
-    if (letter.isNotEmpty) {
-      buf.writeln(letter);
-    }
     return buf.toString().trim();
   }
 }

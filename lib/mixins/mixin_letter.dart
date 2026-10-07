@@ -9,6 +9,7 @@ library;
 import 'dart:math';
 
 import '../core/command_registry.dart';
+import '../core/monthly_pipeline.dart';
 import '../models/letter.dart';
 import '../models/npc.dart';
 import '../providers/game_provider_base.dart';
@@ -163,6 +164,39 @@ mixin GameLetterMixin on GameProviderBase {
         handler: (args) {
           final reply = replyLetter(replyText: args.isEmpty ? null : args);
           return CommandResult(text: reply.isEmpty ? '没有待回的信。' : reply);
+        },
+      ),
+    );
+  }
+
+  // ==================== M3 · 月度结算管线自注册 ====================
+
+  /// 把「NPC 主动来信」注册进月度管线（S12-10）。
+  ///
+  /// 【为什么以前收不到信】[maybeTriggerLetter] 的唯一调用方是
+  /// `mixin_ai.applyAiChoice` —— 那是**只在 AI 行动模式下**走的路径。
+  /// 玩家用「过月」「探索」等普通指令推进时，月度管线里**没有任何信件钩子**
+  /// （`mixin_play.monthlyPipeline` 注册了 play/systems/life/npc_interact/
+  /// generation/marriage/npc_task 七家，独缺 letter），于是：
+  /// **信件面板、回信、+关系 这些功能对普通玩家等同于摆设。**
+  ///
+  /// 【为什么用 afterAdvance / order 13】信件内容要按推进后的年月记录，
+  /// 且冷却键取推进后的 turnCount，与 [mixin_ai] 旧路径一致；
+  /// order 排在 `world_event`(12) 之后、outputOrder 12 接在世界事件(11)之后，
+  /// 保持既有叙事顺序不被打乱。
+  void registerLetterMonthlyHooks(MonthlyPipeline pipeline) {
+    pipeline.register(
+      MonthlyHookSpec(
+        id: 'letter',
+        phase: MonthlyPhase.afterAdvance,
+        order: 13,
+        outputOrder: 12,
+        hook: () {
+          final text = maybeTriggerLetter(seed: progress.turnCount);
+          return MonthlyHookResult(
+            text: text,
+            outputOrder: text.isEmpty ? 0 : 12,
+          );
         },
       ),
     );

@@ -223,6 +223,9 @@ void main() {
         'divorce_clear',
         'inheritance',
         'world_event',
+        // S12-10：信件补进管线（此前只挂在 AI 路径 ⇒ 普通玩家永远收不到信）。
+        // 排在 world_event 之后，叙事也接在世界事件段落之后。
+        'letter',
       ]);
     });
 
