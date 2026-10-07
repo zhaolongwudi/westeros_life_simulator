@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-07 · fix(review): S4-3c train 未知技能用例换样本（magic 已是初始技能）**（`0e4be1e`）
+
+**2026-10-07 · feat(review): S4-3c 26 处死门槛接真实门槛（diplomacy→speech / army·military→reputation 档 / magic→skills.magic）**（`b16965a`）
+
 **2026-10-07 · fix(review): S4-5 抉择时校验选项 requirements（堵住 0 金白拿声望漏洞）**（`04cab52`）
-
-**2026-10-07 · fix(review): S4-5 构造函数拷贝 history（读档后抉择事件崩溃：不可变列表）**（`5f62251`）
-
-**2026-10-07 · fix(review): S4-5 选项按 id 匹配（EventChoice 无 == 导致读档后待决事件点不动）**（`910af8f`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/03-审查接力.md。
 <!-- CHANGELOG:END -->
