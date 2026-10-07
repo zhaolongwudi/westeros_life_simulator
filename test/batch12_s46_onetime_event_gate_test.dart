@@ -23,7 +23,6 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:westeros_life_simulator/data/event_data.dart';
 import 'package:westeros_life_simulator/game_engine.dart';
-import 'package:westeros_life_simulator/models/event.dart';
 import 'package:westeros_life_simulator/models/player.dart';
 import 'package:westeros_life_simulator/providers/event_provider.dart';
 
