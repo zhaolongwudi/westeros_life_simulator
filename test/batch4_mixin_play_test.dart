@@ -18,7 +18,16 @@ void main() {
 
     test('train 未知技能拒绝', () {
       final engine = GameEngine()..startNewGame();
-      expect(engine.train('magic'), contains('从未学过'));
+      // 【S4-3c 换例子的原因】本用例原先拿 `magic` 当「未知技能」的样本，
+      // 但 S4-3c 为让 3 个 `skills.magic` 门槛选项可达，已把 `'magic': 0`
+      // 加进玩家初始技能表（与 `'alchemy': 0` 同先例）。契约不变——「玩家
+      // 技能表里没有的技能仍必须被拒」——只是样本得换成真正未知的键。
+      // 这也正是本批刻意**不删测试**的地方：要锁的是意图，不是旧字面量。
+      expect(engine.player.skills.containsKey('magic'), isTrue,
+          reason: '前提：magic 已在初始技能表内（S4-3c），不能再当未知技能样本');
+      expect(engine.train('necromancy'), contains('从未学过'));
+      // 白名单内但玩家未学的键同样拒绝——门槛「可达」不等于「人人可学」
+      expect(engine.train('leadership'), contains('从未学过'));
     });
 
     test('train 10 级封顶', () {
