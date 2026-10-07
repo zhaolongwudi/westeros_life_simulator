@@ -39,7 +39,6 @@ String seasonLabel(String season) {
     'summer' => '夏天',
     'autumn' => '秋天',
     'winter' => '冬天',
-    'longwinter' => '凛冬',
     _ => season,
   };
 }
@@ -51,7 +50,6 @@ String seasonShortLabel(String season) {
     'summer' => '夏',
     'autumn' => '秋',
     'winter' => '冬',
-    'longwinter' => '凛',
     _ => season,
   };
 }

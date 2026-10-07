@@ -683,7 +683,7 @@ mixin GameLifeMixin on GameProviderBase {
     }
 
     // 5. 冬季更冷更饿
-    if (progress.season == 'winter' || progress.season == 'longwinter') {
+    if (progress.season == 'winter') {
       adjustHunger(-BalanceData.winterHungerExtra);
       if (player.hunger < kStarvationThreshold) {
         buf.writeln('❄️ 凛冬的严寒让你消耗更快。');

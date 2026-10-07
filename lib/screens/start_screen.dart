@@ -44,7 +44,7 @@ class GameSetup {
   /// 时代（中文，如 '篡夺者战争后'）。
   final String era;
 
-  /// 季节标识（spring/summer/autumn/winter/longwinter）。
+  /// 季节标识（spring/summer/autumn/winter）。
   final String season;
   final int year;
   final int month;
@@ -64,7 +64,6 @@ const Map<String, int> kSeasons = <String, int>{
   'summer': 6,
   'autumn': 9,
   'winter': 12,
-  'longwinter': 12,
 };
 
 /// 根据开局配置构建玩家。

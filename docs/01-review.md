@@ -101,6 +101,7 @@
 - **P1**：魔法数值散布 start_screen / event_data / item_data / npc_task_data 多处，无统一 balance 配置。
 - **P1**：无离线数值仿真（"玩 100 个月期望曲线"），平衡只能靠手感。
 - **P2**：季节→月份映射有歧义（longwinter 与 winter 同为 12），靠注释维护。
+  > ✅ **已修复（S4-2，2026-10-07）**：该歧义正是 `longwinter` 不可达的根因（两者映射同一月份）。已采方案 B 清除 `longwinter`，`kSeasons` 收敛为四值，映射不再有歧义。
 
 **建议方向**：建 `lib/data/balance_data.dart` 集中可调数值；headless 仿真测试断言资源曲线；映射改显式表。
 

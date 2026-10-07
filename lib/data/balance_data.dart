@@ -83,7 +83,7 @@ class BalanceData {
   /// 受伤后每月痊愈概率。
   static const double injuryHealChance = 0.4;
 
-  /// 冬季（winter/longwinter）额外饱食消耗。
+  /// 冬季额外饱食消耗。
   static const int winterHungerExtra = 5;
 
   // ==================== 每月上限（S2-2：原名「每日上限」名不副实） ====================
