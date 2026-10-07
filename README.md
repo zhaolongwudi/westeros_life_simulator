@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-07 · fix(review): S4-3 补修测试类型错误（intersection 需 Set 非 List）**（`cec4b94`）
+
+**2026-10-07 · fix(review): S4-3 prompt 事件门槛过滤 + 删虚构概率表（P2-03 / P1-10 双关闭）**（`c543cdf`）
+
 **2026-10-07 · fix(review): S4-2 补修 7 处过期测试断言（CI 首推失败）**（`71104ea`）
-
-**2026-10-07 · fix(review): S4-2 长冬死内容清除（P2-01 关闭）**（`947b9e6`）
-
-**2026-10-07 · fix(review): S5-1 幽灵键死选项清理（2 处 happiness→energy）**（`cd849c5`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/HANDOVER.md。
 <!-- CHANGELOG:END -->
