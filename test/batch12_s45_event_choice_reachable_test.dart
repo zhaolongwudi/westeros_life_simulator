@@ -187,6 +187,53 @@ void main() {
       expect(engine.pendingEvent, isNotNull, reason: '被拒绝后待决事件应保留');
     });
 
+    test('不满足 requirements 的选项被拒绝（堵住「0 金白拿声望」漏洞）', () {
+      // 【为什么必须有这条】223 个选项里 68 个声明了 requirements，
+      // 但 `applyChoice` 从不校验——S4-5 之前选项不可达，那只是死契约；
+      // 现在则是有利可图的漏洞：`event_iron_bank_debt` 的「偿还债务」
+      // 要求 `{gold: 500}`、效果 `gold: -500, reputation: +10`，
+      // 而金币效果被 `max(0, ...)` 破底，0 金玩家也能选 → 白拿 +10 声望。
+      final engine = GameEngine()..startNewGame();
+      engine.updatePlayer(Player.defaultPlayer().copyWith(
+            gold: 0,
+            reputation: 50,
+            hunger: 60,
+            health: 80,
+            energy: 80,
+          ));
+      final debt = eventById('event_iron_bank_debt')!;
+      engine.setPendingEvent(debt);
+      final repay = debt.choices.firstWhere((c) => c.id == 'choice_repay');
+      expect(repay.requirements['gold'], 500, reason: '前提：该选项门槛是 500 金');
+
+      final repBefore = engine.player.reputation;
+      final goldBefore = engine.player.gold;
+      final text = engine.chooseWorldEventChoice(repay);
+
+      expect(text, contains('不满足'), reason: '应拒绝不满足门槛的选项');
+      expect(engine.player.reputation, repBefore,
+          reason: '0 金玩家白拿了声望——requirements 未被校验');
+      expect(engine.player.gold, goldBefore, reason: '状态不该有任何变化');
+      expect(engine.pendingEvent, isNotNull, reason: '被拒绝后待决事件应保留');
+    });
+
+    test('满足 requirements 的选项正常落盘', () {
+      final engine = GameEngine()..startNewGame();
+      engine.updatePlayer(Player.defaultPlayer().copyWith(
+            gold: 600,
+            reputation: 50,
+            hunger: 60,
+            health: 80,
+            energy: 80,
+          ));
+      final debt = eventById('event_iron_bank_debt')!;
+      engine.setPendingEvent(debt);
+      final repay = debt.choices.firstWhere((c) => c.id == 'choice_repay');
+      engine.chooseWorldEventChoice(repay);
+      expect(engine.player.gold, 100, reason: '600 - 500 应真实落盘');
+      expect(engine.player.reputation, 60, reason: '+10 声望应落盘');
+    });
+
     test('摘要实现与 AI 通道共用同一份（防止第六次双通道漂移）', () {
       final engine = _engineAwaitingEvent();
       final sell = _swordEvent.choices.firstWhere((c) => c.id == 'choice_sell');

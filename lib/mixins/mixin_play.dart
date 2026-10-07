@@ -380,6 +380,16 @@ mixin GamePlayMixin
     }
     // 用事件自身的选项对象落盘，避免调用方传入的等价副本带来分歧
     final picked = matched.first;
+    // 【S4-5 必须校验 requirements】223 个选项里 68 个声明了门槛
+    // （gold/skills/attributes/hasItem/energy/reputation/hunger）。此前它们
+    // 只被事件面板用于展示，`applyChoice` 从不校验；S4-5 之前选项不可达，
+    // 那只是死契约，**现在则是有利可图的漏洞**——例如「偿还债务」要求
+    // `{gold: 500}`、效果 `gold: -500, reputation: +10`，而金币效果被
+    // `max(0, ...)` 破底，0 金玩家也能选，等于不花钱白拿声望。
+    // 复用 `EventProvider.canChoose`（既有单一真相），不另写一份判定。
+    if (!eventProvider.canChoose(picked, player)) {
+      return '你还不满足「${picked.text}」的条件。';
+    }
     // 供 applyChoice 记录历史用（它读 currentEvent）
     setCurrentEvent(event);
     final before = player;
