@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
-**2026-10-07 · fix(review): S4-5 抉择时校验选项 requirements（堵住 0 金白拿声望漏洞）**（`04cab52`）
+**2026-10-07 · fix(mixin): GameLetterMixin 移到 GamePlayMixin 之前，S12-10 信件钩子正常注册**（`9ce5aee`）
 
-**2026-10-07 · fix(review): S4-5 构造函数拷贝 history（读档后抉择事件崩溃：不可变列表）**（`5f62251`）
+**2026-10-07 · fix(mixin): S12-10 改用基类延迟注册点挂信件钩子（on 约束无法跨混入顺序）**（`fb16ec3`）
 
-**2026-10-07 · fix(review): S4-5 选项按 id 匹配（EventChoice 无 == 导致读档后待决事件点不动）**（`910af8f`）
+**2026-10-07 · fix(mixin): GamePlayMixin 的 on 约束补 GameLetterMixin（S12-10 信件钩子 CI Analyze 报错）**（`ef70c31`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/archive/03-审查归档.md。
 <!-- CHANGELOG:END -->
