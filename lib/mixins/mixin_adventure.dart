@@ -217,7 +217,27 @@ mixin GameAdventureMixin
         aliases: const ['旅行', 'travel', '去'],
         order: 7,
         helpLine: '旅行 / travel [地点] 查看可去地点或前往',
-        handler: (args) => CommandResult(text: args.isEmpty ? formatTravelPanel() : travel(args)),
+        // 【S9-1（遗留 L3）跨地点移动消耗一个月】与「探索」同构：此前 `travel`
+        // 是唯一不消耗回合的位移指令，一个月内可走遍全图，而 `explore` 要一个月。
+        //
+        // 【为什么只有「真的移动了」才消耗】空参数只是列出可去地点（面板），
+        // 目标不合法 / 未连接 / 旅费不足同样没有发生位移——没移动就不该罚掉
+        // 一个月。判定用**位移**（`player.locationId` 是否变化）而非文案是否
+        // 含「抵达」：后者是字符串耦合，文案一改就失效。
+        //
+        // 【为什么 spec 级 `consumedTurn` 保持缺省 false】它是**声明性**字段
+        // （供帮助文本/契约检查读取），而本指令是**条件消耗**；标 true 会与
+        // 「声明消耗了但没推进」的不一致同型（见 command_registry.dart:63-64
+        // 的警告）。真正的推进动作以本处返回的 `needsTimeAdvance` 为准。
+        handler: (args) {
+          if (args.isEmpty) {
+            return CommandResult(text: formatTravelPanel());
+          }
+          final from = player.locationId;
+          final text = travel(args);
+          final moved = player.locationId != from;
+          return CommandResult(text: text, consumedTurn: moved);
+        },
       ),
     );
     registry.register(

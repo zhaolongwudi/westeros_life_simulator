@@ -265,7 +265,7 @@ GameEngine extends GameProviderBase with:
 | 系统 | systems | formatSystemsPanel | 否 |
 | 信 | letter | formatLettersPanel | 否 |
 | 回信 | reply [内容] | replyLetter | 否 |
-| 旅行 | travel/去 [地点] | travel | 否 |
+| 旅行 | travel/去 [地点] | travel | 仅移动时（S9-1 · L3；无参数查看可去列表不消耗） |
 | 探索 | explore | explore | 是 |
 | 训练 | train [技能] | train | 否 |
 | 工作 | work | work | 否 |
