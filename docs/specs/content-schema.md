@@ -306,7 +306,9 @@ assets/data/*.json         ← 单向导出镜像（只读，运行时从不加�
 ## 8. 物品（items.json）
 
 对应 `lib/data/item_data.dart` → `Item`。
-**该模型没有 `fromJson`** —— items.json 目前无法被反序列化，这是 S4-4 的前置条件之一。
+**该模型没有 `fromJson`** —— items.json 目前无法被反序列化。
+> 📌 **S4-4 已决策（2026-10-07）**：`assets/data` **不外置**，故本项**不再是待办**；
+> 仅当将来引入内容更新通道时才需要补 `fromJson`（见 `assets/data/README.md` 的决策段）。
 
 | 字段 | 类型 | 必填 | 说明 |
 |---|---|---|---|
@@ -343,6 +345,7 @@ assets/data/*.json         ← 单向导出镜像（只读，运行时从不加�
 ## 10. NPC 任务模板（tasks.json）
 
 对应 `lib/models/npc_task.dart` → `NpcTaskTemplate`。**该模型没有 `fromJson`**。
+> 📌 **S4-4 已决策（2026-10-07）**：同上，不外置即无需补 `fromJson`。
 
 | 字段 | 类型 | 必填 | 说明 |
 |---|---|---|---|
