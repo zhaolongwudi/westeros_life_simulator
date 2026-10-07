@@ -29,8 +29,11 @@ class GameEngine extends GameProviderBase
         GameNpcTaskMixin,
         GameGenerationMixin,
         GameMarriageMixin,
-        GamePlayMixin,
+        // S12-10：`GameLetterMixin` 必须排在 `GamePlayMixin` **之前**——
+        // play 的 `on` 约束含 letter，混入顺序必须让被依赖者先就位，
+        // 否则 Dart 报 `mixin_application_not_implemented_interface`（实测）。
         GameLetterMixin,
+        GamePlayMixin,
         GameAdventureMixin,
         GameCommandsMixin,
         GameAiMixin {

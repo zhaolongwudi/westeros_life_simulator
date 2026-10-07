@@ -16,17 +16,17 @@ import '../providers/game_provider_base.dart';
 
 /// 信件混入。挂在 [GameProviderBase] 上。
 mixin GameLetterMixin on GameProviderBase {
-  /// S12-10：把本领域的月度钩子注册函数挂到基类的延迟注册点。
+  /// S12-10：本领域的月度钩子注册函数，由 `mixin_play.monthlyPipeline` 调用。
   ///
-  /// 【为什么用 `on` 构造器而不是在 `mixin_play` 里调用】
-  /// `GamePlayMixin` 的 `on` 约束无法包含 `GameLetterMixin` —— 后者在
-  /// `game_engine.dart` 的 `with` 列表里排在 `GamePlayMixin` **之后**，
-  /// Dart 会报 `mixin_application_not_implemented_interface`（实测）。
-  /// 在本 mixin 自己的 `on` 构造器里登记，则只要求 `GameProviderBase`，
-  /// 与混入顺序无关。
-  GameLetterMixin() {
-    monthlyHookRegistrars.add(registerLetterMonthlyHooks);
-  }
+  /// 【踩坑记录，两个都实测过】
+  /// ① `GamePlayMixin` 的 `on` 约束加进 `GameLetterMixin` 后报
+  ///    `mixin_application_not_implemented_interface` —— 因为 letter 在
+  ///    `game_engine.dart` 的 `with` 列表里排在 play **之后**；
+  ///    已把 letter 调整到 play **之前**（被依赖者须先就位）。
+  /// ② 想「让 letter 自注册」而给 mixin 加构造器 ⇒
+  ///    Dart 禁止 mixin 声明构造器（`mixin_declares_constructor`）。
+  ///    故不存在自注册路径，只能由 play 显式调用。
+  ///
 
   /// 收到的信件（最多 30 封）。
   final List<Letter> _letters = <Letter>[];
