@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-07 · fix(test): S12-12 同步 4 个锁定旧英文回显的测试（改为锁中文契约）+ 修自有测试的归一化调用路径**（`4c8776d`）
+
+**2026-10-07 · fix(review): S12-12 培养方向接受中文名+中文化回显；stealth 门槛永久不可达（补进初始技能表）**（`4315d37`）
+
 **2026-10-07 · fix(mixin): GameLetterMixin 移到 GamePlayMixin 之前，S12-10 信件钩子正常注册**（`9ce5aee`）
-
-**2026-10-07 · fix(mixin): S12-10 改用基类延迟注册点挂信件钩子（on 约束无法跨混入顺序）**（`fb16ec3`）
-
-**2026-10-07 · fix(mixin): GamePlayMixin 的 on 约束补 GameLetterMixin（S12-10 信件钩子 CI Analyze 报错）**（`ef70c31`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/archive/03-审查归档.md。
 <!-- CHANGELOG:END -->
