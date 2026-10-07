@@ -313,6 +313,23 @@ mixin GamePlayMixin
     );
     if (available.isEmpty) return '';
     final event = available[rnd.nextInt(available.length)];
+    // 【S4-6（P1-11）一次性事件必须在此标记完成】
+    // `EventProvider.canTrigger` 对 `isOneTime` 事件的拦截依赖
+    // `_completedEventIds`，而写入该集合的唯一入口 `markCompleted`
+    // 在生产代码中**零调用**（全库只有测试调）——故该门禁恒不生效，
+    // 3 个一次性事件（`event_sword_inheritance` / `event_guild_tooling` /
+    // `event_maester_commission`）会无限重复浮现。
+    //
+    // 为什么标在「浮现」而不是「执行」：事件选项当前在生产中不可达
+    // （S4-5：`applyChoice` 在 UI 零调用，事件面板自述「不做触发执行」），
+    // **本函数是事件唯一触达玩家的通道**，故「浮现」即玩家对该事件的全部曝光。
+    // 不标记的后果是同一条传闻每约 3 个月复读一次。
+    //
+    // 【若S4-5 落地，此处需重新评估】一旦事件选项接入主流程，
+    // 标记点应移到真正的「完成/选择」时机，否则玩家会因听过传闻而永远拿不到事件。
+    if (event.isOneTime) {
+      eventProvider.markCompleted(event.id);
+    }
     return '📜 传闻：${event.name}——${event.description}';
   }
 
