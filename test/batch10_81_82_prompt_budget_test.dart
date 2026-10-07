@@ -118,12 +118,13 @@ void main() {
       }
     });
 
-    test('数值全量保留（技能 5 项 + 属性 6 项，不设预算）', () async {
+    test('数值全量保留（技能 6 项 + 属性 6 项，不设预算）', () async {
       final body = await _promptFor(Player.defaultPlayer());
       final skill = _line(body, '- 技能：');
       final attr = _line(body, '- 属性：');
       // 10-81 只中文化键名，键数不截断
-      expect('、'.allMatches(skill).length + 1, 5);
+      // S4-3c：技能表新增 magic（初始 0 级），故 5 → 6。
+      expect('、'.allMatches(skill).length + 1, 6);
       expect('、'.allMatches(attr).length + 1, 6);
       expect(skill.contains('另有'), isFalse);
       expect(attr.contains('另有'), isFalse);

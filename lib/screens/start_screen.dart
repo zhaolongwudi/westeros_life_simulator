@@ -88,6 +88,10 @@ Player buildSetupPlayer(GameSetup setup) {
         ? 4
         : 2,
     'alchemy': setup.identity == PlayerIdentity.maester ? 3 : 0,
+    // S4-3c：magic 与 alchemy 同先例（初始 0 级、可训练成长）。
+    // 不给这一项，事件库 3 个 `skills.magic: 5` 门槛的选项就永远不可选——
+    // `train()` 对不在技能表里的技能直接拒绝。
+    'magic': 0,
   };
   return Player(
     id: 'player_${DateTime.now().millisecondsSinceEpoch}',

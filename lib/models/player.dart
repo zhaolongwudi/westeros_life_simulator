@@ -134,6 +134,11 @@ class Player {
         'riding': 3,
         'speech': 2,
         'alchemy': 0,
+        // S4-3c：magic 必须在初始技能表内，否则 `train()` 拒绝训练
+        // （未知技能直接返回「你从未学过」），而事件库有 3 个
+        // `skills.magic: 5` 门槛的选项会因此**永久不可选**。
+        // 与 alchemy 同先例：初始 0 级、可训练成长。
+        'magic': 0,
       },
       attributes: const {
         'strength': 5,

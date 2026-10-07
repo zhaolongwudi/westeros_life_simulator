@@ -480,8 +480,8 @@ mixin GamePlayMixin
         aliases: const ['训练', 'train'],
         order: 9,
         requiredArgCount: 1,
-        missingArgsHint: '训练什么？可用技能：sword（剑术）/ archery（弓术）/ riding（骑术）/ speech（口才）/ alchemy（炼金）。',
-        helpLine: '训练 / train [技能]  训练技能（sword/archery/riding/speech/alchemy）',
+        missingArgsHint: '训练什么？可用技能：sword（剑术）/ archery（弓术）/ riding（骑术）/ speech（口才）/ alchemy（炼金）/ magic（魔法）。',
+        helpLine: '训练 / train [技能]  训练技能（sword/archery/riding/speech/alchemy/magic）',
         handler: (args) => CommandResult(text: train(normalizeSkillAlias(args))),
       ),
     );
