@@ -54,6 +54,38 @@ abstract class GameProviderBase extends GameStateProvider {
   /// 事件提供者（组合复用，供事件面板浏览/触发）。
   final EventProvider eventProvider;
 
+  // ---------------------------------------------------------------------------
+  // S8-1：一次性事件的完成集合在**存档的两个边界**上同步。
+  //
+  // 运行时的唯一持有者是 [eventProvider]；状态层的 `completedEventIds`
+  // 只是存档载体（读档链路反序列化的是裸 GameStateProvider，见
+  // save_service.dart:184/261）。只改写入侧或只改读取侧都不成立——这是
+  // 本项目「双通道漂移」的第六次，故两个方向一起改并由测试锁定。
+  // ---------------------------------------------------------------------------
+
+  /// 存档时以 [eventProvider] 为准覆盖该键。
+  ///
+  /// 用 `..[]` 覆盖而非回写状态字段：序列化是读取动作，不该有副作用。
+  @override
+  Map<String, dynamic> toJson() {
+    return super.toJson()
+      ..['completedEventIds'] = eventProvider.completedEventIds;
+  }
+
+  /// 读档后把完成集合推回 [eventProvider]。
+  @override
+  void applyState(GameStateProvider other) {
+    super.applyState(other);
+    eventProvider.restoreCompleted(completedEventIds);
+  }
+
+  /// 新局重置完成集合（[GameStateProvider.startNewGame] 只清状态层）。
+  @override
+  void startNewGame({Player? player}) {
+    super.startNewGame(player: player);
+    eventProvider.reset();
+  }
+
   /// 世界全部 NPC。
   List<Npc> get npcs => List.unmodifiable(_npcs);
 

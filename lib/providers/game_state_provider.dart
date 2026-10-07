@@ -108,6 +108,7 @@ class GameStateProvider extends ChangeNotifier {
     bool isGameActive = false,
     bool isGameOver = false,
     int droppedHistoryCount = 0,
+    List<String>? completedEventIds,
   })  : _player = player ?? Player.defaultPlayer(),
         _progress = progress ?? GameProgress.defaultProgress(),
         // 【必须拷贝】`history` getter 返回 `List.unmodifiable(_history)`，
@@ -120,7 +121,9 @@ class GameStateProvider extends ChangeNotifier {
         _pendingEvent = pendingEvent,
         _isGameActive = isGameActive,
         _isGameOver = isGameOver,
-        _droppedHistoryCount = droppedHistoryCount < 0 ? 0 : droppedHistoryCount;
+        _droppedHistoryCount = droppedHistoryCount < 0 ? 0 : droppedHistoryCount,
+        // 同上：拷贝而非持有调用方的列表。
+        _completedEventIds = List<String>.from(completedEventIds ?? const <String>[]);
 
   Player _player;
   GameProgress _progress;
@@ -171,6 +174,23 @@ class GameStateProvider extends ChangeNotifier {
 
   /// 累计被截断丢弃的事件条数。
   int get droppedHistoryCount => _droppedHistoryCount;
+
+  /// S8-1：已完成的一次性事件 id 集合（**存档往返字段**）。
+  ///
+  /// 【为什么落在状态层】`EventProvider._completedEventIds` 是 `isOneTime`
+  /// 门禁的唯一依据，而它原先只活在内存里 ⇒ 读档后一次性事件重新可触发、
+  /// P1-11 的修复在读档路径上失效；`startNewGame()` 又因在**同一引擎实例**
+  /// 上调用而把上一局的完成记录带进新局。两个症状同一根因：这块状态不属于
+  /// 状态层。放这里后，它与 `_history`/`_currentEvent` 一样被 startNewGame
+  /// 清空、被 applyState 复制、被存档往返。
+  ///
+  /// 【运行时的唯一持有者仍是 `EventProvider`】本字段只在**存档写入与读档
+  /// 两个边界**做镜像（见 `GameProviderBase.toJson` / `applyState`），
+  /// 避免出现两份「都像真的」的活状态而互相漂移。
+  List<String> _completedEventIds = <String>[];
+
+  /// 已完成的一次性事件 id（只读视图）。
+  List<String> get completedEventIds => List.unmodifiable(_completedEventIds);
 
   /// 截断提示行（无丢弃时返回空串）。
   ///
@@ -233,6 +253,9 @@ class GameStateProvider extends ChangeNotifier {
     _droppedHistoryCount = 0;
     _currentEvent = null;
     _pendingEvent = null;
+    // S8-1：新局必须重置一次性事件的完成记录，否则上一局完成过的事件
+    // 在新局里永远不会出现（`settings_screen._newGame` 复用同一引擎实例）。
+    _completedEventIds = <String>[];
     _isGameActive = true;
     _isGameOver = false;
     notifyListeners();
@@ -510,6 +533,8 @@ class GameStateProvider extends ChangeNotifier {
     _isGameActive = other._isGameActive;
     _isGameOver = other._isGameOver;
     _droppedHistoryCount = other._droppedHistoryCount;
+    // S8-1：与 _history 同样拷贝，避免与来源 state 共享可变列表。
+    _completedEventIds = List<String>.from(other._completedEventIds);
     notifyListeners();
   }
 
@@ -523,6 +548,8 @@ class GameStateProvider extends ChangeNotifier {
       // S4-5：纯新增可选字段——按 save_migration 约定不升 schemaVersion，
       // 旧存档缺此键时 fromJson 的 safeObject 会回落 null。
       'pendingEvent': _pendingEvent?.toJson(),
+      // S8-1：同上，纯新增可选字段。旧存档缺此键时 safeStrList 回落空列表。
+      'completedEventIds': List<String>.from(_completedEventIds),
       'isGameActive': _isGameActive,
       'isGameOver': _isGameOver,
       'droppedHistoryCount': _droppedHistoryCount,
@@ -546,6 +573,9 @@ class GameStateProvider extends ChangeNotifier {
       history: overflow > 0 ? parsed.sublist(overflow) : parsed,
       currentEvent: safeObject(json['currentEvent'], GameEvent.fromJson),
       pendingEvent: safeObject(json['pendingEvent'], GameEvent.fromJson),
+      // S8-1：safeStrList 对「键缺失 / 类型不是列表」回落空列表，对
+      // 列表中的非字符串项逐个跳过（json_safe.dart:74-81）。
+      completedEventIds: safeStrList(json, 'completedEventIds'),
       isGameActive: safeBool(json, 'isGameActive'),
       isGameOver: safeBool(json, 'isGameOver'),
       droppedHistoryCount:

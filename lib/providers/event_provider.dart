@@ -63,6 +63,15 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
+  /// S8-1：整体替换完成集合（读档时由 `GameProviderBase.applyState` 调用）。
+  ///
+  /// 【为什么是替换而不是合并】读档是全量覆盖语义；合并会让"读档失败"
+  /// 退化成"读到一半"。【为什么这里不 `notifyListeners`】它在读档路径上被
+  /// 调用，而 `applyState` 紧接着就会通知一次；本 provider 无 UI 监听者。
+  void restoreCompleted(List<String> eventIds) {
+    _completedEventIds = List<String>.from(eventIds);
+  }
+
   /// 检查选项是否可用。
   bool canChoose(EventChoice choice, Player player) {
     for (final entry in choice.requirements.entries) {
