@@ -104,6 +104,7 @@ class GameStateProvider extends ChangeNotifier {
     GameProgress? progress,
     List<GameEvent>? history,
     GameEvent? currentEvent,
+    GameEvent? pendingEvent,
     bool isGameActive = false,
     bool isGameOver = false,
     int droppedHistoryCount = 0,
@@ -111,6 +112,7 @@ class GameStateProvider extends ChangeNotifier {
         _progress = progress ?? GameProgress.defaultProgress(),
         _history = history ?? <GameEvent>[],
         _currentEvent = currentEvent,
+        _pendingEvent = pendingEvent,
         _isGameActive = isGameActive,
         _isGameOver = isGameOver,
         _droppedHistoryCount = droppedHistoryCount < 0 ? 0 : droppedHistoryCount;
@@ -119,6 +121,14 @@ class GameStateProvider extends ChangeNotifier {
   GameProgress _progress;
   List<GameEvent> _history;
   GameEvent? _currentEvent;
+
+  /// 待决的世界事件（S4-5）：月度传闻浮现后等待玩家抉择。
+  ///
+  /// 【为什么放在状态层而不是 mixin 私有字段】`settings_screen` 会在
+  /// **同一个引擎实例**上调 `startNewGame()` 与 `applyState()`（读档）。
+  /// 留在 mixin 里会导致「重新开始后上一局的待决事件仍在界面上」与
+  /// 「读档后旧局待决事件盖在新局上」——放这里才能被清空/复制/存档往返。
+  GameEvent? _pendingEvent;
   bool _isGameActive = false;
   bool _isGameOver = false;
 
@@ -178,6 +188,20 @@ class GameStateProvider extends ChangeNotifier {
   /// 当前事件。
   GameEvent? get currentEvent => _currentEvent;
 
+  /// 待决的世界事件（供 UI 渲染选项卡片；无则 null）。
+  ///
+  /// 【游戏结束/未开始时恒为 null】否则玩家死亡（`endGame()`）后界面仍会
+  /// 渲染选项卡片，而 `applyChoice` 在 `!isGameActive` 时直接返回空串——
+  /// 卡片点了毫无反应，属可见的假承诺。
+  GameEvent? get pendingEvent =>
+      _isGameActive && !_isGameOver ? _pendingEvent : null;
+
+  /// 设置待决的世界事件（S4-5）。
+  void setPendingEvent(GameEvent? event) {
+    _pendingEvent = event;
+    notifyListeners();
+  }
+
   /// 游戏是否进行中。
   bool get isGameActive => _isGameActive;
 
@@ -203,6 +227,7 @@ class GameStateProvider extends ChangeNotifier {
     _history = <GameEvent>[];
     _droppedHistoryCount = 0;
     _currentEvent = null;
+    _pendingEvent = null;
     _isGameActive = true;
     _isGameOver = false;
     notifyListeners();
@@ -228,7 +253,12 @@ class GameStateProvider extends ChangeNotifier {
   /// S2-3（P1-03 阶段一）：与 `applyAiChoice` 对齐——后者早在 Batch 10-94/101
   /// 就把幽灵键做成玩家可见的提示行，事件通道此前返回 void、完全无反馈。
   /// 返回 String 不破坏既有调用方（Dart 允许忽略返回值）。
-  String applyChoice(EventChoice choice) {
+  /// 【S4-5（P1 架构级）新增 [advanceClock]】月度世界事件是在 `advanceMonth()`
+  /// **内部**浮现的——那时时钟已经推进过了。玩家随后点选选项时若再调一次
+  /// [advanceTime]，就等于「同一个事件吃掉两个月」。故事件浮现后的抉择走
+  /// `advanceClock: false`；默认 `true` 保持既有语义（独立触发的事件选项
+  /// 仍自行消耗一个月）。
+  String applyChoice(EventChoice choice, {bool advanceClock = true}) {
     if (!_isGameActive || _isGameOver) return '';
 
     // 应用效果
@@ -247,8 +277,10 @@ class GameStateProvider extends ChangeNotifier {
     }
     _currentEvent = null;
 
-    // 推进时间
-    advanceTime();
+    // 推进时间（月度浮现的事件已推进过，由调用方传 false 抑制）
+    if (advanceClock) {
+      advanceTime();
+    }
 
     // 检查游戏结束条件
     _checkGameOver();
@@ -469,6 +501,7 @@ class GameStateProvider extends ChangeNotifier {
     _progress = other._progress;
     _history = List<GameEvent>.from(other._history);
     _currentEvent = other._currentEvent;
+    _pendingEvent = other._pendingEvent;
     _isGameActive = other._isGameActive;
     _isGameOver = other._isGameOver;
     _droppedHistoryCount = other._droppedHistoryCount;
@@ -482,6 +515,9 @@ class GameStateProvider extends ChangeNotifier {
       'progress': _progress.toJson(),
       'history': _history.map((e) => e.toJson()).toList(),
       'currentEvent': _currentEvent?.toJson(),
+      // S4-5：纯新增可选字段——按 save_migration 约定不升 schemaVersion，
+      // 旧存档缺此键时 fromJson 的 safeObject 会回落 null。
+      'pendingEvent': _pendingEvent?.toJson(),
       'isGameActive': _isGameActive,
       'isGameOver': _isGameOver,
       'droppedHistoryCount': _droppedHistoryCount,
@@ -504,6 +540,7 @@ class GameStateProvider extends ChangeNotifier {
           GameProgress.defaultProgress(),
       history: overflow > 0 ? parsed.sublist(overflow) : parsed,
       currentEvent: safeObject(json['currentEvent'], GameEvent.fromJson),
+      pendingEvent: safeObject(json['pendingEvent'], GameEvent.fromJson),
       isGameActive: safeBool(json, 'isGameActive'),
       isGameOver: safeBool(json, 'isGameOver'),
       droppedHistoryCount:

@@ -5,6 +5,7 @@ library;
 
 import 'dart:math';
 import '../data/balance_data.dart';
+import '../models/event.dart';
 import '../models/location.dart';
 import '../models/player.dart';
 import '../core/command_registry.dart';
@@ -301,9 +302,17 @@ mixin GamePlayMixin
     return null;
   }
 
-  /// 月度世界事件浮现：从可触发事件中随机选一个作叙事提示。
+  /// 月度世界事件浮现：从可触发事件中随机选一个，登记为**待决事件**并输出选项菜单。
   ///
-  /// 仅提示（不强制选择），30% 概率；让世界事件随季节/处境浮现。
+  /// 30% 概率；让世界事件随季节/处境浮现。
+  ///
+  /// 【S4-5 起不再是「纯提示」】浮现后事件进入 [pendingEvent]，玩家可经
+  /// [chooseWorldEventChoice] 真正抉择并落盘效果——此前它只输出一行文本，
+  /// 事件库预写的选项效果在生产中永不生效。
+  ///
+  /// 【待决事件何时消失】被抉择（[chooseWorldEventChoice]）时清空，或被
+  /// 下一条浮现的传闻**替换**。刻意不在未抉择时按月清空：玩家不该因为
+  /// 「当月没点」而永久错过一个已经摆到面前的抉择。
   String _maybeWorldEvent({int? seed}) {
     final rnd = rng(seed);
     if (rnd.nextDouble() >= 0.3) return '';
@@ -320,17 +329,65 @@ mixin GamePlayMixin
     // 3 个一次性事件（`event_sword_inheritance` / `event_guild_tooling` /
     // `event_maester_commission`）会无限重复浮现。
     //
-    // 为什么标在「浮现」而不是「执行」：事件选项当前在生产中不可达
-    // （S4-5：`applyChoice` 在 UI 零调用，事件面板自述「不做触发执行」），
-    // **本函数是事件唯一触达玩家的通道**，故「浮现」即玩家对该事件的全部曝光。
-    // 不标记的后果是同一条传闻每约 3 个月复读一次。
+    // 【为什么标在「浮现」而不是「抉择」】S4-6 定此点时事件选项尚不可达；
+    // S4-5 让选项可抉择后，**标记点仍保留在浮现处**，理由是「浮现」与
+    // 「抉择」是两件事：传闻已经完整播报给玩家（含全部选项文案），而玩家
+    // 完全可能听完就不选。若改标在抉择处，同一条一次性传闻会每月复读一次
+    // 直到玩家点它——那正是 S4-6 要修的病症。不标记的后果亦然。
     //
-    // 【若S4-5 落地，此处需重新评估】一旦事件选项接入主流程，
-    // 标记点应移到真正的「完成/选择」时机，否则玩家会因听过传闻而永远拿不到事件。
+    // 【S4-5（架构级）：把「浮现」变成「可抉择」】
+    // 此前本函数只输出一行文本，事件库预写的选项效果在生产中**永不落盘**。
+    // 现在把它登记为**待决事件**，由 UI 渲染成可点选项卡片，玩家抉择后
+    // 经 [chooseWorldEventChoice] 真正应用效果。
+    //
+    // 【一次性事件的标记点仍在「浮现」】这是 S4-6 的既有决策：本函数是
+    // 事件触达玩家的通道。S4-5 让选项可达后，「浮现」与「抉择」仍然分离
+    // （玩家可能听完传闻不选），故标记点保持在曝光时刻，见 S4-6 遗留项。
     if (event.isOneTime) {
       eventProvider.markCompleted(event.id);
     }
-    return '📜 传闻：${event.name}——${event.description}';
+    setPendingEvent(event);
+    final choices = event.choices.map((c) => '  · ${c.text}').join('\n');
+    return '📜 传闻：${event.name}——${event.description}\n你可以：\n$choices';
+  }
+
+  // 待决事件状态由状态层持有（`GameStateProvider.pendingEvent`）——
+  // 这样「重新开始」能清空、读档能整体复制、且随存档往返。
+
+  /// 抉择当前待决世界事件的一个选项：效果真正落盘 + 记录历史。
+  ///
+  /// 【S4-5 的核心修复】`event_data.dart` 里 71 个事件的 216 个带 effects 的
+  /// 选项此前**在生产流程中不可达**（`applyChoice` 在 screens/widgets 零调用，
+  /// 事件面板自述「不做触发执行」，月度传闻只输出一行文本）。本方法是这些
+  /// 选项的第一个生产调用方。
+  ///
+  /// 【为什么不调 advanceTime】本事件是在 `advanceMonth()` 内部浮现的，
+  /// 那时时钟已经推进过了——故走 `applyChoice(advanceClock: false)`，
+  /// 否则同一个事件会吃掉两个月（详见该方法的 doc）。
+  ///
+  /// 返回结算叙事（选项叙事 + 真实效果摘要）；无待决事件时返回提示文本。
+  String chooseWorldEventChoice(EventChoice choice) {
+    final event = pendingEvent;
+    if (event == null) return '当前没有待抉择的事件。';
+    if (!event.choices.contains(choice)) {
+      return '「${choice.text}」不是「${event.name}」的可选项。';
+    }
+    // 供 applyChoice 记录历史用（它读 currentEvent）
+    setCurrentEvent(event);
+    final before = player;
+    final rejectedText = applyChoice(choice, advanceClock: false);
+    setPendingEvent(null);
+    final buf = StringBuffer();
+    if (choice.narrative.isNotEmpty) {
+      buf.writeln(choice.narrative);
+    }
+    // 摘要与 AI 通道共用同一份实现（见 GameProviderBase.effectSummary）
+    buf.write(effectSummary(before, includeRejected: false));
+    // applyChoice 已返回「N 项效果未生效」提示，此处接上，避免重复
+    if (rejectedText.isNotEmpty) {
+      buf.writeln(rejectedText.trim());
+    }
+    return buf.toString().trim();
   }
 
   // ==================== 内部工具 ====================
@@ -458,5 +515,4 @@ mixin GamePlayMixin
       ),
     );
   }
-
 }

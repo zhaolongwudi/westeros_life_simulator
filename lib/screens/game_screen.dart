@@ -172,6 +172,18 @@ class _GameScreenState extends State<GameScreen> {
     // 引擎 notify 会触发 _onEngineChanged 刷新状态条
   }
 
+  /// 抉择待决的世界事件选项（S4-5）：效果落盘 + 追加结算叙事。
+  ///
+  /// 【为什么不推进时间】该事件在 `advanceMonth()` 内部浮现，时钟已推进过；
+  /// 引擎侧走 `applyChoice(advanceClock: false)` 抑制重复推进。
+  void _chooseWorldEvent(EventChoice choice) {
+    final text = _engine.chooseWorldEventChoice(choice);
+    _appendLine('➡️ ${choice.text}');
+    if (text.isNotEmpty) {
+      _appendLine(text);
+    }
+  }
+
   /// 打开子界面。
   void _openScreen(Widget screen) {
     Navigator.of(context).push(
@@ -306,6 +318,8 @@ class _GameScreenState extends State<GameScreen> {
                     onOpenPanel: _openScreen,
                     aiChoices: _aiChoices,
                     onChooseAi: _chooseAiOption,
+                    worldEvent: _engine.pendingEvent,
+                    onChooseWorldEvent: _chooseWorldEvent,
                   ),
                 ),
                 // 指令输入区

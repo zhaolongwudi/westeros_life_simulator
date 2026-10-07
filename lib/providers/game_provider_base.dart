@@ -9,6 +9,7 @@ import 'dart:math';
 
 import '../data/event_data.dart';
 import '../data/family_data.dart';
+import '../data/item_data.dart';
 import '../data/location_data.dart';
 import '../data/npc_data.dart';
 import '../data/system_data.dart';
@@ -18,6 +19,7 @@ import '../models/location.dart';
 import '../models/npc.dart';
 import '../models/player.dart';
 import '../models/system.dart';
+import '../utils/labels.dart';
 import 'event_provider.dart';
 import 'game_state_provider.dart';
 
@@ -28,6 +30,7 @@ abstract class GameProviderBase extends GameStateProvider {
     super.progress,
     super.history,
     super.currentEvent,
+    super.pendingEvent,
     super.isGameActive,
     super.isGameOver,
     List<Npc>? npcs,
@@ -181,4 +184,114 @@ abstract class GameProviderBase extends GameStateProvider {
 
   /// 基于回合数生成一个确定性随机源（同回合结果可复现）。
   Random rng([int? seed]) => Random(seed ?? progress.turnCount);
+
+  // ==================== 效果摘要（事件通道与 AI 通道共用） ====================
+
+  /// 按 before/after 真实差值生成效果摘要文本（每行一条，无变化返回空串）。
+  ///
+  /// 【为什么放在基类而不是各自的调用方】本项目已发生**五次**「双通道漂移」
+  /// （见 `core/event_trigger_eval.dart` 文件头）。S4-5 让事件选项首次真正
+  /// 可玩后，「事件选项落盘后玩家该看到什么」也成了双通道问题——若在事件
+  /// 通道再抄一份摘要逻辑，就是第六次。故摘要**只此一份**：
+  /// `mixin_ai.applyAiChoice`（AI 选项）与 `mixin_play.chooseWorldEventChoice`
+  /// （事件选项）都调本方法。
+  ///
+  /// 【为什么按 before/after 求差而不是直接读 choice.effects】
+  /// ① 真实 delta 才是玩家关心的（`skills.sword: 1` 落在已满级上、
+  ///    `skills.sword: -5` 被 `max(0, ...)` 破底、`relations.*` 被 ±100
+  ///    钳制时，读 effects 会给出与实际落盘不符的数字）；
+  /// ② 写侧守卫（10-91/92）会静默跳过幽灵键，求差自动不显示它们，
+  ///    无需在摘要侧再复刻一遍白名单判定（避免两处规则漂移）。
+  /// [includeRejected] 为 false 时不输出「N 项效果未生效」行——供
+  /// `applyChoice` 那条通道使用：它自身的返回值已含该提示，两条都输出会重复。
+  String effectSummary(Player before, {bool includeRejected = true}) {
+    final buf = StringBuffer();
+    final goldDelta = player.gold - before.gold;
+    final repDelta = player.reputation - before.reputation;
+    if (goldDelta != 0) {
+      buf.writeln('💰 金币 ${goldDelta > 0 ? '+' : ''}$goldDelta（${player.gold}）');
+    }
+    if (repDelta != 0) {
+      buf.writeln('🌟 声望 ${repDelta > 0 ? '+' : ''}$repDelta（${player.reputation}）');
+    }
+    _writeMapDeltas(buf, before.skills, player.skills, skillLabel, '⚔️');
+    _writeMapDeltas(buf, before.attributes, player.attributes, attributeLabel, '🛡️');
+    _writeRelationDeltas(buf, before.relations, player.relations);
+    _writeInventoryDeltas(buf, before.inventory, player.inventory);
+    // Batch 10-94：被写侧守卫拒绝的效果键可见化（详见 provider 侧注释）。
+    final rejected = lastRejectedEffectKeys;
+    if (includeRejected && rejected.isNotEmpty) {
+      buf.writeln('（其中 ${rejected.length} 项效果未生效：${rejected.join('、')}）');
+    }
+    return buf.toString();
+  }
+
+  /// 通用 Map<int> 数值差摘要行（金币之外的技能/属性走这条）。
+  ///
+  /// [label] 负责把英文键翻成中文（`skillLabel`/`attributeLabel`），
+  /// 兜底仍是键本身——与 UI 侧标签函数的既有行为一致。
+  void _writeMapDeltas(
+    StringBuffer buf,
+    Map<String, int> before,
+    Map<String, int> after,
+    String Function(String key) label,
+    String icon,
+  ) {
+    for (final entry in after.entries) {
+      final key = entry.key;
+      final delta = entry.value - (before[key] ?? 0);
+      if (delta == 0) continue;
+      buf.writeln(
+        '$icon ${label(key)} ${delta > 0 ? '+' : ''}$delta（${entry.value}）',
+      );
+    }
+  }
+
+  /// 关系差摘要行：`🤝 提利昂·兰尼斯特 +10（30）`。
+  ///
+  /// NPC 中文名走 [npcById]（未知 id 退回 id 本身，不抛），
+  /// 与 `labels` 标签函数的兜底策略一致。
+  void _writeRelationDeltas(
+    StringBuffer buf,
+    Map<String, int> before,
+    Map<String, int> after,
+  ) {
+    for (final entry in after.entries) {
+      final key = entry.key;
+      final delta = entry.value - (before[key] ?? 0);
+      if (delta == 0) continue;
+      final name = npcById(key)?.name ?? key;
+      buf.writeln('🤝 $name ${delta > 0 ? '+' : ''}$delta（${entry.value}）');
+    }
+  }
+
+  /// 背包差摘要行：`🎒 黑面包 +2` / `🎒 黑面包 -1（已全部用尽）`。
+  ///
+  /// 物品中文名走 [itemName]（未知 id 退回 id 本身）——与 10-87 背包段
+  /// 「中文名 + 数量」的既定口径一致，**不在此处泄漏英文 id**。
+  void _writeInventoryDeltas(
+    StringBuffer buf,
+    List<String> before,
+    List<String> after,
+  ) {
+    final beforeCount = <String, int>{};
+    for (final id in before) {
+      beforeCount[id] = (beforeCount[id] ?? 0) + 1;
+    }
+    final afterCount = <String, int>{};
+    for (final id in after) {
+      afterCount[id] = (afterCount[id] ?? 0) + 1;
+    }
+    for (final entry in afterCount.entries) {
+      final id = entry.key;
+      final delta = entry.value - (beforeCount[id] ?? 0);
+      if (delta == 0) continue;
+      buf.writeln('🎒 ${itemName(id)} ${delta > 0 ? '+' : ''}$delta');
+    }
+    // 全部用尽的物品不会出现在 afterCount 里，需单列。
+    for (final entry in beforeCount.entries) {
+      if (afterCount.containsKey(entry.key)) continue;
+      buf.writeln('🎒 ${itemName(entry.key)} ${entry.value}（已全部用尽）');
+    }
+  }
 }

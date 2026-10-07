@@ -26,6 +26,8 @@ class NarrativeView extends StatelessWidget {
     required this.onOpenPanel,
     required this.aiChoices,
     required this.onChooseAi,
+    this.worldEvent,
+    this.onChooseWorldEvent,
   });
 
   final List<String> lines;
@@ -35,18 +37,66 @@ class NarrativeView extends StatelessWidget {
   final List<EventChoice> aiChoices;
   final ValueChanged<EventChoice> onChooseAi;
 
+  /// 待决的世界事件（S4-5）：月度传闻浮现后等待玩家抉择；null = 无。
+  ///
+  /// 【为什么与 aiChoices 分开两块渲染】两者语义不同：AI 选项属于
+  /// 「AI 现场生成的下一步」，世界事件选项属于「事件库预写的抉择」。
+  /// 混在一起会让玩家分不清哪张卡来自哪里。
+  final GameEvent? worldEvent;
+
+  /// 抉择世界事件选项的回调（未传时该区块不渲染）。
+  final ValueChanged<EventChoice>? onChooseWorldEvent;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // 末尾附加项：AI 选项卡片 + 面板快捷入口
-    final extraCount = (aiChoices.isNotEmpty ? 1 : 0) + 1;
+    // 末尾附加项：世界事件抉择卡片 + AI 选项卡片 + 面板快捷入口
+    final hasWorldEvent = worldEvent != null && onChooseWorldEvent != null;
+    final extraCount =
+        (hasWorldEvent ? 1 : 0) + (aiChoices.isNotEmpty ? 1 : 0) + 1;
     return ListView.builder(
       controller: scrollController,
       padding: const EdgeInsets.all(12),
       itemCount: lines.length + extraCount,
       itemBuilder: (context, index) {
+        // 世界事件抉择（S4-5）：待决事件的选项卡片
+        if (hasWorldEvent && index == lines.length) {
+          final ev = worldEvent!;
+          return Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.gavel_outlined,
+                      size: 16,
+                      color: theme.colorScheme.tertiary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '${ev.name}·如何应对',
+                        style: theme.textTheme.titleSmall,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                for (var i = 0; i < ev.choices.length; i++)
+                  AiChoiceCard(
+                    ordinal: choiceOrdinal(i),
+                    choice: ev.choices[i],
+                    onTap: () => onChooseWorldEvent!(ev.choices[i]),
+                  ),
+              ],
+            ),
+          );
+        }
         // 末尾：AI 选项（如有）
-        if (aiChoices.isNotEmpty && index == lines.length) {
+        if (aiChoices.isNotEmpty &&
+            index == lines.length + (hasWorldEvent ? 1 : 0)) {
           return Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Column(
@@ -75,7 +125,10 @@ class NarrativeView extends StatelessWidget {
           );
         }
         // 末尾附：面板快捷入口
-        if (index == lines.length + (aiChoices.isNotEmpty ? 1 : 0)) {
+        if (index ==
+            lines.length +
+                (hasWorldEvent ? 1 : 0) +
+                (aiChoices.isNotEmpty ? 1 : 0)) {
           return Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Wrap(

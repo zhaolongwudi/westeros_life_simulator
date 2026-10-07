@@ -39,6 +39,7 @@ class GameEngine extends GameProviderBase
     super.progress,
     super.history,
     super.currentEvent,
+    super.pendingEvent,
     super.isGameActive,
     super.isGameOver,
     super.npcs,
