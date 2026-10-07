@@ -7,9 +7,16 @@
 /// 4. 同分稳定性（保持原列表顺序）
 /// 5. 不满足条件的事件不加分（与无条件事件同层）
 /// 6. 预算常量契约
+///
+/// 【S4-3 更新】筛选器现已**先按门槛过滤再排序**（原实现只排序不筛选）。
+/// 本文件「夏季玩家」用例原断言 `event_frozen_lake`（冬季节门槛）在夏日
+/// prompt 里出现——**那锁住的是 bug**，已按S4-3 修正为断言其不出现，
+/// 并新增「注入集合 ⊆ 可触发集合」的全量边界锁。详见
+/// `test/batch12_s43_prompt_gate_filter_test.dart`。
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:westeros_life_simulator/core/event_trigger_eval.dart';
 import 'package:westeros_life_simulator/data/balance_data.dart';
 import 'package:westeros_life_simulator/data/event_data.dart';
 import 'package:westeros_life_simulator/models/event.dart';
@@ -132,14 +139,33 @@ void main() {
       expect(result.first.id, 'event_frozen_lake');
     });
 
-    test('夏季玩家：冬季事件让位给夏季事件', () {
+    test('夏季玩家：冬季门槛事件被剔除，夏季事件补位（S4-3 修正断言）', () {
       final player = Player.defaultPlayer();
       final result = selectEventsForPrompt(allEvents, player: player, season: 'summer');
       final ids = result.map((e) => e.id).toSet();
-      expect(ids, contains('event_frozen_lake')); // 地点命中仍入选
+      // S4-3 修正：本断言原为 `expect(ids, contains('event_frozen_lake'))`
+      // 并注明「地点命中仍入选」——那**锁住的是 bug 本身**。`event_frozen_lake`
+      // 的门槛是 `locationId: location_winterfell` + `season: winter`，夏日玩家
+      // 只满足地点、不满足季节，门槛整体不满足，不该进 prompt。
+      // 修复后筛选器真正执行门槛，故改为断言它**不出现**。
+      expect(ids, isNot(contains('event_frozen_lake')),
+          reason: '冬季节门槛事件不得注入夏日 prompt（S4-3）');
+      // 夏季事件照常入选
       expect(ids, contains('event_market_surplus')); // 夏季事件入选
       expect(ids, contains('event_trade_fair')); // 夏季事件入选
-      expect(result.first.id, 'event_frozen_lake'); // 地点双分仍第一
+    });
+
+    test('S4-3：注入 prompt 的每条事件都必须真的满足门槛', () {
+      // 这条是本文件新增的边界锁。原筛选器只排序不筛选，
+      // 「注入集合 ⊆ 可触发集合」这一契约从未被断言过。
+      final player = Player.defaultPlayer();
+      for (final season in const ['spring', 'summer', 'autumn', 'winter']) {
+        final result = selectEventsForPrompt(allEvents, player: player, season: season);
+        for (final e in result) {
+          expect(eventTriggersSatisfied(e, player, season: season), isTrue,
+              reason: '$season 下 ${e.id} 门槛不满足却被注入');
+        }
+      }
     });
   });
 }
