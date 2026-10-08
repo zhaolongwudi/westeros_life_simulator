@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
-**2026-10-08 · S13b 文档回写：S13-2 ① 已修并经 CI 验证（run 37727343394，1487 tests），测试基线 143 文件/1487 用例**（`b5e994e`）
+**2026-10-08 · fix(test): S13-3 tap 前 ensureVisible 修 widget 测试**（`a6b4b77`）
 
-**2026-10-08 · S13-2 修 ① 探索双推进任务：删 explore() 内 advanceNpcTasks()，任务推进统一由月度管线负责**（`7734afa`）
+**2026-10-08 · fix(review): S13-3 ④ 删未使用 import 消除 analyze warning**（`e2dec29`）
 
-**2026-10-07 · fix(review): S13-1 修两个 P0 崩溃（传承 isMarried 残留 + 互动空列表）**（`e1a5a17`）
+**2026-10-08 · fix(review): S13-3 ④ NPC 面板「任务」按钮接 V2（接线+直接接第一个）**（`1d98ec9`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/archive/03-审查归档.md。
 <!-- CHANGELOG:END -->
