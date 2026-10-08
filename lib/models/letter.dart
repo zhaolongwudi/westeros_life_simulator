@@ -5,6 +5,8 @@
 /// 迁到 models/ 后：混入层 import 模型层，UI 层 import 模型层，层次单向。
 library;
 
+import '../utils/json_safe.dart';
+
 /// 一封信件（含来信 / 回信）。
 class Letter {
   const Letter({
@@ -48,6 +50,38 @@ class Letter {
       month: month,
       isFromNpc: isFromNpc,
       replied: replied ?? this.replied,
+    );
+  }
+
+  /// S13-4：序列化（信件进存档的前提）。
+  ///
+  /// 此前 `Letter` **完全没有** `toJson`/`fromJson`——它此前只活在内存里
+  /// （见 `mixin_letter.dart` 的三个私有字段），所以没人需要序列化。
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'senderId': senderId,
+      'senderName': senderName,
+      'content': content,
+      'year': year,
+      'month': month,
+      'isFromNpc': isFromNpc,
+      'replied': replied,
+    };
+  }
+
+  /// S13-4：反序列化（防御式：类型不对一律回落默认值，绝不抛）。
+  ///
+  /// 用 `json_safe` 的安全读取而非直接强转，与 `Player.fromJson` / `GameEvent.fromJson`
+  /// 保持同一套约定（坏存档不能崩在加载页）。
+  factory Letter.fromJson(Map<String, dynamic> json) {
+    return Letter(
+      senderId: safeStr(json, 'senderId'),
+      senderName: safeStr(json, 'senderName'),
+      content: safeStr(json, 'content'),
+      year: safeInt(json, 'year'),
+      month: safeInt(json, 'month'),
+      isFromNpc: safeBool(json, 'isFromNpc'),
+      replied: safeBool(json, 'replied'),
     );
   }
 }

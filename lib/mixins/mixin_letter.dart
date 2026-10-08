@@ -13,6 +13,7 @@ import '../core/monthly_pipeline.dart';
 import '../models/letter.dart';
 import '../models/npc.dart';
 import '../providers/game_provider_base.dart';
+import '../providers/game_state_provider.dart';
 
 /// 信件混入。挂在 [GameProviderBase] 上。
 mixin GameLetterMixin on GameProviderBase {
@@ -213,4 +214,60 @@ mixin GameLetterMixin on GameProviderBase {
       ),
     );
   }
+  // ==================== S13-4 · 信件进存档 ====================
+
+  /// S13-4：存档时把信件三字段并入 JSON。
+  ///
+  /// 【为什么由**本 mixin** 覆写、而不在 `GameProviderBase` 里桥接】
+  /// `GameProviderBase extends GameStateProvider`，而本 mixin 是
+  /// `on GameProviderBase`——**父类看不到 mixin 的成员**，在 base 里写桥接必然
+  /// analyze 报 Undefined name（与 S13-3 撞的是同一个方向问题）。
+  /// mixin 在 `GameEngine` 的 `with` 列表里排在 base 之后，覆写生效，
+  /// `super.toJson()` 链到 base/state 层。
+  ///
+  /// 【方向说明】写入以**运行时**为准（运行时才是活状态）；读取以**状态层**为准
+  /// ——读档链路反序列化的静态类型是裸 `GameStateProvider`
+  /// （save_service.dart:184/261），只有状态层有数据。与 S8-1 的
+  /// `completedEventIds` 方向完全一致。
+  @override
+  Map<String, dynamic> toJson() {
+    return super.toJson()
+      ..['letters'] = _letters.map((l) => l.toJson()).toList()
+      ..['lastSenderId'] = _lastSenderId
+      ..['lastLetterMonth'] = _lastLetterMonth;
+  }
+
+  /// S13-4：读档后把状态层的信件三字段推回运行时。
+  @override
+  void applyState(GameStateProvider other) {
+    super.applyState(other);
+    // 🔴 **必须从 `other.` 显式读取，不能写 `letters`**：
+    // mixin 自己也定义了 `letters` getter，在 `GameEngine` 上它**遮蔽**了
+    // 状态层的同名 getter —— 裸写 `letters` 读到的是**运行时旧值**，
+    // 读档会静默失效（表现为「读档后信件还是旧的」）。
+    // `other` 的静态类型是 `GameStateProvider`，故 `other.letters` 拿到的是
+    // 状态层数据，正是本方法要的。
+    _letters
+      ..clear()
+      ..addAll(other.letters);
+    _lastSenderId = other.lastSenderId;
+    _lastLetterMonth = other.lastLetterMonth;
+  }
+
+  /// S13-4：新局重置信件三字段（`settings_screen` 复用同一引擎实例）。
+  @override
+  void startNewGame({Player? player}) {
+    super.startNewGame(player: player);
+    _letters.clear();
+    _lastSenderId = null;
+    _lastLetterMonth = null;
+  }
+
+  /// S13-4：**运行时**的收信冷却键（只读，供测试与调试观察）。
+  ///
+  /// 【为什么状态层已有 `lastLetterMonth` 却还要这个】状态层那份只在
+  /// `applyState` 时被写入，正常游玩期间**不会**跟着运行时更新
+  /// （运行时才是活状态）⇒ 游玩中两者会不一致。
+  /// 加 `Runtime` 前缀以示区分，避免误用状态层那份读出陈旧值。
+  String? get runtimeLastLetterMonth => _lastLetterMonth;
 }

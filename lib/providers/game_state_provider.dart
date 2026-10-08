@@ -15,6 +15,7 @@ import '../data/item_data.dart';
 // 校验 NPC id 是否真实存在（与 `npc_data.npcById` 同源，单一真相）。
 import '../data/npc_data.dart';
 import '../models/event.dart';
+import '../models/letter.dart';
 import '../models/player.dart';
 import '../utils/json_safe.dart';
 
@@ -109,6 +110,9 @@ class GameStateProvider extends ChangeNotifier {
     bool isGameOver = false,
     int droppedHistoryCount = 0,
     List<String>? completedEventIds,
+    List<Letter>? letters,
+    String? lastSenderId,
+    String? lastLetterMonth,
   })  : _player = player ?? Player.defaultPlayer(),
         _progress = progress ?? GameProgress.defaultProgress(),
         // 【必须拷贝】`history` getter 返回 `List.unmodifiable(_history)`，
@@ -123,7 +127,11 @@ class GameStateProvider extends ChangeNotifier {
         _isGameOver = isGameOver,
         _droppedHistoryCount = droppedHistoryCount < 0 ? 0 : droppedHistoryCount,
         // 同上：拷贝而非持有调用方的列表。
-        _completedEventIds = List<String>.from(completedEventIds ?? const <String>[]);
+        _completedEventIds = List<String>.from(completedEventIds ?? const <String>[]),
+        // S13-4：同理，信件列表也必须拷贝，避免与来源共享可变列表。
+        _letters = List<Letter>.from(letters ?? const <Letter>[]),
+        _lastSenderId = lastSenderId,
+        _lastLetterMonth = lastLetterMonth;
 
   Player _player;
   GameProgress _progress;
@@ -192,6 +200,38 @@ class GameStateProvider extends ChangeNotifier {
   /// 已完成的一次性事件 id（只读视图）。
   List<String> get completedEventIds => List.unmodifiable(_completedEventIds);
 
+  // ---------------------------------------------------------------------------
+  // S13-4：信件状态（**存档往返字段**，与 S8-1 的 completedEventIds 同构）。
+  //
+  // 【为什么必须落状态层，而不是留在 GameLetterMixin】
+  // `save_service.dart:184` / `:261` 反序列化的静态类型是 **`GameStateProvider`，
+  // 不是 `GameEngine`** ⇒ mixin 里覆写 `toJson`/`applyState` 对读档**完全无效**。
+  // 这与 S8-1 记录的是同一个坑（双通道漂移），故照搬它的解法。
+  //
+  // 【两个症状同一根因】
+  // ① 读档后信件面板整屏清空；
+  // ② `_lastLetterMonth` 归零 ⇒ 同月可再触发一封，而收信 +1、回信 +2
+  //    ⇒ **反复读档可无限刷关系**。
+  // ---------------------------------------------------------------------------
+
+  /// 已收信件（存档往返字段；运行时的唯一持有者仍是 `GameLetterMixin._letters`）。
+  List<Letter> _letters = <Letter>[];
+
+  /// 上一位寄信人 NPC id（存档往返字段，防连续同一人刷屏）。
+  String? _lastSenderId;
+
+  /// 最近一次收到来信的月份（存档往返字段，冷却：每自然月最多 1 封）。
+  String? _lastLetterMonth;
+
+  /// 已收信件（只读视图）。
+  List<Letter> get letters => List.unmodifiable(_letters);
+
+  /// 上一位寄信人 NPC id（存档往返字段）。
+  String? get lastSenderId => _lastSenderId;
+
+  /// 最近一次收到来信的月份（存档往返字段）。
+  String? get lastLetterMonth => _lastLetterMonth;
+
   /// 截断提示行（无丢弃时返回空串）。
   ///
   /// 供 UI/AI 在历史开头展示，避免玩家以为"这些事没发生过"。
@@ -256,6 +296,10 @@ class GameStateProvider extends ChangeNotifier {
     // S8-1：新局必须重置一次性事件的完成记录，否则上一局完成过的事件
     // 在新局里永远不会出现（`settings_screen._newGame` 复用同一引擎实例）。
     _completedEventIds = <String>[];
+    // S13-4：同理清空信件三字段，否则重开就白拿上一局的待回信与收信冷却。
+    _letters = <Letter>[];
+    _lastSenderId = null;
+    _lastLetterMonth = null;
     _isGameActive = true;
     _isGameOver = false;
     notifyListeners();
@@ -535,6 +579,10 @@ class GameStateProvider extends ChangeNotifier {
     _droppedHistoryCount = other._droppedHistoryCount;
     // S8-1：与 _history 同样拷贝，避免与来源 state 共享可变列表。
     _completedEventIds = List<String>.from(other._completedEventIds);
+    // S13-4：同理。
+    _letters = List<Letter>.from(other._letters);
+    _lastSenderId = other._lastSenderId;
+    _lastLetterMonth = other._lastLetterMonth;
     notifyListeners();
   }
 
@@ -550,6 +598,11 @@ class GameStateProvider extends ChangeNotifier {
       'pendingEvent': _pendingEvent?.toJson(),
       // S8-1：同上，纯新增可选字段。旧存档缺此键时 safeStrList 回落空列表。
       'completedEventIds': List<String>.from(_completedEventIds),
+      // S13-4：纯新增可选字段（按 save_migration 约定不升 schemaVersion）。
+      // 旧存档缺此键时 fromJson 的 safeObjectList 回落空列表。
+      'letters': _letters.map((l) => l.toJson()).toList(),
+      'lastSenderId': _lastSenderId,
+      'lastLetterMonth': _lastLetterMonth,
       'isGameActive': _isGameActive,
       'isGameOver': _isGameOver,
       'droppedHistoryCount': _droppedHistoryCount,
@@ -576,6 +629,14 @@ class GameStateProvider extends ChangeNotifier {
       // S8-1：safeStrList 对「键缺失 / 类型不是列表」回落空列表，对
       // 列表中的非字符串项逐个跳过（json_safe.dart:74-81）。
       completedEventIds: safeStrList(json, 'completedEventIds'),
+      // S13-4：safeObjectList 逐元素解析，坏元素跳过不抛（键缺失/类型不对
+      // 一律回落空列表），与 history 同一套防御式读取。
+      letters: safeObjectList(json, 'letters', Letter.fromJson),
+      lastSenderId:
+          json['lastSenderId'] is String ? json['lastSenderId'] as String : null,
+      lastLetterMonth: json['lastLetterMonth'] is String
+          ? json['lastLetterMonth'] as String
+          : null,
       isGameActive: safeBool(json, 'isGameActive'),
       isGameOver: safeBool(json, 'isGameOver'),
       droppedHistoryCount:
