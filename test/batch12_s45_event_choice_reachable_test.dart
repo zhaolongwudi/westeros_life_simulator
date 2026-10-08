@@ -67,7 +67,8 @@ void main() {
       engine.updatePlayer(_richPlayer());
 
       // 唯一一处依赖 RNG 的用例：池大小恒为 1，且沿用 S4-6 已验证的
-      // 12 回合窗口（`defaultPlayer` 约第 17 回合饿死 → 时钟冻结）。
+      // 12 回合窗口（`defaultPlayer` 自 S13-13 ⑱ 起 hunger 默认 60，
+      // 约第 19 回合饿死 → 时钟冻结；12 回合仍在安全区内）。
       var turns = 0;
       var text = '';
       while (engine.pendingEvent == null && turns < 12) {

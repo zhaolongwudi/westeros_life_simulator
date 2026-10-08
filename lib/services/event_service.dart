@@ -1,7 +1,7 @@
 /// 事件服务：事件触发条件检查、效果计算、存档。
 library;
 
-import 'dart:math' show max;
+import 'dart:math' show max, min;
 
 import '../data/balance_data.dart';
 // Batch 10-91：`applyEffects` 的 `inventory.<id>` 分支要 `itemById` 校验
@@ -109,7 +109,12 @@ class EventService {
               // 10-90 已加，本通道一直漏了）。技能是「等级」，负等级在
               // `train` 的门槛判定（`currentLevel < requiredLevel`）与
               // prompt 展示里都无意义，且会让负值继续累积。
-              newSkills[skillName] = max(0, (newSkills[skillName] ?? 0) + value);
+              // S13-13 ⑳：补上限，与 provider 侧同步（prompt 承诺
+              // 「超出按边界截断」，此前两通道都只有下限）。
+              newSkills[skillName] = min(
+                BalanceData.skillCap,
+                max(0, (newSkills[skillName] ?? 0) + value),
+              );
               newPlayer = newPlayer.copyWith(skills: newSkills);
               applied[key] = value;
             }
@@ -121,7 +126,11 @@ class EventService {
             } else {
               final newAttrs = Map<String, int>.from(newPlayer.attributes);
               // Batch 10-95：同上，属性键也走 `max(0, ...)`。
-              newAttrs[attrName] = max(0, (newAttrs[attrName] ?? 0) + value);
+              // S13-13 ⑳：同上，补 `attributeCap` 上限。
+              newAttrs[attrName] = min(
+                BalanceData.attributeCap,
+                max(0, (newAttrs[attrName] ?? 0) + value),
+              );
               newPlayer = newPlayer.copyWith(attributes: newAttrs);
               applied[key] = value;
             }
@@ -158,7 +167,12 @@ class EventService {
               failed[key] = value;
             } else {
               final newFlags = Map<String, bool>.from(newPlayer.flags);
-              newFlags[flagName] = value != 0;
+              // S13-13 ⑲：此前为 `value != 0`，与
+              // `GameStateProvider.applyEffects` 的 `value > 0` **语义相反**
+              // （-1 在本通道置真、在那通道清除），也与 prompt 文案
+              // 「正值设置标记…0 或负值清除标记」（`ai_service.dart:761`）
+              // 矛盾。本通道无生产调用方，但两条通道必须同源。
+              newFlags[flagName] = value > 0;
               newPlayer = newPlayer.copyWith(flags: newFlags);
               applied[key] = value;
             }

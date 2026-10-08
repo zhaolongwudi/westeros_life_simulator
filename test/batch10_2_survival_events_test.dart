@@ -179,7 +179,9 @@ void main() {
   group('Batch 10-2 EventService 生存轴效果落盘', () {
     test('health/hunger/inventory./flags. 效果正确应用', () {
       const service = EventService();
-      final p = Player.defaultPlayer();
+      // S13-13 ⑱：`defaultPlayer` 的 hunger 默认值已由 0 改为 60，
+      // 故此处显式从 0 起算，断言才只反映 `hunger: 30` 这个效果本身。
+      final p = Player.defaultPlayer().copyWith(hunger: 0);
       final choice = EventChoice(
         id: 'test_choice',
         text: '测试',

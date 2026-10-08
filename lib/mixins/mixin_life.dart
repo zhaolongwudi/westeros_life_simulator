@@ -114,7 +114,11 @@ mixin GameLifeMixin on GameProviderBase {
       return '你缺乏${item.requiresSkill}知识，无法使用「${item.name}」。';
     }
 
-    // 应用效果：health/energy/hunger 由本混入处理；gold/reputation 等转交效果系统
+    // 应用效果：health/energy/hunger 由本混入处理（走 adjustX 才会触发
+    // 死亡判定与上下限）；其余键转交 `applyEffects` 统一落盘。
+    // S13-13 ㉑：此前只取 health/energy/hunger 三个键，`item_wine` 的
+    // `reputation: 1`（`item_data.dart:112`）被**静默丢弃**，而返回值
+    // 仍告诉玩家「你使用了多恩红葡萄酒」——效果与叙事脱节。
     var text = '你使用了「${item.name}」。';
     final effects = item.useEffect;
     final healthDelta = effects['health'] ?? 0;
@@ -123,6 +127,16 @@ mixin GameLifeMixin on GameProviderBase {
     if (healthDelta != 0) adjustHealth(healthDelta);
     if (energyDelta != 0) adjustEnergy(energyDelta);
     if (hungerDelta != 0) adjustHunger(hungerDelta);
+
+    // 生存三维已由上面消费，其余键（gold/reputation/skills./attributes./
+    // relations./flags./inventory.）交给效果系统，含键名白名单校验。
+    final rest = Map<String, int>.from(effects)
+      ..remove('health')
+      ..remove('energy')
+      ..remove('hunger');
+    if (rest.isNotEmpty) {
+      updatePlayer(applyEffects(player, rest));
+    }
 
     removeItem(itemId);
     notifyListeners();

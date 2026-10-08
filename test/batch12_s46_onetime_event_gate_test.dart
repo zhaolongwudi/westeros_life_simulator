@@ -118,11 +118,12 @@ void main() {
       // 跑到命中即停。真实 Dart RNG 实测：池大小恒为 1 时第 2 回合即命中。
       //
       // 【为什么上限只给 12 回合】`Player.defaultPlayer()` 的 `hunger`
-      // 走构造器默认值 **0**（未显式传参），远低于饥饿阈值 25，故
-      // `applyMonthlyLife` 自第 1 回合起每月 -8 健康、恢复仅 +2，
-      // 约第 17 回合健康归零 → `isAlive=false` → `endGame()` →
-      // `advanceMonth` 直接返回、时钟冻结，事件再不浮现。
-      // 即12 回合是「死亡前」的安全上限，超限即说明生产逻辑变了。
+      // 自 S13-13 ⑱ 起为 **60**（此前构造器默认 0），仍低于满值且
+      // 每月自然下降 12 ⇒ 约第 3 回合起低于饥饿阈值 25，
+      // `applyMonthlyLife` 每月 -8 健康、恢复仅 +2（净 -6），
+      // 约第 19 回合健康归零 → `isAlive=false` → 传承失败即 `endGame()`
+      // → `advanceMonth` 直接返回、时钟冻结，事件再不浮现。
+      // 即 12 回合是「死亡前」的安全上限，超限即说明生产逻辑变了。
       var turns = 0;
       while (engine.eventProvider.completedEventIds.isEmpty && turns < 12) {
         engine.advanceMonth();

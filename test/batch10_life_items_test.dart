@@ -16,11 +16,14 @@ import 'package:westeros_life_simulator/providers/game_state_provider.dart';
 
 void main() {
   group('Batch 10 Player 新字段', () {
-    test('默认玩家生命/精力/饱食均为满值', () {
+    test('默认玩家生命/精力为满值、饱食为开局值 60', () {
       final p = Player.defaultPlayer();
       expect(p.health, 100);
       expect(p.energy, 100);
-      expect(p.hunger, 0);
+      // S13-13 ⑱：此前为 0（且用例名写作「均为满值」与断言自相矛盾）。
+      // 0 低于饥饿阈值 25 ⇒ 设置页「新游戏」一开局就每月 -8 健康。
+      // 现与向导 buildSetupPlayer 的 hunger: 60 对齐。
+      expect(p.hunger, 60);
       expect(p.title, '');
     });
 
@@ -47,7 +50,9 @@ void main() {
       final restored = Player.fromJson(json);
       expect(restored.health, 100);
       expect(restored.energy, 100);
-      expect(restored.hunger, 0);
+      // S13-13 ⑱：hunger 与 health/energy 同口径回落开局值，
+      // 否则旧档「读档即挨饿」（0 < starvationThreshold）。
+      expect(restored.hunger, 60);
       expect(restored.title, '');
     });
   });
@@ -143,8 +148,10 @@ void main() {
   group('Batch 10 applyEffects 新键', () {
     test('health/energy/hunger 效果键', () {
       final provider = GameStateProvider();
+      // S13-13 ⑱：显式从 hunger 0 起算。`provider.player` 的默认饱食已改为
+      // 60，直接在其上 +50 会撞到上限被钳成 100，本用例就测不出「+50」本身。
       final p = provider.applyEffects(
-        provider.player,
+        provider.player.copyWith(hunger: 0),
         const <String, int>{'health': -30, 'energy': -40, 'hunger': 50},
       );
       expect(p.health, 70);

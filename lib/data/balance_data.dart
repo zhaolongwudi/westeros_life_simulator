@@ -228,6 +228,20 @@ class BalanceData {
   /// 技能等级上限（封顶）。
   static const int skillCap = 10;
 
+  /// 属性上限（S13-13 ⑳）。
+  ///
+  /// prompt 一直向 AI 承诺「数值超出按边界截断」（`ai_service.dart:764`），
+  /// 但 `skills.`/`attributes.` 的效果写入路径只有下限 `max(0, ...)`、
+  /// 没有上限，`skillCap` 也从未被效果写入读取 ⇒ AI 写
+  /// `skills.sword: 20` 会原样落盘，而属性门槛判定（`< required`）
+  /// 与 `train()` 的上限提示都基于这两个刻度，写穿即失效。
+  ///
+  /// 取 10 与 [skillCap] 同刻度：属性初始 5、现有事件效果最大 +1
+  /// （`event_data` 全库 `attributes.` 效果仅 2 处，均为 +1；其余
+  /// `attributes.` 命中是门槛不是效果），门槛最高 6 ⇒ 封顶对现有内容
+  /// 零影响，只是把「AI 可以写任意大」这条无界通道收口。
+  static const int attributeCap = 10;
+
   /// 训练消耗的精力。
   static const int trainEnergyCost = 10;
 

@@ -459,7 +459,13 @@ class GameStateProvider extends ChangeNotifier {
         final newSkills = Map<String, int>.from(newPlayer.skills);
         // Batch 10-90：防负数破底（与 gold 的 `max(0, ...)` 同策略）——
         // 技能是「等级」，负等级在 `train` 的门槛判定与 prompt 展示里都无意义。
-        newSkills[skillName] = max(0, (newSkills[skillName] ?? 0) + value);
+        // S13-13 ⑳：补上限。prompt 承诺「超出按边界截断」，但此前只有下限，
+        // `skillCap` 从未被效果写入读取 ⇒ AI 写 `skills.sword: 20` 原样落盘，
+        // 而 `train()` 的上限判定与技能门槛都以这个刻度为准。
+        newSkills[skillName] = min(
+          BalanceData.skillCap,
+          max(0, (newSkills[skillName] ?? 0) + value),
+        );
         newPlayer = newPlayer.copyWith(skills: newSkills);
       } else if (key.startsWith('attributes.')) {
         final attrName = key.substring(11);
@@ -469,7 +475,11 @@ class GameStateProvider extends ChangeNotifier {
           continue;
         }
         final newAttrs = Map<String, int>.from(newPlayer.attributes);
-        newAttrs[attrName] = max(0, (newAttrs[attrName] ?? 0) + value);
+        // S13-13 ⑳：同 skills 分支，补 `attributeCap` 上限。
+        newAttrs[attrName] = min(
+          BalanceData.attributeCap,
+          max(0, (newAttrs[attrName] ?? 0) + value),
+        );
         newPlayer = newPlayer.copyWith(attributes: newAttrs);
       } else if (key.startsWith('flags.')) {
         final flagName = key.substring(6);

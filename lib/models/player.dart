@@ -40,7 +40,13 @@ class Player {
     required this.flags,
     this.health = 100,
     this.energy = 100,
-    this.hunger = 0,
+    // S13-13 ⑱：默认值必须是「不会一开局就挨饿」的开局值，与向导
+    // `buildSetupPlayer`（`start_screen.dart` 的 `hunger: 60`）一致。
+    // 此前为 0，而 `Player.defaultPlayer()` 未显式传 hunger ⇒ 设置页
+    // 「新游戏」与各屏幕兜底的 `GameEngine()..startNewGame()` 一开局即
+    // 低于 `starvationThreshold`(25)，`applyMonthlyLife` 每月 -8 健康、
+    // 恢复 +2（净 -6），玩家在无提示的情况下慢性死亡。
+    this.hunger = 60,
     this.title = '',
     this.house = '',
     this.children = const [],
@@ -276,7 +282,9 @@ class Player {
       flags: safeBoolMap(json, 'flags'),
       health: safeInt(json, 'health', fallback: 100),
       energy: safeInt(json, 'energy', fallback: 100),
-      hunger: safeInt(json, 'hunger'),
+      // S13-13 ⑱：与构造器默认值同源。health/energy 都回落满值，
+      // hunger 若回落 0 会让旧档「读档即挨饿」（0 < 25）。
+      hunger: safeInt(json, 'hunger', fallback: 60),
       title: safeStr(json, 'title'),
       house: safeStr(json, 'house'),
       children: safeStrList(json, 'children'),

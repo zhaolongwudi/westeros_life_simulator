@@ -185,10 +185,11 @@ void main() {
       final loaded = await service.loadGame('oldest');
       expect(loaded, isNotNull);
       final player = loaded!.player;
-      // 生存三维回落默认值（Player 构造器默认 health=100/energy=100/hunger=0）
+      // 生存三维回落默认值（Player 构造器默认 health=100/energy=100/hunger=60）
+      // S13-13 ⑱：hunger 此前为 0，会让旧档一读进来就低于饥饿阈值。
       expect(player.health, 100);
       expect(player.energy, 100);
-      expect(player.hunger, 0);
+      expect(player.hunger, 60);
       expect(player.identity, PlayerIdentity.soldier);
       // 引擎可运行
       final engine = GameEngine(
