@@ -59,27 +59,34 @@ void main() {
   /// 🔴 【为什么必须等】`SaveService` 走 `File.writeAsString`：**文件先被创建、
   /// 内容后写入**，所以 `existsSync()` 为 true 的那一刻，文件仍可能是**空的**
   /// ⇒ 立刻 `jsonDecode` 抛 `FormatException: Unexpected end of input`。
-  /// 这在 CI 上表现为**随机红**（我第一版 3 例全红，修完顺序后只剩 1 例红，
-  /// 因为快慢不确定）。轮询直到能解析，比 `existsSync()` 可靠。
-  Future<String?> playerNameInFile(String saveId) async {
-    for (var i = 0; i < 40; i++) {
-      final f = saveFile(saveId);
-      if (f.existsSync()) {
-        final text = f.readAsStringSync();
-        if (text.trim().isNotEmpty) {
-          try {
-            final json = jsonDecode(text) as Map<String, dynamic>;
-            final state = json['state'] as Map<String, dynamic>;
-            final player = state['player'] as Map<String, dynamic>;
-            return player['name'] as String?;
-          } on FormatException {
-            // 内容还没写完（截断的半个 JSON），继续等。
+  /// 🔴 【为什么必须包在 runAsync 里】`testWidgets` 跑在 fake-async 中，
+  /// 裸 `await Future.delayed(...)` **永远不会到点** ⇒ 整个用例卡到 10 分钟超时
+  /// （run `37755398940` 实测：3 例全 `TimeoutException after 0:10:00`，
+  /// 同文件的普通 `test` 通过）。真实文件 IO 与真实计时都必须放进
+  /// `tester.runAsync` 这个「真实域」——既有 `settleIo` 里的 runAsync 同理。
+  Future<String?> playerNameInFile(WidgetTester tester, String saveId) async {
+    String? name;
+    await tester.runAsync(() async {
+      for (var i = 0; i < 40; i++) {
+        final f = saveFile(saveId);
+        if (f.existsSync()) {
+          final text = f.readAsStringSync();
+          if (text.trim().isNotEmpty) {
+            try {
+              final json = jsonDecode(text) as Map<String, dynamic>;
+              final state = json['state'] as Map<String, dynamic>;
+              final player = state['player'] as Map<String, dynamic>;
+              name = player['name'] as String?;
+              return;
+            } on FormatException {
+              // 内容还没写完（截断的半个 JSON），继续等。
+            }
           }
         }
+        await Future<void>.delayed(const Duration(milliseconds: 25));
       }
-      await Future<void>.delayed(const Duration(milliseconds: 25));
-    }
-    return null;
+    });
+    return name;
   }
 
   group('S13-6 ⑪ 自动存档槽位跟随当前 player.id', () {
@@ -103,7 +110,7 @@ void main() {
       engine.resolveCommand('过月');
       await settleIo(tester);
       expect(saveFile('player_old').existsSync(), isTrue, reason: '前置：旧档应已落盘');
-      expect(await playerNameInFile('player_old'), '旧档角色');
+      expect(await playerNameInFile(tester, 'player_old'), '旧档角色');
 
       // ---- 模拟设置页「载入另一个存档」：同一个 engine 上 applyState ----
       // 【与 settings_screen.dart:122 完全同形】那边是 engine.applyState(state)，
@@ -123,13 +130,13 @@ void main() {
 
       // 🔴 判别式：旧档文件必须**仍是旧档角色**，不能被写成新档角色
       expect(
-        await playerNameInFile('player_old'),
+        await playerNameInFile(tester, 'player_old'),
         '旧档角色',
         reason: '旧档文件内容被自动存档覆盖了（这正是 ⑪ 号缺陷）',
       );
       // 新档自己的槽应当被写入
       expect(
-        await playerNameInFile('player_new'),
+        await playerNameInFile(tester, 'player_new'),
         '新档角色',
         reason: '自动存档应写进新载入档自己的槽',
       );
@@ -149,7 +156,7 @@ void main() {
       // 让旧档真的落盘，否则「旧槽未被覆盖」无从谈起
       engine.resolveCommand('过月');
       await settleIo(tester);
-      expect(await playerNameInFile('player_old'), '旧档角色', reason: '前置：旧档已落盘');
+      expect(await playerNameInFile(tester, 'player_old'), '旧档角色', reason: '前置：旧档已落盘');
 
       // 设置页「新游戏」路径：engine.startNewGame() → id 变 'player_default'
       engine.startNewGame();
@@ -160,7 +167,7 @@ void main() {
 
       // 🔴 判别式：旧槽必须**仍属旧档**，不能被写成新局内容
       expect(
-        await playerNameInFile('player_old'),
+        await playerNameInFile(tester, 'player_old'),
         '旧档角色',
         reason: '旧 id 槽被新局内容覆盖了（这正是 ⑪ 号缺陷）',
       );
@@ -184,7 +191,7 @@ void main() {
       await tester.pump();
       engine.resolveCommand('过月');
       await settleIo(tester);
-      expect(await playerNameInFile('player_old'), '旧档角色', reason: '前置：旧档已落盘');
+      expect(await playerNameInFile(tester, 'player_old'), '旧档角色', reason: '前置：旧档已落盘');
 
       // 同月内多次 notify（「状态」不消耗回合）⇒ `_lastSavedMonth` 相同 ⇒ 不落盘。
       // 🔴 【原前提写错】我第一版写的是「同月内载入另一存档不触发落盘」，
