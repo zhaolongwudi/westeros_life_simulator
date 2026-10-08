@@ -60,13 +60,19 @@ void main() {
   String? readNameSync(String saveId) {
     final f = saveFile(saveId);
     if (!f.existsSync()) return null;
+    final text = f.readAsStringSync();
     try {
-      final json = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
+      final json = jsonDecode(text) as Map<String, dynamic>;
       final state = json['state'] as Map<String, dynamic>;
       final player = state['player'] as Map<String, dynamic>;
       return player['name'] as String?;
-    } on Object {
-      return null;
+    } on Object catch (err) {
+      // 📌 诊断用：把「文件多大 + 内容开头 + 真实异常」一起带进失败信息。
+      // 前 9 次 CI 红全靠猜，这个分支让下一次失败**自带答案**。
+      // （解析失败时 fail 会打印这条 note，不用再盲推一轮 CI。）
+      fail('存档 $saveId 解析失败：长度=${text.length} '
+          '开头="${text.length > 120 ? text.substring(0, 120) : text}" '
+          '异常=$err');
     }
   }
 
@@ -84,13 +90,22 @@ void main() {
   /// 读取仍用同步 IO，不跨 zone。
   Future<String?> readNameWhenParsable(WidgetTester tester, String saveId) async {
     String? name;
+    var tries = 0;
     await tester.runAsync(() async {
       for (var i = 0; i < 40; i++) {
+        tries = i + 1;
         name = readNameSync(saveId);
         if (name != null) return;
         await Future<void>.delayed(const Duration(milliseconds: 25));
       }
     });
+    // 轮询 40 次（约 1 秒真实时间）仍读不到：把尝试次数与文件状态一并报出，
+    // 区分「文件始终不存在」与「文件在但始终解析不了」两种情况。
+    if (name == null) {
+      final f = saveFile(saveId);
+      fail('轮询 $tries 次仍读不到 $saveId：exists=${f.existsSync()} '
+          'size=${f.existsSync() ? f.lengthSync() : -1}');
+    }
     return name;
   }
 
