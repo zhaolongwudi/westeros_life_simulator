@@ -349,6 +349,7 @@ mixin GameSystemsMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['系统', 'systems'],
         order: 4,
+        group: '查看',
         helpLine: '系统 / systems      查看已接触系统',
         handler: (args) => CommandResult(text: formatSystemsPanel()),
       ),

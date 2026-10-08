@@ -170,6 +170,7 @@ mixin GameLetterMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['信', 'letter'],
         order: 5,
+        group: '查看',
         helpLine: '信 / letter         查看信件',
         handler: (args) => CommandResult(text: formatLettersPanel()),
       ),
@@ -178,6 +179,7 @@ mixin GameLetterMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['回信', 'reply'],
         order: 6,
+        group: '查看',
         helpLine: '回信 / reply [内容]  回复待回的信',
         handler: (args) {
           final reply = replyLetter(replyText: args.isEmpty ? null : args);

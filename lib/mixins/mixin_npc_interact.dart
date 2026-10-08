@@ -348,6 +348,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
       CommandSpec(
         aliases: const ['在场', 'npc', '人物'],
         order: 23,
+        group: '查看',
         helpLine: '在场 / npc         查看当前在场的 NPC 与关系',
         handler: (args) => CommandResult(text: npcListText()),
       ),
@@ -356,6 +357,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
       CommandSpec(
         aliases: const ['互动', '交谈', 'interact'],
         order: 24,
+        group: '人物',
         requiredArgCount: 1,
         missingArgsHint: '和谁互动？如「互动 提利昂」或「互动 npc_tyrion」。输入「在场」看谁在这里。',
         helpLine: '互动 / interact [名字]  与在场 NPC 深度互动（好感越高内容越深）',
@@ -366,6 +368,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
       CommandSpec(
         aliases: const ['示好', '送礼', 'favor'],
         order: 25,
+        group: '人物',
         requiredArgCount: 1,
         missingArgsHint: '向谁示好？如「示好 提利昂」或「送礼 npc_tyrion」。',
         helpLine: '示好 / favor [名字]   向在场 NPC 示好送礼（每月 3 次）',
@@ -376,6 +379,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
       CommandSpec(
         aliases: const ['深聊', '聊天', 'chat'],
         order: 26,
+        group: '人物',
         requiredArgCount: 1,
         missingArgsHint: '和谁深聊？如「深聊 提利昂」。输入「在场」看谁在这里。',
         helpLine: '深聊 / chat [名字]    与 NPC 深聊（相识以上，每月 3 次，更深入）',
@@ -393,6 +397,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
       CommandSpec(
         aliases: const ['关系', '关系面板', 'relations'],
         order: 31,
+        group: '查看',
         helpLine: '关系 / relations     查看全部 NPC 关系/心情/任务数',
         handler: (args) => CommandResult(text: formatNpcRelationPanel()),
       ),

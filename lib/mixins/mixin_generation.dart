@@ -197,6 +197,7 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
       CommandSpec(
         aliases: const ['家谱', '家族', 'family'],
         order: 32,
+        group: '查看',
         helpLine: '家谱 / family       查看家谱与继承人',
         handler: (args) => CommandResult(text: formatFamilyTree()),
       ),
@@ -205,6 +206,7 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
       CommandSpec(
         aliases: const ['立嗣', '添丁', 'addchild'],
         order: 33,
+        group: '人物',
         requiredArgCount: 1,
         missingArgsHint: '给子女起个名字吧。如「立嗣 罗柏」。',
         helpLine: '立嗣 / addchild [名字] 为家族添丁（如 立嗣 罗柏）',

@@ -424,6 +424,7 @@ mixin GameNpcTaskMixin
       CommandSpec(
         aliases: const ['任务', '委托', 'task'],
         order: 27,
+        group: '人物',
         helpLine: '任务 / task [名字]    查看可接任务；带名字则接下委托',
         handler: (args) => CommandResult(
           text: args.isEmpty
@@ -436,6 +437,7 @@ mixin GameNpcTaskMixin
       CommandSpec(
         aliases: const ['任务列表', '任务2', 'tasks2'],
         order: 28,
+        group: '人物',
         helpLine: '任务列表 / tasks2    查看多步骤任务（难度/期限/奖励）',
         handler: (args) => CommandResult(text: formatNpcTaskPanelV2()),
       ),
@@ -444,6 +446,7 @@ mixin GameNpcTaskMixin
       CommandSpec(
         aliases: const ['接任务', 'accept'],
         order: 29,
+        group: '人物',
         requiredArgCount: 1,
         missingArgsHint: '接谁的任务？如「接任务 艾德·史塔克」。输入「任务列表」看可接任务。',
         helpLine: '接任务 / accept [名字] 接下多步骤任务（如 接任务 艾德·史塔克）',
@@ -454,6 +457,7 @@ mixin GameNpcTaskMixin
       CommandSpec(
         aliases: const ['进度', '任务进度', 'progress'],
         order: 30,
+        group: '人物',
         helpLine: '进度 / progress     查看任务进度（进行中/完成/失败）',
         handler: (args) => CommandResult(text: formatNpcTaskProgressPanel()),
       ),
@@ -462,6 +466,7 @@ mixin GameNpcTaskMixin
       CommandSpec(
         aliases: const ['放弃', 'quit'],
         order: 47,
+        group: '人物',
         requiredArgCount: 1,
         missingArgsHint: '放弃哪个任务？如「放弃 筹备冬季粮仓」。',
         helpLine: '放弃 / quit [任务名] 主动放弃一个进行中任务（关系 -2）',

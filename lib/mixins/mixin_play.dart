@@ -487,6 +487,7 @@ mixin GamePlayMixin
       CommandSpec(
         aliases: const ['状态', 'status'],
         order: 1,
+        group: '查看',
         helpLine: '状态 / status       查看玩家状态（生命/精力/饱食/背包）',
         handler: (args) => CommandResult(text: formatPlayerPanel()),
       ),
@@ -495,6 +496,7 @@ mixin GamePlayMixin
       CommandSpec(
         aliases: const ['训练', 'train'],
         order: 9,
+        group: '成长',
         requiredArgCount: 1,
         missingArgsHint: '训练什么？可用技能：sword（剑术）/ archery（弓术）/ riding（骑术）/ speech（口才）/ alchemy（炼金）/ magic（魔法）。',
         helpLine: '训练 / train [技能]  训练技能（sword/archery/riding/speech/alchemy/magic）',
@@ -505,6 +507,7 @@ mixin GamePlayMixin
       CommandSpec(
         aliases: const ['工作', 'work'],
         order: 10,
+        group: '日常',
         helpLine: '工作 / work         赚取金币（消耗精力）',
         handler: (args) => CommandResult(text: work()),
       ),
@@ -513,6 +516,7 @@ mixin GamePlayMixin
       CommandSpec(
         aliases: const ['狩猎', 'hunt'],
         order: 11,
+        group: '日常',
         helpLine: '狩猎 / hunt         野外狩猎（消耗精力）',
         handler: (args) => CommandResult(text: hunt()),
       ),
@@ -521,6 +525,7 @@ mixin GamePlayMixin
       CommandSpec(
         aliases: const ['贸易', 'trade'],
         order: 12,
+        group: '日常',
         helpLine: '贸易 / trade        城市贸易（消耗精力）',
         handler: (args) => CommandResult(text: trade()),
       ),
@@ -529,6 +534,7 @@ mixin GamePlayMixin
       CommandSpec(
         aliases: const ['休息', 'rest'],
         order: 44,
+        group: '日常',
         helpLine: '休息 / rest         恢复精力/饱食（花 2 金币）',
         handler: (args) => CommandResult(text: rest()),
       ),
@@ -537,6 +543,7 @@ mixin GamePlayMixin
       CommandSpec(
         aliases: const ['过月', 'advance'],
         order: 45,
+        group: '日常',
         consumedTurn: true,
         helpLine: '过月 / advance      推进一个月',
         // handler 内部已自行 advanceMonth()，故 needsTimeAdvance=false：

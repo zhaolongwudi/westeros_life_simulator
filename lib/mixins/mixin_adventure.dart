@@ -222,6 +222,7 @@ mixin GameAdventureMixin
       CommandSpec(
         aliases: const ['旅行', 'travel', '去'],
         order: 7,
+        group: '日常',
         helpLine: '旅行 / travel [地点] 查看可去地点或前往',
         // 【S9-1（遗留 L3）跨地点移动消耗一个月】与「探索」同构：此前 `travel`
         // 是唯一不消耗回合的位移指令，一个月内可走遍全图，而 `explore` 要一个月。
@@ -251,6 +252,7 @@ mixin GameAdventureMixin
       CommandSpec(
         aliases: const ['探索', 'explore'],
         order: 8,
+        group: '日常',
         consumedTurn: true,
         helpLine: '探索 / explore      探索当前地点',
         handler: (args) => CommandResult(text: explore(), consumedTurn: true),

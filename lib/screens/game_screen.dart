@@ -14,11 +14,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../core/command_registry.dart';
 import '../game_engine.dart';
 import '../models/ai_turn.dart';
 import '../models/event.dart';
 import '../services/save_service.dart';
 import '../widgets/game/ai_toggle.dart';
+import '../widgets/game/command_panel.dart';
 import '../widgets/game/input.dart';
 import '../widgets/game/narrative.dart';
 import '../widgets/game/nav_grid.dart';
@@ -37,14 +39,16 @@ import 'settings_screen.dart';
 import 'systems_screen.dart';
 
 /// 快捷指令（参考 mixin_commands 帮助）。
+///
+/// S12-9：横条只留 **6 个最高频**（用户拍板：状态/工作/狩猎/探索/休息/过月）。
+/// 其余 41 条全部进「指令」面板（输入框左侧按钮 → `CommandPanel`），
+/// 面板按分组列出 47 条并支持搜索；需参数的指令点击后预填输入框。
 const List<QuickCommand> _quickCommands = <QuickCommand>[
   QuickCommand('状态', '状态'),
   QuickCommand('工作', '工作'),
-  QuickCommand('训练剑术', '训练 sword'),
   QuickCommand('狩猎', '狩猎'),
-  QuickCommand('贸易', '贸易'),
   QuickCommand('探索', '探索'),
-  QuickCommand('旅行', '旅行'),
+  QuickCommand('休息', '休息'),
   QuickCommand('过月', '过月'),
 ];
 
@@ -66,6 +70,9 @@ class _GameScreenState extends State<GameScreen> {
   late final GameEngine _engine = widget.engine ?? (GameEngine()..startNewGame());
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
+  /// 输入框焦点（S12-9：指令面板预填后自动聚焦，玩家可直接补参数）。
+  final FocusNode _inputFocusNode = FocusNode();
 
   /// 叙事输出行（最新在底部）。
   final List<String> _lines = <String>[];
@@ -121,6 +128,7 @@ class _GameScreenState extends State<GameScreen> {
     _autoSaveTimer?.cancel();
     _engine.removeListener(_onEngineChanged);
     _inputController.dispose();
+    _inputFocusNode.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -249,6 +257,41 @@ class _GameScreenState extends State<GameScreen> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => screen),
     );
+  }
+
+  /// 打开「指令」面板（S12-9）：47 条命令按分组列出 + 搜索。
+  ///
+  /// 零参数指令点一下即执行；需参数指令预填输入框（见 [_prefillCommand]）。
+  void _openCommandPanel() {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => CommandPanel(
+        specs: _engine.commandRegistry.orderedSpecs,
+        onRun: (spec) {
+          Navigator.of(sheetContext).pop();
+          _submitCommand(spec.aliases.first);
+        },
+        onPrefill: (spec) {
+          Navigator.of(sheetContext).pop();
+          _prefillCommand(spec);
+        },
+      ),
+    );
+  }
+
+  /// 把「主名 + 空格」填进输入框并聚焦，由玩家补参数后发送。
+  ///
+  /// 【为什么不直接执行】需参数的指令直接执行只会返回缺参提示，
+  /// 玩家还得自己重打一遍命令——预填把这一步省掉。
+  void _prefillCommand(CommandSpec spec) {
+    final text = '${spec.aliases.first} ';
+    _inputController.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+    _inputFocusNode.requestFocus();
   }
 
   /// 打开导航宫格（AppBar 单入口 → 全部面板）。
@@ -385,7 +428,9 @@ class _GameScreenState extends State<GameScreen> {
                 // 指令输入区
                 CommandInputBar(
                   controller: _inputController,
+                  focusNode: _inputFocusNode,
                   onSubmitted: _submitCommand,
+                  onOpenCommands: _openCommandPanel,
                   hintText: _aiMode
                       ? 'AI 模式：描述你的行动…'
                       : '输入指令（如 工作 / 训练 sword / 过月）',

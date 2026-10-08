@@ -44,6 +44,7 @@ class CommandSpec {
     required this.handler,
     required this.helpLine,
     required this.order,
+    this.group = kCommandGroupOther,
     this.consumedTurn = false,
     this.missingArgsHint,
     this.requiredArgCount = 0,
@@ -61,6 +62,16 @@ class CommandSpec {
   /// 帮助文本与注册顺序（跨领域分组时靠 order 复原历史顺序）。
   final int order;
 
+  /// 指令面板中的分组名（S12-9）。
+  ///
+  /// **只用于 UI 分组，不进 `helpText()`**——`m3_registry_test.dart` 断言
+  /// 「帮助文本行数 == specCount」，往帮助里插分组标题会直接打红它。
+  ///
+  /// 默认 [kCommandGroupOther]：测试与外部自注册（`m3_registry_test.dart`
+  /// 的「自注册演示」）不必显式传分组；引擎自带的 47 条则**全部显式声明**，
+  /// 由 `batch13_s12_9_command_panel_test.dart` 守住「没有指令留在『其他』」。
+  final String group;
+
   /// 执行后是否消耗一个回合（**声明性**：供帮助文本/测试/契约检查读取）。
   ///
   /// 真正的推进动作以 handler 返回的 `CommandResult.needsTimeAdvance` 为准——
@@ -72,7 +83,24 @@ class CommandSpec {
 
   /// 最少参数个数（按空白切分计数）。
   final int requiredArgCount;
+
+  /// 是否需要玩家补充参数（面板据此决定「直接执行」还是「预填输入框」）。
+  bool get needsArgs => requiredArgCount > 0;
 }
+
+/// 未显式分组的指令归入此组（正常应恒为空，由测试守住）。
+const String kCommandGroupOther = '其他';
+
+/// 指令面板的分组顺序（S12-9）。
+///
+/// 只影响面板里的显示次序，与 `order`（帮助文本顺序）互不干涉。
+const List<String> kCommandGroupOrder = <String>[
+  '查看',
+  '日常',
+  '物品',
+  '人物',
+  '成长',
+];
 
 /// 指令注册表：别名 → 指令描述。
 class CommandRegistry {
@@ -114,6 +142,28 @@ class CommandRegistry {
       return c == 0 ? 0 : c;
     });
     return List.unmodifiable(list);
+  }
+
+  /// 按分组聚合的指令（S12-9 指令面板用）。
+  ///
+  /// - 分组顺序取自 [kCommandGroupOrder]，未列入的分组（如 [kCommandGroupOther]）
+  ///   排在最后并按名称排序，保证输出**稳定可测**（不依赖 Map 迭代顺序）。
+  /// - 组内按 [CommandSpec.order] 升序，与帮助文本一致。
+  Map<String, List<CommandSpec>> get specsByGroup {
+    final buckets = <String, List<CommandSpec>>{};
+    for (final spec in orderedSpecs) {
+      buckets.putIfAbsent(spec.group, () => <CommandSpec>[]).add(spec);
+    }
+    final known = kCommandGroupOrder.where(buckets.containsKey).toList();
+    final extra = buckets.keys
+        .where((g) => !kCommandGroupOrder.contains(g))
+        .toList()
+      ..sort();
+    final ordered = <String, List<CommandSpec>>{};
+    for (final g in <String>[...known, ...extra]) {
+      ordered[g] = List<CommandSpec>.unmodifiable(buckets[g]!);
+    }
+    return Map<String, List<CommandSpec>>.unmodifiable(ordered);
   }
 
   /// 分发一条指令；未注册返回 null（由调用方生成未知指令提示）。

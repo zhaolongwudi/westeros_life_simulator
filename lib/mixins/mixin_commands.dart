@@ -88,6 +88,7 @@ mixin GameCommandsMixin
       CommandSpec(
         aliases: const ['帮助', 'help'],
         order: 46,
+        group: '查看',
         helpLine: '帮助 / help         显示本帮助',
         handler: (args) => CommandResult(text: helpText()),
       ),

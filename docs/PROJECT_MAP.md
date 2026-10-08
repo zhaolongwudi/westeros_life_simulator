@@ -303,10 +303,12 @@ lib/screens/game_screen.dart（游戏主界面，StatefulWidget）
   │    ├─ AppBar ⨯ 5 个入口 IconButton → push：EventsScreen / LettersScreen /
   │   │                                 NpcPanelScreen / MapScreen / SettingsScreen
   │    ├─ _StatusBar（姓名·身份·年龄·地点 ❤️⚡🍖 年月季）
-  │    ├─ _QuickCommandBar（状态/工作/训练剑术/狩猎/贸易/探索/旅行/过月 8 键）
+  │    ├─ _QuickCommandBar（S12-9：精简为 6 键 状态/工作/狩猎/探索/休息/过月）
   │    ├─ _AiModeToggle（本地/AI 模式开关）
   │    ├─ _NarrativeView（叙事输出 + _AiChoiceCard AI 选项卡）
-  │    └─ _CommandInputBar（指令输入）
+  │    └─ _CommandInputBar（指令输入；左侧「指令」按钮 → CommandPanel 弹出层：
+  │                          47 条按 查看/日常/物品/人物/成长 分组 + 可搜索，
+  │                          零参数点击即执行、需参数预填输入框）
   ├─ 本地模式：_submitCommand → _engine.resolveCommand(input)   （mixin_commands）
   ├─ AI 模式：_runAiAction → AiConfig.load()（SharedPreferences 读取 key/model/baseUrl）
   │    └─ AiService.generateNarrative(player, worldSnapshot+行动, eventTemplates, season, year)

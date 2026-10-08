@@ -553,6 +553,7 @@ mixin GameMarriageMixin
       CommandSpec(
         aliases: const ['求婚', '成婚', 'marry'],
         order: 34,
+        group: '人物',
         requiredArgCount: 1,
         missingArgsHint: '想与什么样的人成婚？如「求婚 平民」或「成婚 贵族」。',
         helpLine: '求婚 / marry [身世]   成婚（平民/商人/战士/贵族，如 求婚 平民）',
@@ -563,6 +564,7 @@ mixin GameMarriageMixin
       CommandSpec(
         aliases: const ['配偶', '共处', 'spouse'],
         order: 35,
+        group: '人物',
         helpLine: '配偶 / spouse       与配偶共处（每月 1 次，恢复精力）',
         handler: (args) => CommandResult(text: spouseInteract()),
       ),
@@ -571,6 +573,7 @@ mixin GameMarriageMixin
       CommandSpec(
         aliases: const ['婚姻', '婚姻面板', 'marriage'],
         order: 36,
+        group: '查看',
         helpLine: '婚姻 / marriage     查看婚姻面板（配偶/感情/子女培养）',
         handler: (args) => CommandResult(text: formatMarriagePanel()),
       ),
@@ -579,6 +582,7 @@ mixin GameMarriageMixin
       CommandSpec(
         aliases: const ['私语', '谈心', 'chatspouse'],
         order: 37,
+        group: '人物',
         helpLine: '私语 / chatspouse [话题]  与配偶谈心（每月 2 次，增进感情）',
         handler: (args) => CommandResult(text: spouseChat(args.isEmpty ? null : args)),
       ),
@@ -587,6 +591,7 @@ mixin GameMarriageMixin
       CommandSpec(
         aliases: const ['离婚', 'divorce'],
         order: 38,
+        group: '人物',
         helpLine: '离婚 / divorce      解除婚姻（需结婚满一年，耗 30 金币、声望 -10）',
         handler: (args) => CommandResult(text: divorce()),
       ),
@@ -595,6 +600,7 @@ mixin GameMarriageMixin
       CommandSpec(
         aliases: const ['丧偶', 'widow'],
         order: 39,
+        group: '人物',
         helpLine: '丧偶 / widow        配偶离世（解除婚姻，贵族联姻声望 -5）',
         handler: (args) => CommandResult(text: spousePassesAway()),
       ),
@@ -603,6 +609,7 @@ mixin GameMarriageMixin
       CommandSpec(
         aliases: const ['培养', 'rear'],
         order: 40,
+        group: '成长',
         requiredArgCount: 2,
         missingArgsHint: '培养谁、往哪个方向？如「培养 罗柏 剑术」。方向：剑术 / 权谋 / 口才 / 骑术。',
         helpLine: '培养 / rear [子女] [方向] 为子女定培养方向（剑术/权谋/口才/骑术）',
@@ -616,6 +623,7 @@ mixin GameMarriageMixin
       CommandSpec(
         aliases: const ['督导', 'tutor'],
         order: 41,
+        group: '成长',
         requiredArgCount: 1,
         missingArgsHint: '亲自督导哪个子女？如「督导 罗柏」。',
         helpLine: '督导 / tutor [子女]  亲自督导子女（声望 +3）',
@@ -626,6 +634,7 @@ mixin GameMarriageMixin
       CommandSpec(
         aliases: const ['送学', 'school'],
         order: 42,
+        group: '成长',
         requiredArgCount: 1,
         missingArgsHint: '送哪个子女去学城/骑士团？如「送学 罗柏」。',
         helpLine: '送学 / school [子女] 送子女去学城/骑士团进修（声望 +5）',
@@ -636,6 +645,7 @@ mixin GameMarriageMixin
       CommandSpec(
         aliases: const ['家族树', '谱系', 'tree'],
         order: 43,
+        group: '查看',
         helpLine: '家族树 / tree       查看家族树多代谱系',
         handler: (args) => CommandResult(text: formatMultiGenTree()),
       ),

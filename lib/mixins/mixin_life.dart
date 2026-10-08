@@ -770,6 +770,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['背包', 'bag', 'inventory'],
         order: 2,
+        group: '查看',
         helpLine: '背包 / bag          查看背包物品',
         handler: (args) => CommandResult(text: formatInventoryPanel()),
       ),
@@ -778,6 +779,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['使用', 'use'],
         order: 3,
+        group: '物品',
         requiredArgCount: 1,
         missingArgsHint: '使用什么？如「使用 黑面包」或「使用 item_meat」。',
         helpLine: '使用 / use [物品]    使用消耗品（如 使用 黑面包）',
@@ -789,6 +791,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['巡游', '特产', 'specialty'],
         order: 13,
+        group: '日常',
         helpLine: '巡游 / specialty    地区特产巡游：当地收特产，异地高价出售（消耗精力）',
         handler: (args) => CommandResult(text: tradeSpecialty()),
       ),
@@ -797,6 +800,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['议价', 'negotiate'],
         order: 14,
+        group: '日常',
         helpLine: '议价 / negotiate    商人议价：口才决定买卖折价（每月 1 次）',
         handler: (args) => CommandResult(text: negotiate()),
       ),
@@ -805,6 +809,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['商队', '护送', 'convoy'],
         order: 15,
+        group: '日常',
         helpLine: '商队 / convoy       商队护送：按战斗值判定报酬与风险（每月 1 次）',
         handler: (args) => CommandResult(text: convoy()),
       ),
@@ -813,6 +818,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['购买', '买入', 'buy'],
         order: 16,
+        group: '物品',
         requiredArgCount: 1,
         missingArgsHint: '买什么？如「购买 黑面包」或「买入 item_meat」。输入「行情」看价格。',
         helpLine: '购买 / buy [物品]    购买物品（如 购买 黑面包 或 买入 长剑）',
@@ -823,6 +829,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['出售', '卖出', 'sell'],
         order: 17,
+        group: '物品',
         requiredArgCount: 1,
         missingArgsHint: '卖什么？如「出售 烤肉」或「卖出 item_wine」。',
         helpLine: '出售 / sell [物品]   出售物品（如 出售 烤肉 或 卖出 item_wine）',
@@ -833,6 +840,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['行情', 'market', '价格'],
         order: 18,
+        group: '查看',
         helpLine: '行情 / market       查看当前地点物价',
         handler: (args) => CommandResult(text: formatMarketPanel()),
       ),
@@ -841,6 +849,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['装备', 'equip'],
         order: 19,
+        group: '物品',
         requiredArgCount: 1,
         missingArgsHint: '装备什么？如「装备 长剑」或「装备 锁子甲」。',
         helpLine: '装备 / equip [物品]  装备武器/护甲/坐骑（如 装备 长剑）',
@@ -851,6 +860,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['卸下', 'unequip'],
         order: 20,
+        group: '物品',
         requiredArgCount: 1,
         missingArgsHint: '卸下什么？如「卸下 长剑」。',
         helpLine: '卸下 / unequip [物品] 卸下装备',
@@ -861,6 +871,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['装备栏', '装备面板', 'equipment'],
         order: 21,
+        group: '查看',
         helpLine: '装备栏 / equipment   查看当前装备与战斗值',
         handler: (args) => CommandResult(text: formatEquipmentPanel()),
       ),
@@ -869,6 +880,7 @@ mixin GameLifeMixin on GameProviderBase {
       CommandSpec(
         aliases: const ['头衔', 'title'],
         order: 22,
+        group: '查看',
         helpLine: '头衔 / title       查看头衔与晋升进度',
         handler: (args) => CommandResult(text: formatTitlePanel()),
       ),

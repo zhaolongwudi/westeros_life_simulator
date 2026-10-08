@@ -13,11 +13,19 @@ class CommandInputBar extends StatelessWidget {
     required this.controller,
     required this.onSubmitted,
     this.hintText = '输入指令（如 工作 / 训练 sword / 过月）',
+    this.onOpenCommands,
+    this.focusNode,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onSubmitted;
   final String hintText;
+
+  /// 打开「指令」面板（S12-9）。为 null 时不显示该按钮。
+  final VoidCallback? onOpenCommands;
+
+  /// 输入框焦点（S12-9：面板预填命令后自动聚焦）。
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +41,19 @@ class CommandInputBar extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
+          if (onOpenCommands != null) ...<Widget>[
+            IconButton(
+              icon: const Icon(Icons.terminal_outlined),
+              tooltip: '指令（全部 47 条）',
+              color: WesterosColors.goldBright,
+              onPressed: onOpenCommands,
+            ),
+            const SizedBox(width: 4),
+          ],
           Expanded(
             child: TextField(
               controller: controller,
+              focusNode: focusNode,
               decoration: InputDecoration(
                 hintText: hintText,
                 prefixIcon: const Icon(
