@@ -131,7 +131,11 @@ void main() {
       final loaded = await service.loadGame(saveId);
       expect(loaded, isNotNull);
 
-      final revived = GameEngine()..applyState(loaded);
+      // ⚠️ 必须用 `loaded!`：`expect(loaded, isNotNull)` **不会**让 Dart 的
+      // 空安全分析器把 `GameStateProvider?` 收窄成非空（CI 报错
+      // `argument_type_not_assignable`：GameStateProvider? 不能传给 GameStateProvider）。
+      // S8-1 的同款测试也是写 `loaded!.` —— 这是本项目的既有写法，不是权宜。
+      final revived = GameEngine()..applyState(loaded!);
       // 🔴 判别断言：修复前 revived.letters 为空 ⇒ 失败
       expect(revived.letters, hasLength(1), reason: '读档后信件被清空（P0 ⑤ 症状①）');
       expect(revived.letters.first.senderId, before.first.senderId);

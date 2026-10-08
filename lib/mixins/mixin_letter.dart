@@ -12,6 +12,7 @@ import '../core/command_registry.dart';
 import '../core/monthly_pipeline.dart';
 import '../models/letter.dart';
 import '../models/npc.dart';
+import '../models/player.dart';
 import '../providers/game_provider_base.dart';
 import '../providers/game_state_provider.dart';
 
