@@ -18,7 +18,6 @@
 /// - 去抖定时器 + 真实 IO 必须走 `runAsync`，只 `pumpAndSettle` 会假红。
 library;
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -43,49 +42,31 @@ void main() {
     }
   });
 
-  /// 跳过去抖定时器并让**真实文件 IO** 完成（照抄 S12-7 的 `settleIo`）。
-  Future<void> settleIo(WidgetTester tester) async {
-    await tester.pump(const Duration(seconds: 3));
-    await tester.runAsync(() async {
-      await Future<void>.delayed(const Duration(milliseconds: 80));
-    });
-    await tester.pumpAndSettle();
-  }
+  File saveFile(String saveId) => File(`${tempDir.path}/save_$saveId.json`);
 
-  File saveFile(String saveId) => File('${tempDir.path}/save_$saveId.json');
-
-  /// 等到某存档文件**内容可解析**为止，再返回里面的玩家名。
+  /// 跳过去抖定时器、等真实 IO 落盘，**并**读回某存档里的玩家名。
   ///
-  /// 🔴 【为什么必须等】`SaveService` 走 `File.writeAsString`：**文件先被创建、
-  /// 内容后写入**，所以 `existsSync()` 为 true 的那一刻，文件仍可能是**空的**
-  /// ⇒ 立刻 `jsonDecode` 抛 `FormatException: Unexpected end of input`。
-  /// 🔴 【为什么必须包在 runAsync 里】`testWidgets` 跑在 fake-async 中，
-  /// 裸 `await Future.delayed(...)` **永远不会到点** ⇒ 整个用例卡到 10 分钟超时
-  /// （run `37755398940` 实测：3 例全 `TimeoutException after 0:10:00`，
-  /// 同文件的普通 `test` 通过）。真实文件 IO 与真实计时都必须放进
-  /// `tester.runAsync` 这个「真实域」——既有 `settleIo` 里的 runAsync 同理。
-  Future<String?> playerNameInFile(WidgetTester tester, String saveId) async {
+  /// 【为什么等待与读回必须同处一个 runAsync】`testWidgets` 跑在 fake-async：
+  /// 真实文件 IO 与真实计时只在 `tester.runAsync` 这一个「真实域」里有效。
+  /// 我第二版把「等 IO」放进 settleIo 的 runAsync、又另起一次 runAsync 去轮询，
+  /// 结果 3 例全 `Actual: <null>`（run `37759316690`）——第二次 runAsync
+  /// 并不可靠。合成一次就没有这个变量了。
+  ///
+  /// 【为什么用 loadGame 而不是自己 jsonDecode】`File.writeAsString` 是
+  /// 「先建文件、后写内容」，`existsSync()` 为 true 时内容可能还是空的
+  /// ⇒ 手写解析会抛 `FormatException: Unexpected end of input`
+  /// （run `37754733172` 实测）。`loadGame` 内部 `await file.exists()` +
+  /// `_readSaveMap` 在真实异步域，且自带「坏档 ⇒ 返回 null」的容错。
+  Future<String?> settleAndReadName(WidgetTester tester, String saveId) async {
+    await tester.pump(const Duration(seconds: 3));
     String? name;
     await tester.runAsync(() async {
-      for (var i = 0; i < 40; i++) {
-        final f = saveFile(saveId);
-        if (f.existsSync()) {
-          final text = f.readAsStringSync();
-          if (text.trim().isNotEmpty) {
-            try {
-              final json = jsonDecode(text) as Map<String, dynamic>;
-              final state = json['state'] as Map<String, dynamic>;
-              final player = state['player'] as Map<String, dynamic>;
-              name = player['name'] as String?;
-              return;
-            } on FormatException {
-              // 内容还没写完（截断的半个 JSON），继续等。
-            }
-          }
-        }
-        await Future<void>.delayed(const Duration(milliseconds: 25));
-      }
+      // 去抖定时器 2s + 写盘余量，给足避免读到半个文件。
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      final state = await service.loadGame(saveId);
+      name = state?.player.name;
     });
+    await tester.pumpAndSettle();
     return name;
   }
 
@@ -108,9 +89,7 @@ void main() {
       expect(saveFile('player_old').existsSync(), isFalse, reason: '刚开局不该立即落盘');
       // 让旧档真的落一次盘，之后才谈「不被覆盖」
       engine.resolveCommand('过月');
-      await settleIo(tester);
-      expect(saveFile('player_old').existsSync(), isTrue, reason: '前置：旧档应已落盘');
-      expect(await playerNameInFile(tester, 'player_old'), '旧档角色');
+      expect(await settleAndReadName(tester, 'player_old'), '旧档角色', reason: '前置：旧档已落盘');
 
       // ---- 模拟设置页「载入另一个存档」：同一个 engine 上 applyState ----
       // 【与 settings_screen.dart:122 完全同形】那边是 engine.applyState(state)，
@@ -126,17 +105,16 @@ void main() {
 
       // 跨月 → 触发自动存档
       engine.resolveCommand('过月');
-      await settleIo(tester);
 
       // 🔴 判别式：旧档文件必须**仍是旧档角色**，不能被写成新档角色
       expect(
-        await playerNameInFile(tester, 'player_old'),
+        await settleAndReadName(tester, 'player_old'),
         '旧档角色',
         reason: '旧档文件内容被自动存档覆盖了（这正是 ⑪ 号缺陷）',
       );
       // 新档自己的槽应当被写入
       expect(
-        await playerNameInFile(tester, 'player_new'),
+        await settleAndReadName(tester, 'player_new'),
         '新档角色',
         reason: '自动存档应写进新载入档自己的槽',
       );
@@ -155,19 +133,17 @@ void main() {
       await tester.pump();
       // 让旧档真的落盘，否则「旧槽未被覆盖」无从谈起
       engine.resolveCommand('过月');
-      await settleIo(tester);
-      expect(await playerNameInFile(tester, 'player_old'), '旧档角色', reason: '前置：旧档已落盘');
+      expect(await settleAndReadName(tester, 'player_old'), '旧档角色', reason: '前置：旧档已落盘');
 
       // 设置页「新游戏」路径：engine.startNewGame() → id 变 'player_default'
       engine.startNewGame();
       expect(engine.player.id, 'player_default', reason: '前置：新局 id 应为默认');
 
       engine.resolveCommand('过月');
-      await settleIo(tester);
 
       // 🔴 判别式：旧槽必须**仍属旧档**，不能被写成新局内容
       expect(
-        await playerNameInFile(tester, 'player_old'),
+        await settleAndReadName(tester, 'player_old'),
         '旧档角色',
         reason: '旧 id 槽被新局内容覆盖了（这正是 ⑪ 号缺陷）',
       );
@@ -190,21 +166,23 @@ void main() {
       );
       await tester.pump();
       engine.resolveCommand('过月');
-      await settleIo(tester);
-      expect(await playerNameInFile(tester, 'player_old'), '旧档角色', reason: '前置：旧档已落盘');
+      expect(await settleAndReadName(tester, 'player_old'), '旧档角色', reason: '前置：旧档已落盘');
 
       // 同月内多次 notify（「状态」不消耗回合）⇒ `_lastSavedMonth` 相同 ⇒ 不落盘。
       // 🔴 【原前提写错】我第一版写的是「同月内载入另一存档不触发落盘」，
       // 但 `applyState` 换掉的是**整个 progress**（年月一起换），并不是同月，
       // 所以那次会真的排程落盘。守卫真正挡的是「同月内的重复通知」。
-      // 📌 判据用**文件内容**而非 mtime：mtime 在 CI 上可能是秒级粒度，
-      // 「没重写」与「同一秒内重写」分不开，会变成随机红。
-      final contentBefore = saveFile('player_old').readAsStringSync();
+      // 📌 循环里**只 pump，不做 settleAndReadName**：后者每次 `pump(3s)`，
+      // 会推进 fake 时钟 3 秒，足以让 2 秒去抖定时器到期 ⇒ 反而自己触发了落盘，
+      // 断言自相矛盾。改为循环结束后统一读回一次。
+      // 📌 判据比对**整个 toJson**而非只看名字：守卫若失效，重写的是完整状态，
+      // 只比名字会漏判。
+      final snapshotBefore = saveFile('player_old').readAsStringSync();
       for (var i = 0; i < 3; i++) {
         engine.resolveCommand('状态');
-        await settleIo(tester);
+        await tester.pump();
       }
-      expect(saveFile('player_old').readAsStringSync(), contentBefore,
+      expect(saveFile('player_old').readAsStringSync(), snapshotBefore,
           reason: '同月内的重复通知不该重写存档');
     });
 
