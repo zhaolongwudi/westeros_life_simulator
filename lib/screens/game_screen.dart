@@ -89,7 +89,15 @@ class _GameScreenState extends State<GameScreen> {
   // `player_<millisecondsSinceEpoch>`，且 `player.id` 经 `toJson`/`applyState`
   // 原样往返 ⇒ 同一局人生读档后仍是同一个 id ⇒ 自动存档**覆盖同一槽**，
   // 不会像手动保存那样每次新建一个槽（那正是 ② 号缺陷）。
-  late final String _saveSlotId = _engine.player.id;
+  //
+  // 【S13-6】这里原本是 `late final String _saveSlotId = _engine.player.id;`，
+  // 即**在首帧算死一次**。但设置页与本界面**共用同一 engine**
+  // （`SettingsScreen(engine: _engine)`），玩家在设置里载入另一个存档时，
+  // `applyState` 会把 `_player` 整个换成那一档（连 `player.id` 一起换），
+  // 而此处若仍用冻结值落盘，就会**把新档内容写进旧档文件** ⇒ 旧进度被覆盖丢失。
+  // 「设置 → 新游戏」是同一条路径（`startNewGame()` 换成 `player_default`）。
+  // 改为**每次落盘时读取当前 id**：不需要任何状态同步，也不会漏掉换档。
+  String get _saveSlotId => _engine.player.id;
   // 【必须 late】非 late 的实例字段初始化器不能引用 `widget`（编译错误）。
   late final SaveService _saveService = widget.saveService ?? SaveService();
   Timer? _autoSaveTimer;
