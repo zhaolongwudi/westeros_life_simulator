@@ -33,6 +33,24 @@ mixin GameSystemsMixin on GameProviderBase {
   /// - 教会：地点有圣堂或身份为神职人员
   /// - 铁民/淹神：铁群岛
   /// - 雇佣兵/贸易/经济：城市
+  ///
+  /// **S12-8：可见性分层**。此前 `_ => false` 兜底把 **39/73** 个系统静默
+  /// 吞掉（另有异鬼/死亡 2 个是显式 `false`，故修复前永不可见共 41 个），
+  /// 玩家从头到尾看不到它们——其中 21 个其实是可玩内容。现按「玩家能不能
+  /// 真的玩到」显式分三层：
+  ///
+  /// - **可玩类**（魔法/战争/情报/存档/红袍祭司，共 21 个）：给出与
+  ///   身份/地点挂钩的可见条件，见下方 `S12-8` 段。
+  /// - **开发规范类**（AI/规则/保护，共 18 个）：这些系统的 `rules` /
+  ///   `features` 描述的是「AI 该怎么运行」「世界该怎么防漏洞」，是
+  ///   **写给开发者的规范**，不是玩家在世界里能接触的事物 ⇒ 显式
+  ///   `false`，永久不进玩家面板（用户已拍板「只改展示层」）。
+  /// - **被动类**（异鬼/死亡）：不主动列出，保持原语义。
+  ///
+  /// ⚠️ 兜底 `_ => false` 保留为**防御**，但「究竟哪些分类被隐藏」由
+  /// `batch12_s8_system_visibility_test.dart` 精确锁定：跨身份/地点扫描后
+  /// 「永不可见集」必须**恰为 20 个**（18 开发规范 + 2 被动），
+  /// 防止未来新增分类又被静默吞掉。实测修复前永不可见 39 个，修复后 20 个。
   List<GameSystem> availableSystems() {
     final identity = player.identity;
 
@@ -69,6 +87,47 @@ mixin GameSystemsMixin on GameProviderBase {
           isInRegion('厄索斯') && isAtType(LocationType.wilderness),
         '野人' =>
           isInRegion('北境') && isAtType(LocationType.wilderness),
+        // ==================== S12-8：可玩类接入展示 ====================
+        // 以下 5 个分类此前全部落进 `_ => false`，玩家永远看不到。
+        // 它们描述的是玩家真能接触的事物（法术、战事、情报网、存档、
+        // 光之王信仰），故给出可见条件。条件全部复用既有判定辅助
+        // （`isAt` / `isAtType` / `isInRegion` / `isIdentity` / `isFamily`），
+        // 不引入新的世界状态。
+        //
+        // 魔法：超自然领域（绿先知/龙梦等 9 地）或身份本身与法术相关。
+        // 门槛刻意偏严——魔法在原著里是稀有之物，进城就能看到「魔法体系」
+        // 会与世界观冲突。
+        '魔法' =>
+          isAtType(LocationType.supernatural) ||
+              isIdentity(PlayerIdentity.maester) ||
+              isIdentity(PlayerIdentity.priest) ||
+              isIdentity(PlayerIdentity.wildling),
+        // 战争：参战身份，或身处城堡/要塞（战争总是围着据点打）。
+        '战争' =>
+          isIdentity(PlayerIdentity.soldier) ||
+              isIdentity(PlayerIdentity.adventurer) ||
+              isAtType(LocationType.castle) ||
+              isAtType(LocationType.fort),
+        // 情报：情报网在城市里最密；冒险者/刺客/商人以此为生。
+        '情报' =>
+          isIdentity(PlayerIdentity.adventurer) ||
+              isIdentity(PlayerIdentity.assassin) ||
+              isIdentity(PlayerIdentity.merchant) ||
+              isAtType(LocationType.city),
+        // 存档：这是**玩家功能**（存/读档），与地点身份无关 ⇒ 恒可见。
+        // 此前不可见纯属分类没被列出，属实现遗漏而非设计。
+        '存档' => true,
+        // 红袍祭司：光之王信仰，厄索斯是其主要势力范围。
+        '红袍祭司' =>
+          isIdentity(PlayerIdentity.priest) || isInRegion('厄索斯'),
+        // ==================== S12-8：开发规范类（显式隐藏） ====================
+        // AI / 规则 / 保护 三类共 18 个系统，其 rules/features 是**开发
+        // 规范**（「AI 该怎么运行」「世界该怎么防数值漏洞」），不是玩家在
+        // 世界内可接触的对象。此前它们不可见是 `_ => false` 的副作用，
+        // 现在是**有意为之**，并由测试锁定「永不可见集 = 这 18 个 + 异鬼/死亡 2 个」。
+        // 这几条虽与下面的 `_ => false` 等价，但显式写出才能让「隐藏是
+        // 决定而非遗漏」在代码里可读、可被后人 review。
+        'AI' || '规则' || '保护' => false,
         '异鬼' || '死亡' => false, // 被动系统，不主动列出
         _ => false,
       };
