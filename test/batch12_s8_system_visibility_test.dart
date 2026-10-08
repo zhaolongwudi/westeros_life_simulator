@@ -6,12 +6,20 @@
 /// 只有 **18 个是开发规范**（AI 9 / 规则 3 / 保护 6）。
 ///
 /// 【用户已拍板】「只改展示层」：
-/// - 可玩类 21 个 ⇒ 接入展示（给出与身份/地点挂钩的可见条件）
-/// - 开发规范类 18 个 ⇒ 永久隐藏，但**由本测试锁定集合**，
+/// - **新接入**的 21 个（魔法/情报/战争/存档/红袍祭司）⇒ 给出与身份/地点
+///   挂钩的可见条件
+/// - 开发规范类 18 个（AI/规则/保护）⇒ 永久隐藏，但**由本测试锁定集合**，
 ///   防止未来新增分类又被 `_ => false` 静默吞掉
 /// - 占位文案（61/73 个系统的「X规则/X代价/X传承」三段模板）⇒ **本轮不动**
 ///
-/// 【为什么用「跨身份/地点扫描」而不是逐个硬编码】逐个写 21 条断言只能
+/// 【五个口径别混】（CI #419 红过的坑）
+/// - **39**：修复前被 `_ => false` 兜底吞掉的数量
+/// - **41**：修复前永不可见总数 = 39 + 异鬼/死亡 2（后者是显式 `false`）
+/// - **20**：修复后永不可见 = 18 开发规范 + 2 被动
+/// - **21**：本次**新接入**的 5 个分类合计
+/// - **53**：全部「非开发规范、非被动」系统 = 73 - 18 - 2（其中 32 个本来就可见）
+///
+/// 【为什么用「跨身份/地点扫描」而不是逐个硬编码】逐个写断言只能
 /// 证明「我想到的那些可见」，证明不了「没有别的被吞掉」。扫描全部身份 ×
 /// **全部地点** × 三种家族后取**永不可见集**，才能锁死「恰好 20 个」。
 /// （不能只取「每类型/每区域首个」：该取样会漏掉 `location_astapor`
@@ -29,6 +37,19 @@ const Set<String> _devSpecCategories = <String>{'AI', '规则', '保护'};
 
 /// 被动类：不主动列出（保持既有语义）。
 const Set<String> _passiveCategories = <String>{'异鬼', '死亡'};
+
+/// 本次 S12-8 **新接入展示**的 5 个分类（合计 21 个系统）。
+///
+/// ⚠️ 口径区别：这 21 个是「此前被 `_ => false` 吞掉、本次新接线」的部分；
+/// 而「全部非开发规范、非被动」的系统是 **53** 个（另 32 个本来就可见）。
+/// 两者混用会导致断言写错（CI #419 的教训）。
+const Set<String> _newlyWiredCategories = <String>{
+  '魔法',
+  '情报',
+  '战争',
+  '存档',
+  '红袍祭司',
+};
 
 /// 全部身份（用于扫描）。
 const List<PlayerIdentity> _allIdentities = PlayerIdentity.values;
@@ -100,7 +121,26 @@ void main() {
               '少掉 = 开发规范类泄漏进了玩家面板。');
     });
 
-    test('可玩类 21 个系统在某个身份/地点组合下可见', () {
+    test('本次新接入的 21 个系统在某个身份/地点组合下可见', () {
+      final never = _neverVisibleSystemIds();
+
+      // 【口径】21 = 本次新接线的 5 个分类，**不是**「全部非开发规范系统」。
+      // 后者是 53（73 - 18 开发规范 - 2 被动），其中 32 个本来就可见。
+      // 首版这里误用「非开发规范且非被动」当可玩类，断言 21 得到 53 ⇒ CI #419 红。
+      expect(_newlyWiredCategories.length, 5);
+      final newlyWired = allSystems
+          .where((s) => _newlyWiredCategories.contains(s.category))
+          .toList();
+      expect(newlyWired.length, 21,
+          reason: '前提校验：5 个分类应为 7(魔法)+6(情报)+5(战争)+2(存档)+1(红袍祭司)=21 个');
+
+      final stuck = newlyWired.where((s) => never.contains(s.id)).toList();
+      expect(stuck, isEmpty,
+          reason: '这些新接入系统在任何身份/地点下都看不到：'
+              '${stuck.map((s) => '${s.name}(${s.category})').join('、')}');
+    });
+
+    test('全部 53 个非开发规范、非被动系统都可见（不止新接入的 21 个）', () {
       final never = _neverVisibleSystemIds();
       final playable = allSystems
           .where((s) =>
@@ -108,12 +148,13 @@ void main() {
               !_passiveCategories.contains(s.category))
           .toList();
 
-      expect(playable.length, 21,
-          reason: '前提校验：可玩类应为 5(战争)+7(魔法)+6(情报)+2(存档)+1(红袍祭司)=21 个');
+      expect(playable.length, 53,
+          reason: '73 - 18 开发规范 - 2 被动 = 53。'
+              '首版误把它当「可玩类 21」，是本次 CI 红的根因');
 
       final stuck = playable.where((s) => never.contains(s.id)).toList();
       expect(stuck, isEmpty,
-          reason: '这些可玩系统在任何身份/地点下都看不到：'
+          reason: '这些系统在任何身份/地点下都看不到：'
               '${stuck.map((s) => '${s.name}(${s.category})').join('、')}');
     });
 
