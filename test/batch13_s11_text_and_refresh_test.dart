@@ -66,6 +66,10 @@ void main() {
 
     test('单人任务不受影响：接取后只有发布方 +2', () {
       final engine = GameEngine()..startNewGame();
+      // 单人任务同样要求关系 ≥ 20（`acceptNpcTaskV2` 的门槛对两类任务一致）
+      engine.updatePlayer(
+        engine.player.copyWith(relations: const <String, int>{kPublisherId: 25}),
+      );
       final before = engine.npcRelation(kPublisherId);
       final result = engine.acceptNpcTaskV2(kPublisherId);
       expect(result, contains('接下'));
@@ -234,6 +238,13 @@ void main() {
       // 先确认接取前确实没有进行中任务（前提，否则断言无判别力）
       expect(engine.activeTasks, isEmpty);
 
+      // 【为什么要放大视口】本屏是一个长 `ListView`，「进行中的任务」卡片
+      // 在默认视口之外 ⇒ 根本不会被构建，`find.text` 找不到它。
+      // 既有 `batch10_24_task_progress_ui_test.dart:193-204` 用同一手法。
+      tester.view.physicalSize = const Size(1080, 12000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
       await tester.pumpWidget(
         MaterialApp(home: NpcPanelScreen(engine: engine)),
       );
@@ -290,7 +301,8 @@ void main() {
       expect(noble.spouseChat('朝局'), contains('铁王座'));
 
       final warrior = GameEngine()..startNewGame();
-      warrior.marry('武士');
+      // 身世别名见 `_originOf`：'战士' || 'warrior' || '骑士'（没有「武士」）
+      warrior.marry('战士');
       expect(warrior.spouseChat('江湖'), contains('下次闯荡'));
     });
   });
