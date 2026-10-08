@@ -54,15 +54,21 @@ void main() {
       await tester.pumpAndSettle();
 
       // 定位「任务」胶囊本体。`find.text` 是**精确全串**匹配，
-      // 「进行中的任务」标题字符串不同，故不会误命中；
-      // 再从它向上取 GestureDetector（_ActionPill 的实现）保证点到的是胶囊而非标题。
+      // 「进行中的任务」标题字符串不同，故不会误命中。
+      // ⚠️ 临冬城在场 8 位 NPC，其中**只有艾德与琼恩有「任务」胶囊**，
+      // 艾德在列表第 0 位 ⇒ `label.first` 必定是艾德那个（下方 npcId 断言兜底验证）。
       final label = find.text('任务');
-      expect(label, findsWidgets, reason: '艾德在场应渲染出「任务」胶囊');
+      expect(label, findsNWidgets(2), reason: '临冬城仅艾德与琼恩有委托');
       final pill = find.ancestor(
-        of: label.last,
+        of: label.first,
         matching: find.byType(GestureDetector),
       );
       expect(pill, findsWidgets);
+      // 🔴 必须先滚动到可见再点：面板是长 ListView，默认 800x600 视口下
+      // 「任务」胶囊位于 y≈813 **在屏幕外**——CI 首次就因此红过一次
+      // （`Offset(214.8, 813.5) ... outside the bounds of the root, Size(800.0, 600.0)`）。
+      await tester.ensureVisible(pill.first);
+      await tester.pumpAndSettle();
       await tester.tap(pill.first);
       await tester.pumpAndSettle();
 
