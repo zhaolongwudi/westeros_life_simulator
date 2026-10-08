@@ -26,7 +26,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:westeros_life_simulator/game_engine.dart';
-import 'package:westeros_life_simulator/models/npc.dart';
 import 'package:westeros_life_simulator/screens/npc_panel_screen.dart';
 
 /// 把玩家与艾德·史塔克的关系提到「相识」门槛（关系 ≥ 20 才肯委托）。
