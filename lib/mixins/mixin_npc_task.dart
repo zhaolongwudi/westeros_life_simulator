@@ -408,6 +408,23 @@ mixin GameNpcTaskMixin
 
   /// 把本领域指令注册进注册表（order 与历史帮助文本顺序一致）。
   void registerNpcTaskCommands(CommandRegistry registry) {
+    // S13-3 ④：从 `mixin_npc_interact.dart` 迁入。别名「任务/委托/task」原指向
+    // V1 `acceptNpcTask`（只写 flags.npc_task.*），而同屏「进行中的任务」读 V2
+    // 的 `activeTasks` ⇒ 玩家接了委托却永远看不到、也永不结算。
+    // V2 是 V1 的严格超集（V1 全部 14 条委托在 V2 同名存在），改接 V2 不丢内容。
+    // 迁移的另一层原因是依赖方向：`GameNpcInteractMixin` 的 `on` 约束看不到本 mixin。
+    registry.register(
+      CommandSpec(
+        aliases: const ['任务', '委托', 'task'],
+        order: 27,
+        helpLine: '任务 / task [名字]    查看可接任务；带名字则接下委托',
+        handler: (args) => CommandResult(
+          text: args.isEmpty
+              ? formatNpcTaskPanelV2()
+              : acceptNpcTaskV2(normalizeNpcAlias(this, args)),
+        ),
+      ),
+    );
     registry.register(
       CommandSpec(
         aliases: const ['任务列表', '任务2', 'tasks2'],

@@ -300,7 +300,10 @@ class _NpcInteractRow extends StatelessWidget {
                   const SizedBox(width: 6),
                   _ActionPill(
                     label: '任务',
-                    onTap: () => onResult(engine.acceptNpcTask(npc.id)),
+                    // S13-3 ④：原为 `acceptNpcTask`（V1，只写 flags.npc_task.*），
+                    // 而同屏「进行中的任务」读 V2 的 `activeTasks`（:122-128）⇒ 点了永远不出现。
+                    // V2 是 V1 的严格超集（14/14 条 V1 委托在 V2 同名存在），改接 V2 安全。
+                    onTap: () => onResult(engine.acceptNpcTaskV2(npc.id)),
                   ),
                 ],
               ],

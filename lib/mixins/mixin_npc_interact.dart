@@ -389,18 +389,13 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
         handler: (args) => CommandResult(text: npcChat(normalizeNpcAlias(this, args))),
       ),
     );
-    registry.register(
-      CommandSpec(
-        aliases: const ['任务', '委托', 'task'],
-        order: 27,
-        helpLine: '任务 / task [名字]    查看可接任务；带名字则接下委托',
-        handler: (args) => CommandResult(
-          text: args.isEmpty
-              ? formatNpcTaskPanel()
-              : acceptNpcTask(normalizeNpcAlias(this, args)),
-        ),
-      ),
-    );
+    // S13-3 ④：「任务 / 委托 / task」这条 spec 已**迁到 mixin_npc_task.dart**
+    // 的 `registerNpcTaskCommands`（连同实现一起改为 V2）。
+    // 迁走的原因不是整理代码，而是**依赖方向不允许**：
+    // `GameNpcInteractMixin on GameProviderBase, GameLifeMixin`（:20）看不到
+    // `GameNpcTaskMixin` 的 `acceptNpcTaskV2` / `formatNpcTaskPanelV2`
+    // （依赖是单向的 NpcTask → NpcInteract），就地改会 analyze 报 Undefined name。
+    // 别名与 order(27) 一并保留 ⇒ 帮助文本顺序、alias 集合均不变。
     registry.register(
       CommandSpec(
         aliases: const ['关系', '关系面板', 'relations'],
