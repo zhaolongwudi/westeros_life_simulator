@@ -42,7 +42,10 @@ void main() {
     }
   });
 
-  File saveFile(String saveId) => File(`${tempDir.path}/save_$saveId.json`);
+  // 📌 必须用单引号插值：Dart 的反引号是 **raw string** 定界符（不支持插值），
+  // 用反引号写插值会被解析成 raw string、内部 $ 不生效 ⇒ analyzer 报 7 个 error
+  // （run `37760612365` 实测，错误全指向这一行；同文件既有 S12-7 测试用的也是单引号）。
+  File saveFile(String saveId) => File('${tempDir.path}/save_$saveId.json');
 
   /// 跳过去抖定时器、等真实 IO 落盘，**并**读回某存档里的玩家名。
   ///
