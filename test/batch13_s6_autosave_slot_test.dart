@@ -90,12 +90,20 @@ void main() {
   /// 「等写盘完成」交给既有的 `settleIo`（pump 3s 已让 2 秒去抖到期）。
   /// 代价是要自己解析 JSON，但存档结构固定（`{'metadata':…, 'state':…}`），
   /// 比和 fake-async 搏斗可靠得多。
-  Future<String?> settleAndReadName(WidgetTester tester, String saveId) async {
+  Future<void> settleIo(WidgetTester tester) async {
     await tester.pump(const Duration(seconds: 3));
     await tester.runAsync(() async {
       await Future<void>.delayed(const Duration(milliseconds: 80));
     });
     await tester.pumpAndSettle();
+  }
+
+  /// 推进去抖与真实 IO，然后同步读回某存档里的玩家名。
+  ///
+  /// 📌 读取一律走同步 IO（`readNameSync`）：不需要 zone、不需要 await，
+  /// 完全绕开 fake-async 陷阱；「等落盘」由上面的 `settleIo` 负责，两者分开。
+  Future<String?> settleAndReadName(WidgetTester tester, String saveId) async {
+    await settleIo(tester);
     return readNameSync(saveId);
   }
 
@@ -118,7 +126,11 @@ void main() {
       expect(saveFile('player_old').existsSync(), isFalse, reason: '刚开局不该立即落盘');
       // 让旧档真的落一次盘，之后才谈「不被覆盖」
       engine.resolveCommand('过月');
-      expect(await settleAndReadName(tester, 'player_old'), '旧档角色', reason: '前置：旧档已落盘');
+      // 📌 先用 `existsSync` 分界：它为 true 说明落盘成功（问题在解析），
+      // 为 false 说明根本没落盘（问题在时序）。run `37762763363` 卡在这里返回 null。
+      await settleIo(tester);
+      expect(saveFile('player_old').existsSync(), isTrue, reason: '前置：旧档应已落盘');
+      expect(readNameSync('player_old'), '旧档角色');
 
       // ---- 模拟设置页「载入另一个存档」：同一个 engine 上 applyState ----
       // 【与 settings_screen.dart:122 完全同形】那边是 engine.applyState(state)，
