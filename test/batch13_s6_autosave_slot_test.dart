@@ -54,14 +54,32 @@ void main() {
 
   File saveFile(String saveId) => File('${tempDir.path}/save_$saveId.json');
 
-  /// 存档文件里的玩家名（用来判断「这个文件属于哪一档」）。
-  String? playerNameInFile(String saveId) {
-    final f = saveFile(saveId);
-    if (!f.existsSync()) return null;
-    final json = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
-    final state = json['state'] as Map<String, dynamic>;
-    final player = state['player'] as Map<String, dynamic>;
-    return player['name'] as String?;
+  /// 等到某存档文件**内容可解析**为止，再返回里面的玩家名。
+  ///
+  /// 🔴 【为什么必须等】`SaveService` 走 `File.writeAsString`：**文件先被创建、
+  /// 内容后写入**，所以 `existsSync()` 为 true 的那一刻，文件仍可能是**空的**
+  /// ⇒ 立刻 `jsonDecode` 抛 `FormatException: Unexpected end of input`。
+  /// 这在 CI 上表现为**随机红**（我第一版 3 例全红，修完顺序后只剩 1 例红，
+  /// 因为快慢不确定）。轮询直到能解析，比 `existsSync()` 可靠。
+  Future<String?> playerNameInFile(String saveId) async {
+    for (var i = 0; i < 40; i++) {
+      final f = saveFile(saveId);
+      if (f.existsSync()) {
+        final text = f.readAsStringSync();
+        if (text.trim().isNotEmpty) {
+          try {
+            final json = jsonDecode(text) as Map<String, dynamic>;
+            final state = json['state'] as Map<String, dynamic>;
+            final player = state['player'] as Map<String, dynamic>;
+            return player['name'] as String?;
+          } on FormatException {
+            // 内容还没写完（截断的半个 JSON），继续等。
+          }
+        }
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 25));
+    }
+    return null;
   }
 
   group('S13-6 ⑪ 自动存档槽位跟随当前 player.id', () {
@@ -85,7 +103,7 @@ void main() {
       engine.resolveCommand('过月');
       await settleIo(tester);
       expect(saveFile('player_old').existsSync(), isTrue, reason: '前置：旧档应已落盘');
-      expect(playerNameInFile('player_old'), '旧档角色');
+      expect(await playerNameInFile('player_old'), '旧档角色');
 
       // ---- 模拟设置页「载入另一个存档」：同一个 engine 上 applyState ----
       // 【与 settings_screen.dart:122 完全同形】那边是 engine.applyState(state)，
@@ -105,13 +123,13 @@ void main() {
 
       // 🔴 判别式：旧档文件必须**仍是旧档角色**，不能被写成新档角色
       expect(
-        playerNameInFile('player_old'),
+        await playerNameInFile('player_old'),
         '旧档角色',
         reason: '旧档文件内容被自动存档覆盖了（这正是 ⑪ 号缺陷）',
       );
       // 新档自己的槽应当被写入
       expect(
-        playerNameInFile('player_new'),
+        await playerNameInFile('player_new'),
         '新档角色',
         reason: '自动存档应写进新载入档自己的槽',
       );
@@ -131,7 +149,7 @@ void main() {
       // 让旧档真的落盘，否则「旧槽未被覆盖」无从谈起
       engine.resolveCommand('过月');
       await settleIo(tester);
-      expect(playerNameInFile('player_old'), '旧档角色', reason: '前置：旧档已落盘');
+      expect(await playerNameInFile('player_old'), '旧档角色', reason: '前置：旧档已落盘');
 
       // 设置页「新游戏」路径：engine.startNewGame() → id 变 'player_default'
       engine.startNewGame();
@@ -142,7 +160,7 @@ void main() {
 
       // 🔴 判别式：旧槽必须**仍属旧档**，不能被写成新局内容
       expect(
-        playerNameInFile('player_old'),
+        await playerNameInFile('player_old'),
         '旧档角色',
         reason: '旧 id 槽被新局内容覆盖了（这正是 ⑪ 号缺陷）',
       );
@@ -153,10 +171,11 @@ void main() {
       );
     });
 
-    testWidgets('同月内载入另一存档不触发落盘（守卫语义不变）', (tester) async {
+    testWidgets('同月内的重复通知不重复落盘（守卫语义不变）', (tester) async {
       final engine = GameEngine()
         ..startNewGame(
-          player: Player.defaultPlayer().copyWith(id: 'player_old'),
+          player: Player.defaultPlayer()
+              .copyWith(id: 'player_old', name: '旧档角色'),
         );
       // 【顺序坑】同第 1 例
       await tester.pumpWidget(
@@ -165,18 +184,21 @@ void main() {
       await tester.pump();
       engine.resolveCommand('过月');
       await settleIo(tester);
-      expect(saveFile('player_old').existsSync(), isTrue, reason: '前置：旧档已落盘');
+      expect(await playerNameInFile('player_old'), '旧档角色', reason: '前置：旧档已落盘');
 
-      // 只 applyState，不跨月
-      final otherEngine = GameEngine()
-        ..startNewGame(
-          player: Player.defaultPlayer().copyWith(id: 'player_new'),
-        );
-      engine.applyState(otherEngine);
-      await settleIo(tester);
-
-      expect(saveFile('player_new').existsSync(), isFalse,
-          reason: '未跨月不该触发自动存档');
+      // 同月内多次 notify（「状态」不消耗回合）⇒ `_lastSavedMonth` 相同 ⇒ 不落盘。
+      // 🔴 【原前提写错】我第一版写的是「同月内载入另一存档不触发落盘」，
+      // 但 `applyState` 换掉的是**整个 progress**（年月一起换），并不是同月，
+      // 所以那次会真的排程落盘。守卫真正挡的是「同月内的重复通知」。
+      // 📌 判据用**文件内容**而非 mtime：mtime 在 CI 上可能是秒级粒度，
+      // 「没重写」与「同一秒内重写」分不开，会变成随机红。
+      final contentBefore = saveFile('player_old').readAsStringSync();
+      for (var i = 0; i < 3; i++) {
+        engine.resolveCommand('状态');
+        await settleIo(tester);
+      }
+      expect(saveFile('player_old').readAsStringSync(), contentBefore,
+          reason: '同月内的重复通知不该重写存档');
     });
 
     test('默认开局 player.id 为 player_default（前置契约）', () {
