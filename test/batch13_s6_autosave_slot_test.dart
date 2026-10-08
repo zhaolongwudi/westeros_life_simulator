@@ -5,130 +5,69 @@
 /// （`game_screen.dart:306` 传 `engine: _engine`），
 /// 在设置页里载入另一个存档会 `applyState` → `_player = other._player`
 /// （`game_state_provider.dart:598`）⇒ 运行时 `player.id` 已变成被载入档的 id，
-/// 但落盘仍用冻结的 `_saveSlotId`（`game_screen.dart:146`）
+/// 但落盘仍用冻结的 `_saveSlotId`（`game_screen.dart:154`）
 /// ⇒ **旧档文件被新档内容整体覆盖，旧进度丢失**。
+/// 修法就一行：`late final String _saveSlotId` → `String get _saveSlotId => _engine.player.id;`
 ///
 /// 【关键判别式】不能只断言「新槽文件存在」——那在缺陷下也成立
-/// （只是多了一个错槽）。必须断言**旧档文件内容未被改写**，
-/// 否则测试会假绿（与 S13-4/S13-5 踩过的「跨月用 advanceTime 而非 advanceMonth」同源）。
+/// （只是多了一个错槽）。必须断言**旧档内容未被改写**，否则测试会假绿。
 ///
-/// 【既有约定，照抄 batch12_s12_save_autosave_test.dart】
-/// - 注入内存版 `SaveService` 只是为了避开设置页 `initState` 的真实文件 IO；
-///   本卡断言的是**真实文件**，故一律用真 `SaveService(saveDir: tempDir)`。
-/// - 去抖定时器 + 真实 IO 必须走 `runAsync`，只 `pumpAndSettle` 会假红。
+/// ══════════════════════════════════════════════════════════════
+/// 🔴🔴 本文件换了**第三次**断言方式，前两种都被 CI 证伪（见下）。
+/// ══════════════════════════════════════════════════════════════
+/// 【为什么最终改用内存版 SaveService】
+/// 前两种都建立在「真 `SaveService(saveDir: tempDir)` + 读文件内容」之上，
+/// 连续 10 次 CI 红。最后一次诊断（run `37764745090`）给出了**决定性证据**：
+///     轮询 1 次仍读不到 player_old：exists=true size=0
+/// `exists=true` 而 `size=0` ⇒ `File.writeAsString` **只创建了文件、内容从未写入**
+/// ⇒ 在 `testWidgets` 的 fake-async 域里，那个真实的 `await writeAsString`
+/// 根本不会完成。轮询多少次都没用，因为要等的那件事本身不会发生。
+/// 而既有 S12-7 测试为什么一直绿？它**只断言 `existsSync()`**——
+/// 那个恰好只要求「文件被创建」，正好是 fake-async 下唯一能保证的事。
+/// ⇒ 教训：**照抄既有测试的写法不够，还要照抄它断言的内容边界**。
+/// 内存版绕开一切 zone 问题：记录「哪个 saveId 被写了什么 player.name」，
+/// 判别式直接读这个记录，且用的正是既有测试里 `_MemorySaveService` 的同一套路。
 library;
-
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:westeros_life_simulator/game_engine.dart';
 import 'package:westeros_life_simulator/models/player.dart';
+import 'package:westeros_life_simulator/providers/game_state_provider.dart';
 import 'package:westeros_life_simulator/screens/game_screen.dart';
 import 'package:westeros_life_simulator/services/save_service.dart';
 
+/// 内存版存档服务：**只记「哪个槽被写了、写的角色名是谁」**。
+///
+/// 【为什么够用】本批要断言的只有一件事——
+/// 自动存档用的槽 id 是不是**当前** `player.id`。
+/// 记下 `saveId → player.name` 就足以判别，不需要真的序列化到磁盘。
+class _RecordingSaveService extends SaveService {
+  _RecordingSaveService() : super(saveDir: '/tmp/nonexistent_s13_6_dir');
+
+  /// saveId → 写入时的 player.name。按写入顺序累加（同一 id 会被覆盖）。
+  final Map<String, List<String>> writes = <String, List<String>>{};
+
+  @override
+  Future<String> saveGame(GameStateProvider state, {String? saveId}) async {
+    final id = saveId ?? DateTime.now().millisecondsSinceEpoch.toString();
+    (writes[id] ??= <String>[]).add(state.player.name);
+    return id;
+  }
+}
+
 void main() {
-  late Directory tempDir;
-  late SaveService service;
+  late _RecordingSaveService service;
 
-  setUp(() async {
-    tempDir = await Directory.systemTemp.createTemp('s13_6_slot_');
-    service = SaveService(saveDir: tempDir.path);
+  setUp(() {
+    service = _RecordingSaveService();
   });
 
-  tearDown(() async {
-    if (await tempDir.exists()) {
-      await tempDir.delete(recursive: true);
-    }
-  });
-
-  // 📌 必须用单引号插值：Dart 的反引号是 **raw string** 定界符（不支持插值），
-  // 用反引号写插值会被解析成 raw string、内部 $ 不生效 ⇒ analyzer 报 7 个 error
-  // （run `37760612365` 实测，错误全指向这一行；同文件既有 S12-7 测试用的也是单引号）。
-  File saveFile(String saveId) => File('${tempDir.path}/save_$saveId.json');
-
-  /// 同步读存档里的玩家名（读不出来就返回 null，绝不抛）。
+  /// 跳过去抖定时器（2 秒）并让异步落盘完成。
   ///
-  /// 【为什么要容错】`File.writeAsString` 是「先建文件、后写内容」，
-  /// 理论上可能读到空文件或半个 JSON。判别式只需要「这个文件属于哪一档」，
-  /// 读不出来时返回 null，让断言给出清晰失败信息而不是抛 FormatException。
-  ///
-  /// 📌 **必须定义在 `settleAndReadName` 之前**：局部函数不能前向引用
-  /// （run `37762037029` 实测 1 个 analyze error：
-  /// Local variable 'readNameSync' can't be referenced before it is declared）。
-  String? readNameSync(String saveId) {
-    final f = saveFile(saveId);
-    if (!f.existsSync()) return null;
-    final text = f.readAsStringSync();
-    try {
-      final json = jsonDecode(text) as Map<String, dynamic>;
-      final state = json['state'] as Map<String, dynamic>;
-      final player = state['player'] as Map<String, dynamic>;
-      return player['name'] as String?;
-    } on Object catch (err) {
-      // 📌 诊断用：把「文件多大 + 内容开头 + 真实异常」一起带进失败信息。
-      // 前 9 次 CI 红全靠猜，这个分支让下一次失败**自带答案**。
-      // （解析失败时 fail 会打印这条 note，不用再盲推一轮 CI。）
-      fail('存档 $saveId 解析失败：长度=${text.length} '
-          '开头="${text.length > 120 ? text.substring(0, 120) : text}" '
-          '异常=$err');
-    }
-  }
-
-  /// 等某存档文件**内容可解析**为止（同步读 + 真实延时，只在 `runAsync` 内用）。
-  ///
-  /// 🔴 【run `37763396473` 定位到的真因】`existsSync()` 返回 **true** 而
-  /// `readNameSync()` 返回 **null** —— 因为 `SaveService.saveGame` 走
-  /// `File.writeAsString`（`save_service.dart:129`），**文件先被创建、内容后写入**，
-  /// 所以「文件存在」不等于「内容可解析」，此时 `jsonDecode` 抛
-  /// `FormatException: Unexpected end of input` 被我 `on Object` 吞成 null。
-  /// 既有 S12-7 测试只断言 `existsSync()`、**不读内容**，所以它从不踩这个坑。
-  ///
-  /// ✅ 轮询放在 `runAsync` 里：`Future.delayed` 只有在真实域才会推进
-  /// （fake-async 内裸用它会 10 分钟超时，run `37755398940`）。
-  /// 读取仍用同步 IO，不跨 zone。
-  Future<String?> readNameWhenParsable(WidgetTester tester, String saveId) async {
-    String? name;
-    var tries = 0;
-    await tester.runAsync(() async {
-      for (var i = 0; i < 40; i++) {
-        tries = i + 1;
-        name = readNameSync(saveId);
-        if (name != null) return;
-        await Future<void>.delayed(const Duration(milliseconds: 25));
-      }
-    });
-    // 轮询 40 次（约 1 秒真实时间）仍读不到：把尝试次数与文件状态一并报出，
-    // 区分「文件始终不存在」与「文件在但始终解析不了」两种情况。
-    if (name == null) {
-      final f = saveFile(saveId);
-      fail('轮询 $tries 次仍读不到 $saveId：exists=${f.existsSync()} '
-          'size=${f.existsSync() ? f.lengthSync() : -1}');
-    }
-    return name;
-  }
-
-  /// 跳过去抖定时器、等真实 IO 落盘，**并**读回某存档里的玩家名。
-  ///
-  /// 📌 **照抄 S12-7 的 `settleIo` 结构，一个字都没改**（它已被既有测试验证可用）：
-  /// `pump(3s)` → `runAsync` 里等 80ms → `pumpAndSettle()`。
-  ///
-  /// 🔴 【踩坑记录：为什么读档用同步 readAsStringSync 而不是 loadGame】
-  /// 我先后试过三种写法，**全部失败**（每次 3 例全红，既有 1526 例从未受影响）：
-  /// ① 裸 `await Future.delayed` 轮询 → 3 例全 10 分钟 `TimeoutException`
-  ///    （run `37755398940`）：fake-async 里 delay 永不推进。
-  /// ② 轮询包进 `runAsync` → 3 例全 `Actual: <null>`（run `37759316690`）。
-  /// ③ `runAsync` 内 `await service.loadGame(...)` → 仍然 3 例全
-  ///    `Actual: <null>`（run `37761190596`）。
-  /// ③ 说明 **`loadGame` 这条带内部 `await` 的调用在本测试的 `runAsync` 里返回不了**
-  /// （具体机制未确认；只确认「放进 runAsync 就读不到」这一现象，不作进一步推断）。
-  ///
-  /// ✅ 结论：**只用同步 IO**（`existsSync` / `readAsStringSync`）读文件——
-  /// 它不需要 zone、不需要 await，绕开整个 fake-async 陷阱；
-  /// 「等写盘完成」交给既有的 `settleIo`（pump 3s 已让 2 秒去抖到期）。
-  /// 代价是要自己解析 JSON，但存档结构固定（`{'metadata':…, 'state':…}`），
-  /// 比和 fake-async 搏斗可靠得多。
+  /// 📌 与 `batch12_s12_save_autosave_test.dart:68` 的 `settleIo` 同构
+  /// （`pump(3s)` → `runAsync` 等 80ms → `pumpAndSettle`），只是这里不需要
+  /// 再等真实文件 IO——内存版写入不碰磁盘。
   Future<void> settleIo(WidgetTester tester) async {
     await tester.pump(const Duration(seconds: 3));
     await tester.runAsync(() async {
@@ -137,19 +76,11 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// 推进去抖与真实 IO，然后等到内容可解析再读回玩家名。
-  ///
-  /// 📌 两步必须分开：`settleIo` 照抄既有测试（只保证**文件已创建**），
-  /// `readNameWhenParsable` 再等到**内容可解析**。既有 S12-7 只断言 `existsSync()`
-  /// 所以不需要第二步；本批要读内容判断「这个文件属于哪一档」，必须等。
-  Future<String?> settleAndReadName(WidgetTester tester, String saveId) async {
-    await settleIo(tester);
-    return readNameWhenParsable(tester, saveId);
-  }
+  /// 某槽被写入过的角色名（没写过则空列表）。
+  List<String> namesIn(String saveId) => service.writes[saveId] ?? <String>[];
 
   group('S13-6 ⑪ 自动存档槽位跟随当前 player.id', () {
-    testWidgets('局内载入另一存档后跨月：写新槽，旧档内容不被改写',
-        (tester) async {
+    testWidgets('局内载入另一存档后跨月：写新槽，旧档不被改写', (tester) async {
       // 旧档：id = player_old，名字「旧档角色」
       final engine = GameEngine()
         ..startNewGame(
@@ -157,22 +88,18 @@ void main() {
         );
       // 🔴 【顺序坑】必须先 pumpWidget 再 resolveCommand：自动存档挂在
       // GameScreen 的监听器上，widget 还不存在时 notify 没有任何接收者，
-      // 定时器根本不会被安排（S12-7 测试「刚开局不该立即落盘」正是这条语义）。
+      // 定时器根本不会被安排（S12-7「刚开局不该立即落盘」正是这条语义）。
       // 我第一版把 `过月` 写在 pumpWidget 之前 ⇒ 旧档压根没落盘 ⇒ 前置断言红。
       await tester.pumpWidget(
         MaterialApp(home: GameScreen(engine: engine, saveService: service)),
       );
       await tester.pump();
-      expect(saveFile('player_old').existsSync(), isFalse, reason: '刚开局不该立即落盘');
+      expect(service.writes, isEmpty, reason: '刚开局不该立即落盘');
+
       // 让旧档真的落一次盘，之后才谈「不被覆盖」
       engine.resolveCommand('过月');
-      // 📌 先用 `existsSync` 分界：它为 true 只说明**文件已创建**（不等于内容写完），
-      // 为 false 说明根本没落盘。run `37762763363` 靠这行定到了时序问题，
-      // run `37763396473` 靠它定到了「文件在、内容还没写完」——两者都靠它才分得清。
       await settleIo(tester);
-      expect(saveFile('player_old').existsSync(), isTrue, reason: '前置：旧档文件应已创建');
-      expect(await readNameWhenParsable(tester, 'player_old'), '旧档角色',
-          reason: '前置：旧档内容应已写完且可解析');
+      expect(namesIn('player_old'), ['旧档角色'], reason: '前置：旧档应已落盘');
 
       // ---- 模拟设置页「载入另一个存档」：同一个 engine 上 applyState ----
       // 【与 settings_screen.dart:122 完全同形】那边是 engine.applyState(state)，
@@ -188,61 +115,49 @@ void main() {
 
       // 跨月 → 触发自动存档
       engine.resolveCommand('过月');
+      await settleIo(tester);
 
-      // 🔴 判别式：旧档文件必须**仍是旧档角色**，不能被写成新档角色
-      expect(
-        await settleAndReadName(tester, 'player_old'),
-        '旧档角色',
-        reason: '旧档文件内容被自动存档覆盖了（这正是 ⑪ 号缺陷）',
-      );
+      // 🔴 判别式：旧槽**最后一次**写入的内容必须仍是旧档角色。
+      // 缺陷下这里会是 ['旧档角色', '新档角色'] —— 旧档被新档覆盖。
+      expect(namesIn('player_old'), ['旧档角色'],
+          reason: '旧档槽被新档内容覆盖了（这正是 ⑪ 号缺陷）');
       // 新档自己的槽应当被写入
-      expect(
-        await settleAndReadName(tester, 'player_new'),
-        '新档角色',
-        reason: '自动存档应写进新载入档自己的槽',
-      );
+      expect(namesIn('player_new'), ['新档角色'],
+          reason: '自动存档应写进新载入档自己的槽');
     });
 
     testWidgets('局内「新游戏」后跨月：不写旧 id 槽', (tester) async {
       final engine = GameEngine()
         ..startNewGame(
-          player: Player.defaultPlayer()
-              .copyWith(id: 'player_old', name: '旧档角色'),
+          player: Player.defaultPlayer().copyWith(id: 'player_old', name: '旧档角色'),
         );
       // 【顺序坑】同第 1 例：先 pumpWidget 再 resolveCommand，否则无人接收 notify
       await tester.pumpWidget(
         MaterialApp(home: GameScreen(engine: engine, saveService: service)),
       );
       await tester.pump();
-      // 让旧档真的落盘，否则「旧槽未被覆盖」无从谈起
       engine.resolveCommand('过月');
-      expect(await settleAndReadName(tester, 'player_old'), '旧档角色', reason: '前置：旧档已落盘');
+      await settleIo(tester);
+      expect(namesIn('player_old'), ['旧档角色'], reason: '前置：旧档应已落盘');
 
       // 设置页「新游戏」路径：engine.startNewGame() → id 变 'player_default'
       engine.startNewGame();
       expect(engine.player.id, 'player_default', reason: '前置：新局 id 应为默认');
 
       engine.resolveCommand('过月');
+      await settleIo(tester);
 
-      // 🔴 判别式：旧槽必须**仍属旧档**，不能被写成新局内容
-      expect(
-        await settleAndReadName(tester, 'player_old'),
-        '旧档角色',
-        reason: '旧 id 槽被新局内容覆盖了（这正是 ⑪ 号缺陷）',
-      );
-      // 📌 用 settleAndReadName 而不是 existsSync：后者不等写盘完成，
-      // 在 CI 上会读到「文件已建、内容未写」的空档而假红。
-      expect(
-        await settleAndReadName(tester, 'player_default'),
-        isNotNull,
-        reason: '新局应写进自己的槽 player_default',
-      );
+      // 🔴 判别式：旧槽必须**仍只有旧档那一次写入**
+      expect(namesIn('player_old'), ['旧档角色'],
+          reason: '旧 id 槽被新局内容覆盖了（这正是 ⑪ 号缺陷）');
+      expect(namesIn('player_default'), isNotEmpty,
+          reason: '新局应写进自己的槽 player_default');
     });
 
     // 📌 刻意**不写**「同月内重复通知不重复落盘」这条：守卫 `_lastSavedMonth`
-    // 是 S12-7 已有语义（既有 batch12_s12 已覆盖），不是 ⑪ 的核心；
+    // 是 S12-7 已有语义（既有 batch12_s12 已覆盖 7 例），不是 ⑪ 的核心；
     // 且 `状态` 命令（`mixin_play.dart:484`）handler 只调 `formatPlayerPanel()`，
-    // 既不改状态也不 notify ⇒ 写了也是空转，测不到东西。
+    // 既不改状态也不 notify ⇒ 写出来也是空转，测不到东西。
 
     test('默认开局 player.id 为 player_default（前置契约）', () {
       expect(Player.defaultPlayer().id, 'player_default');
