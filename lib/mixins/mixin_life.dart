@@ -9,6 +9,7 @@ library;
 import '../data/balance_data.dart';
 import '../data/item_data.dart';
 import '../models/location.dart';
+import '../models/monthly_counter.dart';
 import '../models/player.dart';
 import '../core/command_registry.dart';
 import '../core/monthly_pipeline.dart';
@@ -313,8 +314,13 @@ mixin GameLifeMixin on GameProviderBase {
 
   // ==================== 贸易深化（Batch 10-11） ====================
 
-  /// 本次议价折扣（0-100 的百分比）。议价成功后生效，跨日重置。
-  int _negotiatedDiscount = 0;
+  /// 本次议价折扣（0-100 的百分比）。议价成功后生效，跨月重置。
+  ///
+  /// S13-5：改读写状态层 `monthlyCounters.negotiatedDiscount`（与议价计数同组），
+  /// 原私有字段一并删除，不留双份活状态。
+  int get _negotiatedDiscount => monthlyCounters.negotiatedDiscount;
+  set _negotiatedDiscount(int value) =>
+      monthlyCounters.negotiatedDiscount = value;
 
   /// 新增贸易活动的每月次数上限（自包含，避免依赖 GamePlayMixin 私有状态）。
   static const Map<String, int> kNewDailyLimits = <String, int>{
@@ -323,29 +329,32 @@ mixin GameLifeMixin on GameProviderBase {
     'convoy': 1,
   };
 
-  Map<String, int> _b1011DailyCount = <String, int>{};
-  String? _b1011DailyMonth;
+  /// S13-5：本组的计数器（状态层 `GameStateProvider.monthlyCounters`）。
+  /// 原 `_b1011DailyCount`/`_b1011DailyMonth` 正是「计数 + 月份键」这一对，
+  /// 被 `MonthlyCounter` 整体取代，不留双份活状态。
+  MonthlyCounter get _tradeCounter => monthlyCounters.trade;
 
   String get _b1011Today => '${progress.year}-${progress.month}';
 
   /// 跨月重置新增活动的每月计数，并清除议价折扣。
   void _b1011RollDaily() {
-    if (_b1011DailyMonth != _b1011Today) {
-      _b1011DailyMonth = _b1011Today;
-      _b1011DailyCount = <String, int>{};
+    if (_b1011RollCounter()) {
       _negotiatedDiscount = 0;
       if (flagOf('negotiated')) setFlag('negotiated', false);
     }
   }
 
+  /// S13-5：跨月重置计数本体，返回是否真的跨了月（供上面的附加逻辑判断）。
+  bool _b1011RollCounter() => _tradeCounter.rollIfNewMonth(_b1011Today);
+
   bool _b1011CanDo(String activity) {
     _b1011RollDaily();
-    return (_b1011DailyCount[activity] ?? 0) < (kNewDailyLimits[activity] ?? 99);
+    return _tradeCounter.used(activity) < (kNewDailyLimits[activity] ?? 99);
   }
 
   void _b1011Record(String activity) {
     _b1011RollDaily();
-    _b1011DailyCount[activity] = (_b1011DailyCount[activity] ?? 0) + 1;
+    _tradeCounter.record(activity);
   }
 
   /// 地区特产映射：每个区域的代表物品（买价更便宜，卖到其他区域更贵）。

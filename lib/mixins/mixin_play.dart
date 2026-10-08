@@ -10,6 +10,7 @@ import '../models/location.dart';
 import '../models/player.dart';
 import '../core/command_registry.dart';
 import '../core/monthly_pipeline.dart';
+import '../models/monthly_counter.dart';
 import '../providers/game_provider_base.dart';
 import '../utils/command_alias.dart';
 import '../utils/labels.dart';
@@ -421,8 +422,13 @@ mixin GamePlayMixin
 
   // ==================== 内部工具 ====================
 
-  Map<String, int> _dailyCount = <String, int>{};
-  String? _dailyDate;
+  /// S13-5：本组的计数器（状态层 `GameStateProvider.monthlyCounters`）。
+  ///
+  /// 【为什么原来的 `_dailyCount`/`_dailyDate` 被删掉而不是「保留 + 镜像」】
+  /// 它们本来就是「计数 + 月份键」这一对，而 `MonthlyCounter` 恰好就是
+  /// 这个形状 ⇒ 保留旧字段就等于造出两份各自像真的活状态，
+  /// 正是 S13-4 花大力气记录下来的漂移陷阱。删掉旧字段后本组只剩一个真相源。
+  MonthlyCounter get _activityCounter => monthlyCounters.activity;
 
   /// 今日日期串（用于每日重置）。
   String get _today => '${progress.year}-${progress.month}';
@@ -433,23 +439,18 @@ mixin GamePlayMixin
   /// 新增一种活动却忘了配上限就会运行时崩溃）。
   bool _canDoDaily(String activity) {
     _rollDaily();
-    final count = _dailyCount[activity] ?? 0;
+    final count = _activityCounter.used(activity);
     return count < (kDailyLimits[activity] ?? 1);
   }
 
   /// 记录一次活动。
   void _recordDaily(String activity) {
     _rollDaily();
-    _dailyCount[activity] = (_dailyCount[activity] ?? 0) + 1;
+    _activityCounter.record(activity);
   }
 
   /// 跨月重置每日计数。
-  void _rollDaily() {
-    if (_dailyDate != _today) {
-      _dailyDate = _today;
-      _dailyCount = <String, int>{};
-    }
-  }
+  void _rollDaily() => _activityCounter.rollIfNewMonth(_today);
 
   /// 玩家信息面板。
   String formatPlayerPanel() {

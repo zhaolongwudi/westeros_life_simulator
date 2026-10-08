@@ -16,6 +16,7 @@ import '../data/item_data.dart';
 import '../data/npc_data.dart';
 import '../models/event.dart';
 import '../models/letter.dart';
+import '../models/monthly_counter.dart';
 import '../models/player.dart';
 import '../utils/json_safe.dart';
 
@@ -113,6 +114,7 @@ class GameStateProvider extends ChangeNotifier {
     List<Letter>? letters,
     String? lastSenderId,
     String? lastLetterMonth,
+    MonthlyCounters? monthlyCounters,
   })  : _player = player ?? Player.defaultPlayer(),
         _progress = progress ?? GameProgress.defaultProgress(),
         // 【必须拷贝】`history` getter 返回 `List.unmodifiable(_history)`，
@@ -131,7 +133,9 @@ class GameStateProvider extends ChangeNotifier {
         // S13-4：同理，信件列表也必须拷贝，避免与来源共享可变列表。
         _letters = List<Letter>.from(letters ?? const <Letter>[]),
         _lastSenderId = lastSenderId,
-        _lastLetterMonth = lastLetterMonth;
+        _lastLetterMonth = lastLetterMonth,
+        // S13-5：同样是拷贝而非持有调用方的对象（它内部是可变 Map）。
+        _monthlyCounters = monthlyCounters ?? MonthlyCounters();
 
   Player _player;
   GameProgress _progress;
@@ -232,6 +236,26 @@ class GameStateProvider extends ChangeNotifier {
   /// 最近一次收到来信的月份（存档往返字段）。
   String? get lastLetterMonth => _lastLetterMonth;
 
+  // ---------------------------------------------------------------------------
+  // S13-5：6 组「每月次数」计数器（**存档往返字段**）。
+  //
+  // 【与 S13-4 的差别：不镜像，运行时直接读同一实例】
+  // S13-4 的信件是「状态层一份 + mixin 运行时一份」，只在存档两个边界做镜像，
+  // 代价是必须显式写 `other.xxx` 防 getter 遮蔽。
+  // 本批**运行时的唯一持有者就是这里**（四个 mixin 直接读写它），
+  // 因此**不存在两份数据漂移**，也不需要防遮蔽——
+  // mixin 只需在 `toJson`/`applyState`/`startNewGame` 三个边界带上它。
+  //
+  // 【为什么必须落状态层】`save_service.dart:184`/`:261` 反序列化的静态类型是
+  // **`GameStateProvider` 而非 `GameEngine`** ⇒ 只改 mixin 对读档完全无效（S13-4 实证）。
+  // ---------------------------------------------------------------------------
+
+  /// 6 组月度计数器的集合（运行时的唯一持有者，见上方说明）。
+  final MonthlyCounters _monthlyCounters;
+
+  /// 月度计数器集合（供 mixin 与测试读写）。
+  MonthlyCounters get monthlyCounters => _monthlyCounters;
+
   /// 截断提示行（无丢弃时返回空串）。
   ///
   /// 供 UI/AI 在历史开头展示，避免玩家以为"这些事没发生过"。
@@ -300,6 +324,8 @@ class GameStateProvider extends ChangeNotifier {
     _letters = <Letter>[];
     _lastSenderId = null;
     _lastLetterMonth = null;
+    // S13-5：新局必须清空 6 组计数，否则重开就白拿上一局用过的当月额度。
+    _monthlyCounters.reset();
     _isGameActive = true;
     _isGameOver = false;
     notifyListeners();
@@ -583,6 +609,8 @@ class GameStateProvider extends ChangeNotifier {
     _letters = List<Letter>.from(other._letters);
     _lastSenderId = other._lastSenderId;
     _lastLetterMonth = other._lastLetterMonth;
+    // S13-5：整体拷贝（含 6 组的计数与月份键），不共享内部 Map。
+    _monthlyCounters.copyFrom(other._monthlyCounters);
     notifyListeners();
   }
 
@@ -603,6 +631,9 @@ class GameStateProvider extends ChangeNotifier {
       'letters': _letters.map((l) => l.toJson()).toList(),
       'lastSenderId': _lastSenderId,
       'lastLetterMonth': _lastLetterMonth,
+      // S13-5：纯新增可选字段（按 save_migration 约定不升 schemaVersion）。
+      // 6 组计数收在一个对象里，故只多一个键。
+      'monthlyCounters': _monthlyCounters.toJson(),
       'isGameActive': _isGameActive,
       'isGameOver': _isGameOver,
       'droppedHistoryCount': _droppedHistoryCount,
@@ -637,6 +668,8 @@ class GameStateProvider extends ChangeNotifier {
       lastLetterMonth: json['lastLetterMonth'] is String
           ? json['lastLetterMonth'] as String
           : null,
+      // S13-5：fromJson 逐组独立回落，坏值一律变空计数（不抛、不影响其余五组）。
+      monthlyCounters: MonthlyCounters.fromJson(json['monthlyCounters']),
       isGameActive: safeBool(json, 'isGameActive'),
       isGameOver: safeBool(json, 'isGameOver'),
       droppedHistoryCount:

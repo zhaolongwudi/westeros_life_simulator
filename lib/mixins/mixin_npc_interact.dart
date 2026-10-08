@@ -8,6 +8,7 @@
 library;
 
 import '../data/balance_data.dart';
+import '../models/monthly_counter.dart';
 import '../models/npc.dart';
 import '../core/command_registry.dart';
 import '../core/monthly_pipeline.dart';
@@ -21,27 +22,23 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
   /// 示好每日次数上限。
   static const int kFavorDailyLimit = 3;
 
-  Map<String, int> _favorDailyCount = <String, int>{};
-  String? _favorDailyMonth;
+  /// S13-5：示好组的计数器（状态层 `GameStateProvider.monthlyCounters`）。
+  /// 原 `_favorDailyCount`/`_favorDailyMonth` 正是「计数 + 月份键」这一对，
+  /// 被 `MonthlyCounter` 整体取代，不留双份活状态。
+  MonthlyCounter get _favorCounter => monthlyCounters.favor;
 
   String get _npcToday => '${progress.year}-${progress.month}';
 
-  void _rollFavorDaily() {
-    if (_favorDailyMonth != _npcToday) {
-      _favorDailyMonth = _npcToday;
-      _favorDailyCount = <String, int>{};
-    }
-  }
+  void _rollFavorDaily() => _favorCounter.rollIfNewMonth(_npcToday);
 
   bool _canFavor() {
     _rollFavorDaily();
-    final total = _favorDailyCount.values.fold(0, (a, b) => a + b);
-    return total < kFavorDailyLimit;
+    return _favorCounter.totalUsed < kFavorDailyLimit;
   }
 
   void _recordFavor() {
     _rollFavorDaily();
-    _favorDailyCount['favor'] = (_favorDailyCount['favor'] ?? 0) + 1;
+    _favorCounter.record('favor');
   }
 
   /// 关系等级中文标签（按关系值 -100~100）。
@@ -308,24 +305,20 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
   }
   /// 深聊每日次数（独立于示好）。
   static const int kChatDailyLimit = 3;
-  Map<String, int> _chatDailyCount = <String, int>{};
-  String? _chatDailyMonth;
+
+  /// S13-5：深聊组的计数器（状态层 `GameStateProvider.monthlyCounters`）。
+  /// 原 `_chatDailyCount`/`_chatDailyMonth` 同上，被 `MonthlyCounter` 整体取代。
+  MonthlyCounter get _chatCounter => monthlyCounters.chat;
+
   bool _canChat() {
     _rollChatDaily();
-    final total = _chatDailyCount.values.fold(0, (a, b) => a + b);
-    return total < kChatDailyLimit;
+    return _chatCounter.totalUsed < kChatDailyLimit;
   }
   void _recordChat() {
     _rollChatDaily();
-    _chatDailyCount['chat'] = (_chatDailyCount['chat'] ?? 0) + 1;
+    _chatCounter.record('chat');
   }
-  void _rollChatDaily() {
-    final today = '${progress.year}-${progress.month}';
-    if (_chatDailyMonth != today) {
-      _chatDailyMonth = today;
-      _chatDailyCount = <String, int>{};
-    }
-  }
+  void _rollChatDaily() => _chatCounter.rollIfNewMonth(_npcToday);
   /// NPC 关系面板文本（全部 NPC 的关系等级/心情/任务数）。
   String formatNpcRelationPanel() {
     final buf = StringBuffer()..writeln('【NPC 关系】');

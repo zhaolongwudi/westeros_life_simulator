@@ -11,6 +11,7 @@ library;
 
 import '../data/balance_data.dart';
 import '../models/marital.dart';
+import '../models/monthly_counter.dart';
 import '../core/command_registry.dart';
 import '../core/monthly_pipeline.dart';
 import '../providers/game_provider_base.dart';
@@ -254,23 +255,27 @@ mixin GameMarriageMixin
 
   // ==================== 每月配偶互动计数（独立于其它 mixin，坑 16） ====================
   static const int kSpouseDailyLimit = BalanceData.spouseDailyLimit;
-  int _spouseDailyCount = 0;
-  String? _spouseDailyMonth;
+
+  /// S13-5：本组的计数器（状态层 `GameStateProvider.monthlyCounters`）。
+  /// 原 `_spouseDailyCount`/`_spouseDailyMonth` 正是「计数 + 月份键」这一对，
+  /// 被 `MonthlyCounter` 整体取代（用标量键 `'used'` 存int），不留双份活状态。
+  MonthlyCounter get _spouseCounter => monthlyCounters.spouseInteract;
+
   bool _canSpouseDaily() {
     _rollSpouseDaily();
-    return _spouseDailyCount < kSpouseDailyLimit;
+    return _spouseCounter.used(_kSpouseScalarKey) < kSpouseDailyLimit;
   }
   void _recordSpouseDaily() {
     _rollSpouseDaily();
-    _spouseDailyCount++;
+    _spouseCounter.setScalar(
+        _kSpouseScalarKey, _spouseCounter.used(_kSpouseScalarKey) + 1);
   }
-  void _rollSpouseDaily() {
-    final today = '${progress.year}-${progress.month}';
-    if (_spouseDailyMonth != today) {
-      _spouseDailyMonth = today;
-      _spouseDailyCount = 0;
-    }
-  }
+  void _rollSpouseDaily() => _spouseCounter.rollIfNewMonth(_spouseToday);
+
+  /// 配偶互动的标量计数键（`MonthlyCounter` 内部是 Map，标量也走同一形状）。
+  static const String _kSpouseScalarKey = 'used';
+
+  String get _spouseToday => '${progress.year}-${progress.month}';
 
   // ==================== Batch 10-25：婚姻系统二轮 ====================
   // 离婚/丧偶、配偶谈心（好感度）、婚后月度事件、婚姻面板。
@@ -417,26 +422,22 @@ mixin GameMarriageMixin
 
   // ==================== 谈心每月计数（独立前缀 _b1025，坑 16） ====================
 
-  int _b1025ChatCount = 0;
-  String? _b1025ChatMonth;
+  /// S13-5：本组的计数器（状态层 `GameStateProvider.monthlyCounters`）。
+  /// 原 `_b1025ChatCount`/`_b1025ChatMonth` 同上，被 `MonthlyCounter` 整体取代。
+  MonthlyCounter get _spouseChatCounter => monthlyCounters.spouseChat;
 
   bool _canSpouseChat() {
     _b1025RollChat();
-    return _b1025ChatCount < kSpouseChatDailyLimit;
+    return _spouseChatCounter.used(_kSpouseScalarKey) < kSpouseChatDailyLimit;
   }
 
   void _recordSpouseChat() {
     _b1025RollChat();
-    _b1025ChatCount++;
+    _spouseChatCounter.setScalar(
+        _kSpouseScalarKey, _spouseChatCounter.used(_kSpouseScalarKey) + 1);
   }
 
-  void _b1025RollChat() {
-    final today = '${progress.year}-${progress.month}';
-    if (_b1025ChatMonth != today) {
-      _b1025ChatMonth = today;
-      _b1025ChatCount = 0;
-    }
-  }
+  void _b1025RollChat() => _spouseChatCounter.rollIfNewMonth(_spouseToday);
 
   /// 跨年清除离婚标记（再婚冷却一年，满一年后允许再婚）。
   ///
