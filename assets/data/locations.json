@@ -14,7 +14,15 @@
     "governorId": "npc_nev",
     "connectedTo": [
       "location_white_harbor",
-      "location_barrowtowns"
+      "location_barrowtowns",
+      "location_castle_black",
+      "location_last_hearth",
+      "location_karhold",
+      "location_bear_island",
+      "location_the_neck",
+      "location_the_wall",
+      "location_whispering_wood",
+      "location_first_mens_graveyard"
     ],
     "description": "史塔克家族世代居住的城堡，北境之王驻地。"
   },
@@ -131,7 +139,9 @@
     "governorId": "npc_hoster_tully",
     "connectedTo": [
       "location_twin_rivers",
-      "location_ravenswood"
+      "location_ravenswood",
+      "location_stone_hedge",
+      "location_the_neck"
     ],
     "description": "徒利家族领地，河流环绕。"
   },
@@ -251,7 +261,9 @@
     ],
     "governorId": "npc_tywin_lannister",
     "connectedTo": [
-      "location_lannisport"
+      "location_lannisport",
+      "location_crane",
+      "location_stone_city"
     ],
     "description": "兰尼斯特家族领地，黄金之城。"
   },
@@ -320,7 +332,8 @@
     "governorId": "npc_robert_baratheon",
     "connectedTo": [
       "location_dragonstone",
-      "location_highgarden"
+      "location_highgarden",
+      "location_storms_end"
     ],
     "description": "七国之都，铁王座所在地。"
   },
@@ -338,7 +351,8 @@
     ],
     "governorId": null,
     "connectedTo": [
-      "location_kings_landing"
+      "location_kings_landing",
+      "location_exile"
     ],
     "description": "坦格利安家族领地，龙巢所在地。"
   },
@@ -356,7 +370,8 @@
     ],
     "governorId": "npc_stannis_baratheon",
     "connectedTo": [
-      "location_kings_landing"
+      "location_kings_landing",
+      "location_tarbeck"
     ],
     "description": "拜拉席恩家族领地，风暴中的城堡。"
   },
@@ -391,7 +406,9 @@
     "governorId": "npc_olenna_tyrell",
     "connectedTo": [
       "location_old_town",
-      "location_kings_landing"
+      "location_kings_landing",
+      "location_corner",
+      "location_redwyne"
     ],
     "description": "提利尔家族领地，最富庶的领地。"
   },
@@ -410,7 +427,8 @@
     ],
     "governorId": null,
     "connectedTo": [
-      "location_highgarden"
+      "location_highgarden",
+      "location_citadel"
     ],
     "description": "学城所在地，七国学术中心。"
   },
@@ -477,7 +495,8 @@
     ],
     "governorId": "npc_oberon_martell",
     "connectedTo": [
-      "location_starfall"
+      "location_starfall",
+      "location_uller"
     ],
     "description": "马泰尔家族领地，多恩首府。"
   },
@@ -561,7 +580,11 @@
     ],
     "governorId": "npc_geor_mormont",
     "connectedTo": [
-      "location_winterfell"
+      "location_winterfell",
+      "location_eastwatch",
+      "location_shadow_tower",
+      "location_castle_black_nightswatch",
+      "location_always_winter"
     ],
     "description": "分隔北境与永冬之地的巨墙。"
   },
@@ -680,7 +703,15 @@
     "governorId": null,
     "connectedTo": [
       "location_braavos",
-      "location_volantis"
+      "location_volantis",
+      "location_lys",
+      "location_tyrosh",
+      "location_myr",
+      "location_norvos",
+      "location_qohor",
+      "location_loras",
+      "location_quarth",
+      "location_dothraki_sea"
     ],
     "description": "自由贸易城邦，商人聚集地。"
   },

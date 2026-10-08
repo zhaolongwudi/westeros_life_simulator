@@ -17,7 +17,18 @@ const List<Location> allLocations = [
     population: 5000,
     features: const ['史塔克家族领地', '鱼梁木', '古老城堡'],
     governorId: 'npc_nev',
-    connectedTo: const ['location_white_harbor', 'location_barrowtowns'],
+    connectedTo: const [
+      'location_white_harbor',
+      'location_barrowtowns',
+      'location_castle_black',
+      'location_last_hearth',
+      'location_karhold',
+      'location_bear_island',
+      'location_the_neck',
+      'location_the_wall',
+      'location_whispering_wood',
+      'location_first_mens_graveyard',
+    ],
     description: '史塔克家族世代居住的城堡，北境之王驻地。',
   ),
   // S1-1 说明：本 id 的**语义锁定为恐怖堡（Dreadfort）**——name/features/
@@ -107,7 +118,12 @@ const List<Location> allLocations = [
     population: 4000,
     features: const ['徒利家族领地', '河流环绕', '鳟鱼'],
     governorId: 'npc_hoster_tully',
-    connectedTo: const ['location_twin_rivers', 'location_ravenswood'],
+    connectedTo: const [
+      'location_twin_rivers',
+      'location_ravenswood',
+      'location_stone_hedge',
+      'location_the_neck',
+    ],
     description: '徒利家族领地，河流环绕。',
   ),
   Location(
@@ -195,7 +211,11 @@ const List<Location> allLocations = [
     population: 8000,
     features: const ['兰尼斯特家族领地', '金色狮子', '黄金'],
     governorId: 'npc_tywin_lannister',
-    connectedTo: const ['location_lannisport'],
+    connectedTo: const [
+      'location_lannisport',
+      'location_crane',
+      'location_stone_city',
+    ],
     description: '兰尼斯特家族领地，黄金之城。',
   ),
   Location(
@@ -245,7 +265,11 @@ const List<Location> allLocations = [
     population: 500000,
     features: const ['铁王座', '红堡', '黑水河', '拜拉席恩家族领地'],
     governorId: 'npc_robert_baratheon',
-    connectedTo: const ['location_dragonstone', 'location_highgarden'],
+    connectedTo: const [
+      'location_dragonstone',
+      'location_highgarden',
+      'location_storms_end',
+    ],
     description: '七国之都，铁王座所在地。',
   ),
   Location(
@@ -257,7 +281,7 @@ const List<Location> allLocations = [
     population: 1000,
     features: const ['坦格利安家族领地', '龙巢', '火山'],
     governorId: null,
-    connectedTo: const ['location_kings_landing'],
+    connectedTo: const ['location_kings_landing', 'location_exile'],
     description: '坦格利安家族领地，龙巢所在地。',
   ),
 
@@ -271,7 +295,7 @@ const List<Location> allLocations = [
     population: 3000,
     features: const ['拜拉席恩家族领地', '风暴中的城堡', '雄鹿'],
     governorId: 'npc_stannis_baratheon',
-    connectedTo: const ['location_kings_landing'],
+    connectedTo: const ['location_kings_landing', 'location_tarbeck'],
     description: '拜拉席恩家族领地，风暴中的城堡。',
   ),
   Location(
@@ -297,7 +321,12 @@ const List<Location> allLocations = [
     population: 10000,
     features: const ['提利尔家族领地', '金色玫瑰', '花园'],
     governorId: 'npc_olenna_tyrell',
-    connectedTo: const ['location_old_town', 'location_kings_landing'],
+    connectedTo: const [
+      'location_old_town',
+      'location_kings_landing',
+      'location_corner',
+      'location_redwyne',
+    ],
     description: '提利尔家族领地，最富庶的领地。',
   ),
   Location(
@@ -309,7 +338,7 @@ const List<Location> allLocations = [
     population: 3000,
     features: const ['学城', '大图书馆', '高塔', '海塔尔家族领地'],
     governorId: null,
-    connectedTo: const ['location_highgarden'],
+    connectedTo: const ['location_highgarden', 'location_citadel'],
     description: '学城所在地，七国学术中心。',
   ),
   Location(
@@ -359,7 +388,7 @@ const List<Location> allLocations = [
     population: 8000,
     features: const ['马泰尔家族领地', '红色太阳', '沙漠'],
     governorId: 'npc_oberon_martell',
-    connectedTo: const ['location_starfall'],
+    connectedTo: const ['location_starfall', 'location_uller'],
     description: '马泰尔家族领地，多恩首府。',
   ),
   Location(
@@ -426,7 +455,13 @@ const List<Location> allLocations = [
     // `npc_geor_mormont`）。悬空引用会让 ai_service 的治主段走
     // 「治主数据缺失（npc_jeor_mormont），地方权力真空」分支。
     governorId: 'npc_geor_mormont',
-    connectedTo: const ['location_winterfell'],
+    connectedTo: const [
+      'location_winterfell',
+      'location_eastwatch',
+      'location_shadow_tower',
+      'location_castle_black_nightswatch',
+      'location_always_winter',
+    ],
     description: '分隔北境与永冬之地的巨墙。',
   ),
   Location(
@@ -518,7 +553,18 @@ const List<Location> allLocations = [
     population: 500000,
     features: const ['商人', '奴隶贸易'],
     governorId: null,
-    connectedTo: const ['location_braavos', 'location_volantis'],
+    connectedTo: const [
+      'location_braavos',
+      'location_volantis',
+      'location_lys',
+      'location_tyrosh',
+      'location_myr',
+      'location_norvos',
+      'location_qohor',
+      'location_loras',
+      'location_quarth',
+      'location_dothraki_sea',
+    ],
     description: '自由贸易城邦，商人聚集地。',
   ),
   Location(

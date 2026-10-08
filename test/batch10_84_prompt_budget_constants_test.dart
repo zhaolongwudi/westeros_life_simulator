@@ -180,17 +180,36 @@ void main() {
       expect(line, contains('关系 0'));
     });
 
-    test('邻近地点与路途风险：临冬城 2 个相连地点全展开（未触发截断）', () async {
+    test('邻近地点与路途风险：临冬城 10 个相连地点按预算截断为 4 条 + 尾注', () async {
       final body = await _promptFor(Player.defaultPlayer());
       final start = body.indexOf('- 邻近地点与路途风险：');
       final line = body.substring(start, body.indexOf('\n', start));
       expect(line, contains('自临冬城可往：'));
       expect(line, contains('，治主：'));
-      // 临冬城 connectedTo = [location_white_harbor, location_barrowtowns]（2 条）
+      // 【S13-12 订正】临冬城 connectedTo 原为 2 条，S13-12 补齐反向边后
+      // 变为 10 条（北境邻接本就写了「X → 临冬城」，反向却缺失）。
+      // 故本条从「未触发截断」改为「按 kAiPromptNearbyLocationCount=4 截断」，
+      // 前两条仍是 白港 / 巴隆镇（connectedTo 顺序不变）。
       expect(line, contains('白港'));
       expect(line, contains('巴隆镇'));
-      // 2 条 → 分隔符「；」出现 1 次，且无「另有 N 处未列」尾注
-      expect('；'.allMatches(line).length, 1);
+      // 4 条 → 分隔符「；」出现 3 次，并带「另有 6 处未列」尾注
+      expect('；'.allMatches(line).length, 3);
+      expect(line, contains('另有 6 处未列'));
+    });
+
+    test('邻近地点与路途风险：相连地点未超预算时不加尾注', () async {
+      // 【为什么保留这条】上一条已因数据变化改测截断路径，「未超预算」
+      // 分支若无覆盖会静默失去保护。白港（location_white_harbor）
+      // 补反向边后仍只有 1 个相邻地点（临冬城）。
+      final body = await _promptFor(
+        Player.defaultPlayer().copyWith(locationId: 'location_white_harbor'),
+      );
+      final start = body.indexOf('- 邻近地点与路途风险：');
+      final line = body.substring(start, body.indexOf('\n', start));
+      expect(line, contains('自白港可往：'));
+      expect(line, contains('临冬城'));
+      // 1 条 → 无分隔符、无尾注
+      expect('；'.allMatches(line).length, 0);
       expect(line, isNot(contains('处未列')));
     });
 
