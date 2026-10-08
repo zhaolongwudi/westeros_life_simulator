@@ -30,7 +30,11 @@ class MonthlyCounter {
   final Map<String, int> _counts;
 
   /// 这些计数所属的月份键（`${年}-${月}`）；null = 从未记录过。
-  final String? month;
+  ///
+  /// 🔴 **不能是 final**：`rollIfNewMonth` / `reset` / `copyFrom` 三处都要写它
+  /// （S13-5 首次 CI run `37747228801` analyze 报 3 个 error 级
+  /// `assignment_to_final` 就是这里声明成了 final）。
+  String? month;
 
   /// 当前计数（只读视图）。
   Map<String, int> get counts => Map<String, int>.unmodifiable(_counts);
