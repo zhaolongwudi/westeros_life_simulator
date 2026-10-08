@@ -72,11 +72,17 @@ void main() {
         ..startNewGame(
           player: Player.defaultPlayer().copyWith(id: 'player_old', name: '旧档角色'),
         );
-      // 先让旧档真的落一次盘，之后才谈「不被覆盖」
-      engine.resolveCommand('过月');
+      // 🔴 【顺序坑】必须先 pumpWidget 再 resolveCommand：自动存档挂在
+      // GameScreen 的监听器上，widget 还不存在时 notify 没有任何接收者，
+      // 定时器根本不会被安排（S12-7 测试「刚开局不该立即落盘」正是这条语义）。
+      // 我第一版把 `过月` 写在 pumpWidget 之前 ⇒ 旧档压根没落盘 ⇒ 前置断言红。
       await tester.pumpWidget(
         MaterialApp(home: GameScreen(engine: engine, saveService: service)),
       );
+      await tester.pump();
+      expect(saveFile('player_old').existsSync(), isFalse, reason: '刚开局不该立即落盘');
+      // 让旧档真的落一次盘，之后才谈「不被覆盖」
+      engine.resolveCommand('过月');
       await settleIo(tester);
       expect(saveFile('player_old').existsSync(), isTrue, reason: '前置：旧档应已落盘');
       expect(playerNameInFile('player_old'), '旧档角色');
@@ -117,11 +123,13 @@ void main() {
           player: Player.defaultPlayer()
               .copyWith(id: 'player_old', name: '旧档角色'),
         );
-      // 先跨月让旧档真的落盘，否则「旧槽未被覆盖」无从谈起
-      engine.resolveCommand('过月');
+      // 【顺序坑】同第 1 例：先 pumpWidget 再 resolveCommand，否则无人接收 notify
       await tester.pumpWidget(
         MaterialApp(home: GameScreen(engine: engine, saveService: service)),
       );
+      await tester.pump();
+      // 让旧档真的落盘，否则「旧槽未被覆盖」无从谈起
+      engine.resolveCommand('过月');
       await settleIo(tester);
       expect(playerNameInFile('player_old'), '旧档角色', reason: '前置：旧档已落盘');
 
@@ -150,13 +158,14 @@ void main() {
         ..startNewGame(
           player: Player.defaultPlayer().copyWith(id: 'player_old'),
         );
-      engine.resolveCommand('过月');
+      // 【顺序坑】同第 1 例
       await tester.pumpWidget(
         MaterialApp(home: GameScreen(engine: engine, saveService: service)),
       );
+      await tester.pump();
+      engine.resolveCommand('过月');
       await settleIo(tester);
-      final before = saveFile('player_old').existsSync();
-      expect(before, isTrue);
+      expect(saveFile('player_old').existsSync(), isTrue, reason: '前置：旧档已落盘');
 
       // 只 applyState，不跨月
       final otherEngine = GameEngine()
