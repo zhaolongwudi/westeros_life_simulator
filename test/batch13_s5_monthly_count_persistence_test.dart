@@ -145,6 +145,12 @@ void main() {
 
     test('贸易：刷满 2 次后读档，同月不能再做买卖', () async {
       final engine = _freshEngine();
+      // S13-8 起 `trade()` 先判地点再扣费：开局默认地点临冬城是**城堡**，
+      // 在城堡贸易会被正确拒绝（不再是「先扣费再拒」），额度永远不会用尽。
+      // 故本用例需先把玩家放到城市，才是在测「贸易额度是否入档」本身。
+      engine.updatePlayer(
+        engine.player.copyWith(locationId: 'location_white_harbor'),
+      );
       _exhaust(engine.trade);
 
       final revived = await _revive(engine, 'trade');

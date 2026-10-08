@@ -11,16 +11,28 @@ import '../theme/westeros_theme.dart';
 import '../widgets/theme/ornate.dart';
 
 /// NPC 关系面板。
-class NpcPanelScreen extends StatelessWidget {
+///
+/// S13-11 ⑰：本屏原为 `StatelessWidget`，但「任务」按钮接取成功后会写入
+/// `player.activeTasks`，而下方「进行中的任务」卡片读的是同一份状态——
+/// 没有重建就**看不到刚接的任务**（S13-3 把按钮从 V1 改接 V2 之后，
+/// 数据确实落盘了，只是界面不刷新，症状看起来仍像「点了没反应」）。
+/// 故改为 `StatefulWidget`，在互动结果回调里 `setState`。
+class NpcPanelScreen extends StatefulWidget {
   const NpcPanelScreen({super.key, this.engine});
+
   /// 可选：传入共享引擎（默认新建，用于独立浏览）。
   final GameEngine? engine;
 
   @override
+  State<NpcPanelScreen> createState() => _NpcPanelScreenState();
+}
+
+class _NpcPanelScreenState extends State<NpcPanelScreen> {
+  @override
   Widget build(BuildContext context) {
     // 注意：`??` 优先级高于级联 `..`，必须加括号，否则传入 engine 时
     // (engine ?? GameEngine())..startNewGame() 会重置传入引擎的玩家数据（坑 23）
-    final e = engine ?? (GameEngine()..startNewGame());
+    final e = widget.engine ?? (GameEngine()..startNewGame());
     final onSite = e.npcsAtCurrentLocation;
     return Scaffold(
       appBar: AppBar(title: const Text('NPC 关系')),
@@ -192,10 +204,14 @@ class NpcPanelScreen extends StatelessWidget {
   }
 
   /// 弹出互动结果。
+  ///
+  /// S13-11 ⑰：顺带 `setState`——「任务」按钮接取后 `activeTasks` 会变，
+  /// 必须重建才能让下方「进行中的任务」卡片显示出来。
   void _showResult(BuildContext context, String text) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(text), duration: const Duration(seconds: 4)),
     );
+    if (mounted) setState(() {});
   }
 }
 

@@ -154,7 +154,11 @@ class _EventCard extends StatelessWidget {
             ],
           ),
           subtitle: Text(
-            '$typeLabel · ${event.tags.join('、')}',
+            // S13-11 ⑮：此前还拼接了 `event.tags.join('、')`，把 91 个英文
+            // 内部标签（political/succession/crisis…）印给玩家。内容规范
+            // （`docs/specs/content-schema.md:96`）写明 tags 是「筛选与统计用」
+            // 的内部字段，不是给玩家看的分类，故不再展示。
+            typeLabel,
             style: const TextStyle(color: WesterosColors.inkDim),
           ),
           children: <Widget>[
@@ -171,10 +175,12 @@ class _EventCard extends StatelessWidget {
                   // 触发条件：Batch 10-103 补空态——门槛清空后
                   // `entries.join('，')` 为空串，原实现会渲染出裸的
                   // 「触发条件：」三个字加一个悬空冒号。
+                  // S13-11 ⑮：改用 `eventConditionLabel` 输出中文，
+                  // 不再把 `locationId=location_white_harbor` 这类内部键印给玩家。
                   Text(
                     event.triggerConditions.isEmpty
                         ? '触发条件：无（任何时候都可能发生）'
-                        : '触发条件：${event.triggerConditions.entries.map((e) => '${e.key}=${e.value}').join('，')}',
+                        : '触发条件：${event.triggerConditions.entries.map((e) => eventConditionLabel(e.key, e.value)).join('，')}',
                     style: theme.textTheme.bodySmall,
                   ),
                   if (event.isOneTime)

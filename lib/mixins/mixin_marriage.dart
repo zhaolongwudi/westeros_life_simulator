@@ -362,12 +362,22 @@ mixin GameMarriageMixin
     _recordSpouseChat();
     final s = player.spouse!;
     final t = topic?.trim();
+    // S13-11 ⑰：`家常` 必须排在 `家业` 之前判定。原实现先判
+    // `t.contains('家') || t.contains('业')`，而「家常」含「家」
+    // ⇒ 永远被路由成「家业」，`家常` 这一档**从来不可达**
+    // （注释与测试都把家常当合法话题，`_randomChatTopic` 也会掷出它）。
+    // 先精确匹配完整的「家常」，再退回前缀判定。
     final normalized = (t == null || t.isEmpty)
         ? _randomChatTopic()
-        : (t.contains('朝') || t.contains('政') ? '朝局'
-            : t.contains('家') || t.contains('业') ? '家业'
-            : t.contains('江湖') || t.contains('冒险') || t.contains('闯荡') ? '江湖'
-            : '家常');
+        : (t == '家常'
+            ? '家常'
+            : t.contains('朝') || t.contains('政')
+                ? '朝局'
+                : t.contains('家') || t.contains('业')
+                    ? '家业'
+                    : t.contains('江湖') || t.contains('冒险') || t.contains('闯荡')
+                        ? '江湖'
+                        : '家常');
     final text = switch (s.origin) {
       SpouseOrigin.noble => _nobleChat(normalized, s.name),
       SpouseOrigin.commoner => _commonerChat(normalized, s.name),

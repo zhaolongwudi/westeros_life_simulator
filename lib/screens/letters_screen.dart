@@ -80,7 +80,11 @@ class _LettersScreenState extends State<LettersScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '待回信：${pending.length} 封（最近：${pending.first.senderName}）',
+                          // S13-11 ⑯：`pending` 取自 `letters`（追加顺序），
+                          // `pending.last` 才是「最近」的那封——与
+                          // `replyLetter` 现在回复的对象、以及下方倒序列表
+                          // 顶部的信件三者一致。
+                          '待回信：${pending.length} 封（最近：${pending.last.senderName}）',
                           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                 color: WesterosColors.goldBright,
                                 fontWeight: FontWeight.bold,

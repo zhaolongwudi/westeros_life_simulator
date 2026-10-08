@@ -113,8 +113,12 @@ mixin GameLetterMixin on GameProviderBase {
     final target = _letters.where((l) => l.isFromNpc && !l.replied).toList();
     if (target.isEmpty) return '';
 
-    // 回最早的一封未回信
-    final letter = target.first;
+    // S13-11 ⑯：取 `last` 而非 `first`。
+    // `_letters` 是**追加**顺序（`_letters.add`），故 `first` 是最早的一封；
+    // 而本方法 doc 写的是「回复最新一封」、信件列表倒序渲染后**顶部就是最新**、
+    // 横幅也写着「最近：…」。三处指向最新，只有实现指向最早 ⇒ 玩家看到的
+    // 「最近」与真正回掉的那封不是同一封。
+    final letter = target.last;
     final index = _letters.indexOf(letter);
     _letters[index] = letter.copyWith(replied: true);
 

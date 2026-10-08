@@ -198,6 +198,10 @@ void main() {
       final before = e.player.energy;
       e.work();
       expect(e.player.energy, lessThan(before));
+      // S13-8 起 `trade()` 先判地点再扣费：开局默认地点临冬城是**城堡**，
+      // 在城堡贸易会被正确拒绝（`batch4_mixin_play_test.dart:109` 就是这条断言），
+      // 故本用例需先把玩家放到城市，才是在测「贸易消耗精力」本身。
+      e.updatePlayer(e.player.copyWith(locationId: 'location_white_harbor'));
       final before2 = e.player.energy;
       e.trade();
       expect(e.player.energy, lessThan(before2));

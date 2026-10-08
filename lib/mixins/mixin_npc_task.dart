@@ -137,6 +137,13 @@ mixin GameNpcTaskMixin
     final tasks = List<NpcTaskProgress>.from(player.activeTasks)..add(taskProgress);
     updatePlayer(player.copyWith(activeTasks: tasks));
     adjustRelation(npc.id, 2);
+    // S13-11 ⑭：协作文案承诺「同伴关系 +2」，但此前只 `adjustRelation(npc.id, 2)`
+    // ——同伴那一半从未生效（既有协作测试在**接取之后**取基线，故看不见缺失）。
+    // 完成结算处（:185-188）早就有同伴奖励，接取处漏了，属同一契约的两半不一致。
+    if (chosen.isCoop) {
+      final coId = chosen.coNpcId!;
+      adjustRelation(coId, 2);
+    }
     final coopText = chosen.isCoop
         ? '（与${npcById(chosen.coNpcId!)?.name ?? '同伴'}协作，'
             '${npcById(chosen.coNpcId!)?.name ?? '同伴'}关系 +2）'

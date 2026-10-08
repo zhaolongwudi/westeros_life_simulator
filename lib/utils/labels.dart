@@ -10,6 +10,9 @@
 /// - 将来若做 i18n，只改本文件函数体即可，调用点零改动。
 library;
 
+import '../data/family_data.dart';
+import '../data/item_data.dart';
+import '../data/location_data.dart';
 import '../models/event.dart';
 import '../models/location.dart';
 import '../models/marital.dart';
@@ -160,6 +163,59 @@ String attributeLabel(String key) {
     'willpower' => '意志',
     'perception' => '感知',
     _ => key,
+  };
+}
+
+/// 事件门槛键的中文描述（S13-11 ⑮）。
+///
+/// 【为什么需要它】事件面板此前直接把门槛印成 `键=值`，玩家看到的是
+/// `locationId=location_white_harbor`、`hasItem.item_glass_candle=1`、
+/// `skills.riding=3` 这类内部键；`event_data` 里实测有 12 种门槛键
+/// （`minGold`/`season`/`locationId`/`flag`/`noFlag`/`hasItem.*`/
+/// `skills.*`/`maxEnergy`/`minAge`/`minEnergy`/`minReputation`）。
+///
+/// 【为什么放这里】本文件是「全项目文案唯一集中层」（见文件头 M6 契约），
+/// 禁止在 screen 里直接写中文标签字面量。
+///
+/// 【未知键怎么办】返回「键=值」原文，而不是丢掉——门槛是**筛选与统计**
+/// 用的内部字段，若未来加了新键，显示原文至少不会静默隐瞒条件；
+/// 这与 `flagLabel` 返回 null 的策略不同，因为调用方在此无法「另行处理」。
+///
+/// 依赖 `location_data` / `item_data` / `family_data` 三个纯数据文件
+/// （它们只 import `models/`，不 import 本文件，故无循环导入）。
+String eventConditionLabel(String key, String value) {
+  // ---- 动态前缀键 ----
+  if (key.startsWith('hasItem.')) {
+    final itemId = key.substring(8);
+    final n = int.tryParse(value) ?? 0;
+    return '持有「${itemName(itemId)}」×$n';
+  }
+  if (key.startsWith('skills.')) {
+    return '${skillLabel(key.substring(7))} ≥ $value';
+  }
+  if (key.startsWith('attributes.')) {
+    return '${attributeLabel(key.substring(11))} ≥ $value';
+  }
+
+  // ---- 固定键 ----
+  return switch (key) {
+    'season' => '季节：${seasonLabel(value)}',
+    'locationId' => '地点：${locationById(value)?.name ?? value}',
+    'familyId' => '家族：${familyById(value)?.name ?? value}',
+    'identity' => '身份：$value',
+    'flag' => '需已${flagLabel(value) ?? value}',
+    'noFlag' => '需未${flagLabel(value) ?? value}',
+    'minAge' => '年龄 ≥ $value',
+    'maxAge' => '年龄 ≤ $value',
+    'minGold' => '金币 ≥ $value',
+    'minReputation' => '声望 ≥ $value',
+    'minHealth' => '健康 ≥ $value',
+    'maxHealth' => '健康 ≤ $value',
+    'minEnergy' => '精力 ≥ $value',
+    'maxEnergy' => '精力 ≤ $value',
+    'minHunger' => '饱食 ≥ $value',
+    'maxHunger' => '饱食 ≤ $value',
+    _ => '$key=$value',
   };
 }
 
