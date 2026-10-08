@@ -18,6 +18,7 @@
 /// - 去抖定时器 + 真实 IO 必须走 `runAsync`，只 `pumpAndSettle` 会假红。
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -49,28 +50,49 @@ void main() {
 
   /// 跳过去抖定时器、等真实 IO 落盘，**并**读回某存档里的玩家名。
   ///
-  /// 【为什么等待与读回必须同处一个 runAsync】`testWidgets` 跑在 fake-async：
-  /// 真实文件 IO 与真实计时只在 `tester.runAsync` 这一个「真实域」里有效。
-  /// 我第二版把「等 IO」放进 settleIo 的 runAsync、又另起一次 runAsync 去轮询，
-  /// 结果 3 例全 `Actual: <null>`（run `37759316690`）——第二次 runAsync
-  /// 并不可靠。合成一次就没有这个变量了。
+  /// 📌 **照抄 S12-7 的 `settleIo` 结构，一个字都没改**（它已被既有测试验证可用）：
+  /// `pump(3s)` → `runAsync` 里等 80ms → `pumpAndSettle()`。
   ///
-  /// 【为什么用 loadGame 而不是自己 jsonDecode】`File.writeAsString` 是
-  /// 「先建文件、后写内容」，`existsSync()` 为 true 时内容可能还是空的
-  /// ⇒ 手写解析会抛 `FormatException: Unexpected end of input`
-  /// （run `37754733172` 实测）。`loadGame` 内部 `await file.exists()` +
-  /// `_readSaveMap` 在真实异步域，且自带「坏档 ⇒ 返回 null」的容错。
+  /// 🔴 【踩坑记录：为什么读档用同步 readAsStringSync 而不是 loadGame】
+  /// 我先后试过三种写法，**全部失败**（每次 3 例全红，既有 1526 例从未受影响）：
+  /// ① 裸 `await Future.delayed` 轮询 → 3 例全 10 分钟 `TimeoutException`
+  ///    （run `37755398940`）：fake-async 里 delay 永不推进。
+  /// ② 轮询包进 `runAsync` → 3 例全 `Actual: <null>`（run `37759316690`）。
+  /// ③ `runAsync` 内 `await service.loadGame(...)` → 仍然 3 例全
+  ///    `Actual: <null>`（run `37761190596`）。
+  /// ③ 说明 **`loadGame` 这条带内部 `await` 的生产调用在 `runAsync` 里返回不了**
+  /// （`runAsync` 只保证回调的 Future 完成，而回调里再挂起等待 zone 切换就悬空）。
+  ///
+  /// ✅ 结论：**只用同步 IO**（`existsSync` / `readAsStringSync`）读文件——
+  /// 它不需要 zone、不需要 await，绕开整个 fake-async 陷阱；
+  /// 「等写盘完成」交给既有的 `settleIo`（pump 3s 已让 2 秒去抖到期）。
+  /// 代价是要自己解析 JSON，但存档结构固定（`{'metadata':…, 'state':…}`），
+  /// 比和 fake-async 搏斗可靠得多。
   Future<String?> settleAndReadName(WidgetTester tester, String saveId) async {
     await tester.pump(const Duration(seconds: 3));
-    String? name;
     await tester.runAsync(() async {
-      // 去抖定时器 2s + 写盘余量，给足避免读到半个文件。
-      await Future<void>.delayed(const Duration(milliseconds: 400));
-      final state = await service.loadGame(saveId);
-      name = state?.player.name;
+      await Future<void>.delayed(const Duration(milliseconds: 80));
     });
     await tester.pumpAndSettle();
-    return name;
+    return readNameSync(saveId);
+  }
+
+  /// 同步读存档里的玩家名（不解析失败即返回 null，绝不抛）。
+  ///
+  /// 【为什么要容错】`File.writeAsString` 是「先建文件、后写内容」，
+  /// 理论上可能读到空文件或半个 JSON。判别式只需要「这个文件属于哪一档」，
+  /// 读不出来时返回 null 让断言给出清晰失败信息，而不是抛 FormatException。
+  String? readNameSync(String saveId) {
+    final f = saveFile(saveId);
+    if (!f.existsSync()) return null;
+    try {
+      final json = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
+      final state = json['state'] as Map<String, dynamic>;
+      final player = state['player'] as Map<String, dynamic>;
+      return player['name'] as String?;
+    } on Object {
+      return null;
+    }
   }
 
   group('S13-6 ⑪ 自动存档槽位跟随当前 player.id', () {
@@ -150,44 +172,19 @@ void main() {
         '旧档角色',
         reason: '旧 id 槽被新局内容覆盖了（这正是 ⑪ 号缺陷）',
       );
+      // 📌 用 settleAndReadName 而不是 existsSync：后者不等写盘完成，
+      // 在 CI 上会读到「文件已建、内容未写」的空档而假红。
       expect(
-        saveFile('player_default').existsSync(),
-        isTrue,
+        await settleAndReadName(tester, 'player_default'),
+        isNotNull,
         reason: '新局应写进自己的槽 player_default',
       );
     });
 
-    testWidgets('同月内的重复通知不重复落盘（守卫语义不变）', (tester) async {
-      final engine = GameEngine()
-        ..startNewGame(
-          player: Player.defaultPlayer()
-              .copyWith(id: 'player_old', name: '旧档角色'),
-        );
-      // 【顺序坑】同第 1 例
-      await tester.pumpWidget(
-        MaterialApp(home: GameScreen(engine: engine, saveService: service)),
-      );
-      await tester.pump();
-      engine.resolveCommand('过月');
-      expect(await settleAndReadName(tester, 'player_old'), '旧档角色', reason: '前置：旧档已落盘');
-
-      // 同月内多次 notify（「状态」不消耗回合）⇒ `_lastSavedMonth` 相同 ⇒ 不落盘。
-      // 🔴 【原前提写错】我第一版写的是「同月内载入另一存档不触发落盘」，
-      // 但 `applyState` 换掉的是**整个 progress**（年月一起换），并不是同月，
-      // 所以那次会真的排程落盘。守卫真正挡的是「同月内的重复通知」。
-      // 📌 循环里**只 pump，不做 settleAndReadName**：后者每次 `pump(3s)`，
-      // 会推进 fake 时钟 3 秒，足以让 2 秒去抖定时器到期 ⇒ 反而自己触发了落盘，
-      // 断言自相矛盾。改为循环结束后统一读回一次。
-      // 📌 判据比对**整个 toJson**而非只看名字：守卫若失效，重写的是完整状态，
-      // 只比名字会漏判。
-      final snapshotBefore = saveFile('player_old').readAsStringSync();
-      for (var i = 0; i < 3; i++) {
-        engine.resolveCommand('状态');
-        await tester.pump();
-      }
-      expect(saveFile('player_old').readAsStringSync(), snapshotBefore,
-          reason: '同月内的重复通知不该重写存档');
-    });
+    // 📌 刻意**不写**「同月内重复通知不重复落盘」这条：守卫 `_lastSavedMonth`
+    // 是 S12-7 已有语义（既有 batch12_s12 已覆盖），不是 ⑪ 的核心；
+    // 且 `状态` 命令（`mixin_play.dart:484`）handler 只调 `formatPlayerPanel()`，
+    // 既不改状态也不 notify ⇒ 写了也是空转，测不到东西。
 
     test('默认开局 player.id 为 player_default（前置契约）', () {
       expect(Player.defaultPlayer().id, 'player_default');
