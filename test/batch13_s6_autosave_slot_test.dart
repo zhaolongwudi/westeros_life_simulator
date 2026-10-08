@@ -48,6 +48,28 @@ void main() {
   // （run `37760612365` 实测，错误全指向这一行；同文件既有 S12-7 测试用的也是单引号）。
   File saveFile(String saveId) => File('${tempDir.path}/save_$saveId.json');
 
+  /// 同步读存档里的玩家名（读不出来就返回 null，绝不抛）。
+  ///
+  /// 【为什么要容错】`File.writeAsString` 是「先建文件、后写内容」，
+  /// 理论上可能读到空文件或半个 JSON。判别式只需要「这个文件属于哪一档」，
+  /// 读不出来时返回 null，让断言给出清晰失败信息而不是抛 FormatException。
+  ///
+  /// 📌 **必须定义在 `settleAndReadName` 之前**：局部函数不能前向引用
+  /// （run `37762037029` 实测 1 个 analyze error：
+  /// Local variable 'readNameSync' can't be referenced before it is declared）。
+  String? readNameSync(String saveId) {
+    final f = saveFile(saveId);
+    if (!f.existsSync()) return null;
+    try {
+      final json = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
+      final state = json['state'] as Map<String, dynamic>;
+      final player = state['player'] as Map<String, dynamic>;
+      return player['name'] as String?;
+    } on Object {
+      return null;
+    }
+  }
+
   /// 跳过去抖定时器、等真实 IO 落盘，**并**读回某存档里的玩家名。
   ///
   /// 📌 **照抄 S12-7 的 `settleIo` 结构，一个字都没改**（它已被既有测试验证可用）：
@@ -60,8 +82,8 @@ void main() {
   /// ② 轮询包进 `runAsync` → 3 例全 `Actual: <null>`（run `37759316690`）。
   /// ③ `runAsync` 内 `await service.loadGame(...)` → 仍然 3 例全
   ///    `Actual: <null>`（run `37761190596`）。
-  /// ③ 说明 **`loadGame` 这条带内部 `await` 的生产调用在 `runAsync` 里返回不了**
-  /// （`runAsync` 只保证回调的 Future 完成，而回调里再挂起等待 zone 切换就悬空）。
+  /// ③ 说明 **`loadGame` 这条带内部 `await` 的调用在本测试的 `runAsync` 里返回不了**
+  /// （具体机制未确认；只确认「放进 runAsync 就读不到」这一现象，不作进一步推断）。
   ///
   /// ✅ 结论：**只用同步 IO**（`existsSync` / `readAsStringSync`）读文件——
   /// 它不需要 zone、不需要 await，绕开整个 fake-async 陷阱；
@@ -75,24 +97,6 @@ void main() {
     });
     await tester.pumpAndSettle();
     return readNameSync(saveId);
-  }
-
-  /// 同步读存档里的玩家名（不解析失败即返回 null，绝不抛）。
-  ///
-  /// 【为什么要容错】`File.writeAsString` 是「先建文件、后写内容」，
-  /// 理论上可能读到空文件或半个 JSON。判别式只需要「这个文件属于哪一档」，
-  /// 读不出来时返回 null 让断言给出清晰失败信息，而不是抛 FormatException。
-  String? readNameSync(String saveId) {
-    final f = saveFile(saveId);
-    if (!f.existsSync()) return null;
-    try {
-      final json = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
-      final state = json['state'] as Map<String, dynamic>;
-      final player = state['player'] as Map<String, dynamic>;
-      return player['name'] as String?;
-    } on Object {
-      return null;
-    }
   }
 
   group('S13-6 ⑪ 自动存档槽位跟随当前 player.id', () {
