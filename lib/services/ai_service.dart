@@ -1366,8 +1366,15 @@ $seasonGuide
                 id: 'choice_${DateTime.now().millisecondsSinceEpoch}',
                 text: c['text'] as String? ?? '',
                 requirements: const <String, int>{},
-                effects: (c['effects'] as Map? ?? <String, dynamic>{})
-                    .cast<String, int>(),
+                // S13-10：不能用 `.cast<String, int>()`——它返回**惰性视图**，
+                // 构造时不校验元素类型，只有读取时才抛 ⇒ 异常逃出本 try/catch，
+                // `_parseResponse` 会返回 `isSuccess: true` 的**毒化** EventChoice，
+                // 直到 `effectLabels` 迭代 `.entries` 或 `applyEffects` 才炸。
+                // 触发条件真实存在：模型输出浮点/字符串效果值（prompt 只给整数
+                // 示例，未约束）。`Map<String, int>.from` 是即时转换，元素非法
+                // 时立刻抛 ⇒ 落回下方 catch ⇒ 降级为「无选项」而非崩溃。
+                effects: Map<String, int>.from(
+                    c['effects'] as Map? ?? <String, dynamic>{}),
                 narrative: c['narrative'] as String? ?? '',
               ))
           .toList();

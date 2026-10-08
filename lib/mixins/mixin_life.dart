@@ -448,11 +448,8 @@ mixin GameLifeMixin on GameProviderBase {
     if (!_b1011CanDo('negotiate')) {
       return '你本月的议价机会已经用过了。';
     }
-    if (!canAffordEnergy(BalanceData.negotiateEnergyCost)) {
-      return '你口干舌燥，无力再费口舌。';
-    }
-    adjustEnergy(-BalanceData.negotiateEnergyCost);
-    _b1011Record('negotiate');
+    // S13-8：地点判定前移——议价的月额度只有 1，误在无商贩处点一次
+    // 就整月作废（且白扣精力）。与 hunt/trade 同型。
     final loc = currentLocation;
     if (loc == null ||
         (loc.type != LocationType.city &&
@@ -461,6 +458,11 @@ mixin GameLifeMixin on GameProviderBase {
             loc.type != LocationType.village)) {
       return '这里没有商贩，无处议价。';
     }
+    if (!canAffordEnergy(BalanceData.negotiateEnergyCost)) {
+      return '你口干舌燥，无力再费口舌。';
+    }
+    adjustEnergy(-BalanceData.negotiateEnergyCost);
+    _b1011Record('negotiate');
     final rnd = rng();
     final speech = skillLevel('speech');
     final isMerchant = isIdentity(PlayerIdentity.merchant);
@@ -517,8 +519,14 @@ mixin GameLifeMixin on GameProviderBase {
       return '商队遇上几伙小毛贼，你有惊无险地护了过去。拿到 ${(baseFee * BalanceData.convoyPartialRate).round()} 金币。';
     }
     // 失败：受伤但保住货物
+    //
+    // S13-8：文案一直写「商队付你 N 金币聊表谢意」，实现却**从不发放**——
+    // `convoyFailRate` 在全库只出现在这行文案里（声明处除外）。
+    // 紧邻的部分成功分支有 `gainGold`，本分支漏了 ⇒ 叙事与状态脱节。
+    final failPay = (baseFee * BalanceData.convoyFailRate).round();
     adjustHealth(-BalanceData.convoyInjuryHealth);
-    return '商队在路口遭了埋伏，你奋力搏杀才护住货物，自己却挂了彩（健康 -${BalanceData.convoyInjuryHealth}）。商队付你 ${(baseFee * BalanceData.convoyFailRate).round()} 金币聊表谢意。';
+    gainGold(failPay);
+    return '商队在路口遭了埋伏，你奋力搏杀才护住货物，自己却挂了彩（健康 -${BalanceData.convoyInjuryHealth}）。商队付你 $failPay 金币聊表谢意。';
   }
 
   // ==================== 装备系统（Batch 10-4） ====================

@@ -134,15 +134,18 @@ mixin GamePlayMixin
     if (!_canDoDaily('hunt')) {
       return '本月的猎物已经够多了。';
     }
+    // S13-8：地点判定必须在扣费之前——否则「在城市狩猎」是**纯亏损**：
+    // 20 精力照扣、当月 1/2 额度照占，只换来一句「城市里无猎可狩」。
+    // 开局默认地点临冬城是 castle（不是 city），故本路径实际很易触发。
+    final loc = currentLocation;
+    if (loc == null) return '你身处荒野之外，无从狩猎。';
+    if (loc.type == LocationType.city) return '城市里无猎可狩。你需要去野外。';
     if (!canAffordEnergy(BalanceData.huntEnergyCost)) {
       return '你实在太累了，拉不开弓。先去休息吧。';
     }
     adjustEnergy(-BalanceData.huntEnergyCost);
     _recordDaily('hunt');
     final rnd = rng();
-    final loc = currentLocation;
-    if (loc == null) return '你身处荒野之外，无从狩猎。';
-    if (loc.type == LocationType.city) return '城市里无猎可狩。你需要去野外。';
 
     final skill = max(skillLevel('archery'), skillLevel('sword'));
     final danger = loc.dangerLevel;
@@ -180,16 +183,17 @@ mixin GamePlayMixin
     if (!_canDoDaily('trade')) {
       return '本月的集市已经散了。';
     }
-    if (!canAffordEnergy(BalanceData.tradeEnergyCost)) {
-      return '你精疲力竭，无心讨价还价。先去休息吧。';
-    }
-    adjustEnergy(-BalanceData.tradeEnergyCost);
-    _recordDaily('trade');
+    // S13-8：同 hunt()——地点判定前移，否则在城堡「贸易」白扣 15 精力 + 占额度。
     final loc = currentLocation;
     if (loc == null ||
         (loc.type != LocationType.city && loc.type != LocationType.market)) {
       return '这里不是做买卖的地方。去城市或集市吧。';
     }
+    if (!canAffordEnergy(BalanceData.tradeEnergyCost)) {
+      return '你精疲力竭，无心讨价还价。先去休息吧。';
+    }
+    adjustEnergy(-BalanceData.tradeEnergyCost);
+    _recordDaily('trade');
 
     final rnd = rng();
     final isMerchant = isIdentity(PlayerIdentity.merchant);

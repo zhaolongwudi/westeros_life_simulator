@@ -92,6 +92,11 @@ Player buildSetupPlayer(GameSetup setup) {
     // 不给这一项，事件库 3 个 `skills.magic: 5` 门槛的选项就永远不可选——
     // `train()` 对不在技能表里的技能直接拒绝。
     'magic': 0,
+    // S13-7：`stealth` 与 magic/alchemy 完全同构，同样「不加就永久不可选」。
+    // S12-12 只把它加进了 `Player.defaultPlayer()`，而**生产开局走的是本函数**
+    // （向导路径）⇒ `event_road_bandits` / `choice_sneak_past`（「绕道潜行」，
+    // 门槛 `skills.stealth: 2`）在真实游玩里依旧不可选。
+    'stealth': 0,
   };
   return Player(
     id: 'player_${DateTime.now().millisecondsSinceEpoch}',

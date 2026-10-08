@@ -520,9 +520,18 @@ class GameStateProvider extends ChangeNotifier {
         }
         newPlayer = newPlayer.copyWith(inventory: newInv);
       } else if (key == 'health') {
-        newPlayer = newPlayer.copyWith(
-          health: (newPlayer.health + value).clamp(0, 100),
-        );
+        // S13-9：健康归零必须判死，与 `mixin_life.adjustHealth` 对齐。
+        // 此前本分支只 clamp、从不置 `isAlive=false`，而 `_checkGameOver`
+        // 只读 `flags['isAlive']` ⇒ 事件库 11 处负 health（-3~-20）能把玩家
+        // 打到 0 血却继续游戏（狩猎/饥饿走 adjustHealth 会判死，两条通道
+        // 对「健康归零」给出不同结论，属实现漂移）。
+        final newHealth = (newPlayer.health + value).clamp(0, 100);
+        newPlayer = newPlayer.copyWith(health: newHealth);
+        if (newHealth <= 0 && (newPlayer.flags['isAlive'] ?? true)) {
+          newPlayer = newPlayer.copyWith(
+            flags: <String, bool>{...newPlayer.flags, 'isAlive': false},
+          );
+        }
       } else if (key == 'energy') {
         newPlayer = newPlayer.copyWith(
           energy: (newPlayer.energy + value).clamp(0, 100),

@@ -190,9 +190,16 @@ class EventService {
               applied[key] = value;
             }
           } else if (key == 'health') {
-            newPlayer = newPlayer.copyWith(
-              health: (newPlayer.health + value).clamp(0, 100),
-            );
+            // S13-9：与 `GameStateProvider.applyEffects` 的同名分支对齐——
+            // 健康归零即判死（`mixin_life.adjustHealth` 一直是这个语义，
+            // 而 `_checkGameOver` 只读 `flags['isAlive']`）。
+            final newHealth = (newPlayer.health + value).clamp(0, 100);
+            newPlayer = newPlayer.copyWith(health: newHealth);
+            if (newHealth <= 0 && (newPlayer.flags['isAlive'] ?? true)) {
+              newPlayer = newPlayer.copyWith(
+                flags: <String, bool>{...newPlayer.flags, 'isAlive': false},
+              );
+            }
             applied[key] = value;
           } else if (key == 'energy') {
             newPlayer = newPlayer.copyWith(
