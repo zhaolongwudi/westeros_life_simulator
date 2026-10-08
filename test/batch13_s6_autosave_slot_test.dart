@@ -70,6 +70,30 @@ void main() {
     }
   }
 
+  /// 等某存档文件**内容可解析**为止（同步读 + 真实延时，只在 `runAsync` 内用）。
+  ///
+  /// 🔴 【run `37763396473` 定位到的真因】`existsSync()` 返回 **true** 而
+  /// `readNameSync()` 返回 **null** —— 因为 `SaveService.saveGame` 走
+  /// `File.writeAsString`（`save_service.dart:129`），**文件先被创建、内容后写入**，
+  /// 所以「文件存在」不等于「内容可解析」，此时 `jsonDecode` 抛
+  /// `FormatException: Unexpected end of input` 被我 `on Object` 吞成 null。
+  /// 既有 S12-7 测试只断言 `existsSync()`、**不读内容**，所以它从不踩这个坑。
+  ///
+  /// ✅ 轮询放在 `runAsync` 里：`Future.delayed` 只有在真实域才会推进
+  /// （fake-async 内裸用它会 10 分钟超时，run `37755398940`）。
+  /// 读取仍用同步 IO，不跨 zone。
+  Future<String?> readNameWhenParsable(WidgetTester tester, String saveId) async {
+    String? name;
+    await tester.runAsync(() async {
+      for (var i = 0; i < 40; i++) {
+        name = readNameSync(saveId);
+        if (name != null) return;
+        await Future<void>.delayed(const Duration(milliseconds: 25));
+      }
+    });
+    return name;
+  }
+
   /// 跳过去抖定时器、等真实 IO 落盘，**并**读回某存档里的玩家名。
   ///
   /// 📌 **照抄 S12-7 的 `settleIo` 结构，一个字都没改**（它已被既有测试验证可用）：
@@ -98,13 +122,14 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// 推进去抖与真实 IO，然后同步读回某存档里的玩家名。
+  /// 推进去抖与真实 IO，然后等到内容可解析再读回玩家名。
   ///
-  /// 📌 读取一律走同步 IO（`readNameSync`）：不需要 zone、不需要 await，
-  /// 完全绕开 fake-async 陷阱；「等落盘」由上面的 `settleIo` 负责，两者分开。
+  /// 📌 两步必须分开：`settleIo` 照抄既有测试（只保证**文件已创建**），
+  /// `readNameWhenParsable` 再等到**内容可解析**。既有 S12-7 只断言 `existsSync()`
+  /// 所以不需要第二步；本批要读内容判断「这个文件属于哪一档」，必须等。
   Future<String?> settleAndReadName(WidgetTester tester, String saveId) async {
     await settleIo(tester);
-    return readNameSync(saveId);
+    return readNameWhenParsable(tester, saveId);
   }
 
   group('S13-6 ⑪ 自动存档槽位跟随当前 player.id', () {
@@ -126,11 +151,13 @@ void main() {
       expect(saveFile('player_old').existsSync(), isFalse, reason: '刚开局不该立即落盘');
       // 让旧档真的落一次盘，之后才谈「不被覆盖」
       engine.resolveCommand('过月');
-      // 📌 先用 `existsSync` 分界：它为 true 说明落盘成功（问题在解析），
-      // 为 false 说明根本没落盘（问题在时序）。run `37762763363` 卡在这里返回 null。
+      // 📌 先用 `existsSync` 分界：它为 true 只说明**文件已创建**（不等于内容写完），
+      // 为 false 说明根本没落盘。run `37762763363` 靠这行定到了时序问题，
+      // run `37763396473` 靠它定到了「文件在、内容还没写完」——两者都靠它才分得清。
       await settleIo(tester);
-      expect(saveFile('player_old').existsSync(), isTrue, reason: '前置：旧档应已落盘');
-      expect(readNameSync('player_old'), '旧档角色');
+      expect(saveFile('player_old').existsSync(), isTrue, reason: '前置：旧档文件应已创建');
+      expect(await readNameWhenParsable(tester, 'player_old'), '旧档角色',
+          reason: '前置：旧档内容应已写完且可解析');
 
       // ---- 模拟设置页「载入另一个存档」：同一个 engine 上 applyState ----
       // 【与 settings_screen.dart:122 完全同形】那边是 engine.applyState(state)，
