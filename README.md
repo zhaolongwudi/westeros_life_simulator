@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-08 · fix(save): S13-4 补 Player import 与 loaded!（analyze 2 error）**（`24c82f4`）
+
+**2026-10-08 · fix(save): S13-4 ⑤ 信件三字段进存档，堵住反复读档刷关系**（`095ed4f`）
+
 **2026-10-08 · fix(test): S13-3 tap 前 ensureVisible 修 widget 测试**（`a6b4b77`）
-
-**2026-10-08 · fix(review): S13-3 ④ 删未使用 import 消除 analyze warning**（`e2dec29`）
-
-**2026-10-08 · fix(review): S13-3 ④ NPC 面板「任务」按钮接 V2（接线+直接接第一个）**（`1d98ec9`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/archive/03-审查归档.md。
 <!-- CHANGELOG:END -->
