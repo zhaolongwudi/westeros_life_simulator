@@ -102,11 +102,16 @@ mixin GameAdventureMixin
       buf.writeln('一无所获。${danger >= 5 ? '这地方不宜久留。' : '也许下次会有收获。'}');
     }
 
-    // Batch 10-18：探索推进多步骤任务（替代 10-15 的简单任务结算）
-    final taskText = advanceNpcTasks();
-    if (taskText.isNotEmpty) {
-      buf.writeln(taskText);
-    }
+    // 【S13-2】任务推进**不在这里**做，统一交给月度管线的 `task_advance` 钩子。
+    // 本指令 `consumedTurn: true` ⇒ 调度方（`game_screen.dart:184`）会在本方法
+    // 返回后再调 `advanceMonth()`，管线的 `beforeAdvance` 钩子
+    // （`mixin_npc_task.dart:451-463`）已经会推 1 步。此处原先还有一次
+    // `advanceNpcTasks()`（Batch 10-18 引入），与管线那次叠加成**一次探索推进 2 步**，
+    // 导致 `NpcTaskStep.turnsRequired`（注释明写「探索/过月各计 1 次」）整体折半，
+    // 72 个任务模板的 `totalTurns` 全部失真（如 `task_nev_escort` 5→3）。
+    //
+    // 注意：**不要**反过来删管线钩子——它同时服务「过月」路径（`needsTimeAdvance`
+    // 为 false 的指令不触发 `advanceMonth()`），删了「过月」就不推进任务了。
 
     // 探索推进时间（半天=0.5 月，用 turnCount 模拟）
     notifyListeners();
