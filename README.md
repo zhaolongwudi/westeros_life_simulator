@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
-**2026-10-08 · fix(review): S13-5 修正 analyze error：MonthlyCounter.month 改为可变字段**（`f3aa86a`）
+**2026-10-08 · test(S13-6): 判别式改用内存版 SaveService，不再读真实文件**（`3fe7370`）
 
-**2026-10-08 · fix(review): S13-5 月度行动计数持久化（修 P1 ⑫ 读档刷额度）**（`85337fb`）
+**2026-10-08 · test(S13-6): 加诊断输出，一次问清存档文件到底长什么样**（`922e640`）
 
-**2026-10-08 · fix(save): S13-4 补 Player import 与 loaded!（analyze 2 error）**（`24c82f4`）
+**2026-10-08 · fix(test): S13-6 等到存档内容可解析，不只等文件创建（CI 第九次）**（`eb6d220`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/archive/03-审查归档.md。
 <!-- CHANGELOG:END -->
