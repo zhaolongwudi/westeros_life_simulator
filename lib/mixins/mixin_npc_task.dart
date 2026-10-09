@@ -9,6 +9,7 @@
 /// 避免 flags 只存 bool 的限制（坑 16）。
 library;
 
+import '../data/balance_data.dart';
 import '../data/npc_task_data.dart';
 import '../models/npc_task.dart';
 import '../core/command_registry.dart';
