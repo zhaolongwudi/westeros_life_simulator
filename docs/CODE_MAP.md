@@ -160,7 +160,7 @@ GameEngine extends GameProviderBase with:
 | 信件 | mixin_letter.dart（replyLetter/formatLettersPanel） |
 | NPC 关系等级 | mixin_npc_interact.dart（npcRelationLabel/npcRelation） |
 | NPC 深度互动 | mixin_npc_interact.dart（npcInteract/npcFavor/maybeNpcStoryEvent） |
-| NPC 任务链 | mixin_npc_interact.dart（npcTasks/acceptNpcTask/maybeResolveNpcTask） |
+| NPC 任务链 | mixin_npc_task.dart（acceptNpcTaskV2/formatNpcTaskPanelV2/advanceNpcTasks，V2 主链；S14-1 已删 V1 `acceptNpcTask/maybeResolveNpcTask/formatNpcTaskPanel`） |
 | NPC 深聊 | mixin_npc_interact.dart（npcChat） |
 | NPC 关系面板 | mixin_npc_interact.dart（formatNpcRelationPanel） |
 | 家谱/立嗣 | mixin_generation.dart（addChild/formatFamilyTree） |
@@ -285,7 +285,7 @@ GameEngine extends GameProviderBase with:
 | 互动 | 交谈/interact [名字] | npcInteract | 否 |
 | 示好 | 送礼/favor [名字] | npcFavor | 否 |
 | 深聊 | 聊天/chat [名字] | npcChat（Batch 10-15） | 否 |
-| 任务 | 委托/task [名字] | formatNpcTaskPanel / acceptNpcTask | 否 |
+| 任务 | 委托/task [名字] | formatNpcTaskPanelV2 / acceptNpcTaskV2（S13-3 已从 V1 迁 V2；S14-1 删除 V1 原函数） | 否 |
 | 任务列表 | 任务2/tasks2 | formatNpcTaskPanelV2（Batch 10-18） | 否 |
 | 接任务 | accept | acceptNpcTaskV2（Batch 10-18） | 否 |
 | 进度 | 任务进度/progress | formatNpcTaskProgressPanel（Batch 10-18） | 否 |

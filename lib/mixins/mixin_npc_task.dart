@@ -136,21 +136,27 @@ mixin GameNpcTaskMixin
     );
     final tasks = List<NpcTaskProgress>.from(player.activeTasks)..add(taskProgress);
     updatePlayer(player.copyWith(activeTasks: tasks));
-    adjustRelation(npc.id, 2);
+    // S14-1：裸字面量 2 改为引用 `BalanceData.taskAcceptRelation`。
+    // 该常量此前**只在 V1 `acceptNpcTask` 里被用过**，而 V1 已在 S13-3
+    // 被 V2 取代并于 S14-1 删除 ⇒ 常量成了摆设（改它没有任何效果）。
+    // 数值同为 2，**行为零变化**，只是把数值收口接回去。
+    adjustRelation(npc.id, BalanceData.taskAcceptRelation);
     // S13-11 ⑭：协作文案承诺「同伴关系 +2」，但此前只 `adjustRelation(npc.id, 2)`
     // ——同伴那一半从未生效（既有协作测试在**接取之后**取基线，故看不见缺失）。
     // 完成结算处（:185-188）早就有同伴奖励，接取处漏了，属同一契约的两半不一致。
     if (chosen.isCoop) {
       final coId = chosen.coNpcId!;
-      adjustRelation(coId, 2);
+      adjustRelation(coId, BalanceData.taskAcceptRelation);
     }
     final coopText = chosen.isCoop
         ? '（与${npcById(chosen.coNpcId!)?.name ?? '同伴'}协作，'
-            '${npcById(chosen.coNpcId!)?.name ?? '同伴'}关系 +2）'
+            '${npcById(chosen.coNpcId!)?.name ?? '同伴'}'
+            '关系 +${BalanceData.taskAcceptRelation}）'
         : '';
     final firstStep = chosen.steps.first.description;
     return '📜 你接下${npc.name}的委托：「${chosen.title}」。'
-        '第一步：$firstStep。期限 ${deadline.$1}年${deadline.$2}月。关系 +2。$coopText';
+        '第一步：$firstStep。期限 ${deadline.$1}年${deadline.$2}月。'
+        '关系 +${BalanceData.taskAcceptRelation}。$coopText';
   }
 
   /// 推进所有进行中任务（探索/过月时调用）。

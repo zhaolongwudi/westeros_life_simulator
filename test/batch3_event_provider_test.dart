@@ -12,7 +12,6 @@ void main() {
     test('默认加载所有事件', () {
       final provider = EventProvider(events: allEvents);
       expect(provider.allEvents.length, allEvents.length);
-      expect(provider.triggeredEvents, isEmpty);
       expect(provider.completedEventIds, isEmpty);
     });
 
@@ -146,14 +145,6 @@ void main() {
       expect(available, isNotEmpty);
     });
 
-    test('triggerRandomEvent 触发事件', () {
-      final provider = EventProvider(events: allEvents);
-      final player = Player.defaultPlayer();
-      final event = provider.triggerRandomEvent(player);
-      expect(event, isNotNull);
-      expect(provider.triggeredEvents.length, 1);
-    });
-
     test('markCompleted 标记完成', () {
       final provider = EventProvider(events: allEvents);
       provider.markCompleted('event_1');
@@ -198,10 +189,8 @@ void main() {
     test('reset 重置状态', () {
       final provider = EventProvider(events: allEvents);
       provider.markCompleted('event_1');
-      provider.triggerRandomEvent(Player.defaultPlayer());
       provider.reset();
       expect(provider.completedEventIds, isEmpty);
-      expect(provider.triggeredEvents, isEmpty);
     });
   });
 }

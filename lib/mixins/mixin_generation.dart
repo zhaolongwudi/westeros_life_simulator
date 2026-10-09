@@ -106,7 +106,13 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
     final isNoble = p.identity == PlayerIdentity.noble;
     // 现任家主记入历代谱系（Batch 10-17 多代展示）
     final prevRecords = List<GenerationRecord>.from(p.generationRecords);
-    final currentGen = prevRecords.length + 1;
+    // S14-1：世代号取「最后一条记录的代数 + 1」，**不再用列表长度 + 1**。
+    // 原因：下方按 `generationRecordCap` 裁剪后，列表长度与真实代数脱钩
+    // （裁到只剩最近 20 条时，第 35 代玩家的 length 仍是 20 ⇒ 用 length
+    // 会显示「第 21 代」）。`generation` 是 `GenerationRecord` 自带的字段，
+    // 本就是权威代数来源。此前该上限常量声明了却从未被引用（纯摆设），
+    // 存档随传承次数线性膨胀。
+    final currentGen = prevRecords.isEmpty ? 1 : prevRecords.last.generation + 1;
     prevRecords.add(
       GenerationRecord(
         generation: currentGen,
@@ -116,6 +122,14 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
         achievement: p.reputation >= 70 ? '声望 ${p.reputation}' : '',
       ),
     );
+    // S14-1：落实 `generationRecordCap` 声明的「环形上限（防存档线性膨胀）」。
+    // 保留**最近 N 条**（最新的代数在尾部），早期记录不再进入存档。
+    if (prevRecords.length > BalanceData.generationRecordCap) {
+      prevRecords.removeRange(
+        0,
+        prevRecords.length - BalanceData.generationRecordCap,
+      );
+    }
     final newPlayer = Player(
       id: 'player_${houseName}_$heir',
       name: heir,
@@ -146,7 +160,8 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
       },
       health: 100,
       energy: 100,
-      hunger: 60,
+      // S14-1：字面量改为引用 BalanceData（三条开局/传承路径统一）。
+      hunger: BalanceData.startingHunger,
       title: '',
       house: houseName,
       children: const [],
@@ -160,13 +175,16 @@ mixin GameGenerationMixin on GameProviderBase, GameLifeMixin {
     return newPlayer;
   }
 
-  /// 当前世代数（1 起；世代谱系 N 条即第 N+1 代，更精确表达三代以上）。
+  /// 当前世代数（1 起）。
   ///
   /// 旧实现 `flagOf('generation') ? 2 : 1` 只能表达 1/2 两档（坑 24：
-  /// 三代以上显示错误），现以 generationRecords 长度 + 1 计算。
+  /// 三代以上显示错误），后改为「generationRecords 长度 + 1」。
+  /// S14-1 再次改为取 `records.last.generation`：谱系记录现在会按
+  /// `generationRecordCap` 裁剪，**列表长度不再等于代数**（第 35 代
+  /// 裁到 20 条后 length = 20，用 length 会误报「第 21 代」）。
   int generationNumber() {
-    final records = player.generationRecords.length;
-    if (records > 0) return records + 1;
+    final records = player.generationRecords;
+    if (records.isNotEmpty) return records.last.generation + 1;
     return flagOf('generation') ? 2 : 1;
   }
 

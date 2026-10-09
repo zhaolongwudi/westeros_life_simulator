@@ -221,68 +221,31 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
   }
   // ==================== Batch 10-15：NPC 任务链 / 深聊 / 关系面板 ====================
   /// 某 NPC 的任务列表（无则空列表）。
+  ///
+  /// **保留（V1 残留）**：本身无生产调用方，但 `batch13_s3` 拿它当**数据源
+  /// 断言**使用——锁「V1 可见委托标题在 V2 有同名模板」这条接线契约
+  /// （`test/batch13_s3_npc_task_button_test.dart:90,134`）。删它会打红
+  /// 既有测试，且那条契约本身有效。
   List<String> npcTasks(String npcId) {
     final npc = npcById(npcId);
     return npc == null ? const <String>[] : npc.tasks;
   }
-  /// 任务面板：列出在场 NPC 的可接任务。
-  String formatNpcTaskPanel() {
-    final buf = StringBuffer()..writeln('【可接任务】');
-    var any = false;
-    for (final n in npcsAtCurrentLocation) {
-      if (n.tasks.isEmpty) continue;
-      any = true;
-      buf.writeln('· ${n.name}：${n.tasks.join(' / ')}');
-    }
-    if (!any) return '【可接任务】\n在场的人没有委托给你任务。';
-    return buf.toString().trim();
-  }
-  /// 接受一位在场 NPC 的任务（关系 ≥ 相识 才肯委托）。
-  ///
-  /// 返回叙事文本；未达关系/不在场返回说明。
-  String acceptNpcTask(String npcId) {
-    final npc = npcById(npcId);
-    if (npc == null) return '没有叫「$npcId」的人。';
-    if (!npc.isAlive) return '${npc.name}已经不在了。';
-    if (npc.locationId != player.locationId) return '${npc.name}不在这里。';
-    if (npc.tasks.isEmpty) return '${npc.name}没有委托给你的任务。';
-    final rel = npcRelation(npc.id);
-    if (rel < 20) {
-      return '${npc.name}还信不过你：「等你我熟络些，再说这些事吧。」';
-    }
-    // 接受任务：记录任务标记（一次性）
-    final task = npc.tasks.first;
-    final flagKey = 'npc_task.${npc.id}.$task';
-    if (flagOf(flagKey)) {
-      return '你已经接下「$task」，${npc.name}在等你带回消息。';
-    }
-    setFlag(flagKey, true);
-    adjustRelation(npc.id, BalanceData.taskAcceptRelation);
-    return '📜 你接下${npc.name}的委托：「$task」。他/她郑重道：「事成之后，不会亏待你。」关系 +2。';
-  }
-  /// 任务进度检查：已接任务在探索/过月后结算。
-  ///
-  /// 当前简化：探索时 40% 概率完成一项已接任务（获得金币+声望+关系）。
-  String maybeResolveNpcTask() {
-    final buf = StringBuffer();
-    for (final n in npcsAtCurrentLocation) {
-      for (final task in n.tasks) {
-        final flagKey = 'npc_task.${n.id}.$task';
-        if (!flagOf(flagKey)) continue;
-        if (flagOf('npc_task_done.${n.id}.$task')) continue;
-        // 模拟结算：直接完成（探索时调用，概率在外层控制）
-        setFlag('npc_task_done.${n.id}.$task', true);
-        setFlag(flagKey, false);
-        final reward = BalanceData.taskRewardBase + npcRelation(n.id) ~/ 2;
-        gainGold(reward);
-        adjustRelation(n.id, BalanceData.taskRewardRelation);
-        adjustReputation(BalanceData.reputationSmallGain);
-        buf.writeln('✅ 你完成了${n.name}的委托：「$task」。获得 $reward 金币，关系 +5，声望 +2。');
-      }
-    }
-    return buf.toString().trim();
-  }
-  /// 与 NPC 深聊（每日限次，比示好更深入，需相识以上）。
+  // S14-1：V1 任务链三函数 `formatNpcTaskPanel` / `acceptNpcTask` /
+  // `maybeResolveNpcTask` **已删除**。
+  //
+  // 删除依据（实测取证，非推测）：
+  // - `acceptNpcTask`：S13-3 已把「任务」指令与 NPC 面板按钮都迁到
+  //   `acceptNpcTaskV2`，`lib/` 内**零调用方**。
+  // - `formatNpcTaskPanel`：同批迁到 `formatNpcTaskPanelV2`，零调用方。
+  // - `maybeResolveNpcTask`：自建以来**从未有过任何调用方**——连 V1 自己
+  //   都没把它接到探索/月度钩子上 ⇒ V1 任务链**从设计上就永远无法结算**
+  //   （这正是 S13-3 卡片 ④ 记录的原始症状）。
+  //
+  // 这三个函数此前唯一的「使用者」是 `test/batch10_15_npc_tasks_test.dart`
+  // ——「只有测试在测、生产没人用」的典型死代码。同文件的 `npcChat` /
+  // `formatNpcRelationPanel` 仍在生产接线，**予以保留**。
+
+  /// 与 NPC 深聊（每月限次，比示好更深入，需相识以上）。
   ///
   /// 按心情与关系产出叙事；提升好感。
   String npcChat(String npcId) {

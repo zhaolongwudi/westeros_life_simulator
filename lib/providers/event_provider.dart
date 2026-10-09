@@ -13,14 +13,10 @@ class EventProvider extends ChangeNotifier {
       : _allEvents = events ?? const <GameEvent>[];
 
   List<GameEvent> _allEvents;
-  List<GameEvent> _triggeredEvents = <GameEvent>[];
   List<String> _completedEventIds = <String>[];
 
   /// 所有事件。
   List<GameEvent> get allEvents => List.unmodifiable(_allEvents);
-
-  /// 已触发事件。
-  List<GameEvent> get triggeredEvents => List.unmodifiable(_triggeredEvents);
 
   /// 已完成事件 ID。
   List<String> get completedEventIds => List.unmodifiable(_completedEventIds);
@@ -43,16 +39,6 @@ class EventProvider extends ChangeNotifier {
   /// 获取可触发事件列表。[season] 可选，用于季节触发条件。
   List<GameEvent> getAvailableEvents(Player player, {String? season}) {
     return _allEvents.where((e) => canTrigger(e, player, season: season)).toList();
-  }
-
-  /// 随机触发一个事件。
-  GameEvent? triggerRandomEvent(Player player) {
-    final available = getAvailableEvents(player);
-    if (available.isEmpty) return null;
-    final random = available[available.length % 7]; // 简单随机
-    _triggeredEvents.add(random);
-    notifyListeners();
-    return random;
   }
 
   /// 标记事件完成。
@@ -111,8 +97,12 @@ class EventProvider extends ChangeNotifier {
   }
 
   /// 重置事件状态。
+  ///
+  /// S14-1：原实现同时清空 `_triggeredEvents`，但该字段已随
+  /// `triggerRandomEvent` 一起删除（生产零调用方，纯死代码）。
+  /// `reset()` 由 `game_provider_base.dart` 的新游戏路径调用，只清空
+  /// 已完成事件集合。
   void reset() {
-    _triggeredEvents = <GameEvent>[];
     _completedEventIds = <String>[];
     notifyListeners();
   }

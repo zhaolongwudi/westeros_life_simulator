@@ -1,14 +1,18 @@
 /// Batch 10-15 测试：NPC 深度交互二轮（任务链 / 深聊 / 关系面板 / AI 注入）。
 ///
 /// 覆盖：
-/// 1. npcTasks：NPC 任务列表
-/// 2. formatNpcTaskPanel：任务面板
-/// 3. acceptNpcTask：接受委托（关系门槛/一次性）
-/// 4. maybeResolveNpcTask：任务结算（金币/关系/声望）
-/// 5. npcChat：深聊（相识以上/每日限次）
-/// 6. formatNpcRelationPanel：关系面板
-/// 7. 指令接线：任务/深聊/关系 命令
-/// 8. ai_service：在场 NPC 关系注入
+/// 1. npcTasks：NPC 任务列表（保留）
+/// 2. npcChat：深聊（相识以上/每日限次）（保留）
+/// 3. formatNpcRelationPanel：关系面板（保留）
+/// 4. 指令接线：任务/深聊/关系 命令（保留）
+/// 5. ai_service：在场 NPC 关系注入（保留）
+///
+/// 【S14-1 删除】`formatNpcTaskPanel` / `acceptNpcTask` / `maybeResolveNpcTask`
+/// 三个 V1 测试组已删除。原因：这三个 V1 函数本身已在 S13-3 被 V2
+/// （`formatNpcTaskPanelV2` / `acceptNpcTaskV2` / V2 多步骤结算链）取代，
+/// 并于 S14-1 从 `mixin_npc_interact.dart` 删除——它们自 S13-3 起就
+/// **只有这批测试在测、生产零调用方**，是典型的「死代码 + 测试」。
+/// 原断言的契约由 `batch13_s3_npc_task_button_test.dart` 覆盖。
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -26,69 +30,6 @@ void main() {
     test('未知 NPC 返回空', () {
       final engine = GameEngine()..startNewGame();
       expect(engine.npcTasks('npc_unknown'), isEmpty);
-    });
-  });
-
-  group('Batch 10-15 formatNpcTaskPanel', () {
-    test('在场有任务 NPC 显示委托', () {
-      final engine = GameEngine()..startNewGame();
-      // 默认临冬城：艾德·史塔克在场且有任务
-      final panel = engine.formatNpcTaskPanel();
-      expect(panel, contains('艾德·史塔克'));
-      expect(panel, contains('护送'));
-    });
-  });
-
-  group('Batch 10-15 acceptNpcTask', () {
-    test('陌生关系拒绝委托', () {
-      final engine = GameEngine()..startNewGame();
-      // 默认关系 0（陌生）
-      final result = engine.acceptNpcTask('npc_nev');
-      expect(result, contains('信不过'));
-    });
-    test('相识关系接受委托', () {
-      final engine = GameEngine()..startNewGame();
-      engine.updatePlayer(
-        engine.player.copyWith(
-          relations: const <String, int>{'npc_nev': 25},
-        ),
-      );
-      final result = engine.acceptNpcTask('npc_nev');
-      expect(result, contains('接下'));
-      expect(engine.player.relations['npc_nev'], greaterThan(25));
-    });
-    test('重复接受提示已接', () {
-      final engine = GameEngine()..startNewGame();
-      engine.updatePlayer(
-        engine.player.copyWith(
-          relations: const <String, int>{'npc_nev': 25},
-        ),
-      );
-      engine.acceptNpcTask('npc_nev');
-      final second = engine.acceptNpcTask('npc_nev');
-      expect(second, contains('已经接下'));
-    });
-  });
-
-  group('Batch 10-15 maybeResolveNpcTask', () {
-    test('完成已接任务获得奖励', () {
-      final engine = GameEngine()..startNewGame();
-      engine.updatePlayer(
-        engine.player.copyWith(
-          relations: const <String, int>{'npc_nev': 25},
-        ),
-      );
-      engine.acceptNpcTask('npc_nev');
-      final goldBefore = engine.player.gold;
-      final result = engine.maybeResolveNpcTask();
-      expect(result, contains('完成'));
-      expect(engine.player.gold, greaterThan(goldBefore));
-      expect(engine.player.relations['npc_nev'] ?? 0, greaterThan(25));
-    });
-    test('未接任务不结算', () {
-      final engine = GameEngine()..startNewGame();
-      final result = engine.maybeResolveNpcTask();
-      expect(result, '');
     });
   });
 

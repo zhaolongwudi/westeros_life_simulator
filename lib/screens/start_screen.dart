@@ -8,6 +8,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../data/balance_data.dart';
 import '../data/family_data.dart';
 import '../data/location_data.dart';
 import '../game_engine.dart';
@@ -103,7 +104,9 @@ Player buildSetupPlayer(GameSetup setup) {
     name: setup.name,
     identity: setup.identity,
     familyId: setup.familyId,
-    age: 18,
+    // S14-1：字面量改为引用 BalanceData（向导是**生产开局路径**，
+    // 此前 age/hunger 写死字面量，改 balance_data 对它没有任何效果）。
+    age: BalanceData.defaultAge,
     gender: setup.gender,
     locationId: setup.locationId,
     gold: gold,
@@ -124,10 +127,11 @@ Player buildSetupPlayer(GameSetup setup) {
       'isMarried': false,
       'isExiled': false,
     },
-    // 开局状态：满血满精力，饱食 60（不会立刻饿死，但需要尽早觅食）
+    // 开局状态：满血满精力，饱食取 `BalanceData.startingHunger`（60，
+    // 不会立刻饿死，但需要尽早觅食）。S14-1：由字面量改为引用常量。
     health: 100,
     energy: 100,
-    hunger: 60,
+    hunger: BalanceData.startingHunger,
   );
 }
 

@@ -43,6 +43,9 @@ import '../models/player.dart';
 /// 评分维度（每个命中条件与玩家当前状态匹配即得分）：
 /// - 地点条件命中 → [BalanceData.kAiScoreLocation]
 /// - 季节条件命中（当前季节或 any）→ [BalanceData.kAiScoreSeason]
+/// - 身份条件命中 → [BalanceData.kAiScoreIdentity]（S14-1 补：此前漏了
+///   这个维度，而 `eventTriggersSatisfied` 明确支持 `identity` 门槛、
+///   事件库也确有该门槛 ⇒ 身份相关事件不参与排序，纯靠下标决定名次）
 /// - 数值条件（minGold/minReputation/minEnergy/maxEnergy/minAge）满足 → 每个 +[BalanceData.kAiScoreNumeric]
 /// - 标记条件（flag 已有 / noFlag 无）满足 → +[BalanceData.kAiScoreNumeric]
 ///
@@ -74,10 +77,24 @@ List<GameEvent> selectEventsForPrompt(
       if (byScore != 0) return byScore;
       return a.$1.compareTo(b.$1);
     });
-  return scored
-      .take(BalanceData.kAiPromptEventBudget)
-      .map((s) => s.$3)
-      .toList();
+  // S14-1：落实 `kAiPromptEventFloor` 声明的「强相关事件不足时兜底注入的
+  // 最少事件数」。此前该常量**从未被任何代码引用**（纯摆设），而文件头
+  // 第 39-41 行那句「无回退兜底，是刻意的」针对的是**门槛过滤**（不能把
+  // 玩家不可能发生的事件塞回 prompt），与「截断后至少留 N 条」是两回事：
+  // 截断到 0 会让 AI 一个可用事件都看不到，叙事退化成凭空编造。
+  // 故：先按预算截断，若结果不足下限，从已过门槛的池子里按原顺序补足。
+  final truncated = scored.take(BalanceData.kAiPromptEventBudget).toList();
+  if (truncated.length >= BalanceData.kAiPromptEventFloor) {
+    // 返回类型为 List<GameEvent>，这里解包三元组。
+    return truncated.map((s) => s.$3).toList();
+  }
+  final picked = truncated.map((s) => s.$3).toList();
+  for (final entry in eligible) {
+    if (picked.length >= BalanceData.kAiPromptEventFloor) break;
+    if (picked.contains(entry.$2)) continue;
+    picked.add(entry.$2);
+  }
+  return picked;
 }
 
 /// 计算单个事件与玩家当前状态的相关度评分（用于 prompt 预算筛选）。
@@ -95,6 +112,13 @@ int _eventRelevanceScore(
   final s = cond['season'];
   if (s != null && (s == season || s == 'any')) {
     score += BalanceData.kAiScoreSeason;
+  }
+  // S14-1：身份维度。判定口径与门槛判定（`event_trigger_eval.dart` 的
+  // `identity` 分支）保持一致：`player.identity.name == value`。
+  // 此处**只影响排序**，不参与放行与否——放行由步骤 1 的门槛过滤决定。
+  final identity = cond['identity'];
+  if (identity != null && identity == player.identity.name) {
+    score += BalanceData.kAiScoreIdentity;
   }
   // 数值条件
   final minGold = cond['minGold'];

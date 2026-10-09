@@ -3,6 +3,7 @@
 /// 字段设计参考 docs/02_家族百科.md 与 docs/08_玩法设计.md。
 library;
 
+import '../data/balance_data.dart';
 import '../utils/json_safe.dart';
 import 'marital.dart';
 import 'npc_task.dart';
@@ -46,7 +47,10 @@ class Player {
     // 「新游戏」与各屏幕兜底的 `GameEngine()..startNewGame()` 一开局即
     // 低于 `starvationThreshold`(25)，`applyMonthlyLife` 每月 -8 健康、
     // 恢复 +2（净 -6），玩家在无提示的情况下慢性死亡。
-    this.hunger = 60,
+    // S14-1：字面量 60 改为引用 `BalanceData.startingHunger`，
+    // 让 balance_data 成为开局数值的唯一真相（此前此处、向导、继承
+    // 三处各写一遍，改平衡要动三个地方、漏一处就复现 S13-13 ⑱）。
+    this.hunger = BalanceData.startingHunger,
     this.title = '',
     this.house = '',
     this.children = const [],
@@ -129,11 +133,13 @@ class Player {
       name: '无名者',
       identity: PlayerIdentity.noble,
       familyId: 'family_stark',
-      age: 18,
+      // S14-1：三项开局值改为引用 BalanceData（此前是写死的字面量，
+      // 改 balance_data 里的对应常量不会有任何效果 —— 那正是「摆设常量」）。
+      age: BalanceData.defaultAge,
       gender: 'male',
       locationId: 'location_winterfell',
-      gold: 100,
-      reputation: 50,
+      gold: BalanceData.defaultGold,
+      reputation: BalanceData.defaultReputation,
       skills: const {
         'sword': 3,
         'archery': 2,
