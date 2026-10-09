@@ -42,6 +42,7 @@ library;
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:westeros_life_simulator/core/event_trigger_eval.dart';
 import 'package:westeros_life_simulator/data/balance_data.dart';
 import 'package:westeros_life_simulator/data/event_data.dart';
 import 'package:westeros_life_simulator/models/event.dart';
@@ -167,11 +168,13 @@ void main() {
   });
 
   group('S14-1 kAiScoreIdentity：identity 门槛未参与 prompt 排序', () {
-    test('前提：事件库确有 identity 门槛事件', () {
-      final withIdentity =
-          allEvents.where((e) => e.triggerConditions.containsKey('identity')).toList();
-      expect(withIdentity, isNotEmpty,
-          reason: '前提失效：若已无 identity 门槛事件，本项无需接线');
+    test('机制支持：eventTriggersSatisfied 识别 identity 门槛（探针验证）', () {
+      // 前提：event_trigger_eval 的 identity 分支（`player.identity.name == value`）
+      // 能让 identity 命中的探针事件通过门槛过滤 ⇒ identity 维度不是空维度。
+      final probe = _probeEvent('probe_noble', '探针-identity-noble',
+          const <String, String>{'identity': 'noble'});
+      expect(eventTriggersSatisfied(probe, Player.defaultPlayer()), isTrue,
+          reason: '机制不支持 identity 门槛，接线无意义');
     });
 
     test('判别式：identity 命中事件因评分被排到前面', () {
@@ -198,7 +201,7 @@ void main() {
       );
       expect(selected.first.name, '探针-identity-noble',
           reason: 'identity 命中的事件必须因 kAiScoreIdentity 被排到最前');
-      expect(selected, contains('探针-无门槛-0'),
+      expect(selected.map((e) => e.name), contains('探针-无门槛-0'),
           reason: '身份不相关事件仍在结果里（identity 维度只影响排序，不过滤）');
     });
 
