@@ -105,6 +105,16 @@ const List<GameSystem> allSystems = [
     description: '维斯特洛的魔法体系。',
     rules: const ['魔法稀有', '魔法代价', '魔法传承'],
     features: const ['魔法稀有', '魔法代价', '魔法传承'],
+    // S14-2：docs/05 §九「魔法稀有 / 魔法代价」⇒ 研习异术 -5 精力。
+    //
+    // 【为什么只有代价】⚠️ 本系统的挂载条件**不是**纯地点门槛：
+    // `availableSystems` 里魔法还包括 maester / priest / wildling 三个
+    // 身份（Sprint 14 范围表原写"窄挂载"，此处订正，见简报 S14-2 卡片）。
+    // 身份覆盖面比另外 5 个系统宽得多，因此只挂纯消耗、不给任何收益。
+    //
+    // 【叠加校验】学士在学城同时挂学城体系 -3 与魔法 -5 = -8，
+    // 仍低于精力月净回上限 ≈ 15（`batch12_s41` 与 `batch14_s14_2` 同型断言）。
+    monthlyEffects: const {'energy': -5},
   ),
 
   // ==================== 绿先知/易形者/血魔法/预言/狼梦/龙梦（6） ====================
@@ -365,6 +375,10 @@ const List<GameSystem> allSystems = [
     description: '维斯特洛的无面者体系。',
     rules: const ['无面者规则', '无面者代价', '无面者传承'],
     features: const ['无面者规则', '无面者代价', '无面者传承'],
+    // S14-2：docs/05 §四十「改变面容 / 需要代价」⇒ 时刻维持「男孩」的
+    // 身份与面具要付精神代价 -5 精力。挂载条件是刺客身份**或**身在布拉佛斯，
+    // 故布拉佛斯的普通人也只承担这一点，不给任何收益。
+    monthlyEffects: const {'energy': -5},
   ),
   GameSystem(
     id: 'system_red_priest',
@@ -401,6 +415,9 @@ const List<GameSystem> allSystems = [
     description: '维斯特洛的无垢者体系。',
     rules: const ['无垢者规则', '无垢者代价', '无垢者传承'],
     features: const ['无垢者规则', '无垢者代价', '无垢者传承'],
+    // S14-2：docs/05 §四十三「每日训练 / 无痛训练」⇒ 练得狠（-5 精力）
+    // 但练出体魄（+2 健康）。挂载点是阿斯塔波一城，窄，不影响主线平衡。
+    monthlyEffects: const {'energy': -5, 'health': 2},
   ),
   GameSystem(
     id: 'system_dothraki_culture',
@@ -409,6 +426,10 @@ const List<GameSystem> allSystems = [
     description: '维斯特洛的多斯拉克体系。',
     rules: const ['多斯拉克规则', '多斯拉克代价', '多斯拉克传承'],
     features: const ['多斯拉克规则', '多斯拉克代价', '多斯拉克传承'],
+    // S14-2：docs/05 §四十四「只掠夺 / 不耕种 / 不建造城市」⇒ 没有稳定
+    // 收入，全靠本月劫掠 +3 金；劫掠本身要出力 -3 精力。
+    // 取 +3 而非更高：厄索斯荒野是苦寒之地，不该比学城津贴赚得多。
+    monthlyEffects: const {'gold': 3, 'energy': -3},
   ),
   GameSystem(
     id: 'system_wildling',
@@ -417,6 +438,11 @@ const List<GameSystem> allSystems = [
     description: '维斯特洛的野人体系。',
     rules: const ['野人规则', '野人代价', '野人传承'],
     features: const ['野人规则', '野人代价', '野人传承'],
+    // S14-2：docs/05 §四十五「部落 / 自由民，靠山吃山」⇒ 采集狩猎能果腹
+    // +5 饱食，但为觅食跋涉 -3 精力。
+    // 参照：饱食每月自然衰减 `hungerDecayPerMonth 12`，+5 抵掉约四成，
+    // 不足以让北境荒野变成宜居之地。
+    monthlyEffects: const {'hunger': 5, 'energy': -3},
   ),
   GameSystem(
     id: 'system_ironborn',
@@ -425,6 +451,11 @@ const List<GameSystem> allSystems = [
     description: '维斯特洛的铁民体系。',
     rules: const ['铁民规则', '铁民代价', '铁民传承'],
     features: const ['铁民规则', '铁民代价', '铁民传承'],
+    // S14-2：docs/05 §四十六「航海 / 付铁钱 / 不耕种」⇒ 没有可挂钩的
+    // 稳定收入（他们的钱是抢来的，不是种出来的），故**只给代价不给收益**：
+    // 海路风浪 -5 精力。六个新系统里唯一的纯消耗项，避免铁群岛变成
+    // 「每月白拿金币」的外挂据点。
+    monthlyEffects: const {'energy': -5},
   ),
 
   // ==================== 法律/身份/私生子/死亡/继承/多世代/历史记忆/世界史书（8） ====================
@@ -655,6 +686,116 @@ const List<GameSystem> allSystems = [
     features: const ['终极原则规则', '终极原则代价', '终极原则传承'],
   ),
 ];
+
+/// S14-2 · **纯背景系统** id 集（65 个）：刻意不挂 `monthlyEffects` 的那些。
+///
+/// 【为什么需要这个集合】`monthlyEffects == {}` 此前同时表示两种含义——
+/// 「世界观背景，刻意留空」与「还没接线」。两者在代码里**长得一模一样**，
+/// 没人能分辨；更糟的是新增系统会**默认**落到「背景」这一侧，
+/// 根本不需要任何人做决定。本集合把归属变成显式声明，
+/// 并由 `batch14_s14_2_system_background_test.dart` 锁定
+/// 「机制化 8 + 纯背景 65 = 全集 73、无交集、无遗漏」——
+/// 日后新增系统若不声明归属，那条测试立即变红。
+///
+/// 【归类依据】挂载条件过宽（城市/恒可见）却没有可依托的世界状态可挂钩时，
+/// 硬挂月度效果等于凭空加钱或凭空扣钱（铁金库即此例，见 docs/05 §0）。
+/// 「挂得上但无状态」与「设计上永不结算」在本卡里统一归为纯背景：
+/// 对玩家而言二者都是「只作查阅，不参与结算」。
+///
+/// 【两个刻意排除的例子】
+/// - 铁金库：挂载条件 `city || market` 几乎全员命中，但全库无债务状态
+///   ⇒ 留空是**设计决定**，不是漏做。
+/// - 异鬼 / 死亡：`availableSystems` 显式 `false`（`mixin_systems.dart:131`），
+///   挂了效果也永远不结算 ⇒ 归入纯背景，杜绝新的摆设。
+const Set<String> kPureBackgroundSystems = <String>{
+  // —— 封建 ——
+  'system_feudal',
+  // —— 家族 ——
+  'system_family',
+  // —— 教会 ——
+  'system_church',
+  // —— 雇佣兵 ——
+  'system_mercenary',
+  // —— 贸易 ——
+  'system_trade',
+  // —— 宗教 ——
+  'system_religion',
+  // —— 魔法（S14-2 只机制化体系本身一条，其余 6 条仍是背景）——
+  'system_green_seer',
+  'system_skinchanger',
+  'system_blood_magic',
+  'system_prophecy',
+  'system_wolf_dream',
+  'system_dragon_dream',
+  // —— 战争 ——
+  'system_war',
+  'system_siege',
+  'system_army',
+  'system_trial',
+  'system_trial_by_combat',
+  // —— 婚姻 ——
+  'system_marriage',
+  'system_women',
+  // —— 继承 ——
+  'system_succession',
+  'system_multigeneration',
+  'system_history_memory',
+  'system_world_history',
+  // —— 经济 ——
+  'system_economy',
+  'system_currency',
+  'system_education',
+  'system_language',
+  'system_festival',
+  'system_family_life',
+  'system_lands',
+  'system_cities',
+  // —— 情报 ——
+  'system_intelligence',
+  'system_travel',
+  'system_adventure',
+  'system_relic',
+  'system_legendary_weapon',
+  'system_valyrian_steel',
+  // —— 龙 ——
+  'system_dragon',
+  // —— 异鬼 ——
+  'system_white_walker',
+  // —— 红袍祭司 ——
+  'system_red_priest',
+  // —— 铁金库 ——
+  'system_iron_bank',
+  // —— 法律 ——
+  'system_law',
+  'system_identity',
+  'system_bastard',
+  // —— 死亡 ——
+  'system_death',
+  // —— 保护（S12-8：写给开发者的规范，玩家永不可见）——
+  'system_reality_protection',
+  'system_magic_protection',
+  'system_god_protection',
+  'system_dragon_protection',
+  'system_walker_protection',
+  'system_information_protection',
+  // —— AI（S12-8：同上）——
+  'system_ai_freedom',
+  'system_causality',
+  'system_opportunity',
+  'system_adventure_meaning',
+  'system_overcrowding_protection',
+  'system_protagonist_protection',
+  'system_number_protection',
+  'system_economy_protection',
+  'system_ai_identity',
+  // —— 规则（S12-8：同上）——
+  'system_rule_update',
+  'system_version_patch',
+  'system_ultimate_principle',
+  // —— 存档（玩家功能，非世界系统）——
+  'system_save',
+  'system_restore',
+};
 
 /// 按 ID 查找系统。
 GameSystem? systemById(String id) {

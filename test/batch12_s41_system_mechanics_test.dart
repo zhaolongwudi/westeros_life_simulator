@@ -2,8 +2,9 @@
 ///
 /// ## 本批次要挡住的三类回归
 ///
-/// 1. **机制化退化成文案**：73 个系统里 71 个 `monthlyEffects` 为空是有意的
-///    诚实标注（无月度结算），但「恰好 2 个有效果」这个事实必须被断言锁住
+/// 1. **机制化退化成文案**：73 个系统里 65 个 `monthlyEffects` 为空是有意的
+///    诚实标注（S14-2 起显式登记在 `kPureBackgroundSystems` 里），
+///    但「恰好 8 个有效果」这个事实必须被断言锁住
 ///    ——否则日后有人批量往systems 里填字段、无人复核算力平衡，机制化就
 ///    变成了「每种玩法路线都能白嫖月度收益」。
 /// 2. **数值与月度恢复打架**：守夜人 `energy: -10` 的上限来自
@@ -42,12 +43,26 @@ void main() {
       }
     });
 
-    test('恰好 2 个系统机制化，71 个为世界观背景（防止范围无声扩张）', () {
+    test('恰好 8 个系统机制化，65 个为纯背景（防止范围无声扩张）', () {
+      // S14-2：机制化 2 → 8（新增 6 个窄挂载系统），背景 71 → 65。
+      // 「恰好 N」这道锁本身**没有放松**——它防的是有人批量往 systems 里
+      // 填字段、无人复核平衡；数字变化是 S14-2 的显式决定，且新增的
+      // 6 个系统逐条钉在 `batch14_s14_2_system_background_test.dart`。
       final mechanized =
           allSystems.where((s) => s.hasMonthlyEffects).map((s) => s.id).toSet();
-      expect(mechanized, {'system_citadel', 'system_nightswatch'});
+      expect(mechanized, {
+        'system_citadel',
+        'system_nightswatch',
+        'system_dothraki',
+        'system_dothraki_culture',
+        'system_wildling',
+        'system_ironborn',
+        'system_faceless',
+        'system_magic',
+      });
       expect(allSystems.length, 73);
-      expect(allSystems.where((s) => s.hasMonthlyEffects).length, 2);
+      expect(allSystems.where((s) => s.hasMonthlyEffects).length, 8);
+      expect(kPureBackgroundSystems.length, 65);
     });
 
     test('铁金库刻意留空（无持久化债务状态，负向金币=凭空扣钱）', () {

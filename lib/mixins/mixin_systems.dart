@@ -13,6 +13,9 @@ import '../models/system.dart';
 import '../core/command_registry.dart';
 import '../core/monthly_pipeline.dart';
 import '../providers/game_provider_base.dart';
+// S14-2：只取纯背景 id 集，避开本 mixin 的 `systemsByCategory` 成员
+// 与 data 层的同名顶层函数。
+import '../data/system_data.dart' show kPureBackgroundSystems;
 
 /// 系统混入。挂在 [GameProviderBase] 上。
 mixin GameSystemsMixin on GameProviderBase {
@@ -158,6 +161,10 @@ mixin GameSystemsMixin on GameProviderBase {
       // 不标出来玩家只能靠猜哪个系统「真的有用」。
       if (s.hasMonthlyEffects) {
         buf.writeln('  月度结算：${_formatMonthlyEffects(s.monthlyEffects)}');
+      } else if (kPureBackgroundSystems.contains(s.id)) {
+        // S14-2：纯背景系统**显式**告知「仅供查阅」。此前它们在面板上与
+        // 机制化系统长得一样，玩家只能靠"点了没反应"自己推断哪个系统有用。
+        buf.writeln('  ▫ 世界观背景（仅供查阅，不参与月度结算）');
       }
     }
     if (avail.length > 12) {

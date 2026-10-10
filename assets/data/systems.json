@@ -155,7 +155,9 @@
       "魔法代价",
       "魔法传承"
     ],
-    "monthlyEffects": {}
+    "monthlyEffects": {
+      "energy": -5
+    }
   },
   {
     "id": "system_green_seer",
@@ -682,7 +684,9 @@
       "无面者代价",
       "无面者传承"
     ],
-    "monthlyEffects": {}
+    "monthlyEffects": {
+      "energy": -5
+    }
   },
   {
     "id": "system_red_priest",
@@ -733,7 +737,10 @@
       "无垢者代价",
       "无垢者传承"
     ],
-    "monthlyEffects": {}
+    "monthlyEffects": {
+      "energy": -5,
+      "health": 2
+    }
   },
   {
     "id": "system_dothraki_culture",
@@ -750,7 +757,10 @@
       "多斯拉克代价",
       "多斯拉克传承"
     ],
-    "monthlyEffects": {}
+    "monthlyEffects": {
+      "gold": 3,
+      "energy": -3
+    }
   },
   {
     "id": "system_wildling",
@@ -767,7 +777,10 @@
       "野人代价",
       "野人传承"
     ],
-    "monthlyEffects": {}
+    "monthlyEffects": {
+      "hunger": 5,
+      "energy": -3
+    }
   },
   {
     "id": "system_ironborn",
@@ -784,7 +797,9 @@
       "铁民代价",
       "铁民传承"
     ],
-    "monthlyEffects": {}
+    "monthlyEffects": {
+      "energy": -5
+    }
   },
   {
     "id": "system_law",
