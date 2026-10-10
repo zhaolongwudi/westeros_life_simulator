@@ -145,7 +145,8 @@ void main() {
       expect(text, contains('精力 -10'));
     });
 
-    test('学士在学城：领津贴 +5 金，抄书耗 3 精力', () {
+    test('学士在学城：领津贴 +5 金，抄书耗 3 精力，另付魔法代价 -5',
+        () {
       final engine = GameEngine(
         player: Player.defaultPlayer().copyWith(
           identity: PlayerIdentity.maester,
@@ -162,9 +163,14 @@ void main() {
       final energyBefore = engine.player.energy;
       final text = engine.applyMonthlySystems(seed: 1);
       expect(engine.player.gold, goldBefore + 5);
-      expect(engine.player.energy, energyBefore - 3);
+      // S14-2：maester 身份同时挂载**魔法体系**（`mixin_systems.dart:100-104`
+      // 的魔法条件含 maester），故学城 -3 之外还要付魔法 -5 = 合计 -8。
+      // 这不是回归，是 S14-2 有意扩大的机制面；学城自身的那 -3 由
+      // `batch14_s14_2` 的「叠加上限」断言继续锁住。
+      expect(engine.player.energy, energyBefore - 8);
       expect(text, contains('学城'));
       expect(text, contains('+5 金币'));
+      expect(text, contains('魔法体系'));
     });
 
     test('未挂载系统不结算（在君临城的贵族拿不到学城津贴）', () {

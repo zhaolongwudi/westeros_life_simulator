@@ -159,11 +159,17 @@ void main() {
       final energy = engine.player.energy;
       final text = engine.applyMonthlySystems(seed: 1);
       expect(engine.player.energy, energy - 3);
-      // 金币不做精确断言：多斯拉克海 dangerLevel=5，`applyMonthlySystems`
-      // 第 2 步会按 30% 概率额外扣钱。但第 5 步的 delta 是**自己前后对比**，
-      // 因此结算文本里的「金币 +3」是确定的。
+      // 金币不做**绝对值**断言：多斯拉克海 dangerLevel=5，
+      // `applyMonthlySystems` 第 2 步会按 30% 概率额外扣钱。
+      // 但第 5 步的 delta 是**自己前后对比**（`mixin_systems.dart` 里
+      // before/after 夹住 applyEffects），因此结算文本里的「+3 金币」是确定的。
+      //
+      // ⚠️ 两种 delta 文本格式不同，别混：金币是「+3 金币」（数值在前），
+      //    活力值是「精力 -3」（标签在前）——面板那行又是第三种
+      //    「energy -3」的 key-first 格式。
       expect(text, contains('多斯拉克系统'));
-      expect(text, contains('金币 +3'));
+      expect(text, contains('+3 金币'));
+      expect(text, contains('精力 -3'));
     });
 
     test('无面者在布拉佛斯：维系易容 -5 精力', () {
