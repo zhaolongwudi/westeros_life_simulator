@@ -118,11 +118,11 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- CHANGELOG:BEGIN -->
 ## 🚀 最近更新
 
+**2026-10-10 · fix(S14-2): 修首推 CI 的 2 条红测（均在测试，实现未动）**（`004da72`）
+
+**2026-10-10 · feat(S14-2): 纯背景系统显式标注 + 6 个窄挂载系统补真实月度效果**（`4283bc7`）
+
 **2026-10-09 · fix(S14-1): 移除测试中未使用的 event_data import（analyze warning 红）**（`497651d`）
-
-**2026-10-09 · fix(S14-1): 修正 batch14 测试——identity 前提改机制验证，contains 断言改为匹配 name**（`424a048`）
-
-**2026-10-09 · fix(S14-1): 补 mixin_npc_task.dart 缺失的 BalanceData import（CI analyze 红）**（`18f21b5`）
 
 > 🔄 每次推送后自动刷新，仅保留最近 3 条。完整记录见 docs/archive/03-审查归档.md。
 <!-- CHANGELOG:END -->
