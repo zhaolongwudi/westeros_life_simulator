@@ -454,8 +454,12 @@ mixin GamePlayMixin
     }
     setPendingEvent(event);
     final text = chooseWorldEventChoice(choice);
-    // 执行的就是待决事件本身 ⇒ 已被清空且不该恢复；否则恢复玩家原待决事件
-    if (previousId != null && previousId != event.id) {
+    // 恢复条件：执行前有别的待决事件，或执行前没有待决事件（previous == null
+    // 也要恢复——chooseWorldEventChoice 被拒时不清 pendingEvent，面板通道
+    // 不做拒绝交互，这里把注入的事件撤掉，避免主界面残留死卡片）。
+    // 唯一不恢复的情形：执行的就是待决事件本身且已成功抉择（已清空、不该复活）；
+    // 被拒时 pendingEvent 仍是注入的事件 ⇒ previousId == event.id，恢复 null 正确。
+    if (previousId != event.id) {
       setPendingEvent(previous);
     }
     return text;
