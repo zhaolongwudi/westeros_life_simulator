@@ -1,7 +1,11 @@
 /// 事件面板：浏览世界事件库与玩家可触发事件。
 ///
 /// 复用 EventProvider（Batch 3）与 GameEngine.eventTemplates（Batch 4）。
-/// 纯展示 + 可触发状态标记，不做触发执行（避免过度工程）。
+/// S14-3：可触发事件满足门槛的选项可点击执行——经
+/// `GameEngine.triggerEventChoice` 复用主流程 `chooseWorldEventChoice`，
+/// 不新建效果通道；结算文本经 SnackBar 展示，执行后 `setState` 重建
+/// （一次性事件从「可触发」列表消失）。S13-11 ⑰ 同款教训：本屏读写
+/// 同一引擎状态，必须 `StatefulWidget`，否则点完不刷新。
 library;
 
 import 'package:flutter/material.dart';
@@ -13,15 +17,30 @@ import '../utils/labels.dart';
 import '../widgets/theme/ornate.dart';
 
 /// 事件面板。
-class EventsScreen extends StatelessWidget {
+class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key, this.engine});
 
   /// 可选：传入共享引擎（默认新建，用于独立浏览）。
   final GameEngine? engine;
 
   @override
+  State<EventsScreen> createState() => _EventsScreenState();
+}
+
+class _EventsScreenState extends State<EventsScreen> {
+  /// 执行结算：SnackBar 展示 + 重建（一次性事件须从列表消失）。
+  void _showSettlement(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text), duration: const Duration(seconds: 4)),
+    );
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final e = engine ?? (GameEngine()..startNewGame());
+    // 注意：`??` 优先级高于级联 `..`，必须加括号，否则传入 engine 时
+    // (engine ?? GameEngine())..startNewGame() 会重置传入引擎的玩家数据（坑 23）
+    final e = widget.engine ?? (GameEngine()..startNewGame());
     final allEvents = e.eventTemplates;
     final available = e.eventProvider.getAvailableEvents(
       e.player,
@@ -51,7 +70,11 @@ class EventsScreen extends StatelessWidget {
                       itemCount: available.length,
                       itemBuilder: (context, index) {
                         final ev = available[index];
-                        return _EventCard(event: ev, playerEngine: e);
+                        return _EventCard(
+                          event: ev,
+                          playerEngine: e,
+                          onTriggered: _showSettlement,
+                        );
                       },
                     ),
               // 全部事件库
@@ -65,6 +88,7 @@ class EventsScreen extends StatelessWidget {
                     event: ev,
                     playerEngine: e,
                     showAvailableBadge: isAvailable,
+                    onTriggered: _showSettlement,
                   );
                 },
               ),
@@ -76,17 +100,24 @@ class EventsScreen extends StatelessWidget {
   }
 }
 
+/// 面板执行回调：执行完成后的结算文本经本回调展示（S14-3）。
+typedef _OnEventTriggered = void Function(String settlement);
+
 /// 单个事件卡片。
 class _EventCard extends StatelessWidget {
   const _EventCard({
     required this.event,
     required this.playerEngine,
     this.showAvailableBadge = false,
+    this.onTriggered,
   });
 
   final GameEvent event;
   final GameEngine playerEngine;
   final bool showAvailableBadge;
+
+  /// 非空 = 满足门槛的选项可点击执行（S14-3）。
+  final _OnEventTriggered? onTriggered;
 
   @override
   Widget build(BuildContext context) {
@@ -193,33 +224,48 @@ class _EventCard extends StatelessWidget {
                   for (final choice in event.choices)
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Icon(
-                            choices.contains(choice)
-                                ? Icons.check_circle_outline
-                                : Icons.circle_outlined,
-                            size: 16,
-                            color: choices.contains(choice)
-                                ? WesterosColors.goldBright
-                                : WesterosColors.inkDim,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              choice.text,
-                              style: TextStyle(
-                                fontWeight: choices.contains(choice)
-                                    ? FontWeight.normal
-                                    : FontWeight.w300,
-                                color: choices.contains(choice)
-                                    ? WesterosColors.parchment
-                                    : WesterosColors.inkDim,
+                      // S14-3：满足门槛的选项可点击执行（复用主流程
+                      // triggerEventChoice → chooseWorldEventChoice）；
+                      // 不满足门槛的保持只读——面板通道不做拒绝交互，
+                      // 也避免拒绝路径在主界面残留待决卡片。
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(6),
+                        onTap: (onTriggered != null && choices.contains(choice))
+                            ? () => onTriggered!(
+                                  playerEngine.triggerEventChoice(
+                                    event,
+                                    choice,
+                                  ),
+                                )
+                            : null,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Icon(
+                              choices.contains(choice)
+                                  ? Icons.check_circle_outline
+                                  : Icons.circle_outlined,
+                              size: 16,
+                              color: choices.contains(choice)
+                                  ? WesterosColors.goldBright
+                                  : WesterosColors.inkDim,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                choice.text,
+                                style: TextStyle(
+                                  fontWeight: choices.contains(choice)
+                                      ? FontWeight.normal
+                                      : FontWeight.w300,
+                                  color: choices.contains(choice)
+                                      ? WesterosColors.parchment
+                                      : WesterosColors.inkDim,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                 ],

@@ -424,6 +424,43 @@ mixin GamePlayMixin
     return buf.toString().trim();
   }
 
+  /// 事件面板「可触发事件」的直接执行入口（S14-3）。
+  ///
+  /// 【为什么不新建效果通道】本项目已发生五次双通道漂移（见
+  /// `event_trigger_eval.dart` 文件头）。面板执行与月度传闻抉择是同一件事的
+  /// 两个入口，故只做薄编排：把事件登记为待决后**复用**
+  /// [chooseWorldEventChoice]——门槛校验、按 id 匹配、
+  /// `applyChoice(advanceClock: false)`、`effectSummary` 摘要、
+  /// 执行后清空待决事件，全部契约白拿主流程既有实现。
+  ///
+  /// 【为什么先暂存原待决事件】`chooseWorldEventChoice` 会对当前
+  /// `pendingEvent` 落盘并**清空**它。若玩家月度传闻的待决事件还没抉择、
+  /// 又在面板里执行了另一个事件，直接 `setPendingEvent(event)` 会把
+  /// 玩家的待决事件冲掉；故先暂存、执行后按 id 判定恢复——只有面板执行
+  /// 的恰好就是待决事件本身时才不恢复（否则会把已执行的事件复活成死卡片）。
+  ///
+  /// 【一次性事件标在「执行」】月度通道标在「浮现」（`_maybeWorldEvent`，
+  /// S4-6 既有决策）；面板通道玩家明确执行了该事件，标在执行。不标的后果：
+  /// 一次性事件执行后下月仍可浮现/再执行，重复拿效果。
+  /// 门槛被拒时**不标**（`chooseWorldEventChoice` 返回拒绝文案且未落盘），
+  /// 否则一次失败尝试会让该事件永远无法再触发。
+  String triggerEventChoice(GameEvent event, EventChoice choice) {
+    final previous = pendingEvent;
+    final previousId = previous?.id;
+    if (event.isOneTime &&
+        previousId != event.id &&
+        !eventProvider.completedEventIds.contains(event.id)) {
+      eventProvider.markCompleted(event.id);
+    }
+    setPendingEvent(event);
+    final text = chooseWorldEventChoice(choice);
+    // 执行的就是待决事件本身 ⇒ 已被清空且不该恢复；否则恢复玩家原待决事件
+    if (previousId != null && previousId != event.id) {
+      setPendingEvent(previous);
+    }
+    return text;
+  }
+
   // ==================== 内部工具 ====================
 
   /// S13-5：本组的计数器（状态层 `GameStateProvider.monthlyCounters`）。
