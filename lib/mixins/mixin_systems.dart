@@ -34,7 +34,7 @@ mixin GameSystemsMixin on GameProviderBase {
   /// - 守夜人：地点在长城沿线或身份为守夜人
   /// - 学城：地点在学城/旧镇或身份为学士
   /// - 教会：地点有圣堂或身份为神职人员
-  /// - 铁民/淹神：铁群岛
+  /// - 铁民：铁群岛
   /// - 雇佣兵/贸易/经济：城市
   ///
   /// **S12-8：可见性分层**。此前 `_ => false` 兜底把 **39/73** 个系统静默
@@ -76,7 +76,7 @@ mixin GameSystemsMixin on GameProviderBase {
               isAt('location_old_town'),
         '教会' || '宗教' =>
           identity == PlayerIdentity.priest || identity == PlayerIdentity.scholar,
-        '铁民' || '淹神' => isInRegion('铁群岛'),
+        '铁民' => isInRegion('铁群岛'),
         '雇佣兵' =>
           identity == PlayerIdentity.soldier || identity == PlayerIdentity.adventurer,
         '贸易' || '经济' || '铁金库' =>
