@@ -18,6 +18,7 @@
 /// 不碰真实存档。
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -185,96 +186,90 @@ void main() {
 
   group('S15-4 自动存档：不再丢档', () {
     testWidgets('同月内的一条指令也会被自动存档（判别式）', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
       final dir = Directory.systemTemp.createTempSync('s15_4_save_');
       addTearDown(() {
         if (dir.existsSync()) dir.deleteSync(recursive: true);
       });
 
+      /// 存档目录里的 save_*.json 个数（同步读盘——见下方 runAsync 说明）。
+      int saveFileCount() => dir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.json'))
+          .length;
+
       final engine = GameEngine()..startNewGame();
       final service = SaveService(saveDir: dir.path);
       final goldBefore = engine.player.gold;
       await tester.pumpWidget(
-        MaterialApp(
-          theme: westerosTheme(),
-          home: GameScreen(engine: engine, saveService: service),
-        ),
+        MaterialApp(home: GameScreen(engine: engine, saveService: service)),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // 【为什么直接改引擎而不是走 UI】本条判别的是「状态变化 ⇒ 落盘」，
       // 而 UI 提交一条指令是否真的改变状态取决于该指令的前置条件
       // （每日次数/精力/金币），那是无关变量；gainGold 必改状态、必 notify。
       engine.gainGold(5);
-      await tester.pumpAndSettle();
 
-      // 跳过 2 秒去抖并让**真实文件 IO** 完成（fake-async 之外）
+      // 【时序必须与 batch12_s12 的通过版同构】pump 跳过 2 秒去抖，
+      // 再用 runAsync 切到真实 async 区让文件 IO 真正落盘；
+      // 中间不要插 pumpAndSettle（会先消耗掉 Timer，改变挂起链的时序）。
       await tester.pump(const Duration(seconds: 3));
       await tester.runAsync(() async {
         await Future<void>.delayed(const Duration(milliseconds: 80));
       });
       await tester.pumpAndSettle();
 
-      // 【必须 runAsync】testWidgets 跑在 fake-async 中，真实文件 IO 的
-      // Future 在那里永不完成 ⇒ 直接 await 会挂死（S12-7 既有测试
-      // 正是为此改用同步 listSync）。
-      final saves = await tester.runAsync(() => service.listSaves());
       // 🔴 判别断言：修复前这里为空（只在跨月时写盘），同月操作全丢
-      expect(saves, isNotEmpty,
+      expect(saveFileCount(), 1,
           reason: '同月内的操作也必须自动落盘，否则退出即丢档（用户反馈「返回＝重开」）');
 
-      // 且存的是**操作后**的状态（金币已变）
-      final loaded =
-          await tester.runAsync(() => service.loadGame(saves!.first.saveId));
-      expect(loaded, isNotNull);
-      // 工作可能因精力/次数限制未改变金币，故只断言「存档中的金币 == 当前金币」
-      expect(loaded!.player.gold, engine.player.gold,
+      // 且存的是**操作后**的状态（金币 +5 已进档）
+      final files = dir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.json'))
+          .toList();
+      final data =
+          jsonDecode(files.first.readAsStringSync()) as Map<String, dynamic>;
+      final savedGold = ((data['state'] as Map<String, dynamic>)['player']
+          as Map<String, dynamic>)['gold'];
+      expect(savedGold, goldBefore + 5,
           reason: '自动存档应反映操作后的最新状态，而非进入时的旧状态');
-      expect(engine.player.gold, goldBefore + 5,
-          reason: '前提自证：这条改动确实生效了（否则落盘断言无判别力）');
     });
 
     testWidgets('退出界面时补存最后一笔（dispose flush）', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
       final dir = Directory.systemTemp.createTempSync('s15_4_flush_');
       addTearDown(() {
         if (dir.existsSync()) dir.deleteSync(recursive: true);
       });
 
+      int saveFileCount() => dir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.json'))
+          .length;
+
       final engine = GameEngine()..startNewGame();
       final service = SaveService(saveDir: dir.path);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: westerosTheme(),
-          home: GameScreen(engine: engine, saveService: service),
-        ),
+        MaterialApp(home: GameScreen(engine: engine, saveService: service)),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
-      // 改状态但**不**等去抖窗口，直接换掉整棵树（触发 dispose）
+      // 改状态但**不**等去抖窗口，直接换掉整棵树（触发 dispose）。
       engine.gainGold(7);
-      // 【必须整段放进 runAsync】dispose 里的补存是 fire-and-forget 的真实
-      // 文件 IO；在 fake-async 区里它只会挂起，runAsync 单独延时也救不回来
-      // （挂起 Future 的回调排在 fake zone 的队列里）。整段切到真实 async
-      // 区做「替换树 ⇒ dispose ⇒ 等 IO」才能观察到底层写入。
+      // 【为什么整段放进 runAsync】dispose 里的补存是 fire-and-forget 的真实
+      // 文件 IO；在 fake-async 区里它只会挂起。整段切到真实 async 区做
+      // 「替换树 ⇒ dispose ⇒ 等 IO」才能观察到底层写入。
       await tester.runAsync(() async {
         await tester.pumpWidget(const MaterialApp(home: Scaffold()));
         await Future<void>.delayed(const Duration(milliseconds: 200));
       });
       await tester.pumpAndSettle();
 
-      // 【必须 runAsync】testWidgets 跑在 fake-async 中，真实文件 IO 的
-      // Future 在那里永不完成 ⇒ 直接 await 会挂死（S12-7 既有测试
-      // 正是为此改用同步 listSync）。
-      final saves = await tester.runAsync(() => service.listSaves());
       // 🔴 判别断言：修复前 dispose 不补存 ⇒ 退出瞬间的操作丢失
-      expect(saves, isNotEmpty,
+      expect(saveFileCount(), 1,
           reason: 'dispose 应补存最后一笔，否则「操作后立刻返回」会丢档');
     });
   });
