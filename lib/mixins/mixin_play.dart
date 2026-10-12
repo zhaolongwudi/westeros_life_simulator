@@ -10,6 +10,7 @@ import '../models/location.dart';
 import '../models/player.dart';
 import '../core/command_registry.dart';
 import '../core/monthly_pipeline.dart';
+import '../core/narrative_momentum.dart';
 import '../models/monthly_counter.dart';
 import '../providers/game_provider_base.dart';
 import '../utils/command_alias.dart';
@@ -331,13 +332,29 @@ mixin GamePlayMixin
   /// 「当月没点」而永久错过一个已经摆到面前的抉择。
   String _maybeWorldEvent({int? seed}) {
     final rnd = rng(seed);
-    if (rnd.nextDouble() >= 0.3) return '';
+    // 【S15-5：概率 → 节奏】改造前这里是一道硬编码 30% 掷骰
+    // （`if (rnd.nextDouble() >= 0.3) return '';`）⇒ **七成月份毫无剧情**，
+    // 这正是用户「本地模式一点剧情都没有」的直接来源。
+    // 现在由相位机按回合数确定性地推进（见 core/narrative_momentum.dart）：
+    // 引入/加压/转折相位**必现**，只在章末留一个间歇回合。
+    final phase = NarrativeMomentum.phaseFor(progress.turnCount);
+    if (!NarrativeMomentum.shouldSurface(progress.turnCount)) return '';
+    // 【不顶掉玩家没抉择的事件】既有语义是「新传闻替换旧的待决事件」，
+    // 但在「每月必现」的节奏下，那条语义会把玩家还没点的抉择直接冲走。
+    // 玩家先处理完眼前的抉择，剧情再继续——推进不等于催命。
+    if (pendingEvent != null) return '';
     final available = eventProvider.getAvailableEvents(
       player,
       season: progress.season,
     );
     if (available.isEmpty) return '';
-    final event = available[rnd.nextInt(available.length)];
+    // 按相位挑事件（引入挑日常/家族、转折挑政治/战争…），同分用确定性 rng 打破。
+    final best = available
+        .map((e) => NarrativeMomentum.scoreEvent(e, phase))
+        .reduce((x, y) => x > y ? x : y);
+    final top =
+        available.where((e) => NarrativeMomentum.scoreEvent(e, phase) == best).toList();
+    final event = top[rnd.nextInt(top.length)];
     // 【S4-6（P1-11）一次性事件必须在此标记完成】
     // `EventProvider.canTrigger` 对 `isOneTime` 事件的拦截依赖
     // `_completedEventIds`，而写入该集合的唯一入口 `markCompleted`
