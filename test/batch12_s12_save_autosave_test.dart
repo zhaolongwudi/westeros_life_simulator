@@ -128,8 +128,10 @@ void main() {
       expect(await saveFileCount(), 0,
           reason: '只读指令没有状态变化，不该落盘');
 
-      // 「工作」改金币/精力 ⇒ 同月内也必须落盘
-      engine.resolveCommand('工作');
+      // 【为什么用 gainGold 而不是「工作」】本条判别的是「状态变化 ⇒ 落盘」，
+      // 而「工作」可能因每日次数/精力不足而提前返回（不 notify）⇒ 假红。
+      // gainGold 必改金币、必 notify，把指令成败这个无关变量排除掉。
+      engine.gainGold(5);
       await settleIo(tester);
       expect(await saveFileCount(), 1,
           reason: '同月内的状态改动必须落盘，否则退出即丢档（S15-4）');

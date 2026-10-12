@@ -196,6 +196,7 @@ void main() {
 
       final engine = GameEngine()..startNewGame();
       final service = SaveService(saveDir: dir.path);
+      final goldBefore = engine.player.gold;
       await tester.pumpWidget(
         MaterialApp(
           theme: westerosTheme(),
@@ -204,9 +205,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 执行一条同月内、不跨月的指令（状态会变化但年月不变）
-      await tester.enterText(find.byType(TextField).last, '工作');
-      await tester.testTextInput.receiveAction(TextInputAction.send);
+      // 【为什么直接改引擎而不是走 UI】本条判别的是「状态变化 ⇒ 落盘」，
+      // 而 UI 提交一条指令是否真的改变状态取决于该指令的前置条件
+      // （每日次数/精力/金币），那是无关变量；gainGold 必改状态、必 notify。
+      engine.gainGold(5);
       await tester.pumpAndSettle();
 
       // 跳过 2 秒去抖并让**真实文件 IO** 完成（fake-async 之外）
@@ -231,6 +233,8 @@ void main() {
       // 工作可能因精力/次数限制未改变金币，故只断言「存档中的金币 == 当前金币」
       expect(loaded!.player.gold, engine.player.gold,
           reason: '自动存档应反映操作后的最新状态，而非进入时的旧状态');
+      expect(engine.player.gold, goldBefore + 5,
+          reason: '前提自证：这条改动确实生效了（否则落盘断言无判别力）');
     });
 
     testWidgets('退出界面时补存最后一笔（dispose flush）', (tester) async {
@@ -255,9 +259,13 @@ void main() {
 
       // 改状态但**不**等去抖窗口，直接换掉整棵树（触发 dispose）
       engine.gainGold(7);
-      await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+      // 【必须整段放进 runAsync】dispose 里的补存是 fire-and-forget 的真实
+      // 文件 IO；在 fake-async 区里它只会挂起，runAsync 单独延时也救不回来
+      // （挂起 Future 的回调排在 fake zone 的队列里）。整段切到真实 async
+      // 区做「替换树 ⇒ dispose ⇒ 等 IO」才能观察到底层写入。
       await tester.runAsync(() async {
-        await Future<void>.delayed(const Duration(milliseconds: 120));
+        await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
       });
       await tester.pumpAndSettle();
 

@@ -364,10 +364,12 @@ void main() {
         ),
         findsOneWidget,
       );
+      // S15-4：训练已接入技能候选按钮 ⇒ 标记从「…」变「▾」
+      // （面板里点它就地列出 sword/archery… 的中文按钮，不再让玩家手打）。
       expect(
         find.descendant(
           of: find.byType(CommandPanel),
-          matching: find.text('训练 …'),
+          matching: find.text('训练 ▾'),
         ),
         findsOneWidget,
       );
@@ -404,12 +406,15 @@ void main() {
       expect(delta, 1, reason: '点「过月」应恰好推进一个月');
     });
 
-    testWidgets('点面板里的需参数指令：面板关闭且输入框被预填「主名 + 空格」', (tester) async {
+    testWidgets('点无候选的需参数指令：面板关闭且输入框被预填「主名 + 空格」',
+        (tester) async {
       await pumpGame(tester);
 
       await tester.tap(find.byIcon(Icons.terminal_outlined));
       await tester.pumpAndSettle();
-      await tapInPanel(tester, '训练 …');
+      // S15-4：改用**无候选**的需参数指令——「立嗣」要玩家自己起名，
+      // argChoices 为 null ⇒ 仍走「预填输入框」的旧路径（这条契约没变）。
+      await tapInPanel(tester, '立嗣 …');
 
       expect(find.byType(CommandPanel), findsNothing);
       final field = tester.widget<TextField>(
@@ -418,8 +423,23 @@ void main() {
           matching: find.byType(TextField),
         ),
       );
-      expect(field.controller!.text, '训练 ',
-          reason: '应预填「训练 」让玩家直接补技能名');
+      expect(field.controller!.text, '立嗣 ',
+          reason: '应预填「立嗣 」让玩家直接补名字');
+    });
+
+    testWidgets('点有候选的需参数指令：面板**不**关闭，就地展开候选按钮（S15-4）',
+        (tester) async {
+      await pumpGame(tester);
+
+      await tester.tap(find.byIcon(Icons.terminal_outlined));
+      await tester.pumpAndSettle();
+      await tapInPanel(tester, '训练 ▾');
+
+      // 新契约：有候选时不预填、不关面板，而是列出候选项
+      expect(find.byType(CommandPanel), findsOneWidget,
+          reason: '候选是就地展开的，面板应保持打开');
+      expect(find.text('选择要用的：'), findsOneWidget);
+      expect(find.text('剑术'), findsWidgets, reason: '候选按钮显示中文技能名');
     });
   });
 }
