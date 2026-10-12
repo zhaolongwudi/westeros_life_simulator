@@ -58,7 +58,8 @@ class CommandInputBar extends StatelessWidget {
                 '指令',
                 style: TextStyle(color: WesterosColors.goldBright),
               ),
-              tooltip: '指令（全部 47 条）',
+              // 文字本身已自解释，不需要 Tooltip（TextButton 也无此参数，
+              // S15-3 首推 CI 红 1 例即此处编译错误：undefined_named_parameter）。
             ),
             const SizedBox(width: 4),
           ],
