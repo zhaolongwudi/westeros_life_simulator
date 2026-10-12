@@ -22,6 +22,7 @@ import 'package:westeros_life_simulator/game_engine.dart';
 import 'package:westeros_life_simulator/models/player.dart';
 import 'package:westeros_life_simulator/screens/game_screen.dart';
 import 'package:westeros_life_simulator/screens/settings_screen.dart';
+import 'package:westeros_life_simulator/providers/game_state_provider.dart';
 import 'package:westeros_life_simulator/services/save_service.dart';
 
 /// 内存版存档服务（**仅用于 widget 测试**）。
@@ -36,6 +37,22 @@ class _MemorySaveService extends SaveService {
 
   @override
   Future<List<SaveMetadata>> listSaves() async => <SaveMetadata>[];
+}
+
+/// 记录型假存档服务（S15-4）：只记录落盘当时的金币，不碰磁盘。
+class _RecordingSaveService extends SaveService {
+  _RecordingSaveService() : super(saveDir: '/tmp/nonexistent_s12_rec_dir');
+
+  final List<int> savedGold = <int>[];
+
+  @override
+  Future<List<SaveMetadata>> listSaves() async => <SaveMetadata>[];
+
+  @override
+  Future<String> saveGame(GameStateProvider state, {String? saveId}) async {
+    savedGold.add(state.player.gold);
+    return saveId ?? 'fake_slot';
+  }
 }
 
 void main() {
@@ -112,29 +129,34 @@ void main() {
         (tester) async {
       // 【S15-4 订正本用例】原断言是「同月内的非时间改动不触发落盘」——
       // 那正是「返回＝丢档」的根因：同月内赚的钱/练的技能退出后全部消失。
-      // 现契约分两半：
-      //   ① 只读指令（状态）不改变任何状态 ⇒ 无 notify ⇒ 不落盘（保持）；
-      //   ② 改变状态的指令（工作）即使没跨月也必须落盘（新增）。
+      // 现契约分两半：① 只读指令不落盘（保持）；② 状态改动必落盘（新增）。
+      //
+      // 【为什么用记录型假实现】真实文件 IO 跑在 fake-async 之外，落盘完成
+      // 时机不可控（实测时红时绿）；记录调用稳定，且能断言落盘当时的状态。
       final engine = GameEngine()..startNewGame();
+      final recorder = _RecordingSaveService();
+      final goldBefore = engine.player.gold;
       await tester.pumpWidget(
-        MaterialApp(home: GameScreen(engine: engine, saveService: service)),
+        MaterialApp(home: GameScreen(engine: engine, saveService: recorder)),
       );
       await tester.pump();
-      expect(await saveFileCount(), 0, reason: '刚开局不该立即落盘');
+      expect(recorder.savedGold, isEmpty, reason: '刚开局不该立即落盘');
 
       // 「状态」不消耗回合、不改状态，不该触发存档
       engine.resolveCommand('状态');
-      await settleIo(tester);
-      expect(await saveFileCount(), 0,
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+      expect(recorder.savedGold, isEmpty,
           reason: '只读指令没有状态变化，不该落盘');
 
-      // 【为什么用 gainGold 而不是「工作」】本条判别的是「状态变化 ⇒ 落盘」，
-      // 而「工作」可能因每日次数/精力不足而提前返回（不 notify）⇒ 假红。
-      // gainGold 必改金币、必 notify，把指令成败这个无关变量排除掉。
+      // 状态改动 ⇒ 同月内也必须落盘
       engine.gainGold(5);
-      await settleIo(tester);
-      expect(await saveFileCount(), 1,
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+      expect(recorder.savedGold, isNotEmpty,
           reason: '同月内的状态改动必须落盘，否则退出即丢档（S15-4）');
+      expect(recorder.savedGold.last, goldBefore + 5,
+          reason: '落盘的应是操作后的最新状态');
     });
   });
 
