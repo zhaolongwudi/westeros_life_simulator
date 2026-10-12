@@ -12,7 +12,9 @@ class CommandInputBar extends StatelessWidget {
   const CommandInputBar({
     required this.controller,
     required this.onSubmitted,
-    this.hintText = '输入指令（如 工作 / 训练 sword / 过月）',
+    // S15-3：placeholder 双向引导——直接输入 / 点左侧「指令」按钮开面板。
+    // 保留「输入指令」前缀（batch10_60:69 textContaining 断言依赖）。
+    this.hintText = '输入指令，或点左侧「指令」浏览全部 47 条面板',
     this.onOpenCommands,
     this.focusNode,
   });
@@ -42,11 +44,21 @@ class CommandInputBar extends StatelessWidget {
       child: Row(
         children: <Widget>[
           if (onOpenCommands != null) ...<Widget>[
-            IconButton(
-              icon: const Icon(Icons.terminal_outlined),
-              tooltip: '指令（全部 47 条）',
-              color: WesterosColors.goldBright,
+            // S15-3：入口从孤图标改为「图标 + 文字」按钮——用户反馈「把指令
+            // 做成按钮」，孤图标发现性差（面板上线后仍有人以为只能打字）。
+            // 图标保留 Icons.terminal_outlined：batch13_s12_9 的 4 处
+            // byIcon 断言依赖它，文字只是叠加，不改交互。
+            TextButton.icon(
               onPressed: onOpenCommands,
+              icon: const Icon(
+                Icons.terminal_outlined,
+                color: WesterosColors.goldBright,
+              ),
+              label: const Text(
+                '指令',
+                style: TextStyle(color: WesterosColors.goldBright),
+              ),
+              tooltip: '指令（全部 47 条）',
             ),
             const SizedBox(width: 4),
           ],

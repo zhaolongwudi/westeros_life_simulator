@@ -431,9 +431,11 @@ class _GameScreenState extends State<GameScreen> {
                   focusNode: _inputFocusNode,
                   onSubmitted: _submitCommand,
                   onOpenCommands: _openCommandPanel,
+                  // S15-3：双向引导（用户反馈「提示都是输入指令」）——
+                  // 普通模式指向左侧「指令」面板；AI 模式指向自然语言描述。
                   hintText: _aiMode
-                      ? 'AI 模式：描述你的行动…'
-                      : '输入指令（如 工作 / 训练 sword / 过月）',
+                      ? 'AI 模式：用一句话描述你的行动…'
+                      : '输入指令，或点左侧「指令」浏览全部 47 条面板',
                 ),
               ],
             ),
