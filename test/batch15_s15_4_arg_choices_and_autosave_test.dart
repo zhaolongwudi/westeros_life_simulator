@@ -216,13 +216,17 @@ void main() {
       });
       await tester.pumpAndSettle();
 
-      final saves = await service.listSaves();
+      // 【必须 runAsync】testWidgets 跑在 fake-async 中，真实文件 IO 的
+      // Future 在那里永不完成 ⇒ 直接 await 会挂死（S12-7 既有测试
+      // 正是为此改用同步 listSync）。
+      final saves = await tester.runAsync(() => service.listSaves());
       // 🔴 判别断言：修复前这里为空（只在跨月时写盘），同月操作全丢
       expect(saves, isNotEmpty,
           reason: '同月内的操作也必须自动落盘，否则退出即丢档（用户反馈「返回＝重开」）');
 
       // 且存的是**操作后**的状态（金币已变）
-      final loaded = await service.loadGame(saves.first.saveId);
+      final loaded =
+          await tester.runAsync(() => service.loadGame(saves!.first.saveId));
       expect(loaded, isNotNull);
       // 工作可能因精力/次数限制未改变金币，故只断言「存档中的金币 == 当前金币」
       expect(loaded!.player.gold, engine.player.gold,
@@ -257,7 +261,10 @@ void main() {
       });
       await tester.pumpAndSettle();
 
-      final saves = await service.listSaves();
+      // 【必须 runAsync】testWidgets 跑在 fake-async 中，真实文件 IO 的
+      // Future 在那里永不完成 ⇒ 直接 await 会挂死（S12-7 既有测试
+      // 正是为此改用同步 listSync）。
+      final saves = await tester.runAsync(() => service.listSaves());
       // 🔴 判别断言：修复前 dispose 不补存 ⇒ 退出瞬间的操作丢失
       expect(saves, isNotEmpty,
           reason: 'dispose 应补存最后一笔，否则「操作后立刻返回」会丢档');
