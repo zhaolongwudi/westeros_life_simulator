@@ -1,3 +1,7 @@
+<!-- DL-TOP:BEGIN -->
+> ⚡ **直连加速下载**：[WesterosLige v0.0.5 APK](https://gh-proxy.com/https://github.com/zhaolongwudi/westeros_life_simulator/releases/download/v0.0.5/WesterosLige.apk)（gh-proxy 国内直连 · 每次构建自动更新）
+<!-- DL-TOP:END -->
+
 # 🐺 维斯特洛人生模拟器
 
 > ### *凛冬不是惩罚。它只是这个世界的季节之一。*
@@ -92,11 +96,12 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- DL-CENTER:BEGIN -->
 ## 📥 下载中心
 
-**最新构建**：`WesterosLige v0.0.5` · 2026-10-12 03:11 UTC · ✅ 自动发布正式版
+**最新构建**：`WesterosLige v0.0.5` · 2026-10-12 03:21 UTC · ✅ 自动发布正式版
 
 | 通道 | 地址 |
 |---|---|
-| 🚀 Release 直链 | [releases/latest/download/WesterosLige.apk](https://github.com/zhaolongwudi/westeros_life_simulator/releases/latest/download/WesterosLige.apk)（免登录，每次构建自动指向最新正式版 `v0.0.5`） |
+| ⚡ 直连加速 | [gh-proxy 加速下载 `WesterosLige v0.0.5`](https://gh-proxy.com/https://github.com/zhaolongwudi/westeros_life_simulator/releases/download/v0.0.5/WesterosLige.apk)（国内直连，每次构建自动更新） |
+| 🚀 Release 直链 | [releases/latest/download/WesterosLige.apk](https://github.com/zhaolongwudi/westeros_life_simulator/releases/latest/download/WesterosLige.apk)（GitHub 原始直链，每次构建自动指向最新正式版 `v0.0.5`） |
 | 🐙 GitHub 官方 | [Releases 页面](https://github.com/zhaolongwudi/westeros_life_simulator/releases) → 最新版 → Assets → `WesterosLige.apk`（保留最近 3 次） |
 
 > 🔄 每次构建自动发布正式版 Release（版本号 0.0.1 → 0.0.2 → 0.0.3…自动递增），仅保留最近 3 次。

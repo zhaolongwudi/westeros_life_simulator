@@ -182,7 +182,7 @@ jobs:
           TAG="v$VERSION"
           REL_JSON=$(curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" \
-            -d "{\"tag_name\":\"$TAG\",\"name\":\"WesterosLige v$VERSION\",\"body\":\"自动构建正式版（commit $SHA8）\\n- 版本: v$VERSION\\n- 直链下载（需登录 GitHub）: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk\\n- 测试: 790+ passed（CI run ${{ github.run_id }}）\",\"draft\":false,\"prerelease\":false}")
+            -d "{\"tag_name\":\"$TAG\",\"name\":\"WesterosLige v$VERSION\",\"body\":\"自动构建正式版（commit $SHA8）\\n- 版本: v$VERSION\\n- ⚡ 直连加速下载（gh-proxy）: https://gh-proxy.com/https://github.com/${GITHUB_REPOSITORY}/releases/download/$TAG/WesterosLige.apk\\n- GitHub 直链（需登录）: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WesterosLige.apk\\n- 测试: 790+ passed（CI run ${{ github.run_id }}）\",\"draft\":false,\"prerelease\":false}")
           REL_ID=$(echo "$REL_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))")
           if [ -z "$REL_ID" ]; then
             # already_exists（版本号重复，可能因上一轮递增 commit push 丢失导致 version.txt 未推进）：

@@ -2,8 +2,10 @@
 """自动更新 README 下载中心与最近更新（westeros_life_simulator）。
 
 两个模式（均由 GitHub Actions 调用，构建/测试成功后自动执行并 push）：
-  --download   刷新「下载中心」区块：GitHub 官方运行页链接 + nightly.link 加速外链，
-               以当前 run 的 SHA/run_id/时间生成。由 build_apk.yml 构建成功后调用。
+  --download   刷新「下载中心」区块（gh-proxy 直连加速 + GitHub 原始直链，
+               以本次发布版本号生成）**并**刷新首页最上方的「直连加速下载」横幅
+               （DL-TOP 区块，S15-2：用户 2026-10-12 拍板，每次构建自动更新）。
+               由 build_apk.yml 构建成功后调用。
   --changelog  刷新「最近更新」区块：从 git log 取最近 3 条非自动更新 commit，
                以「日期 · 标题（SHA）」列表写入。由 ci.yml 测试通过后调用。
 
@@ -12,6 +14,7 @@
                由 ci.yml 测试通过后调用，与 --changelog 同一步骤提交。
 
 区块标记（README.md 内，脚本按标记整体替换，勿手改标记内内容）：
+  <!-- DL-TOP:BEGIN --> ... <!-- DL-TOP:END -->     （README 最上方，不存在时自动插入）
   <!-- DL-CENTER:BEGIN --> ... <!-- DL-CENTER:END -->
   <!-- CHANGELOG:BEGIN --> ... <!-- CHANGELOG:END -->
 
@@ -34,6 +37,10 @@ ARTIFACT_NAME = "WesterosLige-nightly"
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = SCRIPT_DIR.parent
 README = PROJECT_DIR / "README.md"
+
+# 用户 2026-10-12 拍板：构建物下载链接统一加 gh-proxy 直连加速前缀。
+# 用法：https://gh-proxy.com/<完整 GitHub URL>（直接拼接，代理端跟随 GitHub 重定向）。
+GH_PROXY_PREFIX = "https://gh-proxy.com/"
 
 
 def log(msg):
@@ -66,6 +73,15 @@ def build_download_block(version=""):
     releases_page = f"https://github.com/{repo}/releases"
     workflow_page = f"https://github.com/{repo}/actions/workflows/build_apk.yml"
     tag_display = f"v{version}" if version else sha8
+    # S15-2：构建物下载链接统一提供 gh-proxy 直连加速版。带 tag 的精确资产
+    # 地址（releases/download/v<版本>/WesterosLige.apk）没有重定向歧义，
+    # 是 gh-proxy 代理下载的标准形态；latest 直链保留为 GitHub 原始通道。
+    proxy_tagged = (
+        f"{GH_PROXY_PREFIX}https://github.com/{repo}/releases/download/"
+        f"v{version}/WesterosLige.apk"
+    ) if version else (
+        f"{GH_PROXY_PREFIX}{release_latest}"
+    )
     lines = [
         "<!-- DL-CENTER:BEGIN -->",
         "## 📥 下载中心",
@@ -74,7 +90,8 @@ def build_download_block(version=""):
         "",
         "| 通道 | 地址 |",
         "|---|---|",
-        f"| 🚀 Release 直链 | [releases/latest/download/WesterosLige.apk]({release_latest})（免登录，每次构建自动指向最新正式版 `v{version}`） |",
+        f"| ⚡ 直连加速 | [gh-proxy 加速下载 `WesterosLige {tag_display}`]({proxy_tagged})（国内直连，每次构建自动更新） |",
+        f"| 🚀 Release 直链 | [releases/latest/download/WesterosLige.apk]({release_latest})（GitHub 原始直链，每次构建自动指向最新正式版 `v{version}`） |",
         f"| 🐙 GitHub 官方 | [Releases 页面]({releases_page}) → 最新版 → Assets → `WesterosLige.apk`（保留最近 3 次） |",
         "",
         "> 🔄 每次构建自动发布正式版 Release（版本号 0.0.1 → 0.0.2 → 0.0.3…自动递增），仅保留最近 3 次。",
@@ -86,6 +103,54 @@ def build_download_block(version=""):
         "<!-- DL-CENTER:END -->",
     ]
     return "\n".join(lines)
+
+
+def build_top_block(version=""):
+    """首页最上方的「直连加速下载」横幅（S15-2，用户 2026-10-12 拍板）。
+
+    每次构建（build_apk.yml → `--download`）自动重写；版本取**本次发布的**
+    v<版本>，带 tag 精确资产地址经 gh-proxy 代理。
+    """
+    repo = os.environ.get("GITHUB_REPOSITORY", "zhaolongwudi/westeros_life_simulator")
+    tag_display = f"v{version}" if version else "latest"
+    target = (
+        f"https://github.com/{repo}/releases/download/v{version}/WesterosLige.apk"
+        if version
+        else f"https://github.com/{repo}/releases/latest/download/WesterosLige.apk"
+    )
+    proxy_url = f"{GH_PROXY_PREFIX}{target}"
+    lines = [
+        "<!-- DL-TOP:BEGIN -->",
+        f"> ⚡ **直连加速下载**：[WesterosLige {tag_display} APK"
+        f"]({proxy_url})（gh-proxy 国内直连 · 每次构建自动更新）",
+        "<!-- DL-TOP:END -->",
+    ]
+    return "\n".join(lines)
+
+
+def update_top_block(new_block):
+    """把 DL-TOP 区块写回 README 最上方：存在则整体替换，不存在则插到文件第一行之前。
+
+    【为什么不用 do_update】do_update 对「标记不存在」返回 False（语义是
+    「README 缺标记，应当先手写」）；而 DL-TOP 必须保证「无论 README 处于
+    什么状态都能落位到最上方」，插入语义内建于本函数，不失败。
+    """
+    text = read_readme()
+    begin = "<!-- DL-TOP:BEGIN -->"
+    end = "<!-- DL-TOP:END -->"
+    pattern = re.compile(re.escape(begin) + r".*?" + re.escape(end), re.S)
+    if pattern.search(text):
+        updated = pattern.sub(new_block, text, count=1)
+        action = "替换"
+    else:
+        updated = new_block + "\n\n" + text
+        action = "插入顶部"
+    if updated == text:
+        log("DL-TOP 区块内容无变化，跳过写入")
+        return True
+    README.write_text(updated, encoding="utf-8")
+    log(f"DL-TOP 区块已{action}")
+    return True
 
 
 def build_changelog_block():
@@ -203,6 +268,9 @@ def main():
     args = ap.parse_args()
     ok = True
     if args.download:
+        # S15-2：首页最上方的直连加速横幅与下载中心同源（同一 --version），
+        # 每次构建一起刷新；DL-TOP 用 update_top_block（自带「不存在即插入顶部」）。
+        ok = update_top_block(build_top_block(args.version)) and ok
         ok = do_update("DL-CENTER", lambda: build_download_block(args.version)) and ok
     if args.changelog:
         ok = do_update("CHANGELOG", build_changelog_block) and ok
