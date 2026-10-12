@@ -549,6 +549,16 @@ mixin GameMarriageMixin
 
   /// 把本领域指令注册进注册表（order 与历史帮助文本顺序一致）。
   void registerMarriageCommands(CommandRegistry registry) {
+    // S15-4：参数候选——求婚的四种身世、当前子女列表。
+    List<CommandArgChoice> spouseOriginChoices() => const <CommandArgChoice>[
+          CommandArgChoice('贵族', '贵族'),
+          CommandArgChoice('平民', '平民'),
+          CommandArgChoice('商人', '商人'),
+          CommandArgChoice('战士', '战士'),
+        ];
+    List<CommandArgChoice> childChoices() =>
+        player.children.map((n) => CommandArgChoice(n, n)).toList();
+
     registry.register(
       CommandSpec(
         aliases: const ['求婚', '成婚', 'marry'],
@@ -556,6 +566,7 @@ mixin GameMarriageMixin
         group: '人物',
         requiredArgCount: 1,
         missingArgsHint: '想与什么样的人成婚？如「求婚 平民」或「成婚 贵族」。',
+        argChoices: spouseOriginChoices,
         helpLine: '求婚 / marry [身世]   成婚（平民/商人/战士/贵族，如 求婚 平民）',
         handler: (args) => CommandResult(text: marry(args)),
       ),
@@ -626,6 +637,7 @@ mixin GameMarriageMixin
         group: '成长',
         requiredArgCount: 1,
         missingArgsHint: '亲自督导哪个子女？如「督导 罗柏」。',
+        argChoices: childChoices,
         helpLine: '督导 / tutor [子女]  亲自督导子女（声望 +3）',
         handler: (args) => CommandResult(text: tutorChild(args)),
       ),
@@ -637,6 +649,7 @@ mixin GameMarriageMixin
         group: '成长',
         requiredArgCount: 1,
         missingArgsHint: '送哪个子女去学城/骑士团？如「送学 罗柏」。',
+        argChoices: childChoices,
         helpLine: '送学 / school [子女] 送子女去学城/骑士团进修（声望 +5）',
         handler: (args) => CommandResult(text: sendChildToSchool(args)),
       ),

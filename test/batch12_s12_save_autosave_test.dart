@@ -108,16 +108,31 @@ void main() {
           reason: '自动存档必须覆盖同一槽，而不是每次新建');
     });
 
-    testWidgets('同月内的非时间改动不触发落盘', (tester) async {
+    testWidgets('只读指令不落盘；同月内的状态改动必须落盘（S15-4 新契约）',
+        (tester) async {
+      // 【S15-4 订正本用例】原断言是「同月内的非时间改动不触发落盘」——
+      // 那正是「返回＝丢档」的根因：同月内赚的钱/练的技能退出后全部消失。
+      // 现契约分两半：
+      //   ① 只读指令（状态）不改变任何状态 ⇒ 无 notify ⇒ 不落盘（保持）；
+      //   ② 改变状态的指令（工作）即使没跨月也必须落盘（新增）。
       final engine = GameEngine()..startNewGame();
       await tester.pumpWidget(
         MaterialApp(home: GameScreen(engine: engine, saveService: service)),
       );
       await tester.pump();
-      // 「状态」不消耗回合，不该触发存档
+      expect(await saveFileCount(), 0, reason: '刚开局不该立即落盘');
+
+      // 「状态」不消耗回合、不改状态，不该触发存档
       engine.resolveCommand('状态');
       await settleIo(tester);
-      expect(await saveFileCount(), 0, reason: '未跨月不该落盘');
+      expect(await saveFileCount(), 0,
+          reason: '只读指令没有状态变化，不该落盘');
+
+      // 「工作」改金币/精力 ⇒ 同月内也必须落盘
+      engine.resolveCommand('工作');
+      await settleIo(tester);
+      expect(await saveFileCount(), 1,
+          reason: '同月内的状态改动必须落盘，否则退出即丢档（S15-4）');
     });
   });
 

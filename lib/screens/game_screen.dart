@@ -109,9 +109,6 @@ class _GameScreenState extends State<GameScreen> {
   late final SaveService _saveService = widget.saveService ?? SaveService();
   Timer? _autoSaveTimer;
 
-  /// 上次自动存档时的「年·月」，用于只在跨月时落盘。
-  String _lastSavedMonth = '';
-
   @override
   void initState() {
     super.initState();
@@ -126,6 +123,10 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void dispose() {
     _autoSaveTimer?.cancel();
+    // S15-4：返回/退出时立即补一次落盘——去抖窗口内的最后一步操作
+    // （指令、事件抉择、AI 行动）否则会丢，玩家重进发现「进度倒退」。
+    // fire-and-forget：dispose 不能 await，存盘失败也不该阻断退出。
+    _doAutoSave();
     _engine.removeListener(_onEngineChanged);
     _inputController.dispose();
     _inputFocusNode.dispose();
@@ -133,31 +134,35 @@ class _GameScreenState extends State<GameScreen> {
     super.dispose();
   }
 
-  /// 引擎变化 → 刷新界面；跨月时触发去抖自动存档。
+  /// 引擎变化 → 刷新界面；并安排一次去抖自动存档。
   void _onEngineChanged() {
     if (!mounted) return;
     setState(() {});
     _maybeAutoSave();
   }
 
-  /// 月份变化即安排一次去抖自动存档（2 秒）。
+  /// 任何状态变化都安排一次去抖自动存档（2 秒）。
   ///
   /// 【为什么挂在 notifyListeners 而不是逐条指令后】
   /// 月度推进、事件抉择、AI 抉择、系统结算……都会 notify，
-  /// 挂在这里能覆盖**所有**改动路径，漏一条就丢一次进度；
-  /// 而去抖 + 只看「年月变化」又把 IO 压到每局最多几十次。
+  /// 挂在这里能覆盖**所有**改动路径，漏一条就丢一次进度。
+  ///
+  /// 【S15-4 为什么不再「只看跨月」】原实现只在年月变化时落盘，
+  /// 于是同一个月内的指令成果（赚钱、练技能、接任务、写信）在退出后
+  /// **全部丢失**，玩家感受就是「返回等于重新开始」。现在改为任何
+  /// 变化都去抖落盘：连续操作只在**停手 2 秒后**存一次，IO 频率不变，
+  /// 但退出前的那一步不再丢。
   void _maybeAutoSave() {
     if (!_engine.isGameActive) return;
-    final stamp = '${_engine.progress.year}-${_engine.progress.month}';
-    if (stamp == _lastSavedMonth) return;
-    _lastSavedMonth = stamp;
     _autoSaveTimer?.cancel();
     _autoSaveTimer = Timer(const Duration(seconds: 2), _doAutoSave);
   }
 
   /// 真正落盘（失败静默：自动存档不该用弹窗打断玩家）。
+  ///
+  /// 【为什么不再判 `mounted`】dispose 路径要补存最后一笔，
+  /// 那时 `mounted` 已 false——判它等于永远不存「退出前那一步」。
   Future<void> _doAutoSave() async {
-    if (!mounted) return;
     try {
       await _saveService.saveGame(_engine, saveId: _saveSlotId);
     } on Object {
@@ -261,7 +266,7 @@ class _GameScreenState extends State<GameScreen> {
 
   /// 打开「指令」面板（S12-9）：47 条命令按分组列出 + 搜索。
   ///
-  /// 零参数指令点一下即执行；需参数指令预填输入框（见 [_prefillCommand]）。
+  /// 零参数指令点一下即执行；有候选的展开按钮；其余预填输入框。
   void _openCommandPanel() {
     showModalBottomSheet<void>(
       context: context,
@@ -276,6 +281,11 @@ class _GameScreenState extends State<GameScreen> {
         onPrefill: (spec) {
           Navigator.of(sheetContext).pop();
           _prefillCommand(spec);
+        },
+        // S15-4：点选候选参数后直接执行，不再让玩家手打名字/物品/技能。
+        onRunWithArg: (spec, value) {
+          Navigator.of(sheetContext).pop();
+          _runCommandWithArg(spec, value);
         },
       ),
     );
@@ -292,6 +302,14 @@ class _GameScreenState extends State<GameScreen> {
       selection: TextSelection.collapsed(offset: text.length),
     );
     _inputFocusNode.requestFocus();
+  }
+
+  /// 候选参数被选中：拼成完整指令直接执行（S15-4）。
+  ///
+  /// 【为什么不预填】玩家已经点选过参数了，再让他按一次发送是多余步骤；
+  /// 面板里点「互动 ▾ → 提利昂」就应当立刻发生互动。
+  void _runCommandWithArg(CommandSpec spec, String value) {
+    _submitCommand('${spec.aliases.first} $value');
   }
 
   /// 打开导航宫格（AppBar 单入口 → 全部面板）。

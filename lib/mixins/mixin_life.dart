@@ -304,6 +304,38 @@ mixin GameLifeMixin on GameProviderBase {
     return '你卖出 $quantity 件「${item.name}」，得到 $price 金币。';
   }
 
+  /// 市场常见物品（S15-4：行情面板与「购买」候选按钮**共用同一份**，
+  /// 防止两处各写一份清单漂移）。
+  static const List<String> kMarketItemIds = <String>[
+    'item_bread', 'item_meat', 'item_wine', 'item_herb', 'item_poultice',
+    'item_sword', 'item_bow', 'item_leather_armor', 'item_chainmail',
+    'item_steel', 'item_dragonbone', 'item_gold_chain', 'item_ruby',
+    'item_heart_tree_leaf', 'item_horse',
+  ];
+
+  /// 背包候选项（S15-4）：去重后以中文名展示，值为物品 id（引擎两套都认，
+  /// 用 id 更稳）。
+  List<CommandArgChoice> _bagChoices() {
+    final seen = <String>{};
+    final out = <CommandArgChoice>[];
+    for (final id in player.inventory) {
+      if (!seen.add(id)) continue;
+      out.add(CommandArgChoice(itemName(id), id));
+    }
+    return out;
+  }
+
+  /// 市场候选项（S15-4）：当前地点可买的常见物品。
+  List<CommandArgChoice> _marketChoices() {
+    final out = <CommandArgChoice>[];
+    for (final id in kMarketItemIds) {
+      final item = itemById(id);
+      if (item == null) continue;
+      out.add(CommandArgChoice(item.name, id));
+    }
+    return out;
+  }
+
   /// 市场行情：当前地点可买/可卖的关键物品价格。
   String formatMarketPanel() {
     final loc = currentLocation;
@@ -311,14 +343,8 @@ mixin GameLifeMixin on GameProviderBase {
       return '你不在任何已知地点，没有市场行情。';
     }
     final buf = StringBuffer()..writeln('【${loc.name} · 行情】');
-    // 展示常用物品买卖价
-    final demo = <String>[
-      'item_bread', 'item_meat', 'item_wine', 'item_herb', 'item_poultice',
-      'item_sword', 'item_bow', 'item_leather_armor', 'item_chainmail',
-      'item_steel', 'item_dragonbone', 'item_gold_chain', 'item_ruby',
-      'item_heart_tree_leaf', 'item_horse',
-    ];
-    for (final id in demo) {
+    // 展示常用物品买卖价（清单与「购买」候选共用 kMarketItemIds）
+    for (final id in kMarketItemIds) {
       final item = itemById(id);
       if (item == null) continue;
       buf.writeln('· ${item.name}：买 ${buyPriceOf(id)} / 卖 ${sellPriceOf(id)}');
@@ -782,6 +808,7 @@ mixin GameLifeMixin on GameProviderBase {
         group: '物品',
         requiredArgCount: 1,
         missingArgsHint: '使用什么？如「使用 黑面包」或「使用 item_meat」。',
+        argChoices: _bagChoices,
         helpLine: '使用 / use [物品]    使用消耗品（如 使用 黑面包）',
         handler: (args) =>
             CommandResult(text: useItem(normalizeItemAliasStrict(args))),
@@ -821,6 +848,7 @@ mixin GameLifeMixin on GameProviderBase {
         group: '物品',
         requiredArgCount: 1,
         missingArgsHint: '买什么？如「购买 黑面包」或「买入 item_meat」。输入「行情」看价格。',
+        argChoices: _marketChoices,
         helpLine: '购买 / buy [物品]    购买物品（如 购买 黑面包 或 买入 长剑）',
         handler: (args) => CommandResult(text: buyFromArgs(args)),
       ),
@@ -832,6 +860,7 @@ mixin GameLifeMixin on GameProviderBase {
         group: '物品',
         requiredArgCount: 1,
         missingArgsHint: '卖什么？如「出售 烤肉」或「卖出 item_wine」。',
+        argChoices: _bagChoices,
         helpLine: '出售 / sell [物品]   出售物品（如 出售 烤肉 或 卖出 item_wine）',
         handler: (args) => CommandResult(text: sellFromArgs(args)),
       ),
@@ -852,6 +881,7 @@ mixin GameLifeMixin on GameProviderBase {
         group: '物品',
         requiredArgCount: 1,
         missingArgsHint: '装备什么？如「装备 长剑」或「装备 锁子甲」。',
+        argChoices: _bagChoices,
         helpLine: '装备 / equip [物品]  装备武器/护甲/坐骑（如 装备 长剑）',
         handler: (args) => CommandResult(text: equip(normalizeItemAliasStrict(args))),
       ),
@@ -863,6 +893,7 @@ mixin GameLifeMixin on GameProviderBase {
         group: '物品',
         requiredArgCount: 1,
         missingArgsHint: '卸下什么？如「卸下 长剑」。',
+        argChoices: _bagChoices,
         helpLine: '卸下 / unequip [物品] 卸下装备',
         handler: (args) => CommandResult(text: unequip(normalizeItemAliasStrict(args))),
       ),

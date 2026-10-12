@@ -25,6 +25,7 @@ class CommandPanel extends StatefulWidget {
     required this.specs,
     required this.onRun,
     required this.onPrefill,
+    this.onRunWithArg,
   });
 
   /// 全部指令描述（面板按 `group` 聚合、按 `order` 排序）。
@@ -36,6 +37,11 @@ class CommandPanel extends StatefulWidget {
   /// 需参数指令：把「主名 + 空格」预填进输入框并聚焦，由玩家补参数。
   final ValueChanged<CommandSpec> onPrefill;
 
+  /// 需参数指令的**候选按钮**被选中：带参数直接执行（S15-4）。
+  ///
+  /// 为 null 时需参数指令一律走 [onPrefill]（保持旧行为，兼容既有测试与调用方）。
+  final void Function(CommandSpec spec, String value)? onRunWithArg;
+
   @override
   State<CommandPanel> createState() => _CommandPanelState();
 }
@@ -43,6 +49,40 @@ class CommandPanel extends StatefulWidget {
 class _CommandPanelState extends State<CommandPanel> {
   final TextEditingController _search = TextEditingController();
   String _keyword = '';
+
+  /// 当前展开候选按钮的指令主名（S15-4）；null = 无展开。
+  String? _expandedAlias;
+
+  /// 取候选：无 [CommandSpec.argChoices] 时返回空列表（回落预填）。
+  List<CommandArgChoice> _choicesOf(CommandSpec spec) {
+    final source = spec.argChoices;
+    if (source == null) return const <CommandArgChoice>[];
+    try {
+      return source();
+    } on Object {
+      // 候选来源只读玩家/世界状态，不该抛；真抛了也不能让面板崩——
+      // 回落为「预填输入框」让玩家手打，功能不丢。
+      return const <CommandArgChoice>[];
+    }
+  }
+
+  /// 点击一条指令：零参数直接执行；有候选则展开候选按钮；否则预填输入框。
+  void _onTapSpec(CommandSpec spec) {
+    if (!spec.needsArgs) {
+      widget.onRun(spec);
+      return;
+    }
+    final choices = _choicesOf(spec);
+    if (widget.onRunWithArg != null && choices.isNotEmpty) {
+      setState(() {
+        _expandedAlias = _expandedAlias == spec.aliases.first
+            ? null
+            : spec.aliases.first;
+      });
+      return;
+    }
+    widget.onPrefill(spec);
+  }
 
   @override
   void dispose() {
@@ -170,19 +210,34 @@ class _CommandPanelState extends State<CommandPanel> {
                               for (final spec in buckets[g]!)
                                 _CommandChip(
                                   spec: spec,
-                                  onTap: () => spec.needsArgs
-                                      ? widget.onPrefill(spec)
-                                      : widget.onRun(spec),
+                                  hasChoices: spec.needsArgs &&
+                                      widget.onRunWithArg != null &&
+                                      _choicesOf(spec).isNotEmpty,
+                                  onTap: () => _onTapSpec(spec),
                                 ),
                             ],
                           ),
+                          // S15-4：展开的候选参数按钮（免手打）。
+                          if (_expandedAlias != null &&
+                              buckets[g]!.any((s) => s.aliases.first == _expandedAlias))
+                            _ArgChoiceRow(
+                              choices: _choicesOf(buckets[g]!.firstWhere(
+                                  (s) => s.aliases.first == _expandedAlias)),
+                              onPick: (value) {
+                                final spec = buckets[g]!.firstWhere(
+                                    (s) => s.aliases.first == _expandedAlias);
+                                widget.onRunWithArg!(spec, value);
+                              },
+                            ),
                         ],
                       ],
                     ),
             ),
             const SizedBox(height: 8),
             Text(
-              '点零参数指令直接执行；需参数的会填进输入框，补完再发送。',
+              // S15-4：有候选的指令点开会列出按钮，不再让玩家手打参数。
+              '点零参数指令直接执行；带「▾」的会列出候选项；'
+              '其余需参数的填进输入框，补完再发送。',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: WesterosColors.parchmentDim,
               ),
@@ -194,31 +249,113 @@ class _CommandPanelState extends State<CommandPanel> {
   }
 }
 
+/// 候选参数按钮组（S15-4）：点一下就带参执行，免手打。
+class _ArgChoiceRow extends StatelessWidget {
+  const _ArgChoiceRow({required this.choices, required this.onPick});
+
+  final List<CommandArgChoice> choices;
+  final ValueChanged<String> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: WesterosColors.barkBase,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: WesterosColors.gold.withValues(alpha: 0.45),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            const Text(
+              '选择要用的：',
+              style: TextStyle(
+                color: WesterosColors.gold,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: <Widget>[
+                for (final c in choices)
+                  ActionChip(
+                    label: Text(c.label),
+                    backgroundColor: WesterosColors.barkHigh,
+                    side: BorderSide(
+                      color: WesterosColors.outlineGold.withValues(alpha: 0.7),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    labelStyle: const TextStyle(
+                      color: WesterosColors.parchment,
+                      fontSize: 13,
+                    ),
+                    onPressed: () => onPick(c.value),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// 单条指令按钮。
 class _CommandChip extends StatelessWidget {
-  const _CommandChip({required this.spec, required this.onTap});
+  const _CommandChip({
+    required this.spec,
+    required this.onTap,
+    this.hasChoices = false,
+  });
 
   final CommandSpec spec;
   final VoidCallback onTap;
+
+  /// 该指令有可选候选（S15-4）——按钮上加「▾」标记。
+  final bool hasChoices;
 
   @override
   Widget build(BuildContext context) {
     // 需参数的用「描边 + 参数提示」区分，避免玩家点了以为没反应。
     final needsArgs = spec.needsArgs;
     return ActionChip(
-      label: Text(needsArgs ? '${spec.aliases.first} …' : spec.aliases.first),
+      label: Text(
+        needsArgs
+            ? (hasChoices ? '${spec.aliases.first} ▾' : '${spec.aliases.first} …')
+            : spec.aliases.first,
+      ),
       avatar: needsArgs
-          ? const Icon(Icons.edit_outlined,
-              size: 14, color: WesterosColors.parchmentDim)
+          ? Icon(
+              hasChoices ? Icons.touch_app_outlined : Icons.edit_outlined,
+              size: 14,
+              color: hasChoices
+                  ? WesterosColors.goldBright
+                  : WesterosColors.parchmentDim,
+            )
           : null,
       backgroundColor: WesterosColors.barkMid,
       side: BorderSide(
         color: WesterosColors.outlineGold
-            .withValues(alpha: needsArgs ? 0.4 : 0.7),
+            .withValues(alpha: hasChoices ? 0.9 : (needsArgs ? 0.4 : 0.7)),
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       labelStyle: TextStyle(
-        color: needsArgs ? WesterosColors.parchmentDim : WesterosColors.parchment,
+        color: hasChoices
+            ? WesterosColors.goldBright
+            : (needsArgs
+                ? WesterosColors.parchmentDim
+                : WesterosColors.parchment),
         fontWeight: FontWeight.w600,
         fontSize: 13,
       ),

@@ -449,6 +449,14 @@ mixin GameNpcTaskMixin
         handler: (args) => CommandResult(text: formatNpcTaskPanelV2()),
       ),
     );
+    // S15-4：参数候选——在场 NPC（接任务）与进行中任务标题（放弃）。
+    List<CommandArgChoice> onsiteNpcChoices() => npcsAtCurrentLocation
+        .map((n) => CommandArgChoice(n.name, n.id))
+        .toList();
+    List<CommandArgChoice> activeTaskChoices() => activeTasks
+        .map((t) => CommandArgChoice(t.title, t.title))
+        .toList();
+
     registry.register(
       CommandSpec(
         aliases: const ['接任务', 'accept'],
@@ -456,6 +464,7 @@ mixin GameNpcTaskMixin
         group: '人物',
         requiredArgCount: 1,
         missingArgsHint: '接谁的任务？如「接任务 艾德·史塔克」。输入「任务列表」看可接任务。',
+        argChoices: onsiteNpcChoices,
         helpLine: '接任务 / accept [名字] 接下多步骤任务（如 接任务 艾德·史塔克）',
         handler: (args) => CommandResult(text: acceptNpcTaskV2(normalizeNpcAlias(this, args))),
       ),
@@ -476,6 +485,7 @@ mixin GameNpcTaskMixin
         group: '人物',
         requiredArgCount: 1,
         missingArgsHint: '放弃哪个任务？如「放弃 筹备冬季粮仓」。',
+        argChoices: activeTaskChoices,
         helpLine: '放弃 / quit [任务名] 主动放弃一个进行中任务（关系 -2）',
         handler: (args) => CommandResult(text: abandonNpcTask(args)),
       ),

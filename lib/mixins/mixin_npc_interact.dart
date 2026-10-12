@@ -316,6 +316,11 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
         handler: (args) => CommandResult(text: npcListText()),
       ),
     );
+    // S15-4：在场 NPC 作为参数候选（点一下就互动，不必手打名字）。
+    List<CommandArgChoice> onsiteChoices() => npcsAtCurrentLocation
+        .map((n) => CommandArgChoice(n.name, n.id))
+        .toList();
+
     registry.register(
       CommandSpec(
         aliases: const ['互动', '交谈', 'interact'],
@@ -323,6 +328,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
         group: '人物',
         requiredArgCount: 1,
         missingArgsHint: '和谁互动？如「互动 提利昂」或「互动 npc_tyrion」。输入「在场」看谁在这里。',
+        argChoices: onsiteChoices,
         helpLine: '互动 / interact [名字]  与在场 NPC 深度互动（好感越高内容越深）',
         handler: (args) => CommandResult(text: npcInteract(normalizeNpcAlias(this, args))),
       ),
@@ -334,6 +340,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
         group: '人物',
         requiredArgCount: 1,
         missingArgsHint: '向谁示好？如「示好 提利昂」或「送礼 npc_tyrion」。',
+        argChoices: onsiteChoices,
         helpLine: '示好 / favor [名字]   向在场 NPC 示好送礼（每月 3 次）',
         handler: (args) => CommandResult(text: npcFavor(normalizeNpcAlias(this, args))),
       ),
@@ -345,6 +352,7 @@ mixin GameNpcInteractMixin on GameProviderBase, GameLifeMixin {
         group: '人物',
         requiredArgCount: 1,
         missingArgsHint: '和谁深聊？如「深聊 提利昂」。输入「在场」看谁在这里。',
+        argChoices: onsiteChoices,
         helpLine: '深聊 / chat [名字]    与 NPC 深聊（相识以上，每月 3 次，更深入）',
         handler: (args) => CommandResult(text: npcChat(normalizeNpcAlias(this, args))),
       ),

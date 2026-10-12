@@ -48,6 +48,7 @@ class CommandSpec {
     this.consumedTurn = false,
     this.missingArgsHint,
     this.requiredArgCount = 0,
+    this.argChoices,
   });
 
   /// 该指令的全部触发词（第一个为主名，其余为别名）。
@@ -84,8 +85,36 @@ class CommandSpec {
   /// 最少参数个数（按空白切分计数）。
   final int requiredArgCount;
 
+  /// 参数候选（S15-4）：面板点击该指令时列出候选按钮，免手打参数。
+  ///
+  /// 【为什么放在 spec 而不是面板里的映射表】分组字段（[group]）已有先例：
+  /// 指令的参数语义由**注册处**声明，面板只做展示。若把「哪些指令有哪类
+  /// 候选」写进面板，就是本项目反复踩的「双通道漂移」第七次。
+  ///
+  /// 【契约】返回空列表 = 当前没有可用候选（如不在场的 NPC、空背包），
+  /// 面板此时回落为「预填输入框」让玩家自由输入；null = 该指令没有候选
+  /// 概念（如「立嗣 <名字>」需要玩家自己想名字）。
+  ///
+  /// 仅对 [requiredArgCount] == 1 的指令生效（多参数指令暂不支持逐级选择）。
+  final List<CommandArgChoice> Function()? argChoices;
+
   /// 是否需要玩家补充参数（面板据此决定「直接执行」还是「预填输入框」）。
   bool get needsArgs => requiredArgCount > 0;
+}
+
+/// 一个参数候选项：按钮显示 [label]，执行时传 [value]（S15-4）。
+///
+/// 【为什么 label 与 value 分开】玩家要看中文（「剑术」），而引擎的处理器
+/// 认内部键（`sword`）；物品同理（显示「黑面包」，命令可吃 `item_bread`）。
+/// 二合一会让中文泄漏进数据层或英文泄漏给玩家。
+class CommandArgChoice {
+  const CommandArgChoice(this.label, this.value);
+
+  /// 面板按钮上的文字（面向玩家，中文）。
+  final String label;
+
+  /// 传给指令处理器的参数（内部键/id）。
+  final String value;
 }
 
 /// 未显式分组的指令归入此组（正常应恒为空，由测试守住）。

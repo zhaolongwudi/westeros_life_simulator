@@ -540,6 +540,10 @@ mixin GamePlayMixin
         group: '成长',
         requiredArgCount: 1,
         missingArgsHint: '训练什么？可用技能：sword（剑术）/ archery（弓术）/ riding（骑术）/ speech（口才）/ alchemy（炼金）/ magic（魔法）。',
+        // S15-4：技能候选按钮（显示中文，传内部键）。
+        argChoices: () => kPlayerSkillKeys
+            .map((k) => CommandArgChoice(skillLabel(k), k))
+            .toList(),
         helpLine: '训练 / train [技能]  训练技能（sword/archery/riding/speech/alchemy/magic）',
         handler: (args) => CommandResult(text: train(normalizeSkillAlias(args))),
       ),
