@@ -92,14 +92,15 @@ AI 会基于你当前的**状态、处境、在场 NPC、可触发事件**，生
 <!-- DL-CENTER:BEGIN -->
 ## 📥 下载中心
 
-**最新构建**：`WesterosLige v0.0.4` · 2026-10-05 14:12 UTC · ✅ 自动发布正式版
+**最新构建**：`WesterosLige v0.0.5` · 2026-10-12 03:11 UTC · ✅ 自动发布正式版
 
 | 通道 | 地址 |
 |---|---|
-| 🚀 Release 直链 | [releases/latest/download/WesterosLige.apk](https://github.com/zhaolongwudi/westeros_life_simulator/releases/latest/download/WesterosLige.apk)（免登录，每次构建自动指向最新正式版 `v0.0.4`） |
+| 🚀 Release 直链 | [releases/latest/download/WesterosLige.apk](https://github.com/zhaolongwudi/westeros_life_simulator/releases/latest/download/WesterosLige.apk)（免登录，每次构建自动指向最新正式版 `v0.0.5`） |
 | 🐙 GitHub 官方 | [Releases 页面](https://github.com/zhaolongwudi/westeros_life_simulator/releases) → 最新版 → Assets → `WesterosLige.apk`（保留最近 3 次） |
 
 > 🔄 每次构建自动发布正式版 Release（版本号 0.0.1 → 0.0.2 → 0.0.3…自动递增），仅保留最近 3 次。
+> ℹ️ 版本号真相源是 `version.txt`，构建成功后自动递增；因此这里显示的是**最近一次已发布**的版本，比仓库里 `version.txt` 的待构建版本号小一号，属预期行为。
 > 📱 安装要求：Android 6.0+（minSdk 23）。
 > ✉️ 构建完成后可自动直发到你的邮箱：仓库 Settings → Secrets and variables → Actions 配置 `SMTP_USER` / `SMTP_AUTH_CODE` / `SMTP_TO`（参考 `scripts/.mail_env.example`）。
 <!-- DL-CENTER:END -->
