@@ -1907,12 +1907,12 @@
     "id": "event_festival",
     "name": "节日",
     "type": "daily",
-    "description": "节日到来。",
+    "description": "晒谷节到了。街上挂起彩布，酒馆把桌子搬到门外，孩子们在喷泉边追着跑。",
     "triggerConditions": {},
     "choices": [
       {
         "id": "choice_celebrate",
-        "text": "庆祝",
+        "text": "大办三日宴席",
         "requirements": {
           "gold": 50
         },
@@ -1920,27 +1920,27 @@
           "gold": -50,
           "reputation": 10
         },
-        "narrative": "你庆祝节日，家族兴盛。"
+        "narrative": "你包下整座酒馆连摆三日流水席，五十枚金龙花得痛快。整条巷子都在说你的名字。"
       },
       {
         "id": "choice_work",
-        "text": "工作",
+        "text": "照常开门做生意",
         "requirements": {},
         "effects": {
           "gold": 30,
           "reputation": 3,
           "energy": -15
         },
-        "narrative": "你工作，赚取金币。"
+        "narrative": "别人过节，你守店。三十枚金龙进了抽屉，街上的人说你不合群。"
       },
       {
         "id": "choice_rest",
-        "text": "休息",
+        "text": "关起门来歇两天",
         "requirements": {},
         "effects": {
           "energy": 10
         },
-        "narrative": "你休息，恢复精力。"
+        "narrative": "你挂上歇业的牌子睡了两天，好好恢复精力。只是错过了过节的热闹。"
       }
     ],
     "narrative": "节日到来，家族兴盛。",
@@ -1955,14 +1955,14 @@
     "id": "event_wedding",
     "name": "婚礼",
     "type": "daily",
-    "description": "婚礼举行。",
+    "description": "邻家女儿出嫁，请柬送到了你的手上。院里搭起长棚，炖肉的香味飘了一条街。",
     "triggerConditions": {
       "minAge": "16"
     },
     "choices": [
       {
         "id": "choice_attend",
-        "text": "参加",
+        "text": "备厚礼赴宴",
         "requirements": {
           "gold": 30
         },
@@ -1970,20 +1970,20 @@
           "gold": -30,
           "reputation": 10
         },
-        "narrative": "你参加婚礼，家族兴盛。"
+        "narrative": "你封了三十枚金龙的红封，在首席坐了一晚。两家的长辈都记住了你。"
       },
       {
         "id": "choice_absent",
-        "text": "不参加",
+        "text": "称事不去",
         "requirements": {},
         "effects": {
           "reputation": -5
         },
-        "narrative": "你不参加婚礼，家族关系恶化。"
+        "narrative": "你托人带话说脱不开身。喜宴上留了你的位子——空着。"
       },
       {
         "id": "choice_propose",
-        "text": "求婚",
+        "text": "趁席间提亲",
         "requirements": {
           "gold": 100
         },
@@ -1991,7 +1991,7 @@
           "gold": -100,
           "reputation": 15
         },
-        "narrative": "你求婚，家族兴盛。"
+        "narrative": "你在酒过三巡时开口提亲，一百枚金龙的聘礼让满座都静了一瞬。"
       }
     ],
     "narrative": "婚礼举行，家族兴盛。",
@@ -2006,14 +2006,14 @@
     "id": "event_funeral",
     "name": "葬礼",
     "type": "daily",
-    "description": "葬礼举行。",
+    "description": "族中的老人走了。钟敲了七下，送葬的队伍从石桥一直排到神木林。",
     "triggerConditions": {
       "minAge": "16"
     },
     "choices": [
       {
         "id": "choice_attend",
-        "text": "参加",
+        "text": "扶棺送到神木林",
         "requirements": {
           "gold": 20
         },
@@ -2021,26 +2021,26 @@
           "gold": -20,
           "reputation": 5
         },
-        "narrative": "你参加葬礼，家族兴盛。"
+        "narrative": "你出二十枚金龙办了挽幛与酒席，一路扶棺到神木林。族人们看你时眼神软了些。"
       },
       {
         "id": "choice_absent",
-        "text": "不参加",
+        "text": "推说身体不适",
         "requirements": {},
         "effects": {
           "reputation": -10
         },
-        "narrative": "你不参加葬礼，家族关系恶化。"
+        "narrative": "你没有去。送葬的人回来时，没人跟你说话。"
       },
       {
         "id": "choice_mourn",
-        "text": "哀悼",
+        "text": "独自守夜哀悼",
         "requirements": {},
         "effects": {
           "reputation": 5,
           "energy": -5
         },
-        "narrative": "你哀悼，家族兴盛。"
+        "narrative": "你独自在灵前坐到天亮，什么也没吃。族人记下了这份体面。"
       }
     ],
     "narrative": "葬礼举行，家族兴盛。",
@@ -2055,14 +2055,14 @@
     "id": "event_tournament",
     "name": "比武大会",
     "type": "daily",
-    "description": "比武大会举行。",
+    "description": "比武大会开锣，各家的骑士在栅栏后磨枪。长枪折断的声音隔着半个市集都能听见。",
     "triggerConditions": {
       "minReputation": "20"
     },
     "choices": [
       {
         "id": "choice_participate",
-        "text": "参加",
+        "text": "报名下场",
         "requirements": {
           "reputation": 40
         },
@@ -2070,11 +2070,11 @@
           "gold": -30,
           "reputation": 15
         },
-        "narrative": "你参加比武，赢得胜利。"
+        "narrative": "你花三十枚金龙置办甲具与马具，在长枪阵里留到了最后。看台上有人替你喊了名字。"
       },
       {
         "id": "choice_spectate",
-        "text": "观战",
+        "text": "在看台上观战",
         "requirements": {
           "gold": 10
         },
@@ -2082,16 +2082,16 @@
           "gold": -10,
           "reputation": 3
         },
-        "narrative": "你观战，家族兴盛。"
+        "narrative": "你花十枚金龙买了前排的位子，看了一天，也记下了几个值得结交的人。"
       },
       {
         "id": "choice_absent",
-        "text": "不参加",
+        "text": "闭门不出",
         "requirements": {},
         "effects": {
           "reputation": -3
         },
-        "narrative": "你不参加比武，家族关系恶化。"
+        "narrative": "你没去。第二天市集上的人聊起大会时，没人提到你。"
       }
     ],
     "narrative": "比武大会举行，家族兴盛。",
@@ -2260,7 +2260,7 @@
     "id": "event_road_bandits",
     "name": "路遇匪帮",
     "type": "adventure",
-    "description": "商路上出现一伙匪帮，正拦路劫掠过往行人。",
+    "description": "商路上出现一伙匪帮，正拦路劫掠过往行人。前头的货车已经翻在沟里。",
     "triggerConditions": {
       "minGold": "20"
     },
@@ -2291,7 +2291,7 @@
       },
       {
         "id": "choice_sneak_past",
-        "text": "绕道潜行",
+        "text": "借夜色绕道潜行",
         "requirements": {
           "skills.stealth": 2
         },
@@ -2302,7 +2302,7 @@
       },
       {
         "id": "choice_flee_road",
-        "text": "避让绕路",
+        "text": "远远绕开营火",
         "requirements": {},
         "effects": {
           "energy": -5
@@ -2537,14 +2537,14 @@
     "id": "event_hunt",
     "name": "狩猎",
     "type": "daily",
-    "description": "狩猎活动。",
+    "description": "林子里传来野猪拱土的动静，猎户说这一带最近有大物出没。",
     "triggerConditions": {
       "season": "autumn"
     },
     "choices": [
       {
         "id": "choice_hunt",
-        "text": "狩猎",
+        "text": "带猎犬进山",
         "requirements": {
           "reputation": 30
         },
@@ -2552,27 +2552,27 @@
           "gold": 20,
           "reputation": 5
         },
-        "narrative": "你狩猎，赢得胜利。"
+        "narrative": "你循着足迹追了两天，扛回一头野猪，猎户们给你让出了路。"
       },
       {
         "id": "choice_rest",
-        "text": "休息",
+        "text": "留在营地烤火",
         "requirements": {},
         "effects": {
           "energy": 5
         },
-        "narrative": "你休息，恢复精力。"
+        "narrative": "你没有进山，只在营地烤火，恢复精力。野猪留给了别人。"
       },
       {
         "id": "choice_work",
-        "text": "工作",
+        "text": "改去镇上找活干",
         "requirements": {},
         "effects": {
           "gold": 10,
           "reputation": 3,
           "energy": -15
         },
-        "narrative": "你工作，赚取金币。"
+        "narrative": "你放下弓，去镇上扛了两天活。挣得不多，至少不空手。"
       }
     ],
     "narrative": "狩猎活动，家族兴盛。",
