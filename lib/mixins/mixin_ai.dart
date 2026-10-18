@@ -158,13 +158,19 @@ mixin GameAiMixin
   /// 本项目已经发生过五次「双通道漂移」，选项落盘只能有一份实现。
   String applyStoryChoice(EventChoice choice) => applyAiChoice(choice);
 
-  /// 读取 AI 配置；读失败（插件缺失 / 存储损坏）按「未配置」处理。
+  /// 读取 AI 配置；读失败或读不出来（插件缺失 / 存储损坏 / 平台通道不响应）
+  /// 一律按「未配置」处理。
   ///
-  /// 剧情回路**每回合**都要读配置，而配置是外部依赖：让一个读盘异常把整条
-  /// 剧情打断，等于把主流程的可用性押在插件健康度上。
+  /// 剧情回路**每回合**都要读配置，而配置是外部依赖：让一个读盘异常——或者
+  /// 一次永不返回的平台通道调用——把整条剧情卡住，等于把主流程的可用性押在
+  /// 插件健康度上。超时上限取 3 秒：真实设备上读一次偏好设置远快于此，
+  /// 超时只可能是异常，此时本回合交给本地导演即可。
   Future<AiConfig> _loadAiConfig() async {
     try {
-      return await AiConfig.load();
+      return await AiConfig.load().timeout(
+        const Duration(seconds: 3),
+        onTimeout: AiConfig.defaultConfig,
+      );
     } on Object {
       return AiConfig.defaultConfig();
     }
