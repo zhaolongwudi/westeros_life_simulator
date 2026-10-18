@@ -4,7 +4,9 @@
     "name": "国王死亡",
     "type": "political",
     "description": "国王驾崩，王位继承危机爆发。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "30"
+    },
     "choices": [
       {
         "id": "choice_support_heir",
@@ -57,7 +59,9 @@
     "name": "叛乱",
     "type": "political",
     "description": "领主不满，叛乱爆发。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "40"
+    },
     "choices": [
       {
         "id": "choice_suppress",
@@ -116,7 +120,9 @@
     "name": "政变",
     "type": "political",
     "description": "宫廷政变，王位更替。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "55"
+    },
     "choices": [
       {
         "id": "choice_support_coup",
@@ -163,7 +169,9 @@
     "name": "御前会议",
     "type": "political",
     "description": "御前会议召开，讨论国事。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "40"
+    },
     "choices": [
       {
         "id": "choice_attend",
@@ -208,7 +216,9 @@
     "name": "国王之手更替",
     "type": "political",
     "description": "国王之手职位更替。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "45"
+    },
     "choices": [
       {
         "id": "choice_support_new",
@@ -251,7 +261,9 @@
     "name": "总主教更替",
     "type": "political",
     "description": "七神教会总主教更替。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "35"
+    },
     "choices": [
       {
         "id": "choice_support_new",
@@ -294,7 +306,9 @@
     "name": "大学士更替",
     "type": "political",
     "description": "学城大学士更替。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "35"
+    },
     "choices": [
       {
         "id": "choice_support_new",
@@ -337,7 +351,9 @@
     "name": "长城总司令更替",
     "type": "political",
     "description": "长城守夜人总司令更替。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "35"
+    },
     "choices": [
       {
         "id": "choice_support_new",
@@ -380,7 +396,9 @@
     "name": "铁金库债务危机",
     "type": "political",
     "description": "铁金库债务危机爆发。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minGold": "200"
+    },
     "choices": [
       {
         "id": "choice_repay",
@@ -430,7 +448,9 @@
     "name": "自由贸易城邦战争",
     "type": "political",
     "description": "自由贸易城邦之间爆发战争。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minGold": "150"
+    },
     "choices": [
       {
         "id": "choice_support_side_a",
@@ -476,7 +496,9 @@
     "name": "家族联姻",
     "type": "family",
     "description": "家族之间联姻。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minAge": "16"
+    },
     "choices": [
       {
         "id": "choice_accept",
@@ -521,7 +543,9 @@
     "name": "家族继承",
     "type": "family",
     "description": "家族继承危机。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minAge": "18"
+    },
     "choices": [
       {
         "id": "choice_support_eldest",
@@ -564,7 +588,9 @@
     "name": "家族内斗",
     "type": "family",
     "description": "家族内部斗争。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minAge": "16"
+    },
     "choices": [
       {
         "id": "choice_side_a",
@@ -607,7 +633,9 @@
     "name": "家族秘密揭露",
     "type": "family",
     "description": "家族秘密被揭露。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minAge": "16"
+    },
     "choices": [
       {
         "id": "choice_cover_up",
@@ -653,7 +681,9 @@
     "name": "家族诅咒",
     "type": "family",
     "description": "家族被诅咒。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minAge": "18"
+    },
     "choices": [
       {
         "id": "choice_break_curse",
@@ -699,7 +729,9 @@
     "name": "家族预言",
     "type": "family",
     "description": "家族预言应验。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minAge": "16"
+    },
     "choices": [
       {
         "id": "choice_fulfill",
@@ -742,7 +774,9 @@
     "name": "家族神器",
     "type": "family",
     "description": "家族神器现世。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minGold": "100"
+    },
     "choices": [
       {
         "id": "choice_claim",
@@ -785,7 +819,9 @@
     "name": "家族血脉",
     "type": "family",
     "description": "家族血脉危机。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minAge": "18"
+    },
     "choices": [
       {
         "id": "choice_preserve",
@@ -831,7 +867,9 @@
     "name": "家族仇恨",
     "type": "family",
     "description": "家族仇恨爆发。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "30"
+    },
     "choices": [
       {
         "id": "choice_revenge",
@@ -877,7 +915,9 @@
     "name": "家族灭亡",
     "type": "family",
     "description": "家族灭亡危机。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "50"
+    },
     "choices": [
       {
         "id": "choice_save",
@@ -923,7 +963,9 @@
     "name": "战役",
     "type": "war",
     "description": "大规模战役爆发。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "40"
+    },
     "choices": [
       {
         "id": "choice_fight",
@@ -972,7 +1014,9 @@
     "name": "围城",
     "type": "war",
     "description": "城堡被围城。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "45"
+    },
     "choices": [
       {
         "id": "choice_defend",
@@ -1021,7 +1065,9 @@
     "name": "背叛",
     "type": "war",
     "description": "盟友背叛。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "35"
+    },
     "choices": [
       {
         "id": "choice_revenge",
@@ -1067,7 +1113,9 @@
     "name": "刺杀",
     "type": "war",
     "description": "重要人物被刺杀。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "50"
+    },
     "choices": [
       {
         "id": "choice_investigate",
@@ -1116,7 +1164,9 @@
     "name": "比武审判",
     "type": "war",
     "description": "比武审判开始。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "skills.sword": "3"
+    },
     "choices": [
       {
         "id": "choice_fight",
@@ -1165,7 +1215,9 @@
     "name": "宗教审判",
     "type": "religious",
     "description": "宗教审判开始。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "30"
+    },
     "choices": [
       {
         "id": "choice_defend",
@@ -1212,7 +1264,9 @@
     "name": "神迹",
     "type": "religious",
     "description": "神迹显现。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "30"
+    },
     "choices": [
       {
         "id": "choice_accept",
@@ -1255,7 +1309,9 @@
     "name": "异端",
     "type": "religious",
     "description": "异端出现。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "40"
+    },
     "choices": [
       {
         "id": "choice_purge",
@@ -1301,7 +1357,9 @@
     "name": "教会分裂",
     "type": "religious",
     "description": "教会分裂。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "45"
+    },
     "choices": [
       {
         "id": "choice_side_a",
@@ -1440,7 +1498,9 @@
     "name": "贸易繁荣",
     "type": "economic",
     "description": "贸易繁荣。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minGold": "100"
+    },
     "choices": [
       {
         "id": "choice_invest",
@@ -1487,7 +1547,9 @@
     "name": "贸易危机",
     "type": "economic",
     "description": "贸易危机。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minGold": "50"
+    },
     "choices": [
       {
         "id": "choice_invest",
@@ -1534,7 +1596,9 @@
     "name": "铁金库债务",
     "type": "economic",
     "description": "铁金库债务。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minGold": "150"
+    },
     "choices": [
       {
         "id": "choice_repay",
@@ -1584,7 +1648,9 @@
     "name": "龙出现",
     "type": "magical",
     "description": "龙出现。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "50"
+    },
     "choices": [
       {
         "id": "choice_claim",
@@ -1632,7 +1698,9 @@
     "name": "异鬼南下",
     "type": "magical",
     "description": "异鬼南下。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "season": "winter"
+    },
     "choices": [
       {
         "id": "choice_fight",
@@ -1681,7 +1749,9 @@
     "name": "预言",
     "type": "magical",
     "description": "预言应验。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "40"
+    },
     "choices": [
       {
         "id": "choice_fulfill",
@@ -1724,7 +1794,9 @@
     "name": "血魔法",
     "type": "magical",
     "description": "血魔法出现。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "45"
+    },
     "choices": [
       {
         "id": "choice_use",
@@ -1769,7 +1841,9 @@
     "name": "绿先知",
     "type": "magical",
     "description": "绿先知出现。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "35"
+    },
     "choices": [
       {
         "id": "choice_follow",
@@ -1861,7 +1935,9 @@
     "name": "婚礼",
     "type": "daily",
     "description": "婚礼举行。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minAge": "16"
+    },
     "choices": [
       {
         "id": "choice_attend",
@@ -1910,7 +1986,9 @@
     "name": "葬礼",
     "type": "daily",
     "description": "葬礼举行。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minAge": "16"
+    },
     "choices": [
       {
         "id": "choice_attend",
@@ -1956,7 +2034,9 @@
     "name": "比武大会",
     "type": "daily",
     "description": "比武大会举行。",
-    "triggerConditions": {},
+    "triggerConditions": {
+      "minReputation": "20"
+    },
     "choices": [
       {
         "id": "choice_participate",

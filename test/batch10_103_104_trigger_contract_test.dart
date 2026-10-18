@@ -103,11 +103,14 @@ void main() {
       expect(allEvents.map((e) => e.id).toSet().length, 71);
     });
 
-    test('清空门槛的 40 个事件仍保留选项与叙事', () {
-      // 删门槛不能顺手删内容——这些事件仍是玩法内容。
+    test('曾清空门槛的 40 个事件：门槛已用白名单键补回，且内容仍在', () {
+      // 10-103 把这 41 个事件的**不可识别门槛键**（army/magic/…）清空为 {}，
+      // 那是当时唯一正确的处置（清空好过恒放行）。S16-2 用 event_trigger_eval
+      // 认得的白名单键把其中 40 条补了回来——本清单因此从「断言门槛为空」
+      // 升级为「断言补回了真实门槛、键在白名单内、内容未丢」。
       // 清单 = 10-103 取证的 41 个纯死键事件（逐个实证，非凭印象），
       // 其中 `event_high_septon_change_religious` 已于 S3-4 作为重复项删除（-1 → 40）。
-      const clearedIds = <String>[
+      const gatedIds = <String>[
         'event_king_death', 'event_rebellion', 'event_coup',
         'event_small_council', 'event_hand_change', 'event_high_septon_change',
         'event_maester_change', 'event_castle_black_change',
@@ -124,12 +127,28 @@ void main() {
         'event_blood_magic', 'event_green_seer', 'event_wedding',
         'event_funeral', 'event_tournament',
       ];
-      expect(clearedIds.length, 40);
-      expect(clearedIds.toSet().length, 40, reason: '清单内不得有重复 id');
-      for (final id in clearedIds) {
+      expect(gatedIds.length, 40);
+      expect(gatedIds.toSet().length, 40, reason: '清单内不得有重复 id');
+      // 与 `scripts/check_content_sync.py` 的 TRIGGER_KEYS_EXACT / 前缀集同源。
+      const knownKeys = <String>{
+        'season', 'locationId', 'familyId', 'identity',
+        'minAge', 'maxAge', 'minGold', 'minReputation',
+        'minHealth', 'maxHealth', 'minEnergy', 'maxEnergy',
+        'minHunger', 'maxHunger', 'flag', 'noFlag', 'isAlive',
+      };
+      for (final id in gatedIds) {
         final e = eventById(id);
         expect(e, isNotNull, reason: '事件 $id 不应被删掉');
-        expect(e!.triggerConditions, isEmpty, reason: '$id 门槛应已清空');
+        expect(e!.triggerConditions, isNotEmpty,
+            reason: '$id 应已补回真实门槛（否则又是「任何时候都能发生」）');
+        for (final key in e.triggerConditions.keys) {
+          final known = knownKeys.contains(key) ||
+              key.startsWith('hasItem.') ||
+              key.startsWith('skills.') ||
+              key.startsWith('attributes.');
+          expect(known, isTrue,
+              reason: '$id 的门槛键 $key 不被 event_trigger_eval 识别（恒放行＝死门槛）');
+        }
         expect(e.choices, isNotEmpty, reason: '$id 不得变成零选项事件');
         expect(e.narrative.isNotEmpty, true, reason: '$id 叙事不得为空');
       }

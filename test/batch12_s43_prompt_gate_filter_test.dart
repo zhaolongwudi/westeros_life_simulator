@@ -12,7 +12,8 @@
 /// 覆盖：
 /// 1. 门槛过滤：季节/地点/数值/标记门槛不满足 → 一律不注入（S4-3 核心）
 /// 2. 「分数高也不能豁免门槛」——这是本批最关键的边界锁
-/// 3. 无条件事件恒可用（41 个），不会因过滤被误杀
+/// 3. 门槛事件与预算：S16-2 补门槛后只剩「节日」无条件，结果集里不出现
+///    不满足门槛的事件
 /// 4. 预算截断仍生效，且截断在过滤之后
 /// 5. 真实事件库契约：夏天玩家不再收到冬天门槛事件
 /// 6. 排序稳定性与 `event_frozen_lake` 双命中仍居首
@@ -198,32 +199,32 @@ void main() {
     });
   });
 
-  group('S4-3 无条件事件与预算', () {
-    test('41 个无条件事件恒可用，不被过滤误杀', () {
+  group('S4-3 门槛事件与预算', () {
+    test('补门槛后只剩「节日」无条件，且结果集只含满足门槛的事件', () {
       final unconditional = allEvents
           .where((e) => e.triggerConditions.isEmpty)
           .toList();
-      // 文档口径：71 个事件里 41 个无门槛。
-      expect(unconditional, hasLength(41));
+      // S16-2：40 个曾清空门槛的事件已补回白名单内的真实门槛，只剩「节日」
+      // 刻意保持无条件（四季皆可触发，见 batch10_103_104 的节日回归判别式）。
+      expect(unconditional.map((e) => e.id), <String>['event_festival']);
       final result = selectEventsForPrompt(
         allEvents,
         player: Player.defaultPlayer(),
         season: 'summer',
       );
-      final ids = result.map((e) => e.id).toSet();
-      // 无条件事件恒满足门槛，故凡进入结果集的都必须来自这 41 个——
-      // 换个角度：结果里不该出现「有门槛且不满足」的任何事件。
-      for (final id in ids) {
-        final e = allEvents.firstWhere((x) => x.id == id);
-        expect(e.triggerConditions.isEmpty ||
-            eventTriggersSatisfied(e, Player.defaultPlayer(), season: 'summer'),
-            isTrue);
+      // 结果集里不该出现「有门槛且不满足」的任何事件。
+      for (final e in result) {
+        expect(
+          eventTriggersSatisfied(e, Player.defaultPlayer(), season: 'summer'),
+          isTrue,
+          reason: '${e.id} 不满足门槛却进了 prompt 结果集',
+        );
       }
     });
 
     test('过滤发生在截断之前：可用数 ≤ 预算时全返回、> 预算时截到预算', () {
       final player = Player.defaultPlayer();
-      // 71 → 过滤后 50+ → 超预算 → 截到 12。
+      // 71 → 补门槛后冬季仍有 53 条可用 → 超预算 → 截到 12。
       final result =
           selectEventsForPrompt(allEvents, player: player, season: 'winter');
       expect(result, hasLength(BalanceData.kAiPromptEventBudget));

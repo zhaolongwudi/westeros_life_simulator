@@ -77,17 +77,14 @@ class _GameScreenState extends State<GameScreen> {
   /// 叙事输出行（最新在底部）。
   final List<String> _lines = <String>[];
 
-  /// 是否 AI 行动模式（true 时输入框提交给 AI 回合编排）。
+  /// 是否自由行动模式（true 时输入框的一整句话会作为本回合的行动意图）。
   bool _aiMode = false;
 
   /// 当前 AI 生成中的选项（供用户点选）。
   List<EventChoice> _aiChoices = <EventChoice>[];
 
-  /// AI 是否正在请求中（玩家自由行动通道用）。
+  /// 剧情回合是否正在生成（S16 主线，含自由行动通道）。
   bool _aiLoading = false;
-
-  /// 剧情回合是否正在生成（S16 主线）。
-  bool _storyLoading = false;
 
   /// 来源提示（未配置 Key / AI 降级）是否已经提示过，避免每回合刷同一句。
   bool _sourceNoteShown = false;
@@ -196,14 +193,18 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  /// 提交并执行指令（普通模式）或 AI 行动（AI 模式）。
+  /// 提交输入：指令模式走指令表，自由行动模式走剧情回合。
   void _submitCommand(String raw) {
     final input = raw.trim();
     if (input.isEmpty) return;
     _inputController.clear();
 
     if (_aiMode) {
-      _runAiAction(input);
+      // S16-3：自由行动也走剧情回路——**没有 API Key 也能用**（由本地导演
+      // 接手叙事）。此前这里直连 `runAiAction`，未配置 Key 时只回一句
+      // 「请先配置」，玩家写了半天的话被吞掉。
+      _appendLine('✨ 行动：$input');
+      unawaited(_startStoryTurn(intent: input));
       return;
     }
 
@@ -225,18 +226,18 @@ class _GameScreenState extends State<GameScreen> {
   /// 开一个剧情回合（S16 主线）：主 AI 说书，不可用时本地导演接手。
   ///
   /// 【为什么不等玩家打字】用户要的是「以主 AI 反馈剧情和选项为主」——
-  /// 每回合由引擎主动开局并给出可点选项；输入框只是辅助的自由行动通道。
+  /// 每回合由引擎主动开局并给出可点选项；输入框是辅助的自由行动通道。
   Future<void> _startStoryTurn({String? intent}) async {
-    if (_storyLoading || !mounted) return;
+    if (_aiLoading || !mounted) return;
     const placeholder = '（剧情推进中…）';
     setState(() {
-      _storyLoading = true;
+      _aiLoading = true;
       _aiChoices = <EventChoice>[];
     });
     _appendLine(placeholder);
     final AiTurnResult result = await _engine.runStoryTurn(intent: intent);
     if (!mounted) return;
-    _storyLoading = false;
+    _aiLoading = false;
     _lines.removeWhere((l) => l == placeholder);
     // 来源提示只提示一次：主 AI 恢复后再次降级时重新提示。
     if (result.note.isNotEmpty && !_sourceNoteShown) {
@@ -252,30 +253,6 @@ class _GameScreenState extends State<GameScreen> {
     setState(() {
       _aiChoices = result.choices;
     });
-  }
-
-  /// 执行一次 AI 行动：编排下沉到引擎（runAiAction），本方法只渲染结果。
-  Future<void> _runAiAction(String action) async {
-    if (_aiLoading) return;
-
-    setState(() {
-      _aiLoading = true;
-      _aiChoices = <EventChoice>[];
-    });
-    _appendLine('✨ 行动：$action');
-    _appendLine('（AI 思考中…）');
-
-    final AiTurnResult result = await _engine.runAiAction(action);
-    if (!mounted) return;
-    setState(() {
-      _aiLoading = false;
-      _aiChoices = result.choices;
-    });
-    // 移除占位行
-    _lines.removeWhere((l) => l == '（AI 思考中…）');
-    for (final line in result.lines) {
-      _appendLine(line);
-    }
   }
 
   /// 应用剧情回合的选项：效果落盘 + 推进一个月（含系统结算/信件），
@@ -499,9 +476,10 @@ class _GameScreenState extends State<GameScreen> {
                   onSubmitted: _submitCommand,
                   onOpenCommands: _openCommandPanel,
                   // S15-3：双向引导（用户反馈「提示都是输入指令」）——
-                  // 普通模式指向左侧「指令」面板；AI 模式指向自然语言描述。
+                  // 普通模式指向左侧「指令」面板；自由行动模式指向自然语言描述。
+                  // S16-3：自由行动不再要求配置 Key（本地导演会接手）。
                   hintText: _aiMode
-                      ? 'AI 模式：用一句话描述你的行动…'
+                      ? '自由行动：用一句话描述你要做的事…'
                       : '输入指令，或点左侧「指令」浏览全部 47 条面板',
                 ),
               ],

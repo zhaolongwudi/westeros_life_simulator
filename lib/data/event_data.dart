@@ -37,7 +37,7 @@ const List<GameEvent> allEvents = [
     name: '国王死亡',
     type: EventType.political,
     description: '国王驾崩，王位继承危机爆发。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '30'},
     choices: const [
       EventChoice(
         id: 'choice_support_heir',
@@ -77,7 +77,7 @@ const List<GameEvent> allEvents = [
     name: '叛乱',
     type: EventType.political,
     description: '领主不满，叛乱爆发。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '40'},
     choices: const [
       EventChoice(
         id: 'choice_suppress',
@@ -117,7 +117,7 @@ const List<GameEvent> allEvents = [
     name: '政变',
     type: EventType.political,
     description: '宫廷政变，王位更替。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '55'},
     choices: const [
       EventChoice(
         id: 'choice_support_coup',
@@ -150,7 +150,7 @@ const List<GameEvent> allEvents = [
     name: '御前会议',
     type: EventType.political,
     description: '御前会议召开，讨论国事。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '40'},
     choices: const [
       EventChoice(
         id: 'choice_attend',
@@ -183,7 +183,7 @@ const List<GameEvent> allEvents = [
     name: '国王之手更替',
     type: EventType.political,
     description: '国王之手职位更替。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '45'},
     choices: const [
       EventChoice(
         id: 'choice_support_new',
@@ -216,7 +216,7 @@ const List<GameEvent> allEvents = [
     name: '总主教更替',
     type: EventType.political,
     description: '七神教会总主教更替。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '35'},
     choices: const [
       EventChoice(
         id: 'choice_support_new',
@@ -249,7 +249,7 @@ const List<GameEvent> allEvents = [
     name: '大学士更替',
     type: EventType.political,
     description: '学城大学士更替。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '35'},
     choices: const [
       EventChoice(
         id: 'choice_support_new',
@@ -282,7 +282,7 @@ const List<GameEvent> allEvents = [
     name: '长城总司令更替',
     type: EventType.political,
     description: '长城守夜人总司令更替。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '35'},
     choices: const [
       EventChoice(
         id: 'choice_support_new',
@@ -315,7 +315,7 @@ const List<GameEvent> allEvents = [
     name: '铁金库债务危机',
     type: EventType.political,
     description: '铁金库债务危机爆发。',
-    triggerConditions: const {},
+    triggerConditions: const {'minGold': '200'},
     choices: const [
       EventChoice(
         id: 'choice_repay',
@@ -348,7 +348,7 @@ const List<GameEvent> allEvents = [
     name: '自由贸易城邦战争',
     type: EventType.political,
     description: '自由贸易城邦之间爆发战争。',
-    triggerConditions: const {},
+    triggerConditions: const {'minGold': '150'},
     choices: const [
       EventChoice(
         id: 'choice_support_side_a',
@@ -383,7 +383,7 @@ const List<GameEvent> allEvents = [
     name: '家族联姻',
     type: EventType.family,
     description: '家族之间联姻。',
-    triggerConditions: const {},
+    triggerConditions: const {'minAge': '16'},
     choices: const [
       EventChoice(
         id: 'choice_accept',
@@ -416,7 +416,7 @@ const List<GameEvent> allEvents = [
     name: '家族继承',
     type: EventType.family,
     description: '家族继承危机。',
-    triggerConditions: const {},
+    triggerConditions: const {'minAge': '18'},
     choices: const [
       EventChoice(
         id: 'choice_support_eldest',
@@ -449,7 +449,7 @@ const List<GameEvent> allEvents = [
     name: '家族内斗',
     type: EventType.family,
     description: '家族内部斗争。',
-    triggerConditions: const {},
+    triggerConditions: const {'minAge': '16'},
     choices: const [
       EventChoice(
         id: 'choice_side_a',
@@ -482,7 +482,7 @@ const List<GameEvent> allEvents = [
     name: '家族秘密揭露',
     type: EventType.family,
     description: '家族秘密被揭露。',
-    triggerConditions: const {},
+    triggerConditions: const {'minAge': '16'},
     choices: const [
       EventChoice(
         id: 'choice_cover_up',
@@ -515,7 +515,7 @@ const List<GameEvent> allEvents = [
     name: '家族诅咒',
     type: EventType.family,
     description: '家族被诅咒。',
-    triggerConditions: const {},
+    triggerConditions: const {'minAge': '18'},
     choices: const [
       EventChoice(
         id: 'choice_break_curse',
@@ -548,7 +548,7 @@ const List<GameEvent> allEvents = [
     name: '家族预言',
     type: EventType.family,
     description: '家族预言应验。',
-    triggerConditions: const {},
+    triggerConditions: const {'minAge': '16'},
     choices: const [
       EventChoice(
         id: 'choice_fulfill',
@@ -581,7 +581,7 @@ const List<GameEvent> allEvents = [
     name: '家族神器',
     type: EventType.family,
     description: '家族神器现世。',
-    triggerConditions: const {},
+    triggerConditions: const {'minGold': '100'},
     choices: const [
       EventChoice(
         id: 'choice_claim',
@@ -614,7 +614,7 @@ const List<GameEvent> allEvents = [
     name: '家族血脉',
     type: EventType.family,
     description: '家族血脉危机。',
-    triggerConditions: const {},
+    triggerConditions: const {'minAge': '18'},
     choices: const [
       EventChoice(
         id: 'choice_preserve',
@@ -647,7 +647,7 @@ const List<GameEvent> allEvents = [
     name: '家族仇恨',
     type: EventType.family,
     description: '家族仇恨爆发。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '30'},
     choices: const [
       EventChoice(
         id: 'choice_revenge',
@@ -680,7 +680,7 @@ const List<GameEvent> allEvents = [
     name: '家族灭亡',
     type: EventType.family,
     description: '家族灭亡危机。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '50'},
     choices: const [
       EventChoice(
         id: 'choice_save',
@@ -715,7 +715,7 @@ const List<GameEvent> allEvents = [
     name: '战役',
     type: EventType.war,
     description: '大规模战役爆发。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '40'},
     choices: const [
       EventChoice(
         id: 'choice_fight',
@@ -748,7 +748,7 @@ const List<GameEvent> allEvents = [
     name: '围城',
     type: EventType.war,
     description: '城堡被围城。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '45'},
     choices: const [
       EventChoice(
         id: 'choice_defend',
@@ -781,7 +781,7 @@ const List<GameEvent> allEvents = [
     name: '背叛',
     type: EventType.war,
     description: '盟友背叛。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '35'},
     choices: const [
       EventChoice(
         id: 'choice_revenge',
@@ -814,7 +814,7 @@ const List<GameEvent> allEvents = [
     name: '刺杀',
     type: EventType.war,
     description: '重要人物被刺杀。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '50'},
     choices: const [
       EventChoice(
         id: 'choice_investigate',
@@ -847,7 +847,7 @@ const List<GameEvent> allEvents = [
     name: '比武审判',
     type: EventType.war,
     description: '比武审判开始。',
-    triggerConditions: const {},
+    triggerConditions: const {'skills.sword': '3'},
     choices: const [
       EventChoice(
         id: 'choice_fight',
@@ -889,7 +889,7 @@ const List<GameEvent> allEvents = [
     name: '宗教审判',
     type: EventType.religious,
     description: '宗教审判开始。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '30'},
     choices: const [
       EventChoice(
         id: 'choice_defend',
@@ -922,7 +922,7 @@ const List<GameEvent> allEvents = [
     name: '神迹',
     type: EventType.religious,
     description: '神迹显现。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '30'},
     choices: const [
       EventChoice(
         id: 'choice_accept',
@@ -955,7 +955,7 @@ const List<GameEvent> allEvents = [
     name: '异端',
     type: EventType.religious,
     description: '异端出现。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '40'},
     choices: const [
       EventChoice(
         id: 'choice_purge',
@@ -988,7 +988,7 @@ const List<GameEvent> allEvents = [
     name: '教会分裂',
     type: EventType.religious,
     description: '教会分裂。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '45'},
     choices: const [
       EventChoice(
         id: 'choice_side_a',
@@ -1089,7 +1089,7 @@ const List<GameEvent> allEvents = [
     name: '贸易繁荣',
     type: EventType.economic,
     description: '贸易繁荣。',
-    triggerConditions: const {},
+    triggerConditions: const {'minGold': '100'},
     choices: const [
       EventChoice(
         id: 'choice_invest',
@@ -1122,7 +1122,7 @@ const List<GameEvent> allEvents = [
     name: '贸易危机',
     type: EventType.economic,
     description: '贸易危机。',
-    triggerConditions: const {},
+    triggerConditions: const {'minGold': '50'},
     choices: const [
       EventChoice(
         id: 'choice_invest',
@@ -1155,7 +1155,7 @@ const List<GameEvent> allEvents = [
     name: '铁金库债务',
     type: EventType.economic,
     description: '铁金库债务。',
-    triggerConditions: const {},
+    triggerConditions: const {'minGold': '150'},
     choices: const [
       EventChoice(
         id: 'choice_repay',
@@ -1190,7 +1190,7 @@ const List<GameEvent> allEvents = [
     name: '龙出现',
     type: EventType.magical,
     description: '龙出现。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '50'},
     choices: const [
       EventChoice(
         id: 'choice_claim',
@@ -1223,7 +1223,7 @@ const List<GameEvent> allEvents = [
     name: '异鬼南下',
     type: EventType.magical,
     description: '异鬼南下。',
-    triggerConditions: const {},
+    triggerConditions: const {'season': 'winter'},
     choices: const [
       EventChoice(
         id: 'choice_fight',
@@ -1256,7 +1256,7 @@ const List<GameEvent> allEvents = [
     name: '预言',
     type: EventType.magical,
     description: '预言应验。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '40'},
     choices: const [
       EventChoice(
         id: 'choice_fulfill',
@@ -1289,7 +1289,7 @@ const List<GameEvent> allEvents = [
     name: '血魔法',
     type: EventType.magical,
     description: '血魔法出现。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '45'},
     choices: const [
       EventChoice(
         id: 'choice_use',
@@ -1322,7 +1322,7 @@ const List<GameEvent> allEvents = [
     name: '绿先知',
     type: EventType.magical,
     description: '绿先知出现。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '35'},
     choices: const [
       EventChoice(
         id: 'choice_follow',
@@ -1390,7 +1390,7 @@ const List<GameEvent> allEvents = [
     name: '婚礼',
     type: EventType.daily,
     description: '婚礼举行。',
-    triggerConditions: const {},
+    triggerConditions: const {'minAge': '16'},
     choices: const [
       EventChoice(
         id: 'choice_attend',
@@ -1423,7 +1423,7 @@ const List<GameEvent> allEvents = [
     name: '葬礼',
     type: EventType.daily,
     description: '葬礼举行。',
-    triggerConditions: const {},
+    triggerConditions: const {'minAge': '16'},
     choices: const [
       EventChoice(
         id: 'choice_attend',
@@ -1456,7 +1456,7 @@ const List<GameEvent> allEvents = [
     name: '比武大会',
     type: EventType.daily,
     description: '比武大会举行。',
-    triggerConditions: const {},
+    triggerConditions: const {'minReputation': '20'},
     choices: const [
       EventChoice(
         id: 'choice_participate',

@@ -272,5 +272,29 @@ void main() {
       // 下一回合的选项已经就位（剧情回路闭环）
       expect(find.byType(AiChoiceCard), findsWidgets);
     });
+
+    testWidgets('自由行动：没配 Key 也能推进剧情（S16-3）', (tester) async {
+      tester.view.physicalSize = const Size(1080, 3000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      final engine = _engine();
+      await tester.pumpWidget(
+        MaterialApp(home: GameScreen(engine: engine)),
+      );
+      await tester.pumpAndSettle();
+
+      // 打开「自由行动」开关后，输入的一整句话是**意图**而不是指令
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '去长城看看');
+      await tester.tap(find.byIcon(Icons.send));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('去长城看看'), findsWidgets);
+      // 修复前这里会回「尚未配置 AI API Key」，玩家的输入被吞掉
+      expect(find.textContaining('尚未配置 AI API Key'), findsNothing);
+      expect(find.byType(AiChoiceCard), findsWidgets);
+    });
   });
 }

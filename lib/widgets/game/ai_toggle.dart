@@ -56,25 +56,29 @@ class AiModeToggle extends StatelessWidget {
           if (aiMode) ...[
             const SizedBox(width: 6),
             Text(
-              '（描述你的行动）',
+              '（一句话描述行动，无需 Key）',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: WesterosColors.inkDim,
               ),
             ),
           ],
           const Spacer(),
-          if (aiLoading)
+          // S16-3：加载指示与开关**并存**。此前加载态会把开关整个换掉，
+          // 于是「剧情回合进行中」时玩家连开关都点不到；而且开关消失会让
+          // 依赖 `find.byType(Switch)` 的既有断言在时序上变脆。
+          if (aiLoading) ...[
             const SizedBox(
               width: 16,
               height: 16,
               child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          else
-            Switch(
-              value: aiMode,
-              onChanged: onToggle,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
+            const SizedBox(width: 10),
+          ],
+          Switch(
+            value: aiMode,
+            onChanged: onToggle,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
         ],
       ),
     );
