@@ -21,6 +21,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:westeros_life_simulator/core/command_registry.dart';
 import 'package:westeros_life_simulator/game_engine.dart';
 import 'package:westeros_life_simulator/screens/game_screen.dart';
@@ -34,6 +35,15 @@ CommandSpec _spec(GameEngine e, String alias) =>
     e.commandRegistry.orderedSpecs.firstWhere((s) => s.aliases.first == alias);
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  // S16：主界面进入时会自己开一个剧情回合，那一回合要读 AI 配置
+  // （SharedPreferences）。不打桩的话平台通道不会返回，读配置会一直挂着
+  // ——「退出界面立刻结束」的用例会因此留下一个未触发的超时定时器而红。
+  setUp(() {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+  });
+
   group('S15-4 参数候选：声明与内容', () {
     test('需参数指令的候选是 (中文 label, 内部键 value) 对', () {
       final engine = GameEngine()..startNewGame();
