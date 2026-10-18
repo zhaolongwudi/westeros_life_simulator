@@ -43,7 +43,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_support_heir',
         text: '支持继承人',
         requirements: const {},
-        effects: const {'reputation': 5},
+        effects: const {'reputation': 5, 'gold': -20},
         narrative: '你公开支持合法继承人，赢得贵族尊重。',
       ),
       EventChoice(
@@ -57,7 +57,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_neutral',
         text: '保持中立',
         requirements: const {},
-        effects: const {'reputation': 0},
+        effects: const {'reputation': -2},
         narrative: '你按兵不动，等待局势明朗。',
       ),
       EventChoice(
@@ -156,7 +156,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_attend',
         text: '参加',
         requirements: const {},
-        effects: const {'reputation': 3},
+        effects: const {'reputation': 3, 'energy': -10},
         narrative: '你出席御前会议，参与决策。',
       ),
       EventChoice(
@@ -189,7 +189,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_support_new',
         text: '支持新国王之手',
         requirements: const {},
-        effects: const {'reputation': 5},
+        effects: const {'reputation': 5, 'gold': -30},
         narrative: '你支持新国王之手，赢得信任。',
       ),
       EventChoice(
@@ -203,7 +203,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_neutral',
         text: '保持中立',
         requirements: const {},
-        effects: const {'reputation': 0},
+        effects: const {'reputation': -2},
         narrative: '你按兵不动，观察局势。',
       ),
     ],
@@ -222,7 +222,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_support_new',
         text: '支持新总主教',
         requirements: const {},
-        effects: const {'reputation': 5},
+        effects: const {'reputation': 5, 'gold': -20},
         narrative: '你支持新总主教，赢得教会好感。',
       ),
       EventChoice(
@@ -236,7 +236,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_neutral',
         text: '保持中立',
         requirements: const {},
-        effects: const {'reputation': 0},
+        effects: const {'reputation': -2},
         narrative: '你按兵不动，观察局势。',
       ),
     ],
@@ -255,7 +255,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_support_new',
         text: '支持新大学士',
         requirements: const {},
-        effects: const {'reputation': 3},
+        effects: const {'reputation': 3, 'gold': -15},
         narrative: '你支持新大学士，赢得学城好感。',
       ),
       EventChoice(
@@ -269,7 +269,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_neutral',
         text: '保持中立',
         requirements: const {},
-        effects: const {'reputation': 0},
+        effects: const {'reputation': -2},
         narrative: '你按兵不动，观察局势。',
       ),
     ],
@@ -288,7 +288,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_support_new',
         text: '支持新总司令',
         requirements: const {},
-        effects: const {'reputation': 5},
+        effects: const {'reputation': 5, 'gold': -20},
         narrative: '你支持新总司令，赢得北境好感。',
       ),
       EventChoice(
@@ -302,7 +302,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_neutral',
         text: '保持中立',
         requirements: const {},
-        effects: const {'reputation': 0},
+        effects: const {'reputation': -2},
         narrative: '你按兵不动，观察局势。',
       ),
     ],
@@ -354,21 +354,21 @@ const List<GameEvent> allEvents = [
         id: 'choice_support_side_a',
         text: '支持一方',
         requirements: const {},
-        effects: const {'gold': 50, 'reputation': 5},
+        effects: const {'gold': 50, 'reputation': -5},
         narrative: '你支持一方，赢得贸易利益。',
       ),
       EventChoice(
         id: 'choice_support_side_b',
         text: '支持另一方',
         requirements: const {},
-        effects: const {'gold': 50, 'reputation': 5},
+        effects: const {'gold': -30, 'reputation': 5},
         narrative: '你支持另一方，赢得贸易利益。',
       ),
       EventChoice(
         id: 'choice_neutral',
         text: '保持中立',
         requirements: const {},
-        effects: const {'gold': 0, 'reputation': 0},
+        effects: const {'gold': 0, 'reputation': -2},
         narrative: '你按兵不动，观察局势。',
       ),
     ],
@@ -389,7 +389,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_accept',
         text: '接受联姻',
         requirements: const {},
-        effects: const {'reputation': 10},
+        effects: const {'reputation': 10, 'gold': -50},
         narrative: '你接受联姻，家族关系加深。',
       ),
       EventChoice(
@@ -422,7 +422,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_support_eldest',
         text: '支持长子',
         requirements: const {},
-        effects: const {'reputation': 5},
+        effects: const {'reputation': 5, 'gold': -20},
         narrative: '你支持长子继承，家族稳定。',
       ),
       EventChoice(
@@ -455,14 +455,14 @@ const List<GameEvent> allEvents = [
         id: 'choice_side_a',
         text: '支持一方',
         requirements: const {},
-        effects: const {'reputation': 5},
+        effects: const {'reputation': -5},
         narrative: '你支持一方，赢得家族信任。',
       ),
       EventChoice(
         id: 'choice_side_b',
         text: '支持另一方',
         requirements: const {},
-        effects: const {'reputation': 5},
+        effects: const {'reputation': 5, 'gold': -20},
         narrative: '你支持另一方，赢得家族信任。',
       ),
       EventChoice(
@@ -554,7 +554,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_fulfill',
         text: '应验预言',
         requirements: const {},
-        effects: const {'reputation': 10},
+        effects: const {'reputation': 10, 'gold': -30},
         narrative: '你应验预言，家族兴盛。',
       ),
       EventChoice(
@@ -587,7 +587,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_claim',
         text: '认领神器',
         requirements: const {},
-        effects: const {'reputation': 10},
+        effects: const {'reputation': 10, 'gold': -40},
         narrative: '你认领神器，家族兴盛。',
       ),
       EventChoice(
@@ -660,7 +660,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_forgive',
         text: '原谅',
         requirements: const {},
-        effects: const {'reputation': 10},
+        effects: const {'reputation': 10, 'gold': -20},
         narrative: '你原谅，家族关系缓和。',
       ),
       EventChoice(
@@ -794,7 +794,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_forgive',
         text: '原谅',
         requirements: const {},
-        effects: const {'reputation': 10},
+        effects: const {'reputation': 10, 'gold': -20},
         narrative: '你原谅，盟友关系缓和。',
       ),
       EventChoice(
@@ -928,7 +928,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_accept',
         text: '接受神迹',
         requirements: const {},
-        effects: const {'reputation': 10},
+        effects: const {'reputation': 10, 'gold': -20},
         narrative: '你接受神迹，教会兴盛。',
       ),
       EventChoice(
@@ -994,14 +994,14 @@ const List<GameEvent> allEvents = [
         id: 'choice_side_a',
         text: '支持一方',
         requirements: const {},
-        effects: const {'reputation': 5},
+        effects: const {'reputation': -5},
         narrative: '你支持一方，教会兴盛。',
       ),
       EventChoice(
         id: 'choice_side_b',
         text: '支持另一方',
         requirements: const {},
-        effects: const {'reputation': 5},
+        effects: const {'reputation': 5, 'gold': -25},
         narrative: '你支持另一方，教会兴盛。',
       ),
       EventChoice(
@@ -1036,14 +1036,14 @@ const List<GameEvent> allEvents = [
         id: 'choice_distribute',
         text: '分发粮食',
         requirements: const {},
-        effects: const {'reputation': 15},
+        effects: const {'reputation': 15, 'gold': -60},
         narrative: '你分发粮食，赢得民心。',
       ),
       EventChoice(
         id: 'choice_export',
         text: '出口粮食',
         requirements: const {},
-        effects: const {'gold': 100},
+        effects: const {'gold': 100, 'reputation': -10},
         narrative: '你出口粮食，赚取金币。',
       ),
     ],
@@ -1069,7 +1069,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_distribute',
         text: '分发粮食',
         requirements: const {},
-        effects: const {'reputation': 20},
+        effects: const {'reputation': 20, 'gold': -80},
         narrative: '你分发粮食，赢得民心。',
       ),
       EventChoice(
@@ -1102,7 +1102,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_export',
         text: '出口商品',
         requirements: const {},
-        effects: const {'gold': 150, 'reputation': 5},
+        effects: const {'gold': 150, 'reputation': -5},
         narrative: '你出口商品，赚取金币。',
       ),
       EventChoice(
@@ -1135,7 +1135,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_export',
         text: '出口商品',
         requirements: const {},
-        effects: const {'gold': 50, 'reputation': 3},
+        effects: const {'gold': 50, 'reputation': -8},
         narrative: '你出口商品，赚取金币。',
       ),
       EventChoice(
@@ -1262,7 +1262,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_fulfill',
         text: '应验预言',
         requirements: const {},
-        effects: const {'reputation': 10},
+        effects: const {'reputation': 10, 'gold': -30},
         narrative: '你应验预言，家族兴盛。',
       ),
       EventChoice(
@@ -1302,7 +1302,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_refuse',
         text: '拒绝血魔法',
         requirements: const {},
-        effects: const {'reputation': 10},
+        effects: const {'reputation': 10, 'gold': -10},
         narrative: '你拒绝血魔法，家族兴盛。',
       ),
       EventChoice(
@@ -1370,7 +1370,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_work',
         text: '工作',
         requirements: const {},
-        effects: const {'gold': 30, 'reputation': 3},
+        effects: const {'gold': 30, 'reputation': 3, 'energy': -15},
         narrative: '你工作，赚取金币。',
       ),
       EventChoice(
@@ -1443,7 +1443,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_mourn',
         text: '哀悼',
         requirements: const {},
-        effects: const {'reputation': 5},
+        effects: const {'reputation': 5, 'energy': -5},
         narrative: '你哀悼，家族兴盛。',
       ),
     ],
@@ -1764,7 +1764,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_report',
         text: '上报领主',
         requirements: const {},
-        effects: const {'reputation': 10},
+        effects: const {'reputation': 10, 'energy': -5},
         narrative: '你把沉船之事上报领主，赢得了正直的名声。',
       ),
       EventChoice(
@@ -1804,7 +1804,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_work',
         text: '工作',
         requirements: const {},
-        effects: const {'gold': 10, 'reputation': 3},
+        effects: const {'gold': 10, 'reputation': 3, 'energy': -15},
         narrative: '你工作，赚取金币。',
       ),
     ],
@@ -1896,7 +1896,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_see_omen',
         text: '视为凶兆',
         requirements: const {},
-        effects: const {'reputation': 3},
+        effects: const {'reputation': 3, 'energy': -5},
         narrative: '你向邻里宣讲这是战乱的预兆，人们纷纷囤积物资。',
       ),
       EventChoice(
@@ -1973,7 +1973,7 @@ const List<GameEvent> allEvents = [
         id: 'choice_report_warning',
         text: '向七国示警',
         requirements: const {},
-        effects: const {'reputation': 10, 'flags.hasWarned': 1},
+        effects: const {'reputation': -5, 'flags.hasWarned': 1},
         narrative: '你的渡鸦飞向七国，警告凛冬将至。',
       ),
       EventChoice(
@@ -2174,7 +2174,7 @@ const List<GameEvent> allEvents = [
         requirements: const {},
         // Batch 10-96：删幽灵键 `relations.relations.lord`（非真实 npc id，详见
         // 本文件 choice_entrust 处的完整说明）；同行 `reputation` 已承载叙事褒奖。
-        effects: const {'reputation': 3},
+        effects: const {'reputation': 3, 'gold': -10},
         narrative: '领主借你一匹白马，但代价是你在比武场上必须替他的旗帜争光。',
       ),
       EventChoice(
@@ -2380,7 +2380,7 @@ const List<GameEvent> allEvents = [
         requirements: const {},
         // Batch 10-96：删幽灵键 `relations.relations.lord`（非真实 npc id，详见
         // 本文件 choice_entrust 处的完整说明）；同行 `reputation` 已承载叙事褒奖。
-        effects: const {'reputation': 8},
+        effects: const {'reputation': 8, 'gold': -15},
         narrative: '你把证据呈给领主。领主当众杖责了那几个奸商，并赏了你一枚银质徽章。',
       ),
       EventChoice(

@@ -192,16 +192,20 @@ void main() {
       expect(engine.lastRejectedEffectKeys, isEmpty);
     });
 
-    test('「保持中立」类选项保留零值真实键（与既有数据风格一致）', () {
-      // event_king_death 的「保持中立」删除前是 {reputation:0, political:0}，
-      // 现为 {reputation:0}。**刻意不清空**：清空会把 7 个「转身离开」型选项
-      // 之外的第 8 个零收益选项塞进另一类语义，而项目既有数据里
-      // event_free_cities_war 的「保持中立」本就是 {gold:0, reputation:0}。
+    test('「保持中立」类选项保留真实键，并在 S16-5 补上明确代价', () {
+      // 历史：event_king_death 的「保持中立」删除前是 {reputation:0, political:0}，
+      // 清理幽灵键后剩 {reputation:0}（零收益）。
+      //
+      // S16-5 改判：用户摘录的《剧情推进指令》§四-2 要求「每个选项带明确代价」，
+      // 零收益的「保持中立」在玩家侧等同于「这按钮没用」。故中立补上
+      // `reputation: -2`——**不站队本身就是代价**（两边都记你一笔）。
+      // 刻意保留真实数值键而不是清空：清空会让它与 7 个「转身离开」型选项
+      // 混成同一语义（那类选项是"放弃机会"，本就无收益，未改）。
       final event =
           allEvents.firstWhere((e) => e.id == 'event_king_death');
       final choice =
           event.choices.firstWhere((c) => c.id == 'choice_neutral');
-      expect(choice.effects, {'reputation': 0});
+      expect(choice.effects, {'reputation': -2});
     });
   });
 
