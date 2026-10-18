@@ -13,6 +13,8 @@ class AiTurnResult {
     required this.lines,
     required this.choices,
     this.isSuccess = false,
+    this.isLocal = false,
+    this.note = '',
   });
 
   /// 未配置 API Key 的提示文案（引擎常量，UI 直接复用）。
@@ -34,4 +36,16 @@ class AiTurnResult {
 
   /// 是否成功（未配置 / 请求失败 / 无叙事均为 false）。
   final bool isSuccess;
+
+  /// 本回合是否由**本地剧情导演**产出（主 AI 不可用时的兜底）。
+  ///
+  /// 与 [isSuccess] 正交：本地兜底也是成功的一回合（有剧情、有选项），
+  /// 只是叙事来源不同——UI 可据此提示玩家"这是本地导演，不是主 AI"。
+  final bool isLocal;
+
+  /// 来源提示（未配置 Key / AI 失败降级的原因）。
+  ///
+  /// 单独一个字段而不是塞进 [lines]：UI 可以选择只在**来源变化时**提示一次，
+  /// 而不是每回合都把同一句话刷进叙事。
+  final String note;
 }

@@ -83,8 +83,14 @@ class _GameScreenState extends State<GameScreen> {
   /// 当前 AI 生成中的选项（供用户点选）。
   List<EventChoice> _aiChoices = <EventChoice>[];
 
-  /// AI 是否正在请求中。
+  /// AI 是否正在请求中（玩家自由行动通道用）。
   bool _aiLoading = false;
+
+  /// 剧情回合是否正在生成（S16 主线）。
+  bool _storyLoading = false;
+
+  /// 来源提示（未配置 Key / AI 降级）是否已经提示过，避免每回合刷同一句。
+  bool _sourceNoteShown = false;
 
   // ============ S12-7 自动存档 ============
   //
@@ -118,6 +124,10 @@ class _GameScreenState extends State<GameScreen> {
     _appendLine('🏰 欢迎来到维斯特洛。');
     _appendLine(_engine.formatPlayerPanel());
     _appendLine('输入「帮助」查看可用指令，或点击下方快捷按钮。');
+    // S16：进入即开场——剧情回合是主流程，不等玩家打字（见 _startStoryTurn）。
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_startStoryTurn());
+    });
   }
 
   @override
@@ -205,6 +215,43 @@ class _GameScreenState extends State<GameScreen> {
     if (result.needsTimeAdvance) {
       _appendLine(_engine.advanceMonth());
     }
+    // S16：指令推进的月份若浮现了待决事件，交给剧情回合呈现（剧情回路是
+    // 事件的唯一呈现通道），免得玩家只看到一行传闻却点不到选项。
+    if (_engine.pendingEvent != null) {
+      unawaited(_startStoryTurn());
+    }
+  }
+
+  /// 开一个剧情回合（S16 主线）：主 AI 说书，不可用时本地导演接手。
+  ///
+  /// 【为什么不等玩家打字】用户要的是「以主 AI 反馈剧情和选项为主」——
+  /// 每回合由引擎主动开局并给出可点选项；输入框只是辅助的自由行动通道。
+  Future<void> _startStoryTurn({String? intent}) async {
+    if (_storyLoading || !mounted) return;
+    const placeholder = '（剧情推进中…）';
+    setState(() {
+      _storyLoading = true;
+      _aiChoices = <EventChoice>[];
+    });
+    _appendLine(placeholder);
+    final AiTurnResult result = await _engine.runStoryTurn(intent: intent);
+    if (!mounted) return;
+    _storyLoading = false;
+    _lines.removeWhere((l) => l == placeholder);
+    // 来源提示只提示一次：主 AI 恢复后再次降级时重新提示。
+    if (result.note.isNotEmpty && !_sourceNoteShown) {
+      _sourceNoteShown = true;
+      _appendLine(result.note);
+    }
+    if (!result.isLocal && result.isSuccess) {
+      _sourceNoteShown = false;
+    }
+    for (final line in result.lines) {
+      _appendLine(line);
+    }
+    setState(() {
+      _aiChoices = result.choices;
+    });
   }
 
   /// 执行一次 AI 行动：编排下沉到引擎（runAiAction），本方法只渲染结果。
@@ -231,18 +278,20 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
-  /// 应用 AI 生成的选项效果：效果落盘 + 推进一个月（含系统结算/信件）。
+  /// 应用剧情回合的选项：效果落盘 + 推进一个月（含系统结算/信件），
+  /// 随后自动开下一个剧情回合——这一步是「剧情回路」的闭环（S16）。
   void _chooseAiOption(EventChoice choice) {
     setState(() {
       _aiChoices = <EventChoice>[];
     });
     _appendLine('➡️ ${choice.text}');
     // 引擎级应用：效果写回玩家 + 月度推进 + 系统结算 + 信件触发
-    final result = _engine.applyAiChoice(choice);
+    final result = _engine.applyStoryChoice(choice);
     if (result.isNotEmpty) {
       _appendLine(result);
     }
     // 引擎 notify 会触发 _onEngineChanged 刷新状态条
+    unawaited(_startStoryTurn());
   }
 
   /// 抉择待决的世界事件选项（S4-5）：效果落盘 + 追加结算叙事。
