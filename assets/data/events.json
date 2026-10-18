@@ -1227,14 +1227,14 @@
     "id": "event_religious_trial",
     "name": "宗教审判",
     "type": "religious",
-    "description": "宗教审判开始。",
+    "description": "总主教座下的审判庭传唤了你。烛火照着七芒星，指控书上的字句已经念到第三页。",
     "triggerConditions": {
       "minReputation": "30"
     },
     "choices": [
       {
         "id": "choice_defend",
-        "text": "辩护",
+        "text": "据理自辩",
         "requirements": {
           "skills.speech": 5
         },
@@ -1242,26 +1242,26 @@
           "gold": -30,
           "reputation": 10
         },
-        "narrative": "你辩护，赢得胜利。"
+        "narrative": "你在烛火前逐条驳斥指控，三十枚金龙请来的学士替你誊清了证词。审判庭最后放你回去，但所有人都记住了你的名字。"
       },
       {
         "id": "choice_confess",
-        "text": "坦白",
+        "text": "当庭认罪",
         "requirements": {},
         "effects": {
           "reputation": -10
         },
-        "narrative": "你坦白，保住性命。"
+        "narrative": "你跪在七芒星前认了罪。鞭笞之后你被放回，身份上的污点再也洗不掉。"
       },
       {
         "id": "choice_escape",
-        "text": "逃跑",
+        "text": "趁夜逃出城",
         "requirements": {},
         "effects": {
           "gold": -20,
           "reputation": -15
         },
-        "narrative": "你逃跑，保住性命。"
+        "narrative": "你雇了一匹马连夜出城，二十枚金龙花在路上。追捕的告示贴满了三个郡。"
       }
     ],
     "narrative": "宗教审判开始，教会一触即发。",
@@ -1276,38 +1276,38 @@
     "id": "event_miracle",
     "name": "神迹",
     "type": "religious",
-    "description": "神迹显现。",
+    "description": "一名盲眼修士在集市上让瘸子重新走路。人群跪了一地，也有人低声说那是骗术。",
     "triggerConditions": {
       "minReputation": "30"
     },
     "choices": [
       {
         "id": "choice_accept",
-        "text": "接受神迹",
+        "text": "当众领受神迹",
         "requirements": {},
         "effects": {
           "reputation": 10,
           "gold": -20
         },
-        "narrative": "你接受神迹，教会兴盛。"
+        "narrative": "你跪在泥地里领受祝福，并捐出二十枚金龙给修士的同伴。七神的名下从此多了一个你的名字。"
       },
       {
         "id": "choice_reject",
-        "text": "拒绝神迹",
+        "text": "公开指其为骗术",
         "requirements": {},
         "effects": {
           "reputation": -10
         },
-        "narrative": "你拒绝神迹，教会衰败。"
+        "narrative": "你当场拆穿了那套把戏。人群散了，修士的同伴记住了你的脸。"
       },
       {
         "id": "choice_ignore",
-        "text": "无视",
+        "text": "绕道走开",
         "requirements": {},
         "effects": {
           "reputation": -5
         },
-        "narrative": "你无视神迹，教会关系恶化。"
+        "narrative": "你从人群外绕了过去，什么也没说。后来这件事成了城里的传说，与你无关。"
       }
     ],
     "narrative": "神迹显现，教会一触即发。",
@@ -1322,14 +1322,14 @@
     "id": "event_heresy",
     "name": "异端",
     "type": "religious",
-    "description": "异端出现。",
+    "description": "一名传道者在酒馆里宣称七神是人造的偶像。修士们要求领主表态，而听他说过话的人越来越多。",
     "triggerConditions": {
       "minReputation": "40"
     },
     "choices": [
       {
         "id": "choice_purge",
-        "text": "清除异端",
+        "text": "出钱清除异端",
         "requirements": {
           "reputation": 30
         },
@@ -1337,25 +1337,25 @@
           "gold": -50,
           "reputation": 10
         },
-        "narrative": "你清除异端，教会兴盛。"
+        "narrative": "你出五十枚金龙悬赏告发者，把传道者送上了火刑柱。教会记住了你的虔诚。"
       },
       {
         "id": "choice_tolerate",
-        "text": "容忍异端",
+        "text": "暗中容忍",
         "requirements": {},
         "effects": {
           "reputation": -10
         },
-        "narrative": "你容忍异端，教会衰败。"
+        "narrative": "你没有动手，只是让家中不再谈论此事。修士在布道时点了你的名。"
       },
       {
         "id": "choice_ignore",
-        "text": "无视",
+        "text": "当作没听见",
         "requirements": {},
         "effects": {
           "reputation": -5
         },
-        "narrative": "你无视异端，教会关系恶化。"
+        "narrative": "你照旧喝酒吃肉，什么也没做。两边都不再指望你。"
       }
     ],
     "narrative": "异端出现，教会一触即发。",
@@ -1370,38 +1370,38 @@
     "id": "event_church_split",
     "name": "教会分裂",
     "type": "religious",
-    "description": "教会分裂。",
+    "description": "两位自称总主教的人各占一座圣堂，各自宣布对方是僭越者。信众在街口互相掷石。",
     "triggerConditions": {
       "minReputation": "45"
     },
     "choices": [
       {
         "id": "choice_side_a",
-        "text": "支持一方",
+        "text": "支持旧镇的推选",
         "requirements": {},
         "effects": {
           "reputation": -5
         },
-        "narrative": "你支持一方，教会兴盛。"
+        "narrative": "你公开支持旧镇一派。从此君临的教会不再为你做弥撒。"
       },
       {
         "id": "choice_side_b",
-        "text": "支持另一方",
+        "text": "支持王室册封的人选",
         "requirements": {},
         "effects": {
           "reputation": 5,
           "gold": -25
         },
-        "narrative": "你支持另一方，教会兴盛。"
+        "narrative": "你拿出二十五枚金龙为王室册封的人选办了一场布施。宫里记你的情，旧镇记你的账。"
       },
       {
         "id": "choice_neutral",
-        "text": "保持中立",
+        "text": "两座圣堂都不进",
         "requirements": {},
         "effects": {
           "reputation": -5
         },
-        "narrative": "你按兵不动，教会关系恶化。"
+        "narrative": "你两边的礼拜都没去。街口的石头照样在飞，只是不再落在你头上。"
       }
     ],
     "narrative": "教会分裂，教会一触即发。",
@@ -1416,14 +1416,14 @@
     "id": "event_harvest",
     "name": "丰收",
     "type": "economic",
-    "description": "丰收之年。",
+    "description": "今年的麦子压弯了穗子，粮仓装不下，谷价一路往下掉。佃户们等着看你怎么处置。",
     "triggerConditions": {
       "season": "autumn"
     },
     "choices": [
       {
         "id": "choice_stockpile",
-        "text": "囤积粮食",
+        "text": "出钱囤积粮食",
         "requirements": {
           "gold": 50
         },
@@ -1431,27 +1431,27 @@
           "gold": -50,
           "reputation": 5
         },
-        "narrative": "你囤积粮食，家族兴盛。"
+        "narrative": "你花五十枚金龙把多余的麦子收进自家粮仓。佃户们看着车队进院，什么也没说。"
       },
       {
         "id": "choice_distribute",
-        "text": "分发粮食",
+        "text": "开仓分粮",
         "requirements": {},
         "effects": {
           "reputation": 15,
           "gold": -60
         },
-        "narrative": "你分发粮食，赢得民心。"
+        "narrative": "你把六十枚金龙买来的粮食分给佃户与穷人。仓房空了，你的名字被编进了歌谣。"
       },
       {
         "id": "choice_export",
-        "text": "出口粮食",
+        "text": "装船出口粮食",
         "requirements": {},
         "effects": {
           "gold": 100,
           "reputation": -10
         },
-        "narrative": "你出口粮食，赚取金币。"
+        "narrative": "你把粮食装船卖往狭海对岸，净赚一笔。留下的人家只能自己去挖野菜。"
       }
     ],
     "narrative": "丰收之年，家族兴盛。",
@@ -1466,14 +1466,14 @@
     "id": "event_famine",
     "name": "饥荒",
     "type": "economic",
-    "description": "饥荒之年。",
+    "description": "连年的雨把麦子烂在了地里。城门口开始出现饿死的人，粮价一天三涨。",
     "triggerConditions": {
       "season": "winter"
     },
     "choices": [
       {
         "id": "choice_stockpile",
-        "text": "囤积粮食",
+        "text": "倾家囤粮备荒",
         "requirements": {
           "gold": 100
         },
@@ -1481,26 +1481,26 @@
           "gold": -100,
           "reputation": 10
         },
-        "narrative": "你囤积粮食，家族兴盛。"
+        "narrative": "你花一百枚金龙扫空了三个集市。自家熬过去了，旁人记下了你买走了什么。"
       },
       {
         "id": "choice_distribute",
-        "text": "分发粮食",
+        "text": "设棚施粥",
         "requirements": {},
         "effects": {
           "reputation": 20,
           "gold": -80
         },
-        "narrative": "你分发粮食，赢得民心。"
+        "narrative": "你搭起粥棚，八十枚金龙流水一样花出去。饿死的人少了，你的仓房也空了。"
       },
       {
         "id": "choice_ignore",
-        "text": "无视",
+        "text": "关上门自保",
         "requirements": {},
         "effects": {
           "reputation": -20
         },
-        "narrative": "你无视饥荒，家族衰败。"
+        "narrative": "你闩上大门，命家兵守住粮仓。城门口的人越聚越多，他们知道谁家有粮。"
       }
     ],
     "narrative": "饥荒之年，家族衰败。",
@@ -1515,14 +1515,14 @@
     "id": "event_trade_boom",
     "name": "贸易繁荣",
     "type": "economic",
-    "description": "贸易繁荣。",
+    "description": "战事停了一年，海路畅通，布拉佛斯的商船在码头排到了湾口。谁手里有货，谁就说了算。",
     "triggerConditions": {
       "minGold": "100"
     },
     "choices": [
       {
         "id": "choice_invest",
-        "text": "投资贸易",
+        "text": "重金投入商路",
         "requirements": {
           "gold": 200
         },
@@ -1530,26 +1530,26 @@
           "gold": 400,
           "reputation": 10
         },
-        "narrative": "你投资贸易，赚取金币。"
+        "narrative": "你把二百枚金龙压上一支远洋商队。船回来的那天，账房数钱数到半夜。"
       },
       {
         "id": "choice_export",
-        "text": "出口商品",
+        "text": "把存货装船出口",
         "requirements": {},
         "effects": {
           "gold": 150,
           "reputation": -5
         },
-        "narrative": "你出口商品，赚取金币。"
+        "narrative": "你把仓里的货全装上船，赚得盆满钵满。本地铺子却开始抱怨买不到东西。"
       },
       {
         "id": "choice_ignore",
-        "text": "无视",
+        "text": "照旧做老买卖",
         "requirements": {},
         "effects": {
           "reputation": -5
         },
-        "narrative": "你无视贸易，家族衰败。"
+        "narrative": "你没动，还是守着原来那点生意。风口过去，你还在原地。"
       }
     ],
     "narrative": "贸易繁荣，家族兴盛。",
@@ -1564,14 +1564,14 @@
     "id": "event_trade_crisis",
     "name": "贸易危机",
     "type": "economic",
-    "description": "贸易危机。",
+    "description": "狭海上的海盗劫了三支商队，保险费一夜翻倍，码头上没人敢接新的舱位。",
     "triggerConditions": {
       "minGold": "50"
     },
     "choices": [
       {
         "id": "choice_invest",
-        "text": "投资贸易",
+        "text": "低价接盘商路",
         "requirements": {
           "gold": 200
         },
@@ -1579,26 +1579,26 @@
           "gold": -100,
           "reputation": 5
         },
-        "narrative": "你投资贸易，赌上未来。"
+        "narrative": "你趁乱用一百枚金龙接下别人的舱位与合约。有人笑你疯了，也有人开始怕你。"
       },
       {
         "id": "choice_export",
-        "text": "出口商品",
+        "text": "冒险出货",
         "requirements": {},
         "effects": {
           "gold": 50,
           "reputation": -8
         },
-        "narrative": "你出口商品，赚取金币。"
+        "narrative": "你押上五十枚金龙的货走小路出海。货到了，名声也坏了一半——你抢了同行最后的机会。"
       },
       {
         "id": "choice_ignore",
-        "text": "无视",
+        "text": "停手观望",
         "requirements": {},
         "effects": {
           "reputation": -10
         },
-        "narrative": "你无视贸易，家族衰败。"
+        "narrative": "你什么也没做，只是把账本合上。等风头过去，你的位置已经被人占了。"
       }
     ],
     "narrative": "贸易危机，家族衰败。",
@@ -1613,14 +1613,14 @@
     "id": "event_iron_bank_debt",
     "name": "铁金库债务",
     "type": "economic",
-    "description": "铁金库债务。",
+    "description": "铁金库的账目上写着你的家族名字，利息已滚了三年。信使在门外等一个答复。",
     "triggerConditions": {
       "minGold": "150"
     },
     "choices": [
       {
         "id": "choice_repay",
-        "text": "偿还债务",
+        "text": "结清全部本息",
         "requirements": {
           "gold": 500
         },
@@ -1628,21 +1628,21 @@
           "gold": -500,
           "reputation": 10
         },
-        "narrative": "你偿还债务，赢得信任。"
+        "narrative": "你把五百枚金龙运往布拉佛斯。账清了，家底也见底了。"
       },
       {
         "id": "choice_default",
-        "text": "违约",
+        "text": "当众拒付",
         "requirements": {},
         "effects": {
           "gold": 0,
           "reputation": -20
         },
-        "narrative": "你违约，铁金库不满。"
+        "narrative": "你把信使赶出门去，宣布这笔账不算数。此后没有一家钱庄愿意收你的票据。"
       },
       {
         "id": "choice_negotiate",
-        "text": "谈判",
+        "text": "当面谈一个数目",
         "requirements": {
           "skills.speech": 5
         },
@@ -1650,7 +1650,7 @@
           "gold": -100,
           "reputation": 3
         },
-        "narrative": "你与铁金库谈判，达成妥协。"
+        "narrative": "你在账房里与人磨了三天嘴皮，用一百枚金龙换来展期。对方临走时说了一句：还会再见。"
       }
     ],
     "narrative": "铁金库债务，家族衰败。",
@@ -1665,25 +1665,25 @@
     "id": "event_dragon_appears",
     "name": "龙出现",
     "type": "magical",
-    "description": "龙出现。",
+    "description": "一名坦格利安后裔在厄索斯孵出了活物。消息传到维斯特洛时，有人已经在夜里看见了北方的火光。",
     "triggerConditions": {
       "minReputation": "50"
     },
     "choices": [
       {
         "id": "choice_claim",
-        "text": "认领龙",
+        "text": "试图认领这条龙",
         "requirements": {
           "skills.magic": 5
         },
         "effects": {
           "reputation": 20
         },
-        "narrative": "你认领龙，家族兴盛。"
+        "narrative": "你以古瓦雷利亚的血脉自称，走进那片焦土。龙看了你很久，最后把头低下——或者只是恰好那时低下了。"
       },
       {
         "id": "choice_fight",
-        "text": "战斗",
+        "text": "组织人手猎龙",
         "requirements": {
           "reputation": 40
         },
@@ -1691,16 +1691,16 @@
           "gold": -100,
           "reputation": 15
         },
-        "narrative": "你战斗，赢得胜利。"
+        "narrative": "你凑齐一百枚金龙的赏格与四十名弓手。队伍进了山谷，回来的不到一半。"
       },
       {
         "id": "choice_flee",
-        "text": "逃跑",
+        "text": "举家南迁避祸",
         "requirements": {},
         "effects": {
           "reputation": -10
         },
-        "narrative": "你逃跑，保住性命。"
+        "narrative": "你连夜把家眷迁往南方。身后传来消息：又有两座村庄烧成了白地。"
       }
     ],
     "narrative": "龙出现，家族兴盛。",
@@ -1715,14 +1715,14 @@
     "id": "event_white_walkers",
     "name": "异鬼南下",
     "type": "magical",
-    "description": "异鬼南下。",
+    "description": "长城外的雪线上出现了会走的东西。守夜人的巡逻队回来时少了三个人，剩下的不肯细说。",
     "triggerConditions": {
       "season": "winter"
     },
     "choices": [
       {
         "id": "choice_fight",
-        "text": "战斗",
+        "text": "带人北上迎敌",
         "requirements": {
           "reputation": 55
         },
@@ -1730,20 +1730,20 @@
           "gold": -200,
           "reputation": 20
         },
-        "narrative": "你战斗，赢得胜利。"
+        "narrative": "你出资二百枚金龙置办黑曜石兵器与火油，随守夜人北上。你活着回来了，也再没睡过一个整觉。"
       },
       {
         "id": "choice_retreat",
-        "text": "撤退",
+        "text": "南撤避其锋芒",
         "requirements": {},
         "effects": {
           "reputation": -10
         },
-        "narrative": "你撤退，保住军队。"
+        "narrative": "你把封地的人往南迁。走得越远，回头看的人越少。"
       },
       {
         "id": "choice_negotiate",
-        "text": "谈判",
+        "text": "设法与墙外通话",
         "requirements": {
           "skills.speech": 5
         },
@@ -1751,7 +1751,7 @@
           "gold": -30,
           "reputation": 5
         },
-        "narrative": "你谈判，达成妥协。"
+        "narrative": "你花三十枚金龙请来一名会说古语的野人，隔着冰墙喊了一夜。对方只回了一声长啸。"
       }
     ],
     "narrative": "异鬼南下，家族兴盛。",
@@ -1766,38 +1766,38 @@
     "id": "event_prophecy",
     "name": "预言",
     "type": "magical",
-    "description": "预言应验。",
+    "description": "一名红袍女祭在篝火里看见了你的脸，说三件事将要发生，其中一件与你的死有关。",
     "triggerConditions": {
       "minReputation": "40"
     },
     "choices": [
       {
         "id": "choice_fulfill",
-        "text": "应验预言",
+        "text": "循着预言去做",
         "requirements": {},
         "effects": {
           "reputation": 10,
           "gold": -30
         },
-        "narrative": "你应验预言，家族兴盛。"
+        "narrative": "你依照她的话往东走，沿路花去三十枚金龙。第二件事应验了，你开始害怕第三件。"
       },
       {
         "id": "choice_defy",
-        "text": "违背预言",
+        "text": "故意反其道而行",
         "requirements": {},
         "effects": {
           "reputation": -10
         },
-        "narrative": "你违背预言，家族衰败。"
+        "narrative": "你掉头往西，把所有安排都改了。预言还在，只是没人知道你改掉了什么。"
       },
       {
         "id": "choice_ignore",
-        "text": "无视",
+        "text": "让她离开城堡",
         "requirements": {},
         "effects": {
           "reputation": -5
         },
-        "narrative": "你无视预言，家族关系恶化。"
+        "narrative": "你命人把女祭送出城门。篝火灭了，夜里你总会想起那两个还没应验的句子。"
       }
     ],
     "narrative": "预言应验，家族兴盛。",
@@ -1812,40 +1812,40 @@
     "id": "event_blood_magic",
     "name": "血魔法",
     "type": "magical",
-    "description": "血魔法出现。",
+    "description": "一名从亚夏来的术士愿意替你办一件事，只要一点血，和一点不该问的代价。",
     "triggerConditions": {
       "minReputation": "45"
     },
     "choices": [
       {
         "id": "choice_use",
-        "text": "使用血魔法",
+        "text": "让他施术",
         "requirements": {
           "skills.magic": 5
         },
         "effects": {
           "reputation": -10
         },
-        "narrative": "你使用血魔法，家族兴盛。"
+        "narrative": "你划开手掌。事情办成了，但从此夜里总听见有人在耳边数数。"
       },
       {
         "id": "choice_refuse",
-        "text": "拒绝血魔法",
+        "text": "拒绝并送他离开",
         "requirements": {},
         "effects": {
           "reputation": 10,
           "gold": -10
         },
-        "narrative": "你拒绝血魔法，家族兴盛。"
+        "narrative": "你给了他十枚金龙当路费，让他走。他在门口回了一次头。"
       },
       {
         "id": "choice_ignore",
-        "text": "无视",
+        "text": "不见这个术士",
         "requirements": {},
         "effects": {
           "reputation": -5
         },
-        "narrative": "你无视血魔法，家族关系恶化。"
+        "narrative": "你让门房回话说主人不在。术士在客栈住了三天，然后消失了。"
       }
     ],
     "narrative": "血魔法出现，家族兴盛。",
@@ -1860,39 +1860,39 @@
     "id": "event_green_seer",
     "name": "绿先知",
     "type": "magical",
-    "description": "绿先知出现。",
+    "description": "一名森林之子模样的人坐在神木林下，说能让你看见旧神的眼睛所看见的东西。",
     "triggerConditions": {
       "minReputation": "35"
     },
     "choices": [
       {
         "id": "choice_follow",
-        "text": "跟随绿先知",
+        "text": "随他进入神木林",
         "requirements": {
           "skills.magic": 5
         },
         "effects": {
           "reputation": 10
         },
-        "narrative": "你跟随绿先知，家族兴盛。"
+        "narrative": "你在鱼梁木下坐了整夜。你看见了不该看见的东西，醒来时手指冻得发紫。"
       },
       {
         "id": "choice_refuse",
-        "text": "拒绝绿先知",
+        "text": "谢绝这份邀请",
         "requirements": {},
         "effects": {
           "reputation": -5
         },
-        "narrative": "你拒绝绿先知，家族衰败。"
+        "narrative": "你行了个礼转身离开。身后传来一声很轻的笑。"
       },
       {
         "id": "choice_ignore",
-        "text": "无视",
+        "text": "命人把他赶走",
         "requirements": {},
         "effects": {
           "reputation": -5
         },
-        "narrative": "你无视绿先知，家族关系恶化。"
+        "narrative": "你命人把他赶出林子。此后再没有鸟落在你家的鱼梁木上。"
       }
     ],
     "narrative": "绿先知出现，家族兴盛。",
