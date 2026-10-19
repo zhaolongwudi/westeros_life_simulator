@@ -11,6 +11,7 @@ import '../models/player.dart';
 import '../core/command_registry.dart';
 import '../core/monthly_pipeline.dart';
 import '../core/narrative_momentum.dart';
+import '../core/story_director.dart';
 import '../models/monthly_counter.dart';
 import '../providers/game_provider_base.dart';
 import '../utils/command_alias.dart';
@@ -331,7 +332,8 @@ mixin GamePlayMixin
   /// 下一条浮现的传闻**替换**。刻意不在未抉择时按月清空：玩家不该因为
   /// 「当月没点」而永久错过一个已经摆到面前的抉择。
   String _maybeWorldEvent({int? seed}) {
-    final rnd = rng(seed);
+    // seed 保留在签名里（既有调用方按回合数传入）；S16-8 起挑事件改为
+    // `StoryDirector.pickEvent` 的确定性规则，不再需要本地随机源。
     // 【S15-5：概率 → 节奏】改造前这里是一道硬编码 30% 掷骰
     // （`if (rnd.nextDouble() >= 0.3) return '';`）⇒ **七成月份毫无剧情**，
     // 这正是用户「本地模式一点剧情都没有」的直接来源。
@@ -348,13 +350,16 @@ mixin GamePlayMixin
       season: progress.season,
     );
     if (available.isEmpty) return '';
-    // 按相位挑事件（引入挑日常/家族、转折挑政治/战争…），同分用确定性 rng 打破。
-    final best = available
-        .map((e) => NarrativeMomentum.scoreEvent(e, phase))
-        .reduce((x, y) => x > y ? x : y);
-    final top =
-        available.where((e) => NarrativeMomentum.scoreEvent(e, phase) == best).toList();
-    final event = top[rnd.nextInt(top.length)];
+    // 按相位挑事件（引入挑日常/家族、转折挑政治/战争…），并按停滞检测
+    // 把最近几回合刚讲过的事件降权（回看窗口取自**已有**的 history，
+    // 不新增存档字段）。
+    final event = StoryDirector.pickEvent(
+      available,
+      phase,
+      progress.turnCount,
+      recentEventIds: history.map((e) => e.id).toList(),
+    );
+    if (event == null) return '';
     // 【S4-6（P1-11）一次性事件必须在此标记完成】
     // `EventProvider.canTrigger` 对 `isOneTime` 事件的拦截依赖
     // `_completedEventIds`，而写入该集合的唯一入口 `markCompleted`

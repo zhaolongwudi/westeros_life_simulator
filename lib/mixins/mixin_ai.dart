@@ -207,6 +207,8 @@ mixin GameAiMixin
             familyName: playerFamily?.name ?? '',
             onSiteNpcs: npcsAtCurrentLocation,
             canChoose: canChoose,
+            // S16-8 停滞检测：最近讲过的事件降权（回看窗口取自已有 history）。
+            recentEventIds: history.map((e) => e.id).toList(),
           );
     // 一次性事件在「讲述」时即标记完成：否则同一条一次性传闻会被反复讲
     // （与 `mixin_play._maybeWorldEvent` 的标记点一致）。

@@ -73,6 +73,8 @@ class StoryDirector {
   }
 
   /// 自动挑一个可用事件生成剧情；一个都没有时走日常兜底。
+  ///
+  /// [recentEventIds] 透传给 [pickEvent] 做停滞检测（见那里的说明）。
   static DirectedScene direct({
     required Player player,
     required int year,
@@ -84,6 +86,7 @@ class StoryDirector {
     String familyName = '',
     List<Npc> onSiteNpcs = const <Npc>[],
     bool Function(EventChoice)? canChoose,
+    List<String> recentEventIds = const <String>[],
   }) {
     final phase = NarrativeMomentum.phaseFor(turnCount);
     return _compose(
@@ -92,7 +95,12 @@ class StoryDirector {
       month: month,
       season: season,
       turnCount: turnCount,
-      event: pickEvent(availableEvents, phase, turnCount),
+      event: pickEvent(
+        availableEvents,
+        phase,
+        turnCount,
+        recentEventIds: recentEventIds,
+      ),
       location: location,
       familyName: familyName,
       onSiteNpcs: onSiteNpcs,
@@ -100,25 +108,41 @@ class StoryDirector {
     );
   }
 
+  /// 停滞检测的回看窗口（最近 N 回合出现过的事件不再优先）。
+  static const int kRecentWindow = 4;
+
+  /// 重复出现的降权分：比任何相位分档（1~4）都高，故**只要还有别的可用事件**
+  /// 就一定会换一条；全都刚出现过时仍能选出最高分的那条（不会无事件可用）。
+  static const int kRepeatPenalty = 3;
+
   /// 按相位挑事件：分高者优先，同分用回合数确定性地取一个。
   ///
   /// 与 `NarrativeMomentum.scoreEvent` 的分工：那边给「事件 × 相位」打分，
   /// 这边负责在最高分集合里选；同分集合先按 id 排序，避免依赖事件表的
   /// 书写顺序（顺序一变结果就变，测试与存档都会漂）。
+  ///
+  /// S16-8（停滞检测）：[recentEventIds] 传最近几回合已经出现过的事件 id
+  /// （调用方从**已有**的 `history` 取，不新增任何存档字段）——刚讲过的事
+  /// 降权，避免「同一条传闻连月复读」这种最像卡带的手感。
   static GameEvent? pickEvent(
     List<GameEvent> events,
     NarrativePhase phase,
-    int turnCount,
-  ) {
+    int turnCount, {
+    List<String> recentEventIds = const <String>[],
+  }) {
     if (events.isEmpty) return null;
-    var best = NarrativeMomentum.scoreEvent(events.first, phase);
+    final recent = recentEventIds.length > kRecentWindow
+        ? recentEventIds.sublist(recentEventIds.length - kRecentWindow)
+        : recentEventIds;
+    int scoreOf(GameEvent e) =>
+        NarrativeMomentum.scoreEvent(e, phase) -
+        (recent.contains(e.id) ? kRepeatPenalty : 0);
+    var best = scoreOf(events.first);
     for (final e in events) {
-      final s = NarrativeMomentum.scoreEvent(e, phase);
+      final s = scoreOf(e);
       if (s > best) best = s;
     }
-    final top = events
-        .where((e) => NarrativeMomentum.scoreEvent(e, phase) == best)
-        .toList()
+    final top = events.where((e) => scoreOf(e) == best).toList()
       ..sort((a, b) => a.id.compareTo(b.id));
     return top[turnCount % top.length];
   }
