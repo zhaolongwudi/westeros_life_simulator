@@ -26,3 +26,8 @@ docs/HANDOVER.md
 
 # Email config (secrets)
 .mail_env
+
+# 本机（DSH 手机端）开发残留：上一批用 wg addall 误暂存的备份与看板副本，
+# S16-7 已把仓库内这批文件移到仓库外；这两条防它们再被顺手提交。
+.refbackup/
+.kanban_bak.md

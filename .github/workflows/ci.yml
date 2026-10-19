@@ -37,6 +37,26 @@ jobs:
 
       - name: Test
         run: flutter test --coverage
+      - name: Regenerate content mirror (S16-7)
+        # `assets/data/*.json` 是 `lib/data/*.dart` 的**生成物**。S16-7 之前它靠人工
+        # 重跑 `dart_content_extract.py` 同步：本机没有 python3 时只能手改 JSON，
+        # 那正是「三份真相」漂移的来源。现在 CI 每次自动重新生成，有变化就提交
+        # （带 [skip ci] 防递归），于是 Dart 是唯一真相、镜像是产物——
+        # 下面那道对账闸门仍然保留，用来抓「导出器本身解析坏了」这类问题。
+        run: |
+          git checkout main
+          git pull --rebase origin main || true
+          python3 scripts/dart_content_extract.py
+          if [ -n "$(git status --porcelain assets/data)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add assets/data
+            git commit -m "chore(content): 自动同步 assets/data 镜像 [skip ci]"
+            git push origin main || true
+            echo "mirror regenerated & pushed"
+          else
+            echo "mirror already in sync"
+          fi
       - name: Content sync check (M4c)
         run: python3 scripts/check_content_sync.py --quiet
       - name: Docs sync check (S3-2)
