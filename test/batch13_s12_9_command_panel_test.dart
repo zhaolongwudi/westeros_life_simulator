@@ -244,8 +244,8 @@ void main() {
         onPrefill: (s) => prefilled.add(s.aliases.first),
       );
 
-      // 需参数指令的 chip 文案是「主名 …」，据此定位。
-      await tapInPanel(tester, '使用 …');
+      // 需参数指令的 chip 文案是「主名（需填写）」，据此定位。
+      await tapInPanel(tester, '使用（需填写）');
 
       expect(prefilled, <String>['使用']);
       expect(ran, isEmpty, reason: '需参数指令不该直接执行（会白点一次）');
@@ -259,7 +259,7 @@ void main() {
       await tester.enterText(find.byType(TextField), '训练');
       await tester.pumpAndSettle();
 
-      expect(find.text('训练 …'), findsOneWidget);
+      expect(find.text('训练（需填写）'), findsOneWidget);
       expect(find.text('状态'), findsNothing, reason: '「状态」不含「训练」应被过滤掉');
       expect(find.text('1/47'), findsOneWidget);
     });
@@ -273,7 +273,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 训练 sword 的帮助行含 sword
-      expect(find.text('训练 …'), findsOneWidget);
+      expect(find.text('训练（需填写）'), findsOneWidget);
     });
 
     testWidgets('搜索无结果时给出明确提示（不留白屏）', (tester) async {
@@ -364,7 +364,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      // S15-4：训练已接入技能候选按钮 ⇒ 标记从「…」变「▾」
+      // S15-4：训练已接入技能候选按钮 ⇒ 标记从「（需填写）」变「▾」
       // （面板里点它就地列出 sword/archery… 的中文按钮，不再让玩家手打）。
       expect(
         find.descendant(
@@ -414,7 +414,7 @@ void main() {
       await tester.pumpAndSettle();
       // S15-4：改用**无候选**的需参数指令——「立嗣」要玩家自己起名，
       // argChoices 为 null ⇒ 仍走「预填输入框」的旧路径（这条契约没变）。
-      await tapInPanel(tester, '立嗣 …');
+      await tapInPanel(tester, '立嗣（需填写）');
 
       expect(find.byType(CommandPanel), findsNothing);
       final field = tester.widget<TextField>(

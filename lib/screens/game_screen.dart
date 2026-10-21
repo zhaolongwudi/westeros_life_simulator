@@ -118,8 +118,13 @@ class _GameScreenState extends State<GameScreen> {
     // 监听引擎变化（状态条/叙事随游戏推进刷新）
     _engine.addListener(_onEngineChanged);
     // 初始叙事
+    //
+    // 【S17-1 为什么删掉 `formatPlayerPanel()`】它一次往剧情流里塞 9 行
+    // 「【玩家状态】…属性…技能…背包」，玩家一进游戏看到的是一大坨状态，
+    // 剧情被挤到下面——这正是「剩下的都是玩家状态」的来源。状态信息已有
+    // 顶部 StatusBar（生命/精力/饱食/金币/年月）与「玩家详情」面板承载，
+    // 剧情流只留剧情。
     _appendLine('🏰 欢迎来到维斯特洛。');
-    _appendLine(_engine.formatPlayerPanel());
     _appendLine('输入「帮助」查看可用指令，或点击下方快捷按钮。');
     // S16：进入即开场——剧情回合是主流程，不等玩家打字（见 _startStoryTurn）。
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -456,13 +461,12 @@ class _GameScreenState extends State<GameScreen> {
                     _aiChoices = <EventChoice>[];
                   }),
                 ),
-                // 叙事输出区
+                // 叙事输出区（S17-1：选项区已移入本 widget 的固定下栏）
                 Expanded(
                   child: NarrativeView(
                     lines: _lines,
                     scrollController: _scrollController,
                     engine: _engine,
-                    onOpenPanel: _openScreen,
                     aiChoices: _aiChoices,
                     onChooseAi: _chooseAiOption,
                     worldEvent: _engine.pendingEvent,

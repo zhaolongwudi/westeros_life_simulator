@@ -149,7 +149,7 @@ void main() {
         onRunWithArg: (spec, value) => calls.add('${spec.aliases.first}:$value'),
       );
 
-      // 有候选的指令带「▾」标记（判别式：修复前是「训练 …」）
+      // 有候选的指令带「▾」标记（判别式：无候选的需参数指令是「训练（需填写）」）
       expect(find.text('训练 ▾'), findsOneWidget,
           reason: '有关联候选的指令应显示 ▾ 标记');
       await tester.tap(find.text('训练 ▾'));
@@ -185,9 +185,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 没有 onRunWithArg ⇒ 不显示 ▾，仍是「…」并走预填
+      // 没有 onRunWithArg ⇒ 不显示 ▾，仍是「（需填写）」并走预填
       expect(find.text('训练 ▾'), findsNothing);
-      await tester.tap(find.text('训练 …'));
+      await tester.tap(find.text('训练（需填写）'));
       await tester.pumpAndSettle();
       expect(prefilled, contains('训练'));
     });

@@ -10,11 +10,11 @@ import '../game_engine.dart';
 import '../providers/game_state_provider.dart';
 import '../data/ai_provider_defaults.dart';
 import '../services/ai_config.dart';
-import '../services/ai_service.dart';
 import '../services/save_service.dart';
 import '../theme/westeros_theme.dart';
 import '../utils/text_formats.dart';
 import '../widgets/theme/ornate.dart';
+import 'ai_config_screen.dart';
 
 /// 设置/存档界面。
 class SettingsScreen extends StatefulWidget {
@@ -52,6 +52,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   /// AI 配置（懒加载，仅首次进入时读取）。
   AiConfig? _aiConfig;
 
+  /// 读取 AI 配置失败的原因（非空时卡片如实显示失败，不再假装「未配置」）。
+  ///
+  /// 【为什么必须区分「没配」和「读不出来」】两者此前都渲染成
+  /// 「未配置 API Key」：存储一旦异常，玩家会以为是自己没填 Key，
+  /// 反复重填也永远不生效，问题被界面吞掉。
+  String _aiConfigError = '';
+
   @override
   void initState() {
     super.initState();
@@ -59,11 +66,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadAiConfig();
   }
 
-  /// 异步读取 AI 配置。
+  /// 异步读取 AI 配置（失败不静默：把原因落到卡片副标题上）。
   Future<void> _loadAiConfig() async {
-    final config = await AiConfig.load();
-    if (!mounted) return;
-    setState(() => _aiConfig = config);
+    try {
+      final config = await AiConfig.load();
+      if (!mounted) return;
+      setState(() {
+        _aiConfig = config;
+        _aiConfigError = '';
+      });
+    } on Object catch (error) {
+      if (!mounted) return;
+      setState(() => _aiConfigError = '$error');
+    }
   }
 
   /// 刷新存档列表。
@@ -191,425 +206,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await _refreshSaves();
   }
 
-  /// 编辑 AI 配置（Batch 10-59 提供商/多 Key；Batch 10-106 多模型 + 自动识别 + 连通性测试）。
+  /// 打开 AI 配置页（S17-1：从弹窗迁出，见 [AiConfigScreen] 的类注释）。
+  ///
+  /// 【为什么不再自己弹 AlertDialog】旧的窄弹窗在手机上既会被键盘挤压，又会
+  /// 被误触关闭（遮罩可点 ⇒ 返回 null ⇒ 整块保存逻辑被跳过且没有任何提示）；
+  /// 失败路径也不可见。全屏页把「保存中 / 保存失败原因 / 保存成功」全部显式
+  /// 呈现，并且**只有保存成功才返回新配置**。
   Future<void> _editAiConfig() async {
     final config = _aiConfig ?? AiConfig.defaultConfig();
-    // 多 key：换行分隔展示，便于粘贴多个。
-    final keysController = TextEditingController(
-      text: config.apiKeys.join('\n'),
-    );
-    final modelController = TextEditingController(text: config.model);
-    final baseUrlController = TextEditingController(text: config.baseUrl);
-    var selectedProvider = config.provider;
-    var selectedModel = config.model;
-    // 自定义模型（自动识别 / 手动添加后并入）。
-    var customModels = <String>[...config.customModels];
-    // 连通性测试 / 自动识别的状态与结果。
-    var testing = false;
-    var fetching = false;
-    var testResult = '';
-    var fetchResult = '';
-
-    final saved = await showDialog<bool>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          final defaults = providerDefaultsOf(selectedProvider);
-          // 全部可选模型：提供商候选 + 自定义（去重）。
-          final allModels = <String>[];
-          final seen = <String>{};
-          for (final m in providerDefaultsOf(selectedProvider).models) {
-            if (seen.add(m)) allModels.add(m);
-          }
-          for (final m in customModels) {
-            if (seen.add(m)) allModels.add(m);
-          }
-          if (selectedModel.isNotEmpty && seen.add(selectedModel)) {
-            allModels.add(selectedModel);
-          }
-          return AlertDialog(
-            title: const Text('AI 配置'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const Text('提供商', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  DropdownButtonFormField<String>(
-                    initialValue: selectedProvider,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    items: kAiProviderDefaults
-                        .map((d) => DropdownMenuItem<String>(
-                              value: d.name,
-                              child: Text(d.label),
-                            ))
-                        .toList(),
-                    onChanged: (v) {
-                      if (v == null) return;
-                      setDialogState(() {
-                        selectedProvider = v;
-                        // 切换提供商时模型跟随默认，baseUrl 清空（回落默认）。
-                        selectedModel = '';
-                        modelController.text = '';
-                        baseUrlController.text = '';
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  const Text('API Key（每行一个，自动轮换）',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  TextField(
-                    controller: keysController,
-                    maxLines: 5,
-                    minLines: 3,
-                    decoration: const InputDecoration(
-                      hintText: '粘贴 API Key，每行一个\n多个 Key 会自动轮换，单个 Key 限流时自动切换',
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text('模型', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  DropdownButtonFormField<String>(
-                    // provider 切换时强制重建下拉（initialValue 只在首次 build 生效）。
-                    key: ValueKey<String>('model_$selectedProvider'),
-                    initialValue: selectedModel.isEmpty
-                        ? defaults.model
-                        : selectedModel,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    items: allModels
-                        .map((m) => DropdownMenuItem<String>(
-                              value: m,
-                              child: Text(m),
-                            ))
-                        .toList(),
-                    onChanged: (v) {
-                      if (v == null) return;
-                      setDialogState(() {
-                        selectedModel = v;
-                        modelController.text = v;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  // 自动识别模型 + 手动添加 + 连通性测试
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: <Widget>[
-                      TextButton.icon(
-                        onPressed: fetching
-                            ? null
-                            : () => _fetchModels(
-                                  setDialogState,
-                                  baseUrlController,
-                                  keysController,
-                                  selectedProvider,
-                                  () => customModels,
-                                  (m) {
-                                    customModels = m;
-                                    if (selectedModel.isEmpty &&
-                                        m.isNotEmpty) {
-                                      selectedModel = m.first;
-                                      modelController.text = m.first;
-                                    }
-                                  },
-                                  (r) => fetchResult = r,
-                                  (f) => fetching = f,
-                                ),
-                        icon: fetching
-                            ? const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.settings_input_antenna, size: 16),
-                        label: Text(fetching ? '识别中…' : '自动识别模型'),
-                      ),
-                      TextButton.icon(
-                        onPressed: () => _addCustomModel(
-                          setDialogState,
-                          modelController,
-                          () => customModels,
-                          (m) {
-                            customModels = m;
-                            selectedModel = m.last;
-                            modelController.text = m.last;
-                          },
-                        ),
-                        icon: const Icon(Icons.add, size: 16),
-                        label: const Text('添加模型'),
-                      ),
-                      TextButton.icon(
-                        onPressed: testing
-                            ? null
-                            : () => _testConnection(
-                                  setDialogState,
-                                  baseUrlController,
-                                  keysController,
-                                  selectedProvider,
-                                  selectedModel.isEmpty
-                                      ? defaults.model
-                                      : selectedModel,
-                                  (r) => testResult = r,
-                                  (t) => testing = t,
-                                ),
-                        icon: testing
-                            ? const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.wifi_tethering, size: 16),
-                        label: Text(testing ? '测试中…' : '测试连接'),
-                      ),
-                    ],
-                  ),
-                  if (fetchResult.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      fetchResult,
-                      style: TextStyle(
-                        color: fetchResult.startsWith('识别到')
-                            ? WesterosColors.goldBright
-                            : WesterosColors.bloodRed,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                  if (testResult.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      testResult,
-                      style: TextStyle(
-                        color: testResult.contains('连接正常')
-                            ? WesterosColors.goldBright
-                            : WesterosColors.bloodRed,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                  if (customModels.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    const Text('自定义模型', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    for (final m in customModels)
-                      ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(m, style: const TextStyle(fontSize: 13)),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.close, size: 16),
-                          tooltip: '移除',
-                          onPressed: () => setDialogState(() {
-                            customModels = customModels
-                                .where((x) => x != m)
-                                .toList();
-                            if (selectedModel == m) {
-                              selectedModel = '';
-                              modelController.text = '';
-                            }
-                          }),
-                        ),
-                      ),
-                  ],
-                  const SizedBox(height: 8),
-                  const Text('Base URL（留空用默认）',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  TextField(
-                    controller: baseUrlController,
-                    decoration: InputDecoration(
-                      hintText: defaults.baseUrl,
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '默认：${defaults.baseUrl} · ${defaults.model}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('保存'),
-              ),
-            ],
-          );
-        },
+    final saved = await Navigator.of(context).push<AiConfig>(
+      MaterialPageRoute<AiConfig>(
+        builder: (_) => AiConfigScreen(initial: config),
       ),
     );
-
-    if (saved == true) {
-      final keys = keysController.text
-          .split('\n')
-          .map((k) => k.trim())
-          .where((k) => k.isNotEmpty)
-          .toList();
-      final newConfig = AiConfig(
-        apiKeys: keys,
-        model: selectedModel,
-        baseUrl: baseUrlController.text.trim(),
-        provider: selectedProvider,
-        customModels: customModels,
-      );
-      await newConfig.save();
-      if (!mounted) return;
-      setState(() => _aiConfig = newConfig);
-      _showSnack('AI 配置已保存（${keys.length} 个 Key）');
-    }
-    keysController.dispose();
-    modelController.dispose();
-    baseUrlController.dispose();
-  }
-
-  /// 自动识别厂商模型：GET {baseUrl}/models，把识别结果并入自定义模型列表。
-  void _fetchModels(
-    StateSetter setDialogState,
-    TextEditingController baseUrlController,
-    TextEditingController keysController,
-    String provider,
-    List<String> Function() getCustom,
-    void Function(List<String>) setCustom,
-    void Function(String) setResult,
-    void Function(bool) setFetching,
-  ) async {
-    setDialogState(() => setFetching(true));
-    final keys = keysController.text
-        .split('\n')
-        .map((k) => k.trim())
-        .where((k) => k.isNotEmpty)
-        .toList();
-    if (keys.isEmpty) {
-      setDialogState(() {
-        setFetching(false);
-        setResult('请先填入至少一个 API Key');
-      });
-      return;
-    }
-    final baseUrl = baseUrlController.text.trim().isEmpty
-        ? providerDefaultsOf(provider).baseUrl
-        : baseUrlController.text.trim();
-    final service = AiService(
-      apiKeys: keys,
-      baseUrl: normalizeOpenAiBaseUrl(baseUrl),
-      model: 'ping',
-    );
-    final models = await service.fetchModels();
-    if (!mounted) return;
-    setDialogState(() {
-      setFetching(false);
-      if (models.isEmpty) {
-        setResult('未能识别模型（接口无数据或不可用）');
-      } else {
-        // 并入自定义列表（去重保序），不覆盖用户已加的。
-        final merged = <String>[...getCustom()];
-        for (final m in models) {
-          if (!merged.contains(m)) merged.add(m);
-        }
-        setCustom(merged);
-        setResult('识别到 ${models.length} 个模型');
-      }
+    if (saved == null || !mounted) return;
+    setState(() {
+      _aiConfig = saved;
+      _aiConfigError = '';
     });
-  }
-
-  /// 手动添加模型（文本输入，加入自定义列表并激活）。
-  void _addCustomModel(
-    StateSetter setDialogState,
-    TextEditingController modelController,
-    List<String> Function() getCustom,
-    void Function(List<String>) setCustom,
-  ) async {
-    final controller = TextEditingController();
-    final name = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('添加模型'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: '模型名称，如 deepseek-chat',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: const Text('添加'),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
-    if (name == null || name.isEmpty) return;
-    if (!mounted) return;
-    setDialogState(() {
-      final merged = <String>[...getCustom()];
-      if (!merged.contains(name)) merged.add(name);
-      setCustom(merged);
-      modelController.text = name;
-    });
-  }
-
-  /// 连通性测试：用当前 Key/BaseURL/模型发最小请求，把结果显示在弹窗内。
-  void _testConnection(
-    StateSetter setDialogState,
-    TextEditingController baseUrlController,
-    TextEditingController keysController,
-    String provider,
-    String model,
-    void Function(String) setResult,
-    void Function(bool) setTesting,
-  ) async {
-    setDialogState(() => setTesting(true));
-    final keys = keysController.text
-        .split('\n')
-        .map((k) => k.trim())
-        .where((k) => k.isNotEmpty)
-        .toList();
-    if (keys.isEmpty) {
-      setDialogState(() {
-        setTesting(false);
-        setResult('请先填入至少一个 API Key');
-      });
-      return;
-    }
-    final baseUrl = baseUrlController.text.trim().isEmpty
-        ? providerDefaultsOf(provider).baseUrl
-        : baseUrlController.text.trim();
-    final service = AiService(
-      apiKeys: keys,
-      baseUrl: normalizeOpenAiBaseUrl(baseUrl),
-      model: model,
-    );
-    final (ok, msg) = await service.testConnection(model: model);
-    if (!mounted) return;
-    setDialogState(() {
-      setTesting(false);
-      setResult(ok ? msg : '连接失败：$msg');
-    });
+    _showSnack('AI 配置已保存（${saved.apiKeys.length} 个 Key）');
   }
 
   /// 新游戏（重置引擎）。
@@ -763,9 +378,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 subtitle: Text(
-                  (_aiConfig?.isConfigured ?? false)
-                      ? '已配置 ${_aiConfig!.apiKeys.length} 个 Key · ${providerDefaultsOf(_aiConfig!.provider).label} · ${_aiConfig!.resolvedModel}'
-                      : '未配置 API Key（AI 行动模式不可用）',
+                  // 读取失败必须显示失败本身：否则「存储坏了」和「没填 Key」
+                  // 长得一模一样，玩家会一直重填一个永远读不出来的输入框。
+                  _aiConfigError.isNotEmpty
+                      ? '配置读取失败：$_aiConfigError'
+                      : (_aiConfig?.isConfigured ?? false)
+                          ? '已配置 ${_aiConfig!.apiKeys.length} 个 Key · '
+                              '${providerDefaultsOf(_aiConfig!.provider).label} · '
+                              '${_aiConfig!.resolvedModel}'
+                          : '未配置 API Key（AI 行动模式不可用）',
                   style: const TextStyle(color: WesterosColors.inkDim),
                 ),
                 trailing: IconButton(

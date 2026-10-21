@@ -176,7 +176,17 @@ class _CommandPanelState extends State<CommandPanel> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            // S17-1：三种交互的图例从面板**最底部**（要滚到最后才看得到，
+            // 等于没有说明）提到搜索框下方，玩家一打开面板就知道按钮怎么读。
+            Text(
+              '点一下直接执行 ｜ 带「▾」的会列出候选项 ｜ '
+              '带「（需填写）」的填进输入框，补完再发送。',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: WesterosColors.parchmentDim,
+              ),
+            ),
+            const SizedBox(height: 10),
             // 47 条平铺会超出弹层高度 ⇒ 必须可滚动；shrinkWrap 让短内容不占满。
             Flexible(
               child: visible.isEmpty
@@ -232,15 +242,6 @@ class _CommandPanelState extends State<CommandPanel> {
                         ],
                       ],
                     ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              // S15-4：有候选的指令点开会列出按钮，不再让玩家手打参数。
-              '点零参数指令直接执行；带「▾」的会列出候选项；'
-              '其余需参数的填进输入框，补完再发送。',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: WesterosColors.parchmentDim,
-              ),
             ),
           ],
         ),
@@ -330,9 +331,12 @@ class _CommandChip extends StatelessWidget {
     // 需参数的用「描边 + 参数提示」区分，避免玩家点了以为没反应。
     final needsArgs = spec.needsArgs;
     return ActionChip(
+      // S17-1：需补参数的指令此前显示「主名 …」。省略号本意是「这条还没写完」，
+      // 但用户读到的就是「按钮文字被截断了，只显示两个字」——语义完全丢失。
+      // 改为直白的「（需填写）」，与「▾（可展开候选）」区分开。
       label: Text(
         needsArgs
-            ? (hasChoices ? '${spec.aliases.first} ▾' : '${spec.aliases.first} …')
+            ? (hasChoices ? '${spec.aliases.first} ▾' : '${spec.aliases.first}（需填写）')
             : spec.aliases.first,
       ),
       avatar: needsArgs
